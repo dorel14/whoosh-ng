@@ -179,9 +179,7 @@ class SegmentWriter(SegmentDeletionMixin, IndexWriter):
                     )
                 for fieldnum in vectored_fieldnums:
                     if reader.has_vector(docnum, fieldnum):
-                        self._add_vector(
-                            fieldnum, reader.vector(docnum, fieldnum).items()
-                        )
+                        self._add_vector(fieldnum, reader.vector(docnum, fieldnum).items())
                 self.docnum += 1
 
         current_fieldnum = None
@@ -231,9 +229,7 @@ class SegmentWriter(SegmentDeletionMixin, IndexWriter):
                 if vformat:
                     vlist = sorted(
                         (w, valuestring)
-                        for w, freq, valuestring in vformat.word_values(
-                            value, mode="index"
-                        )
+                        for w, freq, valuestring in vformat.word_values(value, mode="index")
                     )
                     self._add_vector(fieldnum, vlist)
 

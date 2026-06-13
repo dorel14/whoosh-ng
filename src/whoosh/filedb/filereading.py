@@ -99,9 +99,7 @@ class SegmentReader(IndexReader):
     def _open_postfile(self):
         if self.postfile:
             return
-        self.postfile = self.storage.open_file(
-            self.segment.termposts_filename, mapped=False
-        )
+        self.postfile = self.storage.open_file(self.segment.termposts_filename, mapped=False)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.segment})"

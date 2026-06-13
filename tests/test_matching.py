@@ -476,9 +476,7 @@ def test_current_terms():
 
 
 def test_dismax():
-    schema = fields.Schema(
-        id=fields.ID(stored=True), title=fields.TEXT, body=fields.TEXT
-    )
+    schema = fields.Schema(id=fields.ID(stored=True), title=fields.TEXT, body=fields.TEXT)
     ix = RamStorage().create_index(schema)
 
     with ix.writer() as w:

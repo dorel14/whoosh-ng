@@ -78,8 +78,7 @@ def _do_basic(writerclass):
 
             # Check there are lengths
             total = sum(
-                r.doc_field_length(docnum, "text", 0)
-                for docnum in range(r.doc_count_all())
+                r.doc_field_length(docnum, "text", 0) for docnum in range(r.doc_count_all())
             )
             assert total > 0
 

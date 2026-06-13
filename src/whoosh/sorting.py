@@ -229,9 +229,7 @@ class ColumnCategorizer(Categorizer):
 
     def set_searcher(self, segment_searcher, docoffset):
         r = segment_searcher.reader()
-        self._creader = r.column_reader(
-            self._fieldname, reverse=self._reverse, translate=False
-        )
+        self._creader = r.column_reader(self._fieldname, reverse=self._reverse, translate=False)
 
     def key_for(self, matcher, segment_docnum):
         return self._creader.sort_key(segment_docnum)
@@ -276,9 +274,7 @@ class OverlappingCategorizer(Categorizer):
         field = global_searcher.schema[fieldname]
         reader = global_searcher.reader()
         self._use_vectors = bool(field.vector)
-        self._use_column = (
-            reader.has_column(fieldname) and field.column_type.stores_lists()
-        )
+        self._use_column = reader.has_column(fieldname) and field.column_type.stores_lists()
 
         # These are set in set_searcher() as we iterate over the sub-searchers
         self._segment_searcher = None
@@ -719,9 +715,7 @@ class StoredFieldFacet(FacetType):
         return self.fieldname
 
     def categorizer(self, global_searcher):
-        return self.StoredFieldCategorizer(
-            self.fieldname, self.allow_overlap, self.split_fn
-        )
+        return self.StoredFieldCategorizer(self.fieldname, self.allow_overlap, self.split_fn)
 
     class StoredFieldCategorizer(Categorizer):
         def __init__(self, fieldname, allow_overlap, split_fn):
@@ -803,9 +797,7 @@ class MultiFacet(FacetType):
         return self
 
     def add_query(self, querydict, other=None, allow_overlap=False):
-        self.facets.append(
-            QueryFacet(querydict, other=other, allow_overlap=allow_overlap)
-        )
+        self.facets.append(QueryFacet(querydict, other=other, allow_overlap=allow_overlap))
         return self
 
     def add_score(self):
@@ -814,9 +806,7 @@ class MultiFacet(FacetType):
 
     def add_facet(self, facet):
         if not isinstance(facet, FacetType):
-            raise TypeError(
-                f"{facet!r} is not a facet object, perhaps you meant add_field()"
-            )
+            raise TypeError(f"{facet!r} is not a facet object, perhaps you meant add_field()")
         self.facets.append(facet)
         return self
 
@@ -847,10 +837,7 @@ class MultiFacet(FacetType):
             return tuple(catter.key_for(matcher, docid) for catter in self.catters)
 
         def key_to_name(self, key):
-            return tuple(
-                catter.key_to_name(keypart)
-                for catter, keypart in zip(self.catters, key)
-            )
+            return tuple(catter.key_to_name(keypart) for catter, keypart in zip(self.catters, key))
 
 
 class Facets:

@@ -29,7 +29,6 @@
 documents.
 """
 
-
 import random
 from collections import defaultdict
 from math import log
@@ -91,9 +90,7 @@ class KLModel(ExpansionModel):
         if wit_over_tt < wic_over_ct:
             return 0
         else:
-            return wit_over_tt * log(
-                wit_over_tt / (weight_in_top / self.collection_total), 2
-            )
+            return wit_over_tt * log(wit_over_tt / (weight_in_top / self.collection_total), 2)
 
 
 class Expander:
@@ -149,8 +146,7 @@ class Expander:
             self.add_text(ixreader.stored_fields(docnum).get(self.fieldname))
         else:
             raise Exception(
-                "Field %r in document %s is not vectored or stored"
-                % (self.fieldname, docnum)
+                "Field %r in document %s is not vectored or stored" % (self.fieldname, docnum)
             )
 
     def add_text(self, string):
@@ -161,9 +157,7 @@ class Expander:
 
         field = self.ixreader.schema[self.fieldname]
         from_bytes = field.from_bytes
-        self.add(
-            (from_bytes(text), weight) for text, _, weight, _ in field.index(string)
-        )
+        self.add((from_bytes(text), weight) for text, _, weight, _ in field.index(string))
 
     def expanded_terms(self, number, normalize=True):
         """Returns the N most important terms in the vectors added so far.

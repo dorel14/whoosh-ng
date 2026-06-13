@@ -18,10 +18,7 @@ def test_null_fragment():
     nf = highlight.WholeFragmenter()
     uc = highlight.UppercaseFormatter()
     htext = highlight.highlight(_doc, terms, sa, nf, uc)
-    assert (
-        htext
-        == "alfa BRAVO charlie delta echo foxtrot golf hotel INDIA juliet kilo lima"
-    )
+    assert htext == "alfa BRAVO charlie delta echo foxtrot golf hotel INDIA juliet kilo lima"
 
 
 def test_phrase_strict():
@@ -48,9 +45,7 @@ def test_phrase_strict():
 
         # Non-strict
         outputs = [hit.highlights("title", strict_phrase=False) for hit in r]
-        assert outputs == [
-            "strict PHRASE highlights PHRASE TERMS but not individual...TERMS"
-        ]
+        assert outputs == ["strict PHRASE highlights PHRASE TERMS but not individual...TERMS"]
 
         # Strict
         outputs = [hit.highlights("title", strict_phrase=True) for hit in r]
@@ -61,9 +56,7 @@ def test_phrase_strict():
 
         # Non-strict
         outputs = [hit.highlights("title", strict_phrase=False) for hit in r]
-        assert outputs == [
-            "STRICT phrase HIGHLIGHTS phrase TERMS but not individual...TERMS"
-        ]
+        assert outputs == ["STRICT phrase HIGHLIGHTS phrase TERMS but not individual...TERMS"]
 
         # Strict
         outputs = [hit.highlights("title", strict_phrase=True) for hit in r]
@@ -74,9 +67,7 @@ def test_phrase_strict():
 
         # Non-strict
         outputs = [hit.highlights("title", strict_phrase=False) for hit in r]
-        assert outputs == [
-            "strict PHRASE highlights PHRASE TERMS but not INDIVIDUAL TERMS"
-        ]
+        assert outputs == ["strict PHRASE highlights PHRASE TERMS but not INDIVIDUAL TERMS"]
 
         # Strict
         outputs = [hit.highlights("title", strict_phrase=True) for hit in r]
@@ -93,10 +84,7 @@ def test_sentence_fragment():
     sf = highlight.SentenceFragmenter()
     uc = highlight.UppercaseFormatter()
     htext = highlight.highlight(text, terms, sa, sf, uc)
-    assert (
-        htext
-        == "This is the first SENTENCE...This SENTENCE is the second...Third SENTENCE here"
-    )
+    assert htext == "This is the first SENTENCE...This SENTENCE is the second...Third SENTENCE here"
 
 
 def test_context_fragment():
@@ -135,10 +123,7 @@ def test_html_escape():
     wf = highlight.WholeFragmenter()
     hf = highlight.HtmlFormatter()
     htext = highlight.highlight('alfa <bravo "charlie"> delta', terms, sa, wf, hf)
-    assert (
-        htext
-        == 'alfa &lt;<strong class="match term0">bravo</strong> "charlie"&gt; delta'
-    )
+    assert htext == 'alfa &lt;<strong class="match term0">bravo</strong> "charlie"&gt; delta'
 
 
 def test_maxclasses():
@@ -250,8 +235,7 @@ def test_multifilter():
             assert ("text", "5000") in s.reader()
             hit = s.search(query.Term("text", "5000"))[0]
             assert (
-                hit.highlights("text")
-                == 'Our BabbleTron<b class="match term0">5000</b> is great'
+                hit.highlights("text") == 'Our BabbleTron<b class="match term0">5000</b> is great'
             )
 
 
@@ -274,17 +258,11 @@ def test_pinpoint():
         hi.formatter = highlight.UppercaseFormatter()
 
         assert not hi.can_load_chars(r, "text")
-        assert (
-            hi.highlight_hit(hit, "text")
-            == "golf hotel india JULIET kilo lima mike november"
-        )
+        assert hi.highlight_hit(hit, "text") == "golf hotel india JULIET kilo lima mike november"
 
         hi.fragmenter = highlight.PinpointFragmenter()
         assert hi.can_load_chars(r, "text")
-        assert (
-            hi.highlight_hit(hit, "text")
-            == "ot golf hotel india JULIET kilo lima mike nove"
-        )
+        assert hi.highlight_hit(hit, "text") == "ot golf hotel india JULIET kilo lima mike nove"
 
         hi.fragmenter.autotrim = True
         assert hi.highlight_hit(hit, "text") == "golf hotel india JULIET kilo lima mike"

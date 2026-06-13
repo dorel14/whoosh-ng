@@ -197,9 +197,7 @@ def test_near_unordered():
     w.commit()
 
     with ix.searcher() as s:
-        q = spans.SpanNear(
-            Term("text", "bravo"), Term("text", "charlie"), ordered=False
-        )
+        q = spans.SpanNear(Term("text", "bravo"), Term("text", "charlie"), ordered=False)
         r = sorted(d["text"] for d in s.search(q))
         assert r == [
             "alfa bravo charlie delta echo",
@@ -214,9 +212,7 @@ def test_span_near_tree():
     ix = st.create_index(schema)
     w = ix.writer()
     w.add_document(
-        text=(
-            "The Lucene library is by Doug Cutting and Whoosh was made by Matt Chaput"
-        )
+        text=("The Lucene library is by Doug Cutting and Whoosh was made by Matt Chaput")
     )
     w.commit()
 

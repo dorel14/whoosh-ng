@@ -205,9 +205,7 @@ def test_roundtrip():
 
 
 def test_multivalue():
-    schema = fields.Schema(
-        s=fields.TEXT(sortable=True), n=fields.NUMERIC(sortable=True)
-    )
+    schema = fields.Schema(s=fields.TEXT(sortable=True), n=fields.NUMERIC(sortable=True))
     ix = RamStorage().create_index(schema)
     with ix.writer(codec=W3Codec()) as w:
         w.add_document(s="alfa foxtrot charlie".split(), n=[100, 200, 300])
@@ -222,9 +220,7 @@ def test_multivalue():
 
 
 def test_column_field():
-    schema = fields.Schema(
-        a=fields.TEXT(sortable=True), b=fields.COLUMN(columns.RefBytesColumn())
-    )
+    schema = fields.Schema(a=fields.TEXT(sortable=True), b=fields.COLUMN(columns.RefBytesColumn()))
     with TempIndex(schema, "columnfield") as ix:
         cd = b"charlie delta"
         with ix.writer(codec=W3Codec()) as w:

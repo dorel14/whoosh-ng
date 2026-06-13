@@ -108,9 +108,7 @@ class WrappingCodec(Codec):
         return self._child.postings_writer(dbfile, byteids=byteids)
 
     def postings_reader(self, dbfile, terminfo, format_, term=None, scorer=None):
-        return self._child.postings_reader(
-            dbfile, terminfo, format_, term=term, scorer=scorer
-        )
+        return self._child.postings_reader(dbfile, terminfo, format_, term=term, scorer=scorer)
 
     def automata(self, storage, segment):
         return self._child.automata(storage, segment)
@@ -196,9 +194,7 @@ class FieldWriter:
             if lastfn is not None and fieldname < lastfn:
                 raise OutOfOrderError(f"Field {lastfn!r} .. {fieldname!r}")
             if fieldname == lastfn and lasttext and btext < lasttext:
-                raise OutOfOrderError(
-                    f"Term {lastfn}:{lasttext!r} .. {fieldname}:{btext!r}"
-                )
+                raise OutOfOrderError(f"Term {lastfn}:{lasttext!r} .. {fieldname}:{btext!r}")
 
             # If the fieldname of this posting is different from the last one,
             # tell the writer we're starting a new field
@@ -425,9 +421,7 @@ class PerDocumentReader:
         """
 
         is_deleted = self.is_deleted
-        return (
-            docnum for docnum in range(self.doc_count_all()) if not is_deleted(docnum)
-        )
+        return (docnum for docnum in range(self.doc_count_all()) if not is_deleted(docnum))
 
     def iter_docs(self):
         for docnum in self.all_doc_ids():

@@ -93,9 +93,7 @@ def MERGE_SMALL(writer, segments):
         if merge_point_found:  # append the remaining to unchanged
             unchanged_segments.append(seg)
         else:  # look for a merge point
-            segments_to_merge.append(
-                (seg, i)
-            )  # merge every segment up to the merge point
+            segments_to_merge.append((seg, i))  # merge every segment up to the merge point
             if i > 3 and total_docs < fib(i + 5):
                 merge_point_found = True
 
@@ -430,9 +428,7 @@ class IndexWriter:
     def _unique_fields(self, fields):
         # Check which of the supplied fields are unique
         unique_fields = [
-            name
-            for name, field in self.schema.items()
-            if name in fields and field.unique
+            name for name, field in self.schema.items() if name in fields and field.unique
         ]
         return unique_fields
 
@@ -730,9 +726,7 @@ class SegmentWriter(IndexWriter):
     def add_reader(self, reader):
         self._check_state()
         basedoc = self.docnum
-        ndxnames = {
-            fname for fname in reader.indexed_field_names() if fname in self.schema
-        }
+        ndxnames = {fname for fname in reader.indexed_field_names() if fname in self.schema}
         fieldnames = set(self.schema.names()) | ndxnames
 
         docmap = self.write_per_doc(fieldnames, reader)
@@ -753,9 +747,7 @@ class SegmentWriter(IndexWriter):
         add_post = self.pool.add
 
         docboost = self._doc_boost(fields)
-        fieldnames = sorted(
-            [name for name in fields.keys() if not name.startswith("_")]
-        )
+        fieldnames = sorted([name for name in fields.keys() if not name.startswith("_")])
         self._check_fields(schema, fieldnames)
 
         perdocwriter.start_doc(docnum)
@@ -796,9 +788,7 @@ class SegmentWriter(IndexWriter):
                     # Call the format's word_values method to get posting values
                     vitems = vformat.word_values(value, analyzer, mode="index")
                     # Remove unused frequency field from the tuple
-                    vitems = sorted(
-                        (text, weight, vbytes) for text, _, weight, vbytes in vitems
-                    )
+                    vitems = sorted((text, weight, vbytes) for text, _, weight, vbytes in vitems)
                     perdocwriter.add_vector_items(fieldname, field, vitems)
 
                 # Allow a custom value for stored field/column

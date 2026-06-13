@@ -167,9 +167,7 @@ def write_postings(schema, termtable, postwriter, postiter):
                 # This is a new term, so finish the postings and add the
                 # term to the term table
                 postcount = postwriter.finish()
-                termtable.add(
-                    (current_fieldnum, current_text), (current_freq, offset, postcount)
-                )
+                termtable.add((current_fieldnum, current_text), (current_freq, offset, postcount))
 
             # Reset the post writer and the term variables
             current_fieldnum = fieldnum
@@ -177,9 +175,7 @@ def write_postings(schema, termtable, postwriter, postiter):
             current_freq = 0
             offset = postwriter.start(fieldnum)
 
-        elif fieldnum < current_fieldnum or (
-            fieldnum == current_fieldnum and text < current_text
-        ):
+        elif fieldnum < current_fieldnum or (fieldnum == current_fieldnum and text < current_text):
             # This should never happen!
             raise Exception(
                 "Postings are out of order: %s:%s .. %s:%s"
@@ -193,9 +189,7 @@ def write_postings(schema, termtable, postwriter, postiter):
     # If there are still "uncommitted" postings at the end, finish them off
     if not first:
         postcount = postwriter.finish()
-        termtable.add(
-            (current_fieldnum, current_text), (current_freq, offset, postcount)
-        )
+        termtable.add((current_fieldnum, current_text), (current_freq, offset, postcount))
 
 
 class LengthSpool:
@@ -332,9 +326,7 @@ class TempfilePool(PoolBase):
             postiter = iter([])
             # total = 0
         else:
-            postiter = imerge(
-                [read_run(runname, count) for runname, count in self.runs]
-            )
+            postiter = imerge([read_run(runname, count) for runname, count in self.runs])
             # total = sum(count for runname, count in self.runs)
 
         write_postings(schema, termtable, postingwriter, postiter)
@@ -356,9 +348,7 @@ class PoolWritingTask(Process):
         pqueue = self.postingqueue
         rqueue = self.resultqueue
 
-        subpool = TempfilePool(
-            None, limitmb=self.limitmb, dir=self.dir, basename=self.name
-        )
+        subpool = TempfilePool(None, limitmb=self.limitmb, dir=self.dir, basename=self.name)
 
         while True:
             unit = pqueue.get()
@@ -398,9 +388,7 @@ class MultiPool(PoolBase):
         self.postingqueue = Queue()
         self.resultsqueue = Queue()
         self.tasks = [
-            PoolWritingTask(
-                self._dir, self.postingqueue, self.resultsqueue, self.limitmb
-            )
+            PoolWritingTask(self._dir, self.postingqueue, self.resultsqueue, self.limitmb)
             for _ in range(procs)
         ]
         for task in self.tasks:
