@@ -233,6 +233,7 @@ norecursedirs = [
 python_files = ["test_*.py"]
 markers = [
   "slow: marks tests as slower integration-style checks",
+  "asyncio: marks tests as async",
 ]
 
 [tool.coverage.run]

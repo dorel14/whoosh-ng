@@ -14,7 +14,8 @@ class NumpyProvider(VectorProvider):
 
     def add(self, vectors: Iterable[tuple[str, Sequence[float]]]) -> None:
         for doc_id, values in vectors:
-            self._vectors[doc_id] = np.asarray(values, dtype=np.float64)
+            arr = np.asarray(values, dtype=np.float64)
+            self._vectors[doc_id] = (arr, float(np.linalg.norm(arr)))
 
     def search(
         self,
@@ -32,10 +33,9 @@ class NumpyProvider(VectorProvider):
 
         results: list[VectorHit] = []
         allowed = set(filter_ids) if filter_ids else set()
-        for doc_id, vector in self._vectors.items():
+        for doc_id, (vector, doc_norm) in self._vectors.items():
             if allowed and doc_id not in allowed:
                 continue
-            doc_norm = np.linalg.norm(vector)
             if doc_norm == 0:
                 continue
             score = float(np.dot(vector, query) / (doc_norm * query_norm))

@@ -37,6 +37,8 @@ class VectorField:
         self.name = name
 
     def vector_to_bytes(self, values: Sequence[float]) -> bytes:
+        if len(values) != self.dimension:
+            raise ValueError(f"Vector length {len(values)} does not match field dimension {self.dimension}")
         return struct.pack(f"{len(values)}d", *values)
 
     def bytes_to_vector(self, data: bytes) -> tuple[float, ...]:
