@@ -19,9 +19,7 @@ def make_index():
     w.add_document(key="B", name="Alpha beta", value="Gamma delta epsilon omega.")
     w.add_document(key="C", name="One two", value="Three rendered four five.")
     w.add_document(key="D", name="Quick went", value="Every red town.")
-    w.add_document(
-        key="E", name="Yellow uptown", value="Interest rendering outer photo!"
-    )
+    w.add_document(key="E", name="Yellow uptown", value="Interest rendering outer photo!")
     w.commit()
 
     return ix
@@ -75,9 +73,7 @@ def test_and():
         ["A"],
     )
     # Missing
-    _run_query(
-        query.And([query.Term("value", "ochre"), query.Term("name", "glonk")]), []
-    )
+    _run_query(query.And([query.Term("value", "ochre"), query.Term("name", "glonk")]), [])
 
 
 def test_or():
@@ -86,9 +82,7 @@ def test_or():
         ["A", "D", "E"],
     )
     # Missing
-    _run_query(
-        query.Or([query.Term("value", "ochre"), query.Term("name", "glonk")]), []
-    )
+    _run_query(query.Or([query.Term("value", "ochre"), query.Term("name", "glonk")]), [])
     _run_query(query.Or([]), [])
 
 
@@ -182,9 +176,7 @@ def test_variations():
 
 def test_wildcard():
     _run_query(
-        query.Or(
-            [query.Wildcard("value", "*red*"), query.Wildcard("name", "*yellow*")]
-        ),
+        query.Or([query.Wildcard("value", "*red*"), query.Wildcard("name", "*yellow*")]),
         ["A", "C", "D", "E"],
     )
     # Missing
@@ -376,17 +368,13 @@ def test_open_date_ranges():
         q = qp.parse("[2011-01-10 to]")
         r = [hit["date"] for hit in s.search(q, limit=None)]
         assert len(r) > 0
-        target = [
-            d for d in domain if d >= datetime(2011, 1, 10, 6, 25, tzinfo=timezone.utc)
-        ]
+        target = [d for d in domain if d >= datetime(2011, 1, 10, 6, 25, tzinfo=timezone.utc)]
         assert r == target
 
         q = qp.parse("[to 2011-01-30]")
         r = [hit["date"] for hit in s.search(q, limit=None)]
         assert len(r) > 0
-        target = [
-            d for d in domain if d <= datetime(2011, 1, 30, 6, 25, tzinfo=timezone.utc)
-        ]
+        target = [d for d in domain if d <= datetime(2011, 1, 30, 6, 25, tzinfo=timezone.utc)]
         assert r == target
 
         # With date parser
@@ -397,25 +385,19 @@ def test_open_date_ranges():
         q = qp.parse("[10 jan 2011 to]")
         r = [hit["date"] for hit in s.search(q, limit=None)]
         assert len(r) > 0
-        target = [
-            d for d in domain if d >= datetime(2011, 1, 10, 6, 25, tzinfo=timezone.utc)
-        ]
+        target = [d for d in domain if d >= datetime(2011, 1, 10, 6, 25, tzinfo=timezone.utc)]
         assert r == target
 
         q = qp.parse("[to 30 jan 2011]")
         r = [hit["date"] for hit in s.search(q, limit=None)]
         assert len(r) > 0
-        target = [
-            d for d in domain if d <= datetime(2011, 1, 30, 6, 25, tzinfo=timezone.utc)
-        ]
+        target = [d for d in domain if d <= datetime(2011, 1, 30, 6, 25, tzinfo=timezone.utc)]
         assert r == target
 
 
 def test_negated_unlimited_ranges():
     # Whoosh should treat "[to]" as if it was "*"
-    schema = fields.Schema(
-        id=fields.ID(stored=True), num=fields.NUMERIC, date=fields.DATETIME
-    )
+    schema = fields.Schema(id=fields.ID(stored=True), num=fields.NUMERIC, date=fields.DATETIME)
     ix = RamStorage().create_index(schema)
     w = ix.writer()
     from string import ascii_letters
@@ -693,9 +675,7 @@ def test_phrase_multi():
 
 
 def test_missing_field_scoring():
-    schema = fields.Schema(
-        name=fields.TEXT(stored=True), hobbies=fields.TEXT(stored=True)
-    )
+    schema = fields.Schema(name=fields.TEXT(stored=True), hobbies=fields.TEXT(stored=True))
     with TempIndex(schema) as ix:
         with ix.writer() as w:
             w.add_document(name="Frank", hobbies="baseball, basketball")
@@ -778,9 +758,7 @@ def test_weighting():
 
 
 def test_dismax():
-    schema = fields.Schema(
-        id=fields.STORED, f1=fields.TEXT, f2=fields.TEXT, f3=fields.TEXT
-    )
+    schema = fields.Schema(id=fields.STORED, f1=fields.TEXT, f2=fields.TEXT, f3=fields.TEXT)
     ix = RamStorage().create_index(schema)
     w = ix.writer()
     w.add_document(
@@ -858,9 +836,7 @@ def test_missing_wildcard():
 def test_finalweighting():
     from whoosh.scoring import Frequency
 
-    schema = fields.Schema(
-        id=fields.ID(stored=True), summary=fields.TEXT, n_comments=fields.STORED
-    )
+    schema = fields.Schema(id=fields.ID(stored=True), summary=fields.TEXT, n_comments=fields.STORED)
     st = RamStorage()
     ix = st.create_index(schema)
 
@@ -939,9 +915,9 @@ def test_ngram_phrase():
     writer = ix.writer()
     writer.add_document(
         text=(
-            "\u9AD8\u6821\u307E\u3067\u306F\u6771\u4EAC"
-            "\u3067\u3001\u5927\u5B66\u304B\u3089\u306F"
-            "\u4EAC\u5927\u3067\u3059\u3002"
+            "\u9ad8\u6821\u307e\u3067\u306f\u6771\u4eac"
+            "\u3067\u3001\u5927\u5b66\u304b\u3089\u306f"
+            "\u4eac\u5927\u3067\u3059\u3002"
         ),
         path="sample",
     )
@@ -950,13 +926,13 @@ def test_ngram_phrase():
     with ix.searcher() as s:
         p = qparser.QueryParser("text", schema)
 
-        q = p.parse("\u6771\u4EAC\u5927\u5B66")
+        q = p.parse("\u6771\u4eac\u5927\u5b66")
         assert len(s.search(q)) == 1
 
-        q = p.parse('"\u6771\u4EAC\u5927\u5B66"')
+        q = p.parse('"\u6771\u4eac\u5927\u5b66"')
         assert len(s.search(q)) == 0
 
-        q = p.parse('"\u306F\u6771\u4EAC\u3067"')
+        q = p.parse('"\u306f\u6771\u4eac\u3067"')
         assert len(s.search(q)) == 1
 
 
@@ -1081,9 +1057,7 @@ def test_multireader_not():
 
 
 def test_boost_phrase():
-    schema = fields.Schema(
-        title=fields.TEXT(field_boost=5.0, stored=True), text=fields.TEXT
-    )
+    schema = fields.Schema(title=fields.TEXT(field_boost=5.0, stored=True), text=fields.TEXT)
     ix = RamStorage().create_index(schema)
     domain = "alfa bravo charlie delta".split()
     w = ix.writer()
@@ -1184,9 +1158,7 @@ def test_fieldboost():
 
 
 def test_andmaybe_quality():
-    schema = fields.Schema(
-        id=fields.STORED, title=fields.TEXT(stored=True), year=fields.NUMERIC
-    )
+    schema = fields.Schema(id=fields.STORED, title=fields.TEXT(stored=True), year=fields.NUMERIC)
     ix = RamStorage().create_index(schema)
 
     domain = [
@@ -1630,9 +1602,7 @@ def test_groupedby_with_terms():
             organism="mus",
             content="IPFSTD1 IPFSTD_kdwq134 Kaminski-all Study00:00:00",
         )
-        w.add_document(
-            organism="mus", content="IPFSTD1 IPFSTD_kdwq134 Kaminski-all Study"
-        )
+        w.add_document(organism="mus", content="IPFSTD1 IPFSTD_kdwq134 Kaminski-all Study")
         w.add_document(organism="hs", content="This is the first document we've added!")
 
     with ix.searcher() as s:
@@ -1805,9 +1775,7 @@ def test_limit_scores():
                 w.add_document(desc=" ".join(words), parent=str(count))
 
         with ix.searcher() as s:
-            q = query.And(
-                [query.Term("desc", "delta", boost=30.0), query.Term("parent", "545")]
-            )
+            q = query.And([query.Term("desc", "delta", boost=30.0), query.Term("parent", "545")])
             r = s.search(q, limit=500)
             assert r.scored_length() == 1
             limited_score = r[0].score
@@ -1870,8 +1838,6 @@ def test_function_weighting():
             ids = "".join([hit["id"] for hit in r])
             assert ids == "agmsb"
 
-            q = query.Or(
-                [query.Term("text", "aa"), query.Term("text", "bb")], scale=2.0
-            )
+            q = query.Or([query.Term("text", "aa"), query.Term("text", "bb")], scale=2.0)
             m = q.matcher(s, s.context())
             assert not m.supports_block_quality()

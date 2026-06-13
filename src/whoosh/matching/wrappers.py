@@ -169,9 +169,7 @@ class MultiMatcher(mcore.Matcher):
             # Skip sub-matchers that don't have a high enough max quality to
             # contribute
             while m.is_active() and m.matchers[m.current].max_quality() < minquality:
-                m = self.__class__(
-                    self.matchers, self.offsets, self.scorer, m.current + 1
-                )
+                m = self.__class__(self.matchers, self.offsets, self.scorer, m.current + 1)
                 m._next_matcher()
 
         if not m.is_active():
@@ -287,14 +285,10 @@ class FilterMatcher(WrappingMatcher):
         self._find_next()
 
     def copy(self):
-        return self.__class__(
-            self.child.copy(), self._ids, self._exclude, boost=self.boost
-        )
+        return self.__class__(self.child.copy(), self._ids, self._exclude, boost=self.boost)
 
     def _replacement(self, newchild):
-        return self.__class__(
-            newchild, self._ids, exclude=self._exclude, boost=self.boost
-        )
+        return self.__class__(newchild, self._ids, exclude=self._exclude, boost=self.boost)
 
     def _find_next(self):
         child = self.child
@@ -561,9 +555,7 @@ class CoordMatcher(WrappingMatcher):
         if termcount == 0 or termcount == scale:
             return 0
 
-        sqr = (score + ((matching - 1) / (termcount - scale) ** 2)) * (
-            (termcount - 1) / termcount
-        )
+        sqr = (score + ((matching - 1) / (termcount - scale) ** 2)) * ((termcount - 1) / termcount)
         return sqr
 
     def max_quality(self):

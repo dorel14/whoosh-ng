@@ -76,9 +76,7 @@ def lfu_cache(maxsize=100):
             except KeyError:
                 stats[1] += 1  # Miss
                 if len(data) == maxsize:
-                    for k, _ in nsmallest(
-                        maxsize // 10 or 1, usecount.items(), key=itemgetter(1)
-                    ):
+                    for k, _ in nsmallest(maxsize // 10 or 1, usecount.items(), key=itemgetter(1)):
                         del data[k]
                         del usecount[k]
                 data[args] = user_function(*args)

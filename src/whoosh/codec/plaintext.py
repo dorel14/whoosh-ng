@@ -229,9 +229,7 @@ class PlainPerDocReader(base.PerDocumentReader, LineReader):
 
             c = self._find_line(2, "COLVAL", fn=fieldname)
             if c is None:
-                raise ValueError(
-                    f"Missing column value for field {fieldname} doc {docnum}"
-                )
+                raise ValueError(f"Missing column value for field {fieldname} doc {docnum}")
 
             yield c.get("v")
 

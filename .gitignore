@@ -1,6 +1,10 @@
 *.pyc
 __pycache__/
 .tox/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
 env/
 build/
 dist/
@@ -16,6 +20,7 @@ eggs/
 *.coverage.DESKTOP-*
 /coverage.xml
 /lcov.info
+/htmlcov/
 /.codiumai.local.toml
 ./kilo
 ./kilo/*

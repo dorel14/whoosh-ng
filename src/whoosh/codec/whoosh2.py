@@ -753,9 +753,7 @@ class W2FieldWriter(base.FieldWriter):
 
 
 class W2LeafMatcher(LeafMatcher):
-    def __init__(
-        self, postfile, startoffset, fmt, scorer=None, term=None, stringids=False
-    ):
+    def __init__(self, postfile, startoffset, fmt, scorer=None, term=None, stringids=False):
         self.postfile = postfile
         self.startoffset = startoffset
         self.format = fmt
@@ -856,9 +854,7 @@ class W2LeafMatcher(LeafMatcher):
     def _read_block(self, offset):
         pf = self.postfile
         pf.seek(offset)
-        return self.blockclass.from_file(
-            pf, self.format.posting_size, stringids=self.stringids
-        )
+        return self.blockclass.from_file(pf, self.format.posting_size, stringids=self.stringids)
 
     def _consume_block(self):
         self.block.read_ids()
@@ -1506,9 +1502,7 @@ class StoredFieldReader:
         dbfile.seek(self.basepos)
         for length in lengths:
             vlist = loads(dbfile.read(length) + b".")
-            vdict = {
-                names[i]: vlist[i] for i in range(len(vlist)) if vlist[i] is not None
-            }
+            vdict = {names[i]: vlist[i] for i in range(len(vlist)) if vlist[i] is not None}
             yield vdict
 
     def __getitem__(self, num):
@@ -1520,9 +1514,7 @@ class StoredFieldReader:
         dbfile.seek(start)
         ptr = dbfile.read(stored_pointer_size)
         if len(ptr) != stored_pointer_size:
-            raise ValueError(
-                f"Error reading {dbfile} @{start} {len(ptr)} < {stored_pointer_size}"
-            )
+            raise ValueError(f"Error reading {dbfile} @{start} {len(ptr)} < {stored_pointer_size}")
         position, length = unpack_stored_pointer(ptr)
         dbfile.seek(position)
         vlist = loads(dbfile.read(length) + b".")
@@ -1688,9 +1680,7 @@ class W2Block:
         infostring = dumps(info, -1)
 
         # Offset to next block
-        postfile.write_uint(
-            len(infostring) + len(idstring) + len(wtstring) + len(vstring)
-        )
+        postfile.write_uint(len(infostring) + len(idstring) + len(wtstring) + len(vstring))
         # Block contents
         postfile.write(infostring)
         postfile.write(idstring)
@@ -1741,9 +1731,7 @@ class W2Block:
             offset = self.dataoffset + self.idslen + self.weightslen
             self.postfile.seek(offset)
             vstring = self.postfile.read(self.nextoffset - offset)
-            values = deminimize_values(
-                postingsize, self.count, vstring, self.compression
-            )
+            values = deminimize_values(postingsize, self.count, vstring, self.compression)
         self.values = values
         return values
 
@@ -1792,9 +1780,7 @@ class FileTermInfo(TermInfo):
         xid = NO_ID if self._maxid is None else self._maxid
 
         # Pack the term info into bytes
-        st = self.struct.pack(
-            self._weight, self._df, ml, xl, self._maxweight, 0, mid, xid
-        )
+        st = self.struct.pack(self._weight, self._df, ml, xl, self._maxweight, 0, mid, xid)
 
         if isinstance(self.postings, tuple):
             # Postings are inlined - dump them using the pickle protocol
@@ -2104,9 +2090,7 @@ class OLD_NUMERIC(NUMERIC):
             e = sys.exc_info()[1]
             raise QueryParserError(e)
 
-        return query.NumericRange(
-            fieldname, start, end, startexcl, endexcl, boost=boost
-        )
+        return query.NumericRange(fieldname, start, end, startexcl, endexcl, boost=boost)
 
     def sortable_terms(self, ixreader, fieldname):
         for btext in ixreader.lexicon(fieldname):

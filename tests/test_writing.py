@@ -121,9 +121,7 @@ def test_buffered():
         domain = "alfa bravo charlie delta echo foxtrot golf hotel india"
         domain = domain.split()
 
-        w = writing.BufferedWriter(
-            ix, period=None, limit=10, commitargs={"merge": False}
-        )
+        w = writing.BufferedWriter(ix, period=None, limit=10, commitargs={"merge": False})
         for i in range(20):
             w.add_document(id=str(i), text=" ".join(random.sample(domain, 5)))
         time.sleep(0.1)
@@ -158,9 +156,7 @@ def test_buffered_search():
 
 
 def test_buffered_update():
-    schema = fields.Schema(
-        id=fields.ID(stored=True, unique=True), payload=fields.STORED
-    )
+    schema = fields.Schema(id=fields.ID(stored=True, unique=True), payload=fields.STORED)
     with TempIndex(schema, "bufferedupdate") as ix:
         w = writing.BufferedWriter(ix, period=None, limit=5)
         for i in range(10):
@@ -337,30 +333,18 @@ def test_add_reader():
     )
     with TempIndex(schema, "addreader") as ix:
         with ix.writer() as w:
-            w.add_document(
-                i="0", a="alfa bravo charlie delta", b="able baker coxwell dog"
-            )
-            w.add_document(
-                i="1", a="bravo charlie delta echo", b="elf fabio gong hiker"
-            )
-            w.add_document(
-                i="2", a="charlie delta echo foxtrot", b="india joker king loopy"
-            )
-            w.add_document(
-                i="3", a="delta echo foxtrot golf", b="mister noogie oompah pancake"
-            )
+            w.add_document(i="0", a="alfa bravo charlie delta", b="able baker coxwell dog")
+            w.add_document(i="1", a="bravo charlie delta echo", b="elf fabio gong hiker")
+            w.add_document(i="2", a="charlie delta echo foxtrot", b="india joker king loopy")
+            w.add_document(i="3", a="delta echo foxtrot golf", b="mister noogie oompah pancake")
 
         with ix.writer() as w:
             w.delete_by_term("i", "1")
             w.delete_by_term("i", "3")
 
         with ix.writer() as w:
-            w.add_document(
-                i="4", a="hotel india juliet kilo", b="quick rhubarb soggy trap"
-            )
-            w.add_document(
-                i="5", a="india juliet kilo lima", b="umber violet weird xray"
-            )
+            w.add_document(i="4", a="hotel india juliet kilo", b="quick rhubarb soggy trap")
+            w.add_document(i="5", a="india juliet kilo lima", b="umber violet weird xray")
             w.optimize = True
 
         with ix.reader() as r:
@@ -396,9 +380,7 @@ def test_add_reader_spelling():
 
     # Because b is stemming and spelled, it will use add_spell_word()
     ana = analysis.StemmingAnalyzer()
-    schema = fields.Schema(
-        a=fields.TEXT(analyzer=ana), b=fields.TEXT(analyzer=ana, spelling=True)
-    )
+    schema = fields.Schema(a=fields.TEXT(analyzer=ana), b=fields.TEXT(analyzer=ana, spelling=True))
 
     with TempIndex(schema, "addreadersp") as ix:
         with ix.writer() as w:

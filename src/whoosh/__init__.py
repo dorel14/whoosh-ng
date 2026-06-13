@@ -25,7 +25,12 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-__version__ = (3, 0, 0)
+from __future__ import annotations
+
+import re
+
+__version__ = (4, 0, 0)
+__version_string__ = "4.0.0.dev0"
 
 
 def versionstring(build=True, extra=True):
@@ -36,14 +41,16 @@ def versionstring(build=True, extra=True):
         checked if build is True.
     :rtype: str
     """
+    match = re.match(r"^(\d+)\.(\d+)\.?(\d+)?", __version_string__)
+    if not match:
+        return __version_string__
 
-    if build:
-        first = 3
-    else:
-        first = 2
+    major, minor, patch = match.groups()
+    if not build:
+        return f"{major}.{minor}"
 
-    s = ".".join(str(n) for n in __version__[:first])
-    if build and extra:
-        s += "".join(str(n) for n in __version__[3:])
-
-    return s
+    if not patch:
+        return f"{major}.{minor}"
+    if not extra:
+        return f"{major}.{minor}.{patch}"
+    return __version_string__

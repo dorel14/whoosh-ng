@@ -202,15 +202,11 @@ class MultiTerm(qcore.Query):
 
     def estimate_size(self, ixreader):
         fieldname = self.field()
-        return sum(
-            ixreader.doc_frequency(fieldname, btext) for btext in self._btexts(ixreader)
-        )
+        return sum(ixreader.doc_frequency(fieldname, btext) for btext in self._btexts(ixreader))
 
     def estimate_min_size(self, ixreader):
         fieldname = self.field()
-        return min(
-            ixreader.doc_frequency(fieldname, text) for text in self._btexts(ixreader)
-        )
+        return min(ixreader.doc_frequency(fieldname, text) for text in self._btexts(ixreader))
 
     def matcher(self, searcher, context=None):
         from whoosh.query import Or
@@ -270,12 +266,7 @@ class PatternQuery(MultiTerm):
         return r
 
     def __hash__(self):
-        return (
-            hash(self.fieldname)
-            ^ hash(self.text)
-            ^ hash(self.boost)
-            ^ hash(self.constantscore)
-        )
+        return hash(self.fieldname) ^ hash(self.text) ^ hash(self.boost) ^ hash(self.constantscore)
 
     def _get_pattern(self):
         raise NotImplementedError
@@ -444,9 +435,7 @@ class FuzzyTerm(ExpandingTerm):
         "prefixlength": int,
     }
 
-    def __init__(
-        self, fieldname, text, boost=1.0, maxdist=1, prefixlength=1, constantscore=True
-    ):
+    def __init__(self, fieldname, text, boost=1.0, maxdist=1, prefixlength=1, constantscore=True):
         """
         :param fieldname: The name of the field to search.
         :param text: The text to search for.

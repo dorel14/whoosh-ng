@@ -155,15 +155,9 @@ def test_replacements():
     assert wm.boost == 2.0
     assert wm.child.__class__ == matching.IntersectionMatcher
 
-    ls1 = matching.ListMatcher(
-        [1, 2, 3], [0.1, 0.1, 0.1], scorer=scoring.WeightScorer(0.1)
-    )
-    ls2 = matching.ListMatcher(
-        [1, 2, 3], [0.2, 0.2, 0.2], scorer=scoring.WeightScorer(0.2)
-    )
-    ls3 = matching.ListMatcher(
-        [1, 2, 3], [0.3, 0.3, 0.3], scorer=scoring.WeightScorer(0.3)
-    )
+    ls1 = matching.ListMatcher([1, 2, 3], [0.1, 0.1, 0.1], scorer=scoring.WeightScorer(0.1))
+    ls2 = matching.ListMatcher([1, 2, 3], [0.2, 0.2, 0.2], scorer=scoring.WeightScorer(0.2))
+    ls3 = matching.ListMatcher([1, 2, 3], [0.3, 0.3, 0.3], scorer=scoring.WeightScorer(0.3))
     mm = matching.MultiMatcher([ls1, ls2, ls3], [0, 4, 8])
     mm = mm.replace(0.25)
     assert mm.current == 2

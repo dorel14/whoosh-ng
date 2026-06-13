@@ -203,9 +203,7 @@ class WhooshModule(Module):
         return self.parser.parse(qstring)
 
     def find(self, q):
-        return self.srch.search(
-            q, limit=int(self.options.limit), optimize=self.options.optimize
-        )
+        return self.srch.search(q, limit=int(self.options.limit), optimize=self.options.optimize)
 
     def findterms(self, terms):
         limit = int(self.options.limit)
@@ -303,9 +301,7 @@ class XapianModule(Module):
         hf = self.bench.spec.headline_field
         mf = self.bench.spec.main_field
         for m in matches:
-            yield self._process_result(
-                {hf: m.document.get_value(0), mf: m.document.get_data()}
-            )
+            yield self._process_result({hf: m.document.get_value(0), mf: m.document.get_data()})
 
 
 class SolrModule(Module):
@@ -391,9 +387,7 @@ class ZcatalogModule(Module):
             FileStorage,  # type: ignore # type: ignore @UnresolvedImport
         )
 
-        path = os.path.join(
-            self.options.dir, f"{self.options.indexname}_zcatalog", "index"
-        )
+        path = os.path.join(self.options.dir, f"{self.options.indexname}_zcatalog", "index")
         storage = FileStorage(path)
         db = DB(storage)
         conn = db.open()
@@ -455,9 +449,7 @@ class NucularModule(Module):
     def searcher(self):
         from nucular import Nucular  # type: ignore # type: ignore @UnresolvedImport
 
-        directory = os.path.join(
-            self.options.directory, f"{self.options.indexname}_nucular"
-        )
+        directory = os.path.join(self.options.directory, f"{self.options.indexname}_nucular")
         self.archive = Nucular.Nucular(directory)
 
     def query(self):
@@ -607,9 +599,7 @@ class Bench:
             help="Solr URL",
             default="http://localhost:8983/solr",
         )
-        p.add_option(
-            "-m", "--mb", dest="limitmb", help="Max. memory usage, in MB", default="128"
-        )
+        p.add_option("-m", "--mb", dest="limitmb", help="Max. memory usage, in MB", default="128")
         p.add_option(
             "-c",
             "--chunk",

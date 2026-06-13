@@ -595,9 +595,7 @@ class BitSet(BaseBitSet):
 
     def _logic(self, obj, op, other):
         objbits = obj.bits
-        for i, (byte1, byte2) in enumerate(
-            zip_longest(objbits, other.bits, fillvalue=0)
-        ):
+        for i, (byte1, byte2) in enumerate(zip_longest(objbits, other.bits, fillvalue=0)):
             value = op(byte1, byte2) & 0xFF
             if i >= len(objbits):
                 objbits.append(value)
@@ -892,9 +890,7 @@ class RoaringIdSet(DocIdSet):
         bucket = n >> 16
         floor = n << 16
         if bucket >= len(self.idsets):
-            self.idsets.extend(
-                [SortedIntSet() for _ in range(len(self.idsets), bucket + 1)]
-            )
+            self.idsets.extend([SortedIntSet() for _ in range(len(self.idsets), bucket + 1)])
         idset = self.idsets[bucket]
         return bucket, floor, idset
 

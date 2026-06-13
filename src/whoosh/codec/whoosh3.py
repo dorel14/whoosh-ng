@@ -222,9 +222,7 @@ class W3PerDocWriter(base.PerDocWriterWithColumns):
         if self._indoc:
             raise Exception("Called start_doc when already in a doc")
         if docnum != self._doccount:
-            raise Exception(
-                f"Called start_doc({docnum!r}) was expecting {self._doccount!r}"
-            )
+            raise Exception(f"Called start_doc({docnum!r}) was expecting {self._doccount!r}")
 
         self._docnum = docnum
         self._doccount += 1
@@ -621,9 +619,7 @@ class W3TermsReader(base.TermsReader):
     def terms_from(self, fieldname, prefix):
         prefixbytes = self._keycoder(fieldname, prefix)
         keydecoder = self._keydecoder
-        return (
-            keydecoder(keybytes) for keybytes in self._tindex.keys_from(prefixbytes)
-        )
+        return (keydecoder(keybytes) for keybytes in self._tindex.keys_from(prefixbytes))
 
     def items(self):
         tidecoder = W3TermInfo.from_bytes
@@ -678,9 +674,7 @@ class W3PostingsWriter(base.PostingsWriter):
     through the postings.
     """
 
-    def __init__(
-        self, postfile, blocklimit, byteids=False, compression=3, inlinelimit=1
-    ):
+    def __init__(self, postfile, blocklimit, byteids=False, compression=3, inlinelimit=1):
         self._postfile = postfile
         self._blocklimit = blocklimit
         self._byteids = byteids
@@ -1168,9 +1162,7 @@ class W3LeafMatcher(LeafMatcher):
             self._values = (None,) * self._blocklength
         else:
             assert isinstance(vs, bytes)
-            self._values = tuple(
-                vs[i : i + fixedsize] for i in range(0, len(vs), fixedsize)
-            )
+            self._values = tuple(vs[i : i + fixedsize] for i in range(0, len(vs), fixedsize))
 
 
 # Term info implementation
