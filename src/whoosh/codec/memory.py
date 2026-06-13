@@ -160,24 +160,13 @@ class MemPerDocReader(base.PerDocumentReader):
         return sum(lens.get(fieldname, 0) for lens in self._segment._lengths.values())
 
     def min_field_length(self, fieldname):
-        return min(
-            lens[fieldname]
-            for lens in self._segment._lengths.values()
-            if fieldname in lens
-        )
+        return min(lens[fieldname] for lens in self._segment._lengths.values() if fieldname in lens)
 
     def max_field_length(self, fieldname):
-        return max(
-            lens[fieldname]
-            for lens in self._segment._lengths.values()
-            if fieldname in lens
-        )
+        return max(lens[fieldname] for lens in self._segment._lengths.values() if fieldname in lens)
 
     def has_vector(self, docnum, fieldname):
-        return (
-            docnum in self._segment._vectors
-            and fieldname in self._segment._vectors[docnum]
-        )
+        return docnum in self._segment._vectors and fieldname in self._segment._vectors[docnum]
 
     def vector(self, docnum, fieldname, format_):
         items = self._segment._vectors[docnum][fieldname]

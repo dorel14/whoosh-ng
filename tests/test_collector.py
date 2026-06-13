@@ -203,11 +203,7 @@ def test_termdocs():
         r = s.search(q, scored=False, terms=True)
 
         field = s.schema["key"]
-        terms = [
-            field.from_bytes(term)
-            for fieldname, term in r.termdocs
-            if fieldname == "key"
-        ]
+        terms = [field.from_bytes(term) for fieldname, term in r.termdocs if fieldname == "key"]
         assert sorted(terms) == ["angora", "anorak", "ant"]
 
 
@@ -247,9 +243,7 @@ def test_termdocs2():
 
 
 def test_filter_results_count():
-    schema = fields.Schema(
-        id=fields.STORED, django_ct=fields.ID(stored=True), text=fields.TEXT
-    )
+    schema = fields.Schema(id=fields.STORED, django_ct=fields.ID(stored=True), text=fields.TEXT)
     with TempIndex(schema) as ix:
         with ix.writer() as w:
             w.add_document(id=1, django_ct="app.model1", text="alfa bravo charlie")

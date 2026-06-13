@@ -160,11 +160,7 @@ class EnglishStemmer(_StandardStemmer):
             return self.__special_words[word]
 
         # Map the different apostrophe characters to a single consistent one
-        word = (
-            word.replace("\u2019", "\x27")
-            .replace("\u2018", "\x27")
-            .replace("\u201B", "\x27")
-        )
+        word = word.replace("\u2019", "\x27").replace("\u2018", "\x27").replace("\u201b", "\x27")
 
         if word.startswith("\x27"):
             word = word[1:]

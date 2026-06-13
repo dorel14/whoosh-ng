@@ -104,12 +104,7 @@ def test_simple_indexing():
 
         with ix.searcher() as s:
             for word in domain:
-                rset = sorted(
-                    [
-                        hit["id"]
-                        for hit in s.search(query.Term("text", word), limit=None)
-                    ]
-                )
+                rset = sorted([hit["id"] for hit in s.search(query.Term("text", word), limit=None)])
                 assert rset == docs[word]
 
 
@@ -253,9 +248,7 @@ def test_frequency_keyword():
         assert tr.doc_frequency("content", "Z") == 0
         assert tr.frequency("content", "Z") == 0
 
-        stats = [
-            (fname, text, ti.doc_frequency(), ti.weight()) for (fname, text), ti in tr
-        ]
+        stats = [(fname, text, ti.doc_frequency(), ti.weight()) for (fname, text), ti in tr]
 
         assert stats == [
             ("content", b"A", 1, 1),
@@ -292,9 +285,7 @@ def test_frequency_text():
         assert tr.doc_frequency("content", "zulu") == 0
         assert tr.frequency("content", "zulu") == 0
 
-        stats = [
-            (fname, text, ti.doc_frequency(), ti.weight()) for (fname, text), ti in tr
-        ]
+        stats = [(fname, text, ti.doc_frequency(), ti.weight()) for (fname, text), ti in tr]
 
         assert stats == [
             ("content", b"alfa", 1, 1),
@@ -386,9 +377,7 @@ def test_update():
 
 
 def test_update2():
-    schema = fields.Schema(
-        key=fields.ID(unique=True, stored=True), p=fields.ID(stored=True)
-    )
+    schema = fields.Schema(key=fields.ID(unique=True, stored=True), p=fields.ID(stored=True))
     with TempIndex(schema, "update2") as ix:
         nums = list(range(21))
         random.shuffle(nums)
@@ -430,9 +419,7 @@ def test_reindex():
         },
     ]
 
-    schema = fields.Schema(
-        text=fields.TEXT(stored=True), id=fields.ID(unique=True, stored=True)
-    )
+    schema = fields.Schema(text=fields.TEXT(stored=True), id=fields.ID(unique=True, stored=True))
     with TempIndex(schema, "reindex") as ix:
 
         def reindex():
@@ -470,9 +457,7 @@ def test_noscorables1():
     with TempIndex(schema, "noscorables1") as ix:
         w = ix.writer()
         for _ in range(times):
-            w.add_document(
-                id=choice(values), tags=" ".join(sample(values, randint(2, 7)))
-            )
+            w.add_document(id=choice(values), tags=" ".join(sample(values, randint(2, 7))))
         w.commit()
 
         with ix.searcher() as s:
@@ -488,9 +473,7 @@ def test_noscorables2():
 
 
 def test_multi():
-    schema = fields.Schema(
-        id=fields.ID(stored=True), content=fields.KEYWORD(stored=True)
-    )
+    schema = fields.Schema(id=fields.ID(stored=True), content=fields.KEYWORD(stored=True))
     with TempIndex(schema, "multi") as ix:
         writer = ix.writer()
         # Deleted 1
@@ -553,9 +536,7 @@ def test_deleteall():
         w.commit()
 
         with ix.searcher() as s:
-            r = s.search(
-                query.Or([query.Term("text", "alfa"), query.Term("text", "bravo")])
-            )
+            r = s.search(query.Or([query.Term("text", "alfa"), query.Term("text", "bravo")]))
             assert len(r) == 0
 
         ix.optimize()
@@ -590,9 +571,7 @@ def test_single():
 
 
 def test_indentical_fields():
-    schema = fields.Schema(
-        id=fields.STORED, f1=fields.TEXT, f2=fields.TEXT, f3=fields.TEXT
-    )
+    schema = fields.Schema(id=fields.STORED, f1=fields.TEXT, f2=fields.TEXT, f3=fields.TEXT)
     with TempIndex(schema, "identifields") as ix:
         w = ix.writer()
         w.add_document(id=1, f1="alfa", f2="alfa", f3="alfa")
@@ -655,9 +634,7 @@ def test_multi_language():
         ("pig", "Otay ebay, roay otnay otay ebay"),
     ]
 
-    schema = fields.Schema(
-        content=fields.TEXT(stored=True), lang=fields.ID(stored=True)
-    )
+    schema = fields.Schema(content=fields.TEXT(stored=True), lang=fields.ID(stored=True))
     ix = RamStorage().create_index(schema)
 
     with ix.writer() as w:

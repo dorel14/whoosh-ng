@@ -333,11 +333,7 @@ class IntraWordFilter(Filter):
         self.mergenums = mergenums
 
     def __eq__(self, other):
-        return (
-            other
-            and self.__class__ is other.__class__
-            and self.__dict__ == other.__dict__
-        )
+        return other and self.__class__ is other.__class__ and self.__dict__ == other.__dict__
 
     def _split(self, string):
         bound = self.boundary
@@ -423,11 +419,7 @@ class IntraWordFilter(Filter):
                 this = None
 
             # Is this the same type as the previous part?
-            if (
-                buf
-                and (this == last == 1 and mergewords)
-                or (this == last == 2 and mergenums)
-            ):
+            if buf and (this == last == 1 and mergewords) or (this == last == 2 and mergenums):
                 # This part is the same type as the previous. Add it to the
                 # buffer of parts to merge.
                 buf.append(item)
@@ -467,9 +459,7 @@ class IntraWordFilter(Filter):
                     # Token doesn't have positions, just use 0
                     newpos = 0
 
-            if (
-                text.isalpha() and (text.islower() or text.isupper())
-            ) or text.isdigit():
+            if (text.isalpha() and (text.islower() or text.isupper())) or text.isdigit():
                 # Short-circuit the common cases of no delimiters, no case
                 # transitions, only digits, etc.
                 t.pos = newpos
@@ -480,10 +470,7 @@ class IntraWordFilter(Filter):
                 # boundaries into a list of (text, pos, startchar, endchar)
                 # tuples
                 ranges = self._split(text)
-                parts = [
-                    (text[sc:ec], i + newpos, sc, ec)
-                    for i, (sc, ec) in enumerate(ranges)
-                ]
+                parts = [(text[sc:ec], i + newpos, sc, ec) for i, (sc, ec) in enumerate(ranges)]
 
                 # Did the split yield more than one part?
                 if len(parts) > 1:

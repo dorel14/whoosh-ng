@@ -38,7 +38,6 @@ Whoosh uses these structures to store a directed acyclic word graph (DAWG) for
 use in (at least) spell checking.
 """
 
-
 import copy
 import sys
 from array import array
@@ -1524,9 +1523,7 @@ def within(graph, text, k=1, prefix=0, address=None):
 
         arcs = graph.arc_dict(address)
         # Insertions
-        stack.extend(
-            (arc.target, k, i, sofar + char, arc.accept) for char, arc in arcs.items()
-        )
+        stack.extend((arc.target, k, i, sofar + char, arc.accept) for char, arc in arcs.items())
 
         # Deletion, replacement, and transpo only work before the end
         if i >= len(text):
@@ -1548,9 +1545,7 @@ def within(graph, text, k=1, prefix=0, address=None):
                 if target:
                     arc = graph.find_arc(target, char)
                     if arc:
-                        stack.append(
-                            (arc.target, k, i + 2, sofar + char2 + char, arc.accept)
-                        )
+                        stack.append((arc.target, k, i + 2, sofar + char2 + char, arc.accept))
 
 
 # Utility functions

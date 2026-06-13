@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Coroutine
+import logging
+from typing import Any, Callable
 
 from whoosh.event_bus import event_bus
 
@@ -22,6 +23,7 @@ def register_hook(name: str, impl: HookImpl) -> None:
 
 
 async def call_hook(name: str, *args: Any, **kwargs: Any) -> list[Any]:
+    logger = logging.getLogger(__name__)
     results: list[Any] = []
     for hook in _hooks.get(name, []):
         try:
@@ -30,6 +32,6 @@ async def call_hook(name: str, *args: Any, **kwargs: Any) -> list[Any]:
                 results.append(await res)
             else:
                 results.append(res)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.exception("Error executing hook '%s'", name, exc_info=exc)
     return results

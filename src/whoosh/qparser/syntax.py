@@ -490,9 +490,7 @@ class RangeNode(SyntaxNode):
             if end:
                 end = get_single_text(field, end, tokenize=False, removestops=False)
 
-        q = query.TermRange(
-            fieldname, start, end, self.startexcl, self.endexcl, boost=self.boost
-        )
+        q = query.TermRange(fieldname, start, end, self.startexcl, self.endexcl, boost=self.boost)
         return attach(q, self)
 
 

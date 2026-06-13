@@ -10,9 +10,7 @@ from whoosh.util.testing import TempIndex
 
 
 def _create_index():
-    s = fields.Schema(
-        f1=fields.KEYWORD(stored=True), f2=fields.KEYWORD, f3=fields.KEYWORD
-    )
+    s = fields.Schema(f1=fields.KEYWORD(stored=True), f2=fields.KEYWORD, f3=fields.KEYWORD)
     st = RamStorage()
     ix = st.create_index(s)
     return ix
@@ -111,9 +109,7 @@ def test_term_inspection():
                 title="My document",
                 content="AA AA BB BB CC AA AA AA BB BB CC DD EE EE",
             )
-            w.add_document(
-                title="My other document", content="AA AB BB CC EE EE AX AX DD"
-            )
+            w.add_document(title="My other document", content="AA AB BB CC EE EE AX AX DD")
 
         with ix.reader() as r:
             cterms = " ".join(r.field_terms("content"))
@@ -552,12 +548,8 @@ def test_term_inspection_segment_reader():
     schema = fields.Schema(title=fields.TEXT(stored=True), content=fields.TEXT)
     with TempIndex(schema) as ix:
         with ix.writer() as w:
-            w.add_document(
-                title="My document", content="AA AA BB BB CC AA AA AA BB BB CC DD EE EE"
-            )
-            w.add_document(
-                title="My other document", content="AA AÉ BB CC EE EE Aú AÚ DD"
-            )
+            w.add_document(title="My document", content="AA AA BB BB CC AA AA AA BB BB CC DD EE EE")
+            w.add_document(title="My other document", content="AA AÉ BB CC EE EE Aú AÚ DD")
 
         _check_inspection_results(ix)
 
@@ -566,14 +558,10 @@ def test_term_inspection_multi_reader():
     schema = fields.Schema(title=fields.TEXT(stored=True), content=fields.TEXT)
     with TempIndex(schema) as ix:
         with ix.writer() as w:
-            w.add_document(
-                title="My document", content="AA AA BB BB CC AA AA AA BB BB CC DD EE EE"
-            )
+            w.add_document(title="My document", content="AA AA BB BB CC AA AA AA BB BB CC DD EE EE")
 
         with ix.writer() as w:
-            w.add_document(
-                title="My other document", content="AA AÉ BB CC EE EE Aú AÚ DD"
-            )
+            w.add_document(title="My other document", content="AA AÉ BB CC EE EE Aú AÚ DD")
             w.merge = False
 
         _check_inspection_results(ix)

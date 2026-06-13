@@ -37,9 +37,7 @@ def test_creation1():
 
 
 def test_creation2():
-    s = fields.Schema(
-        a=fields.ID(stored=True), b=fields.ID, c=fields.KEYWORD(scorable=True)
-    )
+    s = fields.Schema(a=fields.ID(stored=True), b=fields.ID, c=fields.KEYWORD(scorable=True))
 
     assert s.names() == ["a", "b", "c"]
     assert "a" in s
@@ -573,9 +571,7 @@ def test_boolean_find_deleted():
 
 
 def test_boolean_multifield():
-    schema = fields.Schema(
-        name=fields.TEXT(stored=True), bit=fields.BOOLEAN(stored=True)
-    )
+    schema = fields.Schema(name=fields.TEXT(stored=True), bit=fields.BOOLEAN(stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
         w.add_document(name="audi", bit=True)
@@ -654,9 +650,7 @@ def test_pickle_schema():
         path=fields.ID(stored=True, unique=True),
         file_mtime=fields.DATETIME(stored=True),
         name=fields.TEXT(stored=False, field_boost=2.0),
-        description=fields.TEXT(
-            stored=False, field_boost=1.5, analyzer=freetext_analyzer
-        ),
+        description=fields.TEXT(stored=False, field_boost=1.5, analyzer=freetext_analyzer),
         content=fields.TEXT(analyzer=freetext_analyzer),
     )
 
@@ -695,9 +689,7 @@ def test_valid_date_string():
     query = field.parse_query("date", date_string)
 
     # Define the expected start and end dates
-    expected_start = datetime_to_long(
-        datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
-    )
+    expected_start = datetime_to_long(datetime.datetime(2022, 1, 1, tzinfo=timezone.utc))
     expected_end = datetime_to_long(
         datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
         + datetime.timedelta(days=1)

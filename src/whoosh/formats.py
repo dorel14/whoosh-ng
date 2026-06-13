@@ -69,11 +69,7 @@ class Format:
         self.options = options
 
     def __eq__(self, other):
-        return (
-            other
-            and self.__class__ is other.__class__
-            and self.__dict__ == other.__dict__
-        )
+        return other and self.__class__ is other.__class__ and self.__dict__ == other.__dict__
 
     def __repr__(self):
         return f"{self.__class__.__name__}(boost={self.field_boost})"
@@ -437,9 +433,7 @@ class CharacterBoosts(Characters):
         charbase = 0
         summedboost = 0
         for pos, startchar, endchar, boost in poses:
-            codes.append(
-                (pos - posbase, startchar - charbase, endchar - startchar, boost)
-            )
+            codes.append((pos - posbase, startchar - charbase, endchar - startchar, boost))
             posbase = pos
             charbase = endchar
             summedboost += boost
@@ -473,10 +467,7 @@ class CharacterBoosts(Characters):
         ]
 
     def decode_position_boosts(self, valuestring):
-        return [
-            (pos, boost)
-            for pos, _, _, boost in self.decode_character_boosts(valuestring)
-        ]
+        return [(pos, boost) for pos, _, _, boost in self.decode_character_boosts(valuestring)]
 
     def combine(self, vs):
         s = {}

@@ -1,4 +1,1 @@
-pytest
-pythomata
-versioneer
--e .
+.[dev]

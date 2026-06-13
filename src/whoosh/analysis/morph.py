@@ -133,9 +133,7 @@ class StemFilter(Filter):
         return self._stem.cache_info()
 
     def __eq__(self, other):
-        return (
-            other and self.__class__ is other.__class__ and self.stemfn == other.stemfn
-        )
+        return other and self.__class__ is other.__class__ and self.stemfn == other.stemfn
 
     def __call__(self, tokens):
         stemfn = self._stem

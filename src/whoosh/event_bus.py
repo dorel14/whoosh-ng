@@ -27,16 +27,29 @@ class EventBus:
 
     def publish(self, event: Event) -> None:
         listeners = self._listeners.get(type(event), [])
+        if not listeners:
+            return
+
+        coros = []
         for listener in listeners:
             try:
-                coro = listener(event)
-                try:
-                    loop = asyncio.get_running_loop()
-                    loop.create_task(coro)
-                except RuntimeError:
-                    asyncio.run(coro)
+                res = listener(event)
+                if hasattr(res, "__await__"):
+                    coros.append(res)
             except Exception:
                 pass
+
+        if not coros:
+            return
+
+        try:
+            loop = asyncio.get_running_loop()
+            for coro in coros:
+                loop.create_task(coro)
+        except RuntimeError:
+            async def run_all():
+                await asyncio.gather(*coros, return_exceptions=True)
+            asyncio.run(run_all())
 
     def clear(self) -> None:
         self._listeners.clear()

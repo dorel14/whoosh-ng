@@ -103,11 +103,7 @@ class Filter(Composable):
     """
 
     def __eq__(self, other):
-        return (
-            other
-            and self.__class__ is other.__class__
-            and self.__dict__ == other.__dict__
-        )
+        return other and self.__class__ is other.__class__ and self.__dict__ == other.__dict__
 
     def __ne__(self, other):
         return self != other
@@ -168,11 +164,7 @@ class MultiFilter(Filter):
         self.filters = kwargs
 
     def __eq__(self, other):
-        return (
-            other
-            and self.__class__ is other.__class__
-            and self.filters == other.filters
-        )
+        return other and self.__class__ is other.__class__ and self.filters == other.filters
 
     def __call__(self, tokens):
         # Only selects on the first token
@@ -221,8 +213,7 @@ class TeeFilter(Filter):
         # Tee the token iterator and wrap each teed iterator with the
         # corresponding filter
         gens = [
-            filter(t.copy() for t in gen)
-            for filter, gen in zip(self.filters, tee(tokens, count))
+            filter(t.copy() for t in gen) for filter, gen in zip(self.filters, tee(tokens, count))
         ]
         # Keep a count of the number of running iterators
         running = count
@@ -292,9 +283,7 @@ class StopFilter(Filter):
     has a stop word list available.
     """
 
-    def __init__(
-        self, stoplist=STOP_WORDS, minsize=2, maxsize=None, renumber=True, lang=None
-    ):
+    def __init__(self, stoplist=STOP_WORDS, minsize=2, maxsize=None, renumber=True, lang=None):
         """
         :param stoplist: A collection of words to remove from the stream.
             This is converted to a frozenset. The default is a list of
@@ -402,11 +391,7 @@ class CharsetFilter(Filter):
         self.charmap = charmap
 
     def __eq__(self, other):
-        return (
-            other
-            and self.__class__ is other.__class__
-            and self.charmap == other.charmap
-        )
+        return other and self.__class__ is other.__class__ and self.charmap == other.charmap
 
     def __call__(self, tokens):
         assert hasattr(tokens, "__iter__")

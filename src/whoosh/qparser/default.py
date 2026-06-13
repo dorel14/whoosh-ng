@@ -203,9 +203,7 @@ class QueryParser:
                 raise QueryParserError(f"Unknown multitoken_query value {spec!r}")
             return qclass([termclass(fieldname, t, boost=boost) for t in texts])
 
-    def term_query(
-        self, fieldname, text, termclass, boost=1.0, tokenize=True, removestops=True
-    ):
+    def term_query(self, fieldname, text, termclass, boost=1.0, tokenize=True, removestops=True):
         """Returns the appropriate query object for a single term in the query
         string.
         """
@@ -226,9 +224,7 @@ class QueryParser:
             # Otherwise, ask the field to process the text into a list of
             # tokenized strings
             texts = list(
-                field.process_text(
-                    text, mode="query", tokenize=tokenize, removestops=removestops
-                )
+                field.process_text(text, mode="query", tokenize=tokenize, removestops=removestops)
             )
 
             # If the analyzer returned more than one token, use the field's
@@ -294,8 +290,7 @@ class QueryParser:
                 if node is not None:
                     if node.endchar <= pos:
                         raise Exception(
-                            "Token %r did not move cursor forward."
-                            " (%r, %s)" % (tagger, text, pos)
+                            "Token %r did not move cursor forward. (%r, %s)" % (tagger, text, pos)
                         )
                     if prev < pos:
                         tween = inter(prev, pos)

@@ -1,51 +1,64 @@
 ---
-name: Test
+name: CI
 
-on: [pull_request, push, workflow_dispatch]
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  codespell_and_ruff:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v5
-    - run: pip install --user codespell[toml] ruff
-    # TODO: Fix lint issues and remove `--exit-zero` from the line below.
-    - run: ruff check --exit-zero --output-format=github --target-version=py38 .
-  test:
-    runs-on: ubuntu-latest
+  quality:
+    name: Quality (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, "3.10", 3.11, 3.12, 3.13, 3.14, 3.14t]
-    steps:
-    - uses: actions/checkout@v5
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel
-        pip install pytest pytest-cov pytest-sugar coverage cached-property
-    - name: Install Whoosh
-      run: |
-        pip install --editable .
-    - name: Run tests
-      run: |
-        pytest --cov=./ --cov-report=xml --cov-report=html
-    - name: Upload HTML coverage report
-      uses: actions/upload-artifact@v7
-      with:
-        name: "HTML Coverage ${{ matrix.python-version }}"
-        path: "htmlcov"
-        retention-days: 7
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
 
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v7.0.0
-      with:
-        directory: ./
-        env_vars: OS,PYTHON
-        fail_ci_if_error: true
-        files: ./coverage.xml
-        handle_no_reports_found: true
-        token: ${{ secrets.CODECOV_TOKEN }} # required
-        verbose: true # optional (default = false)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up UV
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --extra dev --extra vector --extra vector
+
+      - name: Ruff
+        run: uv run ruff check .
+
+      - name: Ruff format
+        run: uv run ruff format --check .
+
+      - name: Mypy
+        run: uv run mypy src/whoosh
+
+      - name: Pytest
+        run: uv run pytest tests
+
+      - name: Build distributions
+        run: uv run python -m build
+
+      - name: Check distributions
+        run: uv run twine check dist/*
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: |
+            coverage.xml
+            htmlcov
+          if-no-files-found: ignore
+          retention-days: 7
