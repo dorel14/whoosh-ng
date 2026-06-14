@@ -48,7 +48,8 @@ try:
 
 except ImportError as exc:
     raise ImportError(
-        "FastAPI plugin requires fastapi. Install with: pip install whoosh-reloaded[api]"
+        "FastAPI plugin requires fastapi. "
+        "Install with: pip install whoosh-NG[api]"
     ) from exc
 
 
