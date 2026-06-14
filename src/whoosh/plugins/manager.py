@@ -3,13 +3,19 @@ from __future__ import annotations
 from abc import ABC
 from typing import ClassVar
 
+from whoosh.hooks import register_hook, HookImpl
+
 
 class Plugin(ABC):
     name: str
     version: str
     conflicts_with: list[str] = []
+    owner: str = ""
 
-    def register(self, registry) -> None:
+    def register(self, manager: "PluginManager") -> None:
+        pass
+
+    def register_hooks(self) -> None:
         pass
 
 
@@ -50,6 +56,8 @@ class PluginManager:
         self._plugins[plugin.name] = plugin
         self._order.append(plugin.name)
         self._enabled.add(plugin.name)
+        plugin.register(self)
+        plugin.register_hooks()
 
     def get(self, name: str) -> Plugin:
         try:

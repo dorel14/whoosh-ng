@@ -45,14 +45,7 @@ from hashlib import sha1  # type: ignore @UnresolvedImport
 from io import BytesIO
 
 from whoosh.filedb.structfile import StructFile
-from whoosh.system import (
-    _INT_SIZE,
-    emptybytes,
-    pack_byte,
-    pack_int,
-    pack_long,
-    pack_uint,
-)
+from whoosh.system import _INT_SIZE, emptybytes, pack_byte, pack_int, pack_long, pack_uint
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.util.varints import varint
 
@@ -206,8 +199,8 @@ class SequenceValues(Values):
     """Abstract base class for value types that store sequences."""
 
     @staticmethod
-    def is_valid(self, v):
-        return isinstance(self, (list, tuple))
+    def is_valid(v):
+        return isinstance(v, (list, tuple))
 
     @staticmethod
     def common(v1, v2):

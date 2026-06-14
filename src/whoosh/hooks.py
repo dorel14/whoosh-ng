@@ -3,10 +3,11 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable
 
-from whoosh.event_bus import event_bus
-
+from whoosh.event_bus import event_bus, Event
 
 _hooks: dict[str, list[Callable[..., Any]]] = {}
+
+logger = logging.getLogger(__name__)
 
 
 class HookImpl:
@@ -23,7 +24,6 @@ def register_hook(name: str, impl: HookImpl) -> None:
 
 
 async def call_hook(name: str, *args: Any, **kwargs: Any) -> list[Any]:
-    logger = logging.getLogger(__name__)
     results: list[Any] = []
     for hook in _hooks.get(name, []):
         try:

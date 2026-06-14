@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Iterable, Sequence, TypeVar
+from whoosh.vector.base import VectorField, VectorHit, VectorProvider
 
-from whoosh_modern.vector.base import VectorField, VectorHit, VectorProvider
+try:
+    from whoosh_modern.vector.numpy_provider import NumpyProvider
+except ImportError:
+    NumpyProvider = None
 
-__all__ = ["VectorField", "VectorHit", "VectorProvider"]
+__all__ = ["VectorField", "VectorHit", "VectorProvider", "NumpyProvider"]
