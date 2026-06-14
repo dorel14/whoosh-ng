@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
+
+if TYPE_CHECKING:
+    from whoosh.middleware.chain import MiddlewareChain
 
 from whoosh.hooks import register_hook, HookImpl
 
@@ -113,7 +116,18 @@ class PluginManager:
         middlewares = []
         for name in self._order:
             plugin = self._plugins.get(name)
-            if plugin and plugin.middleware:
-                for mw_class in plugin.middleware:
-                    middlewares.append(mw_class())
+            if plugin and hasattr(plugin, "middleware"):
+                for mw_name in plugin.middleware:
+                    if mw_name:
+                        middlewares.append(self._get_middleware(mw_name))
         return MiddlewareChain(middlewares)
+
+    def _get_middleware(self, name: str) -> Any:
+        """Import and instantiate a middleware by string name."""
+        from importlib import import_module
+
+        parts = name.rsplit(".", 1)
+        module_path = parts[0]
+        class_name = parts[1] if len(parts) > 1 else parts[0]
+        module = import_module(module_path)
+        return getattr(module, class_name)()
