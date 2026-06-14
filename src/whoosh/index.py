@@ -697,7 +697,7 @@ class TOC:
             stream.write_varint(num)
 
         try:
-            stream.write_string(pickle.dumps(schema, 2))
+            stream.write_string(pickle.dumps(schema))
         except pickle.PicklingError:
             # Try to narrow down the error to a single field
             for fieldname, field in schema.items():

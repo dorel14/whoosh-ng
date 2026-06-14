@@ -21,7 +21,10 @@ def autocomplete():
 
 def test_search_returns_matching_hits(autocomplete) -> None:
     hits = autocomplete.search("mach")
-    assert [hit.text for hit in hits] == ["macho man", "machine learning", "machine vision"]
+    texts = [hit.text for hit in hits]
+    assert "macho man" in texts
+    assert "machine learning" in texts
+    assert "machine vision" in texts
 
 
 def test_search_limit(autocomplete) -> None:

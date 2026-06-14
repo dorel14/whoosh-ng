@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
+
 from whoosh import fields, qparser, query
 from whoosh.filedb.filestore import RamStorage
 from whoosh.util import times
@@ -666,10 +667,10 @@ def test_pickle_schema():
             for doc in docs:
                 w.add_document(description=doc, content=doc)
 
-        assert dumps(schema, 2)
+        assert dumps(schema)
 
         with ix.reader() as r:
-            assert dumps(r.schema, 2)
+            assert dumps(r.schema)
 
 
 def test_valid_date_string():

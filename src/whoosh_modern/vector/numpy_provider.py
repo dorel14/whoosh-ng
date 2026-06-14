@@ -5,7 +5,7 @@ from typing import Iterable, Sequence
 
 import numpy as np
 
-from whoosh_modern.vector.base import VectorField, VectorHit, VectorProvider
+from whoosh.vector.base import VectorHit, VectorProvider
 
 
 class NumpyProvider(VectorProvider):

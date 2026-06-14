@@ -21,12 +21,7 @@ from whoosh.fields import UnknownFieldError
 from whoosh.filedb import misc
 from whoosh.filedb.fileindex import Segment, SegmentDeletionMixin, SegmentSet
 from whoosh.filedb.filepostings import FilePostingWriter
-from whoosh.filedb.filetables import (
-    FileListWriter,
-    FileTableWriter,
-    LengthWriter,
-    StructHashWriter,
-)
+from whoosh.filedb.filetables import FileListWriter, FileTableWriter, LengthWriter, StructHashWriter
 from whoosh.filedb.pools import MultiPool, TempfilePool
 from whoosh.index import LockError
 from whoosh.support import unicode

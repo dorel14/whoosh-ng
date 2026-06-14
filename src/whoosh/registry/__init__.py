@@ -6,6 +6,7 @@ RankingRegistry = Registry("ranking")
 SuggestRegistry = Registry("suggest")
 VectorRegistry = Registry("vector")
 AutocompleteRegistry = Registry("autocomplete")
+BackendRegistry = Registry("backend")
 
 __all__ = [
     "Registry",
@@ -15,4 +16,5 @@ __all__ = [
     "SuggestRegistry",
     "VectorRegistry",
     "AutocompleteRegistry",
+    "BackendRegistry",
 ]

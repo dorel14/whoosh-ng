@@ -19,7 +19,9 @@ class VectorProvider(Generic[T]):
     def add(self, vectors: Iterable[tuple[str, Sequence[float]]]) -> None:
         raise NotImplementedError
 
-    def search(self, query_vector: Sequence[float], k: int = 10, filter_ids: Sequence[str] = ()) -> list[VectorHit]:
+    def search(
+        self, query_vector: Sequence[float], k: int = 10, filter_ids: Sequence[str] = ()
+    ) -> list[VectorHit]:
         raise NotImplementedError
 
     def remove(self, doc_ids: Iterable[str]) -> None:
@@ -32,8 +34,14 @@ class VectorField:
         self.name = name
 
     def vector_to_bytes(self, values: Sequence[float]) -> bytes:
+        if len(values) != self.dimension:
+            raise ValueError(
+                f"Vector length {len(values)} does not match field dimension {self.dimension}"
+            )
         return struct.pack(f"{len(values)}d", *values)
 
     def bytes_to_vector(self, data: bytes) -> tuple[float, ...]:
         count = len(data) // 8
+        if count != self.dimension:
+            raise ValueError(f"Data length {count} does not match field dimension {self.dimension}")
         return struct.unpack(f"{count}d", data)

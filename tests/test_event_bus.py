@@ -1,19 +1,8 @@
 from __future__ import annotations
 
 import pytest
-from dataclasses import dataclass
 
-from whoosh.event_bus import Event, EventBus, event_bus
-
-
-@dataclass(frozen=True)
-class DocumentIndexed(Event):
-    document_id: str
-
-
-@dataclass(frozen=True)
-class SearchExecuted(Event):
-    query: str
+from whoosh.event_bus import DocumentIndexed, Event, EventBus, event_bus, SearchExecuted
 
 
 @pytest.fixture(autouse=True)

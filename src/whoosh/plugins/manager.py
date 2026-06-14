@@ -1,9 +1,21 @@
 from __future__ import annotations
 
 from abc import ABC
+from dataclasses import dataclass, field
 from typing import ClassVar
 
 from whoosh.hooks import register_hook, HookImpl
+
+
+@dataclass
+class PluginMetadata:
+    """Metadata for a plugin."""
+
+    name: str
+    version: str
+    depends_on: list[str] = field(default_factory=list)
+    priority: int = 0
+    middleware: list[str] = field(default_factory=list)
 
 
 class Plugin(ABC):
@@ -11,6 +23,9 @@ class Plugin(ABC):
     version: str
     conflicts_with: list[str] = []
     owner: str = ""
+    depends_on: list[str] = []
+    priority: int = 0
+    middleware: list[str] = []
 
     def register(self, manager: "PluginManager") -> None:
         pass
@@ -90,3 +105,15 @@ class PluginManager:
         if plugin is None:
             return False
         return name2 in getattr(plugin, "conflicts_with", [])
+
+    def get_middleware_chain(self) -> "MiddlewareChain":
+        """Return a MiddlewareChain containing all plugin middleware, sorted by priority."""
+        from whoosh.middleware.chain import MiddlewareChain
+
+        middlewares = []
+        for name in self._order:
+            plugin = self._plugins.get(name)
+            if plugin and plugin.middleware:
+                for mw_class in plugin.middleware:
+                    middlewares.append(mw_class())
+        return MiddlewareChain(middlewares)

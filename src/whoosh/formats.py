@@ -237,7 +237,7 @@ class Positions(Format):
         for pos in poslist:
             deltas.append(pos - base)
             base = pos
-        return pack_uint(len(deltas)) + dumps(deltas, 2)
+        return pack_uint(len(deltas)) + dumps(deltas)
 
     def decode_positions(self, valuestring):
         if not valuestring.endswith(b"."):
@@ -298,7 +298,7 @@ class Characters(Positions):
             deltas.append((pos - posbase, startchar - charbase, endchar - startchar))
             posbase = pos
             charbase = endchar
-        return pack_uint(len(deltas)) + dumps(deltas, 2)
+        return pack_uint(len(deltas)) + dumps(deltas)
 
     def decode_characters(self, valuestring):
         if not valuestring.endswith(b"."):
@@ -368,7 +368,7 @@ class PositionBoosts(Positions):
             summedboost += boost
             codes.append((pos - base, boost))
             base = pos
-        return pack_uint(len(poses)) + pack_float(summedboost) + dumps(codes, 2)
+        return pack_uint(len(poses)) + pack_float(summedboost) + dumps(codes)
 
     def decode_position_boosts(self, valuestring):
         if not valuestring.endswith(b"."):
@@ -439,7 +439,7 @@ class CharacterBoosts(Characters):
             summedboost += boost
 
         return (
-            (pack_uint(len(poses)) + pack_float(summedboost * fb) + dumps(codes, 2)),
+            (pack_uint(len(poses)) + pack_float(summedboost * fb) + dumps(codes)),
             summedboost,
         )
 

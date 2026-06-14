@@ -343,9 +343,7 @@ class ZcatalogModule(Module):
         import transaction  # type: ignore # type: ignore @UnresolvedImport
         from zcatalog import catalog  # type: ignore # type: ignore @UnresolvedImport
         from ZODB.DB import DB  # type: ignore # type: ignore @UnresolvedImport
-        from ZODB.FileStorage import (
-            FileStorage,  # type: ignore # type: ignore @UnresolvedImport
-        )
+        from ZODB.FileStorage import FileStorage  # type: ignore # type: ignore @UnresolvedImport
 
         directory = os.path.join(self.options.dir, f"{self.options.indexname}_zcatalog")
         if os.path.exists(directory):
@@ -383,9 +381,7 @@ class ZcatalogModule(Module):
 
     def searcher(self):
         from ZODB.DB import DB  # type: ignore # type: ignore @UnresolvedImport
-        from ZODB.FileStorage import (
-            FileStorage,  # type: ignore # type: ignore @UnresolvedImport
-        )
+        from ZODB.FileStorage import FileStorage  # type: ignore # type: ignore @UnresolvedImport
 
         path = os.path.join(self.options.dir, f"{self.options.indexname}_zcatalog", "index")
         storage = FileStorage(path)

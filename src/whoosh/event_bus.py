@@ -1,11 +1,23 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 from typing import Any, Callable, Coroutine, Type
 
 
+@dataclass(frozen=True)
 class Event:
     pass
+
+
+@dataclass(frozen=True)
+class DocumentIndexed(Event):
+    document_id: str
+
+
+@dataclass(frozen=True)
+class SearchExecuted(Event):
+    query: str
 
 
 class EventBus:
@@ -47,8 +59,10 @@ class EventBus:
             for coro in coros:
                 loop.create_task(coro)
         except RuntimeError:
+
             async def run_all():
                 await asyncio.gather(*coros, return_exceptions=True)
+
             asyncio.run(run_all())
 
     def clear(self) -> None:

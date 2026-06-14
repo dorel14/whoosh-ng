@@ -6,8 +6,8 @@ import pytest
 
 pytest.importorskip("numpy")
 
+from whoosh_modern.vector.base import VectorField, VectorHit
 from whoosh_modern.vector.numpy_provider import NumpyProvider
-from whoosh_modern.vector.base import VectorHit, VectorField
 
 
 @pytest.fixture

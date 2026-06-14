@@ -9,8 +9,8 @@ class SamplePlugin(Plugin):
     name = "sample"
     version = "1.2.0"
 
-    def register(self, registry) -> None:
-        registry.register("sample", self, owner=self.name)
+    def register(self, manager: PluginManager) -> None:
+        pass
 
 
 class BadPlugin(Plugin):

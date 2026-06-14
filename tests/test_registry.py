@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pytest
 
-from whoosh.registry.base import Registry
 from whoosh.registry import (
     AnalyzerRegistry,
     RankingRegistry,
@@ -10,6 +9,7 @@ from whoosh.registry import (
     SuggestRegistry,
     VectorRegistry,
 )
+from whoosh.registry.base import Registry
 
 
 class DummyItem:

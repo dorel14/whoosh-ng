@@ -57,13 +57,7 @@ from whoosh.system import (
     unpack_long,
     unpack_ushort,
 )
-from whoosh.util.numeric import (
-    NaN,
-    byte_to_length,
-    from_sortable,
-    length_to_byte,
-    to_sortable,
-)
+from whoosh.util.numeric import NaN, byte_to_length, from_sortable, length_to_byte, to_sortable
 from whoosh.util.numlists import GrowableArray
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.util.times import datetime_to_long, long_to_datetime

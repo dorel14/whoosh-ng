@@ -160,7 +160,7 @@ class FileIndex(SegmentDeletionMixin, Index):
         for num in __version__:
             stream.write_varint(num)
 
-        stream.write_string(pickle.dumps(self.schema, -1))
+        stream.write_string(pickle.dumps(self.schema))
         stream.write_int(self.generation)
         stream.write_int(self.segment_counter)
         stream.write_pickle(self.segments)

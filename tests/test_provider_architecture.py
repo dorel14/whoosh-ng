@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import pytest
 from dataclasses import dataclass, field
 from typing import Any
+
+import pytest
 
 from whoosh.hooks import HookImpl, call_hook, hookimpl, register_hook
 
