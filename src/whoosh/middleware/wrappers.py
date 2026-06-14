@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from whoosh.index import Index
 
-from whoosh.middleware.base import Middleware
 from whoosh.middleware.chain import MiddlewareChain
 from whoosh.middleware.context import MiddlewareContext
 

@@ -11,6 +11,7 @@ from whoosh.hooks import register_hook, HookImpl
 
 
 @dataclass
+class PluginMetadata:
     """Metadata for a plugin."""
 
     name: str

@@ -3515,6 +3515,7 @@ version = "4.0.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "cached-property" },
+    { name = "fastapi" },
     { name = "isort" },
 ]
 
@@ -3581,6 +3582,7 @@ requires-dist = [
     { name = "build", marker = "extra == 'dev'", specifier = ">=1.2" },
     { name = "cached-property", specifier = ">=2.0.1" },
     { name = "faiss-cpu", marker = "extra == 'faiss'" },
+    { name = "fastapi", specifier = ">=0.136.3" },
     { name = "fastapi", marker = "extra == 'api'" },
     { name = "fastembed", marker = "extra == 'fastembed'" },
     { name = "hnswlib", marker = "extra == 'hnsw'" },
