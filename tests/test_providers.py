@@ -12,14 +12,16 @@ def test_vector_registry_exists():
     assert hasattr(VectorRegistry, "get")
 
 
-def test_hnsw_provider_optional_import():
-    """Test that HNSWProvider can be imported when hnswlib is available."""
+def test_hnsw_provider_optional():
+    """Test that HNSWProvider is available when hnswlib is installed."""
     try:
-        from whoosh.providers import HNSWProvider
-
-        assert HNSWProvider is not None
+        import hnswlib  # noqa: F401
     except ImportError:
-        pytest.skip("hnswlib not installed")
+        pytest.skip("hnswlib not installed - HNSWProvider requires optional dependency")
+
+    from whoosh.providers.hnsw import HNSWProvider
+
+    assert HNSWProvider is not None
 
 
 def test_vector_provider_base():
