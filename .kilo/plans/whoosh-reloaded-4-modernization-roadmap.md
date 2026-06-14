@@ -159,16 +159,16 @@ Changer les back‑ends épinglés en providers pluggables.
 # Checklist de Validation par Étape
 | Étape | Code implémenté | Tests passent (100%) | 0 erreur Ruff | 0 erreur Mypy | Aucune régression | PR vers `dev` |
 |-------|-----------------|----------------------|---------------|---------------|---------------------|---------------|
-| Phase 1 – Plugin System | ✔ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| Phase 2 – Registry System | ✔ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| Phase 3 – Middleware Pipeline | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| Phase 4 – Event Bus | ✔ | ✔ | ☐ | ☐ | ☐ | ☐ |
-| Phase 5 – Hook System | ✔ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| Phase 6 – Provider Architecture | ⚠ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| Phase 7 – Autocomplete Plugin | ✔ | ✔ | ☐ | ☐ | ☐ | ☐ |
-| Phase 8 – FastAPI Plugin | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| Phase 9 – Observability Plugin | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| Phase 10 – Admin UI Plugin | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| Phase 1 – Plugin System | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 2 – Registry System | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 3 – Middleware Pipeline | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 4 – Event Bus | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 5 – Hook System | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 6 – Provider Architecture | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 7 – Autocomplete Plugin | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 8 – FastAPI Plugin | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 9 – Observability Plugin | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Phase 10 – Admin UI Plugin | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 
 # Points Critiques à Implémenter
 1. **Middleware Pipeline** - Le fichier existe mais le système est squelettique et non intégré au core ; besoin de refactor `src/whoosh/middleware/base.py` et d’ajouter `context.py`, `chain.py`, `registry.py`, `exceptions.py`.
