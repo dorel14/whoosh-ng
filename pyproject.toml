@@ -99,6 +99,7 @@ benchmark = []
 [project.entry-points."whoosh.plugins"]
 whoosh_autocomplete = "whoosh_modern.autocomplete.plugin:AutocompletePlugin"
 whoosh_vector = "whoosh_modern.vector.plugin:VectorPlugin"
+whoosh_fastapi = "whoosh_fastapi:create_app"
 
 [project.urls]
 Documentation = "https://whoosh-reloaded.readthedocs.io/"
