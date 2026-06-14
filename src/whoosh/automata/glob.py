@@ -82,7 +82,8 @@ def glob_automaton(pattern):
         elif op is _QUEST:
             nfa.add_transition(i, ANY, i + 1)
         elif op is _RANGE:
-            for char in arg[0]:
-                nfa.add_transition(i, char, i + 1)
+            if arg is not None:
+                for char in arg[0]:
+                    nfa.add_transition(i, char, i + 1)
     nfa.add_final_state(i + 1)
     return nfa

@@ -366,9 +366,9 @@ class Node:
         self.accept = accept
 
     def __iter__(self):
-        if not self._edges:
+        if self._edges is None:
             self._load()
-        return self._edges.keys()
+        return iter(self._edges)
 
     def __contains__(self, key):
         if self._edges is None:
