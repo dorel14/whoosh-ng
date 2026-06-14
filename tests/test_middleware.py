@@ -1,5 +1,11 @@
 import pytest
 
+from whoosh.middleware import (
+    MiddlewareChain,
+    MiddlewareContext,
+    MiddlewareWriter,
+    MiddlewareSearcher,
+)
 from whoosh.middleware.base import (
     CacheMiddleware,
     CompressionMiddleware,
@@ -7,9 +13,78 @@ from whoosh.middleware.base import (
     MetricsMiddleware,
     Middleware,
 )
-from whoosh.middleware.chain import MiddlewareChain
-from whoosh.middleware.context import MiddlewareContext
 from whoosh.middleware.exceptions import StopOperation
+
+
+class MockWriter:
+    """Mock writer for testing MiddlewareWriter."""
+
+    def __init__(self):
+        self.documents = []
+        self.committed = False
+
+    def add_document(self, **fields) -> None:
+        self.documents.append(dict(fields))
+
+    def update_document(self, **fields) -> None:
+        self.documents.append(dict(fields))
+
+    def delete_document(self, docnum=None, term=None, **kwargs) -> None:
+        pass
+
+    def commit(self) -> None:
+        self.committed = True
+
+    def cancel(self) -> None:
+        self.documents.clear()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args) -> None:
+        pass
+
+
+class MockSearcher:
+    """Mock searcher for testing MiddlewareSearcher."""
+
+    def __init__(self):
+        self.queries = []
+
+    def search(self, query, **kwargs) -> list:
+        self.queries.append(str(query))
+        return [0]
+
+    def search_page(self, query, pagenum, **kwargs) -> list:
+        self.queries.append(str(query))
+        return [0]
+
+    def search_with_collector(self, query, collector) -> list:
+        self.queries.append(str(query))
+        return [0]
+
+    def close(self) -> None:
+        pass
+
+
+class TestMiddlewareWriter:
+    def test_add_document_calls_middleware(self):
+        mock = MockWriter()
+        chain = MiddlewareChain([MetricsMiddleware()])
+        wrapper = MiddlewareWriter(mock, chain)
+        wrapper.add_document(title="test")
+        assert len(mock.documents) == 1
+        assert mock.documents[0]["title"] == "test"
+
+
+class TestMiddlewareSearcher:
+    def test_search_calls_middleware(self):
+        mock = MockSearcher()
+        chain = MiddlewareChain([MetricsMiddleware()])
+        wrapper = MiddlewareSearcher(mock, chain)
+        result = wrapper.search("test query")
+        assert len(mock.queries) == 1
+        assert mock.queries[0] == "test query"
 
 
 class TestMiddlewareContext:
