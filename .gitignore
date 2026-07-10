@@ -24,3 +24,10 @@ eggs/
 /.codiumai.local.toml
 ./kilo
 ./kilo/*
+
+# Cruft / local scratch
+*.tmp
+/testindex/
+/testindex/**
+fix_*.py
+src/**/*.tmp

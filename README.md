@@ -1,8 +1,8 @@
-[![PyPI](https://img.shields.io/pypi/v/whoosh-reloaded.svg)](https://pypi.org/project/whoosh-reloaded/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/whoosh-reloaded.svg)](https://pypi.org/project/whoosh-reloaded/)
-[![License](https://img.shields.io/pypi/l/whoosh-reloaded.svg)](https://pypi.org/project/whoosh-reloaded/)
+[![PyPI](https://img.shields.io/pypi/v/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
+[![License](https://img.shields.io/pypi/l/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
 
-# Whoosh-Reloaded
+# Whoosh-NG
 
 Whoosh-Reloaded is a pure-Python full-text indexing and search library. The 4.0 modernization targets Python 3.11+, modern packaging, strict quality gates, optional feature profiles, and automated semantic releases.
 
@@ -17,21 +17,21 @@ Whoosh-Reloaded is a pure-Python full-text indexing and search library. The 4.0 
 ## Installation
 
 ```bash
-pip install whoosh-reloaded
+pip install whoosh-ng
 ```
 
 Development tooling:
 
 ```bash
-pip install "whoosh-reloaded[dev]"
+pip install "whoosh-ng[dev]"
 ```
 
 Optional profiles:
 
 ```bash
-pip install "whoosh-reloaded[models,async]"
-pip install "whoosh-reloaded[vector,embeddings]"
-pip install "whoosh-reloaded[api,postgres,metrics]"
+pip install "whoosh-ng[models,async]"
+pip install "whoosh-ng[vector,embeddings]"
+pip install "whoosh-ng[api,postgres,metrics]"
 ```
 
 ## Quality gates
