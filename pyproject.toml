@@ -34,8 +34,6 @@ classifiers = [
 ]
 dependencies = [
   "cached-property>=2.0.1",
-  "isort>=8.0.1",
-  "nose>=1.3.7",
 ]
 
 [project.optional-dependencies]
@@ -95,6 +93,8 @@ dev = [
   "build>=1.2",
   "twine>=6",
   "python-semantic-release>=10.5",
+  "isort>=8.0.1",
+  "nose>=1.3.7",
 ]
 benchmark = []
 

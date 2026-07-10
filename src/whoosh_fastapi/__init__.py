@@ -17,8 +17,13 @@ try:
     from fastapi.responses import JSONResponse
 
     def _run_search(index: Index, query: str, **kwargs: Any) -> tuple[list[dict[str, Any]], int]:
+        from whoosh.qparser import QueryParser
+
         with index.searcher() as searcher:
-            results = searcher.search(query, **kwargs)
+            default_field = index.schema.names()[0] if index.schema.names() else "content"
+            parser = QueryParser(default_field, index.schema)
+            parsed_query = parser.parse(query)
+            results = searcher.search(parsed_query, **kwargs)
             hits = [
                 {"docnum": hit.docnum, "score": hit.score, "fields": dict(hit)} for hit in results
             ]

@@ -282,7 +282,7 @@ class IndexWriter:
             object.
         """
 
-        self.schema.add(fieldname, fieldtype, **kwargs)
+        self.schema.add(fieldname, fieldtype, **kwargs)  # type: ignore[attr-defined]
 
     def remove_field(self, fieldname, **kwargs):
         """Removes the named field from the index's schema. Depending on the
@@ -291,7 +291,7 @@ class IndexWriter:
         clear out existing data for a removed field.
         """
 
-        self.schema.remove(fieldname, **kwargs)
+        self.schema.remove(fieldname, **kwargs)  # type: ignore[attr-defined]
 
     @abstractmethod
     def reader(self, **kwargs):
@@ -428,7 +428,7 @@ class IndexWriter:
     def _unique_fields(self, fields):
         # Check which of the supplied fields are unique
         unique_fields = [
-            name for name, field in self.schema.items() if name in fields and field.unique
+            name for name, field in self.schema.items() if name in fields and field.unique  # type: ignore[attr-defined]
         ]
         return unique_fields
 
@@ -834,7 +834,7 @@ class SegmentWriter(IndexWriter):
         if self._searcher is None:
             s = super().searcher()
             self._searcher = s
-            s._orig_close = s.close  # called in _finish()
+            s._orig_close = s.close  # type: ignore[attr-defined]  # called in _finish()
             s.close = lambda: None
         return self._searcher
 
@@ -921,7 +921,7 @@ class SegmentWriter(IndexWriter):
     def _finish(self):
         if self._searcher is not None:
             # Close the cached Searcher if we have one.
-            self._searcher._orig_close()
+            self._searcher._orig_close()  # type: ignore[attr-defined]
             self._searcher = None
         self._tempstorage.destroy()
         if self.writelock:
