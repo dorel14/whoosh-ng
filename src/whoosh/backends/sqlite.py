@@ -348,7 +348,8 @@ class SQLiteBackend(Backend):
         return _SQLiteIndex(self, schema)
 
     def open(self, schema: Schema | None = None) -> _SQLiteIndex:
-        if not self._path.exists():
+        # For in-memory databases, skip file existence check
+        if not (isinstance(self._path, str) and self._path == ":memory:") and not self._path.exists():
             raise EmptyIndexError(f"No Whoosh (SQLite) index found at {self._path!r}")
         self._connect()
         loaded = self._load_schema()

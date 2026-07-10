@@ -122,7 +122,7 @@ def test_sqlite_fts_columns_in_schema() -> None:
     backend = SQLiteBackend(":memory:")
     schema = Schema(content=TEXT, tags=KEYWORD, title=ID(stored=True))
     backend.create(schema)
-    ix = backend.open()
+    ix = backend.open(schema)
     assert "content" in ix.schema
     assert "tags" in ix.schema
     assert "title" in ix.schema
