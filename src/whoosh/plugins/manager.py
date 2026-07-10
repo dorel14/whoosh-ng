@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, Awaitable, ClassVar, cast
 
 if TYPE_CHECKING:
     from whoosh.middleware.chain import MiddlewareChain
 
 from whoosh.hooks import register_hook, HookImpl
+from whoosh.utils.async_utils import is_async_callable, run_async_from_sync
 
 
 @dataclass
@@ -74,7 +75,11 @@ class PluginManager:
         self._plugins[plugin.name] = plugin
         self._order.append(plugin.name)
         self._enabled.add(plugin.name)
-        plugin.register(self)
+        if is_async_callable(plugin.register):
+            coro = plugin.register(self)  # type: ignore[func-returns-value]
+            run_async_from_sync(cast("Awaitable[None]", coro))
+        else:
+            plugin.register(self)
         plugin.register_hooks()
 
     def get(self, name: str) -> Plugin:

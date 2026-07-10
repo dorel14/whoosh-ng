@@ -9,11 +9,11 @@ import pickle
 from typing import Any
 
 try:
-    import hnswlib
+    import hnswlib  # type: ignore[import-untyped]
     import numpy as np
 except ImportError as exc:
     raise ImportError(
-        "HNSWProvider requires hnswlib and numpy. Install with: pip install whoosh-reloaded[hnsw]"
+        "HNSWProvider requires hnswlib and numpy. Install with: pip install whoosh-ng[hnsw]"
     ) from exc
 
 from whoosh.vector.base import VectorHit, VectorProvider
