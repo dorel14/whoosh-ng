@@ -3,7 +3,7 @@ description: Pure-Python full-text indexing and search library, modernized for 2
 lang: en
 timezone: UTC
 
-baseurl: "/whoosh-NG"
+baseurl: "/Whoosh-NG"
 
 remote_theme: just-the-docs/just-the-docs
 
