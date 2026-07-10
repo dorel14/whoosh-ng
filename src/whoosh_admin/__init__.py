@@ -9,7 +9,6 @@ try:
     from fastapi import FastAPI
     from fastapi.responses import HTMLResponse
 
-
     def create_admin_app(index, *, prefix: str = "/admin") -> FastAPI:
         """Create admin UI FastAPI application.
 
@@ -35,8 +34,7 @@ try:
 
 except ImportError as exc:
     raise ImportError(
-        "Admin plugin requires fastapi. "
-        "Install with: pip install whoosh-NG[api]"
+        "Admin plugin requires fastapi. Install with: pip install whoosh-NG[api]"
     ) from exc
 
 
