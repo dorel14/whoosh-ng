@@ -56,6 +56,21 @@ jobs:
             echo "No release required: ${VERSION}"
           fi
 
+      - name: Update docs version
+        if: steps.version.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Mise à jour de docs/_config.yml (clé 'version:')
+          if [ -f docs/_config.yml ]; then
+            sed -i -E "s/^(v|V)ersion: .*/version: $VERSION/" docs/_config.yml
+          fi
+          # Mise à jour de l'installation pip (whoosh-ng=={VERSION})
+          find docs/ -name "*.md" -exec sed -i -E \
+            "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" {} \;
+          sed -i -E "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" README.md
+
       - name: Create release and tag
         if: steps.version.outputs.version != ''
         env:

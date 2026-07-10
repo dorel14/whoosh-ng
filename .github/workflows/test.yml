@@ -4,63 +4,113 @@ name: CI
 on:
   pull_request:
   push:
+    branches: [master, dev]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  quality:
-    name: Quality (${{ matrix.os }}, Python ${{ matrix.python-version }})
+  lint:
+    name: Pre-commit (auto-fix)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - id: setup-uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-suffix: lint
+          python-version: "3.12"
+      - name: Install deps
+        run: uv sync --frozen --extra dev --extra vector
+      - name: Run pre-commit and auto-fix
+        run: |
+          set +e
+          uv run pre-commit run --all-files 2>&1 | tee precommit.log
+          first_status=${PIPESTATUS[0]}
+          set -e
+          if [ $first_status -eq 0 ]; then
+            echo "Pre-commit passed, no fixes needed."
+          else
+            if ! git diff --quiet; then
+              echo "Pre-commit applied automatic fixes. Verifying..."
+              uv run pre-commit run --all-files
+              second_status=$?
+              if [ $second_status -eq 0 ]; then
+                git config user.email "action@github.com"
+                git config user.name "github-actions[bot]"
+                git add -A
+                git commit -m "chore: apply pre-commit fixes"
+                git push origin HEAD:${{ github.head_ref }}
+              else
+                echo "Pre-commit still failing after fixes."
+                exit $second_status
+              fi
+            else
+              echo "Pre-commit failed without automatic fixes."
+              exit $first_status
+            fi
+          fi
+
+  pytest:
+    name: Test (${{ matrix.os }}, Python ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ["3.11", "3.12"]
-
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Set up UV
+          persist-credentials: false
+          fetch-depth: 0
+      - id: setup-uv
         uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-suffix: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python-version }}
+      - name: Install deps
+        run: uv sync --frozen --extra dev --extra vector
+      - name: Run pytest
+        run: uv run pytest tests
 
+  quality:
+    name: Quality (ruff, mypy, pyright, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
       - name: Install dependencies
         run: uv sync --extra dev --extra vector
-
       - name: Ruff
         run: uv run ruff check .
-
       - name: Ruff format
-        run: uv run ruff format .
-
+        run: uv run ruff format --check .
       - name: Mypy
         run: uv run mypy src/whoosh
-
       - name: Pyright (non-blocking, progressive)
         continue-on-error: true
         run: uv run pyright src/whoosh
-
-      - name: Pytest
-        run: uv run pytest tests
-
       - name: Build distributions
         run: uv run python -m build
-
       - name: Check distributions
         run: uv run twine check dist/*
-
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
+          name: coverage
           path: |
             coverage.xml
             htmlcov
