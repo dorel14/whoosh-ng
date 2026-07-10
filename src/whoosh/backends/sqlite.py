@@ -74,7 +74,10 @@ class _SQLiteIndex:
         return True
 
     def last_modified(self) -> int:
-        return self.backend._path.stat().st_mtime_ns if self.backend._path else -1
+        path = self.backend._path
+        if isinstance(path, str) and path == ":memory:":
+            return -1
+        return path.stat().st_mtime_ns if path else -1
 
     def add_field(self, fieldname: str, fieldspec) -> None:  # type: ignore[override]
         raise NotImplementedError(
@@ -182,7 +185,11 @@ class SQLiteBackend(Backend):
     name = "sqlite"
 
     def __init__(self, path: str | Path) -> None:
-        self._path = Path(path)
+        # Keep ":memory:" as string for special handling; convert other paths
+        if isinstance(path, str) and path == ":memory:":
+            self._path: str | Path = path
+        else:
+            self._path = Path(path)
         self._conn: sqlite3.Connection | None = None
         self._schema: Schema | None = None
 
@@ -382,7 +389,10 @@ class SQLiteBackend(Backend):
         if self._conn is not None:
             self._conn.close()
             self._conn = None
-        if self._path.exists() or isinstance(self._path, str) and self._path == ":memory:":
+        # :memory: databases have no file to destroy
+        if isinstance(self._path, str) and self._path == ":memory:":
+            return
+        if self._path.exists():
             try:
                 self._path.unlink()
             except (PermissionError, OSError):
