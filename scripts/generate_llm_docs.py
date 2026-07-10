@@ -33,10 +33,10 @@ def generate() -> None:
     - llms.txt : Un index simple avec des liens vers les documents.
     - llms-full.txt : Le contenu complet de tous les documents et exemples.
     """
-    full_md = ["# Taskiq-Flow : Full Technical Documentation\n"]
+    full_md = ["# whoosh-ng : Full Technical Documentation\n"]
     index_md = [
-        "# Taskiq-Flow\n",
-        "> Orchestration de tâches asynchrones pour taskiq (Sequential & Dataflow).\n",
+        "# whoosh-ng\n",
+        "> Documentation technique complète pour whoosh-ng.\n",
         "## Core Documentation\n",
     ]
 
