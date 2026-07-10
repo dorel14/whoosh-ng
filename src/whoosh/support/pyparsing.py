@@ -3976,14 +3976,14 @@ def operator_precedence(base_expr, op_list):
     return ret
 
 
-dblQuotedString = Regex(r'"(?:[^"\n\r\\]|(?:"")|(?:\\x[0-9a-fA-F]+)|(?:\\.))*"').set_name(
+dblQuotedString = Regex(r'"(?:[^"\n\r\\]|(?:"")|(?:\\x[0-9a-fA-F]{2})|(?:\\.))*"').set_name(
     "string enclosed in double quotes"
 )
-sglQuotedString = Regex(r"'(?:[^'\n\r\\]|(?:'')|(?:\\x[0-9a-fA-F]+)|(?:\\.))*'").set_name(
+sglQuotedString = Regex(r"'(?:[^'\n\r\\]|(?:'')|(?:\\x[0-9a-fA-F]{2})|(?:\\.))*'").set_name(
     "string enclosed in single quotes"
 )
 quotedString = Regex(
-    r"""(?:"(?:[^"\n\r\\]|(?:"")|(?:\\x[0-9a-fA-F]+)|(?:\\.))*")|(?:'(?:[^'\n\r\\]|(?:'')|(?:\\x[0-9a-fA-F]+)|(?:\\.))*')"""
+    r"""(?:"(?:[^"\n\r\\]|(?:"")|(?:\\x[0-9a-fA-F]{2})|(?:\\.))*")|(?:'(?:[^'\n\r\\]|(?:'')|(?:\\x[0-9a-fA-F]{2})|(?:\\.))*')"""
 ).set_name("quotedString using single or double quotes")
 unicodeString = Combine(_L("u") + quotedString.copy())
 

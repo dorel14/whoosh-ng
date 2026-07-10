@@ -362,10 +362,14 @@ class SQLiteBackend(Backend):
         ):
             raise EmptyIndexError(f"No Whoosh (SQLite) index found at {self._path!r}")
         self._connect()
-        loaded = self._load_schema()
-        if loaded is None:
-            raise EmptyIndexError(f"Index at {self._path!r} has no schema")
-        schema = schema or loaded
+        # For :memory: databases, use the schema already in memory if available
+        if isinstance(self._path, str) and self._path == ":memory:" and self._schema is not None:
+            schema = schema or self._schema
+        else:
+            loaded = self._load_schema()
+            if loaded is None:
+                raise EmptyIndexError(f"Index at {self._path!r} has no schema")
+            schema = schema or loaded
         self._ensure_doc_table(schema)
         self._schema = schema
         return _SQLiteIndex(self, schema)

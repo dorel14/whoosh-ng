@@ -114,11 +114,6 @@ def test_sqlite_context_manager(tmp_sqlite_path) -> None:
 
 
 def test_sqlite_fts_columns_in_schema() -> None:
-    # Skip :memory: test as it has connection issues on some platforms
-    import sys
-
-    if sys.platform == "win32":
-        pytest.skip("SQLite :memory: test skipped on Windows")
     backend = SQLiteBackend(":memory:")
     schema = Schema(content=TEXT, tags=KEYWORD, title=ID(stored=True))
     backend.create(schema)

@@ -21,18 +21,25 @@ jobs:
   build:
     name: Build and deploy
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./docs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/docs/Gemfile
         with:
           ruby-version: 3.0
           bundler-cache: true
 
       - name: Build Jekyll site
         run: bundle exec jekyll build
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/docs/Gemfile
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -40,7 +47,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: ./docs/_site
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
