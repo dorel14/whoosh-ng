@@ -11,19 +11,45 @@
 [INFO] Installing environment for https://github.com/pre-commit/mirrors-mypy.
 [INFO] Once installed this environment will be reused.
 [INFO] This may take a few minutes...
-check python ast.........................................................Passed
-check for merge conflicts................................................Passed
-check toml...............................................................Passed
-check yaml...............................................................Passed
-detect private key.......................................................Passed
-fix end of files.........................................................Passed
-mixed line ending........................................................Passed
-trim trailing whitespace.................................................Passed
-ruff.....................................................................Passed
+check python ast.........................................................Failed
+- hook id: check-ast
+- files were modified by this hook
+check for merge conflicts................................................Failed
+- hook id: check-merge-conflict
+- files were modified by this hook
+check toml...............................................................Failed
+- hook id: check-toml
+- files were modified by this hook
+check yaml...............................................................Failed
+- hook id: check-yaml
+- files were modified by this hook
+detect private key.......................................................Failed
+- hook id: detect-private-key
+- files were modified by this hook
+fix end of files.........................................................Failed
+- hook id: end-of-file-fixer
+- files were modified by this hook
+mixed line ending........................................................Failed
+- hook id: mixed-line-ending
+- files were modified by this hook
+trim trailing whitespace.................................................Failed
+- hook id: trailing-whitespace
+- files were modified by this hook
+ruff.....................................................................Failed
+- hook id: ruff
+- files were modified by this hook
+
+All checks passed!
+
 ruff-format..............................................................Failed
 - hook id: ruff-format
 - files were modified by this hook
 
-1 file reformatted, 223 files left unchanged
+224 files left unchanged
 
-mypy.....................................................................Passed
+mypy.....................................................................Failed
+- hook id: mypy
+- files were modified by this hook
+
+Success: no issues found in 224 source files
+
