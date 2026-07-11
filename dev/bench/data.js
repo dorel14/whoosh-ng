@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783781776702,
+  "lastUpdate": 1783790968105,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -87,6 +87,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.00003723217718661146",
             "extra": "mean: 955.9955859519011 usec\nrounds: 541"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "304cbd95fe3764241cd1205951ebc7531c6a9648",
+          "message": "chore(docs): ✏️ Mise à jour de la documentation et suppression de fichiers obsolètes\n\n* Suppression de fichiers inutilisés tels que `Makefile`, `make.bat`, et `requirements.txt`.\n* Réorganisation de la documentation en ajoutant des fichiers de démarrage rapide en français.\n* Correction du chemin de journalisation dans le fichier de workflow `test.yml`.\n* Mise à jour de la configuration de documentation pour une meilleure gestion des langues.",
+          "timestamp": "2026-07-11T19:28:39+02:00",
+          "tree_id": "3c299724fd2f1e67bc44c49fd46dd14b0b6c1a78",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/304cbd95fe3764241cd1205951ebc7531c6a9648"
+        },
+        "date": 1783790967486,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1056.7173729343435,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00005530793452225306",
+            "extra": "mean: 946.3268283582318 usec\nrounds: 536"
           }
         ]
       }
