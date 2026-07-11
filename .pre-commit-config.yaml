@@ -23,3 +23,6 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [cached-property>=2.0.1]
+
+# Never scan the CI pre-commit log artifact
+exclude: '^precommit\.log$'

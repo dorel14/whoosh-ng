@@ -31,3 +31,6 @@ eggs/
 /testindex/**
 fix_*.py
 src/**/*.tmp
+
+# Pre-commit log artifact
+precommit.log

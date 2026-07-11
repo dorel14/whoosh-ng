@@ -4135,9 +4135,9 @@ cStyleComment = Regex(r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/").set_name("C style comme
 htmlComment = Regex(r"<!--[\s\S]*?-->")
 restOfLine = Regex(r".*").leave_whitespace()
 dblSlashComment = Regex(r"\/\/(\\\n|.)*").set_name("// comment")
-cppStyleComment = Regex(r"/(?:\*[^*]*\*+(?:[^/*][^*]*\*+)*/|/[^\n]*(?:\n[^\n]*)*?(?:(?<!\\)|\Z))").set_name(
-    "C++ style comment"
-)
+cppStyleComment = Regex(
+    r"/(?:\*[^*]*\*+(?:[^/*][^*]*\*+)*/|/[^\n]*(?:\n[^\n]*)*?(?:(?<!\\)|\Z))"
+).set_name("C++ style comment")
 
 javaStyleComment = cppStyleComment
 pythonStyleComment = Regex(r"#.*").set_name("Python style comment")
