@@ -18,9 +18,7 @@ def test_single_term():
 
 
 def test_vector_reading():
-    schema = fields.Schema(
-        title=fields.TEXT, content=fields.TEXT(vector=formats.Frequency())
-    )
+    schema = fields.Schema(title=fields.TEXT, content=fields.TEXT(vector=formats.Frequency()))
 
     with TempIndex(schema, "vectorreading") as ix:
         writer = ix.writer()
@@ -38,9 +36,7 @@ def test_vector_reading():
 
 
 def test_vector_merge():
-    schema = fields.Schema(
-        title=fields.TEXT, content=fields.TEXT(vector=formats.Frequency())
-    )
+    schema = fields.Schema(title=fields.TEXT, content=fields.TEXT(vector=formats.Frequency()))
 
     with TempIndex(schema, "vectormerge") as ix:
         writer = ix.writer()
@@ -50,9 +46,7 @@ def test_vector_merge():
         writer.commit()
 
         writer = ix.writer()
-        writer.add_document(
-            title=u("two"), content=u("You can read along in your book")
-        )
+        writer.add_document(title=u("two"), content=u("You can read along in your book"))
         writer.commit()
 
         with ix.searcher() as s:

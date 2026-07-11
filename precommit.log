@@ -1,0 +1,29 @@
+[INFO] Initializing environment for https://github.com/pre-commit/pre-commit-hooks.
+[INFO] Initializing environment for https://github.com/astral-sh/ruff-pre-commit.
+[INFO] Initializing environment for https://github.com/pre-commit/mirrors-mypy.
+[INFO] Initializing environment for https://github.com/pre-commit/mirrors-mypy:cached-property>=2.0.1.
+[INFO] Installing environment for https://github.com/pre-commit/pre-commit-hooks.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Installing environment for https://github.com/astral-sh/ruff-pre-commit.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Installing environment for https://github.com/pre-commit/mirrors-mypy.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+check python ast.........................................................Passed
+check for merge conflicts................................................Passed
+check toml...............................................................Passed
+check yaml...............................................................Passed
+detect private key.......................................................Passed
+fix end of files.........................................................Passed
+mixed line ending........................................................Passed
+trim trailing whitespace.................................................Passed
+ruff.....................................................................Passed
+ruff-format..............................................................Failed
+- hook id: ruff-format
+- files were modified by this hook
+
+1 file reformatted, 223 files left unchanged
+
+mypy.....................................................................Passed

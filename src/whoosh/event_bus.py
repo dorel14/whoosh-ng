@@ -1,0 +1,72 @@
+from __future__ import annotations
+
+import asyncio
+from dataclasses import dataclass
+from typing import Any, Callable, Coroutine, Type
+
+
+@dataclass(frozen=True)
+class Event:
+    pass
+
+
+@dataclass(frozen=True)
+class DocumentIndexed(Event):
+    document_id: str
+
+
+@dataclass(frozen=True)
+class SearchExecuted(Event):
+    query: str
+
+
+class EventBus:
+    def __init__(self) -> None:
+        self._listeners: dict[Type[Event], list[Callable[[Event], Coroutine[Any, Any, None]]]] = {}
+
+    def subscribe(
+        self, event_type: Type[Event]
+    ) -> Callable[
+        [Callable[[Event], Coroutine[Any, Any, None]]], Callable[[Event], Coroutine[Any, Any, None]]
+    ]:
+        def decorator(
+            func: Callable[[Event], Coroutine[Any, Any, None]],
+        ) -> Callable[[Event], Coroutine[Any, Any, None]]:
+            self._listeners.setdefault(event_type, []).append(func)
+            return func
+
+        return decorator
+
+    def publish(self, event: Event) -> None:
+        listeners = self._listeners.get(type(event), [])
+        if not listeners:
+            return
+
+        coros = []
+        for listener in listeners:
+            try:
+                res = listener(event)
+                if hasattr(res, "__await__"):
+                    coros.append(res)
+            except Exception:
+                pass
+
+        if not coros:
+            return
+
+        try:
+            loop = asyncio.get_running_loop()
+            for coro in coros:
+                loop.create_task(coro)
+        except RuntimeError:
+
+            async def run_all():
+                await asyncio.gather(*coros, return_exceptions=True)
+
+            asyncio.run(run_all())
+
+    def clear(self) -> None:
+        self._listeners.clear()
+
+
+event_bus = EventBus()

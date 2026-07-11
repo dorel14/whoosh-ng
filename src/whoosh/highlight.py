@@ -48,7 +48,6 @@ The highlighting system has four main elements.
 See :doc:`/highlight` for more information.
 """
 
-
 from collections import deque
 from heapq import nlargest
 from html import escape as htmlescape
@@ -238,9 +237,9 @@ def set_matched_filter_phrases(tokens, text, terms, phrases):
                             Looking for the last match will find [0], then, given a choice between [1] or [2], will pick [2],
                             making [4] visible from there
                             """
-                            text_sub = text[
-                                current_word_index + 1 : current_word_index + 1 + slop
-                            ][::-1]  # Substring to scan (reversed)
+                            text_sub = text[current_word_index + 1 : current_word_index + 1 + slop][
+                                ::-1
+                            ]  # Substring to scan (reversed)
                             len_sub = len(text_sub)
                             next_word_index = (
                                 len_sub - text_sub.index(word) - 1
@@ -519,9 +518,7 @@ class PinpointFragmenter(Fragmenter):
     positions of the matched terms.
     """
 
-    def __init__(
-        self, maxchars=200, surround=20, autotrim=False, charlimit=DEFAULT_CHARLIMIT
-    ):
+    def __init__(self, maxchars=200, surround=20, autotrim=False, charlimit=DEFAULT_CHARLIMIT):
         """
         :param maxchars: The maximum number of characters allowed in a
             fragment.
@@ -861,7 +858,7 @@ class GenshiFormatter(Formatter):
         self.qname = qname
         self.between = between
 
-        from genshi.core import (  # type: ignore @UnresolvedImport  # type: ignore @UnresolvedImport
+        from genshi.core import (  # type: ignore  # type: ignore
             END,
             START,
             TEXT,
@@ -1043,9 +1040,7 @@ class Highlighter:
         if token is not None:
             yield token
 
-    def highlight_hit(
-        self, hitobj, fieldname, text=None, top=3, minscore=1, strict_phrase=False
-    ):
+    def highlight_hit(self, hitobj, fieldname, text=None, top=3, minscore=1, strict_phrase=False):
         results = hitobj.results
         schema = results.searcher.schema
         field = schema[fieldname]
@@ -1072,9 +1067,7 @@ class Highlighter:
                 self._load_chars(results, fieldname, words, to_bytes)
 
             hitterms = (
-                from_bytes(term[1])
-                for term in hitobj.matched_terms()
-                if term[0] == fieldname
+                from_bytes(term[1]) for term in hitobj.matched_terms() if term[0] == fieldname
             )
 
             # Grab the word->[(startchar, endchar)] map for this docnum
@@ -1087,9 +1080,7 @@ class Highlighter:
                 for pos, startchar, endchar in chars:
                     if charlimit and endchar > charlimit:
                         break
-                    tokens.append(
-                        Token(text=word, pos=pos, startchar=startchar, endchar=endchar)
-                    )
+                    tokens.append(Token(text=word, pos=pos, startchar=startchar, endchar=endchar))
             tokens.sort(key=lambda t: t.startchar)
             tokens = [
                 max(group, key=lambda t: t.endchar - t.startchar)
@@ -1099,9 +1090,7 @@ class Highlighter:
         else:
             # Retokenize the text
             analyzer = results.searcher.schema[fieldname].analyzer
-            tokens = analyzer(
-                text, positions=True, chars=True, mode="index", removestops=False
-            )
+            tokens = analyzer(text, positions=True, chars=True, mode="index", removestops=False)
 
             # Set Token.matched attribute for tokens that match a query term
             if strict_phrase:
@@ -1112,8 +1101,6 @@ class Highlighter:
             tokens = self._merge_matched_tokens(tokens)
             fragments = self.fragmenter.fragment_tokens(text, tokens)
 
-        fragments = top_fragments(
-            fragments, top, self.scorer, self.order, minscore=minscore
-        )
+        fragments = top_fragments(fragments, top, self.scorer, self.order, minscore=minscore)
         output = self.formatter.format(fragments)
         return output

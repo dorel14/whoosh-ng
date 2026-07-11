@@ -21,10 +21,7 @@ def _plugin_classes(ignore):
 
 
 def test_combos():
-    qs = (
-        'w:a "hi there"^4.2 AND x:b^2.3 OR c AND (y:d OR e) '
-        + "(apple ANDNOT bear)^2.3"
-    )
+    qs = 'w:a "hi there"^4.2 AND x:b^2.3 OR c AND (y:d OR e) ' + "(apple ANDNOT bear)^2.3"
 
     init_args = {
         plugins.MultifieldPlugin: (
@@ -58,9 +55,7 @@ def test_field_alias():
     qp = qparser.QueryParser("content", None)
     qp.add_plugin(plugins.FieldAliasPlugin({"title": ("article", "caption")}))
     q = qp.parse("alfa title:bravo article:charlie caption:delta")
-    assert str(q) == (
-        "(content:alfa AND title:bravo AND title:charlie AND title:delta)"
-    )
+    assert str(q) == ("(content:alfa AND title:bravo AND title:charlie AND title:delta)")
 
 
 def test_dateparser():
@@ -317,10 +312,7 @@ def test_copyfield():
 
     qp = qparser.QueryParser("a", None)
     qp.add_plugin(plugins.CopyFieldPlugin({"a": "c"}, syntax.OrGroup))
-    assert (
-        str(qp.parse("hello there"))
-        == "((a:hello OR c:hello) AND (a:there OR c:there))"
-    )
+    assert str(qp.parse("hello there")) == "((a:hello OR c:hello) AND (a:there OR c:there))"
 
     qp = qparser.QueryParser("a", None)
     qp.add_plugin(plugins.CopyFieldPlugin({"b": "c"}, mirror=True))
@@ -328,9 +320,7 @@ def test_copyfield():
 
     qp = qparser.QueryParser("a", None)
     qp.add_plugin(plugins.CopyFieldPlugin({"c": "a"}, mirror=True))
-    assert (
-        str(qp.parse("hello c:matt")) == "((a:hello OR c:hello) AND (c:matt OR a:matt))"
-    )
+    assert str(qp.parse("hello c:matt")) == "((a:hello OR c:hello) AND (c:matt OR a:matt))"
 
     ana = analysis.RegexAnalyzer(r"\w+") | analysis.DoubleMetaphoneFilter()
     fmt = formats.Frequency()
@@ -338,10 +328,7 @@ def test_copyfield():
     schema = fields.Schema(name=fields.KEYWORD, name_phone=ft)
     qp = qparser.QueryParser("name", schema)
     qp.add_plugin(plugins.CopyFieldPlugin({"name": "name_phone"}))
-    target = (
-        "((name:spruce OR name_phone:SPRS) "
-        "AND (name:view OR name_phone:F OR name_phone:FF))"
-    )
+    target = "((name:spruce OR name_phone:SPRS) AND (name:view OR name_phone:F OR name_phone:FF))"
     assert str(qp.parse("spruce view")) == target
 
 
@@ -370,9 +357,7 @@ def test_gtlt():
     assert len(q) == 3
     assert q[0] == query.Term("a", "hello")
     # As of this writing, date ranges don't support startexcl/endexcl
-    assert q[1] == query.DateRange(
-        "e", datetime(2001, 3, 29, 0, 0, tzinfo=timezone.utc), None
-    )
+    assert q[1] == query.DateRange("e", datetime(2001, 3, 29, 0, 0, tzinfo=timezone.utc), None)
     assert q[2] == query.Term("a", "there")
 
     q = qp.parse("a:> alfa c:<= bravo")
@@ -486,9 +471,7 @@ def test_fuzzy_plugin():
 def test_fuzzy_prefix():
     from whoosh import scoring
 
-    schema = fields.Schema(
-        title=fields.TEXT(stored=True), content=fields.TEXT(spelling=True)
-    )
+    schema = fields.Schema(title=fields.TEXT(stored=True), content=fields.TEXT(spelling=True))
 
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
@@ -524,10 +507,7 @@ def test_fuzzy_prefix():
     with ix.searcher(weighting=scoring.TF_IDF()) as searcher:
         results = searcher.search(q)
         assert len(results) == 4
-        assert (
-            " ".join(sorted(hit["title"] for hit in results))
-            == "Fifth First Fourth Third"
-        )
+        assert " ".join(sorted(hit["title"] for hit in results)) == "Fifth First Fourth Third"
 
 
 def test_function_plugin():
@@ -550,9 +530,7 @@ def test_function_plugin():
     def fuzzy(qs, prefix=0, maxdist=2):
         prefix = int(prefix)
         maxdist = int(maxdist)
-        return query.FuzzyTerm(
-            qs[0].fieldname, qs[0].text, prefixlength=prefix, maxdist=maxdist
-        )
+        return query.FuzzyTerm(qs[0].fieldname, qs[0].text, prefixlength=prefix, maxdist=maxdist)
 
     fp = plugins.FunctionPlugin({"foo": FakeQuery, "fuzzy": fuzzy})
     qp = default.QueryParser("f", None)
@@ -564,9 +542,7 @@ def test_function_plugin():
 
     check("alfa #foo charlie delta", "(f:alfa AND <  > AND f:charlie AND f:delta)")
 
-    check(
-        "alfa #foo(charlie delta) echo", "(f:alfa AND <f:charlie|f:delta  > AND f:echo)"
-    )
+    check("alfa #foo(charlie delta) echo", "(f:alfa AND <f:charlie|f:delta  > AND f:echo)")
 
     check(
         "alfa #foo(charlie AND delta) echo",
@@ -595,9 +571,7 @@ def test_function_plugin():
         "(f:alfa AND <(f:charlie AND f:delta)  a:1,b:2,boost:2.0> AND f:echo)",
     )
 
-    check(
-        "alfa #fuzzy[maxdist=2](bravo) charlie", "(f:alfa AND f:bravo~2 AND f:charlie)"
-    )
+    check("alfa #fuzzy[maxdist=2](bravo) charlie", "(f:alfa AND f:bravo~2 AND f:charlie)")
 
 
 def test_function_first():
@@ -622,8 +596,7 @@ def test_sequence_plugin():
 
     q = qp.parse('alfa "bravo charlie~2 (delta OR echo)" foxtrot')
     assert (
-        str(q)
-        == "(f:alfa AND (f:bravo NEAR f:charlie~2 NEAR (f:delta OR f:echo)) AND f:foxtrot)"
+        str(q) == "(f:alfa AND (f:bravo NEAR f:charlie~2 NEAR (f:delta OR f:echo)) AND f:foxtrot)"
     )
     assert q[1].__class__ == query.Sequence
 

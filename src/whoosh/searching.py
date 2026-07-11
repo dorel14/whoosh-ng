@@ -25,9 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-"""This module contains classes and functions related to searching the index.
-"""
-
+"""This module contains classes and functions related to searching the index."""
 
 import copy
 import weakref
@@ -149,9 +147,7 @@ class Searcher:
         self.subsearchers = None
         if not self.ixreader.is_atomic():
             self.leafreaders = self.ixreader.leaf_readers()
-            self.subsearchers = [
-                (self._subsearcher(r), offset) for r, offset in self.leafreaders
-            ]
+            self.subsearchers = [(self._subsearcher(r), offset) for r, offset in self.leafreaders]
 
         # Copy attributes/methods from wrapped reader
         for name in (
@@ -178,9 +174,7 @@ class Searcher:
         self.close()
 
     def _subsearcher(self, reader):
-        return self.__class__(
-            reader, fromindex=self._ix, weighting=self.weighting, parent=self
-        )
+        return self.__class__(reader, fromindex=self._ix, weighting=self.weighting, parent=self)
 
     def _offset_for_subsearcher(self, subsearcher):
         for ss, offset in self.subsearchers:
@@ -240,9 +234,7 @@ class Searcher:
         """
 
         if not self._ix:
-            raise ValueError(
-                "No reference to index"
-            )  # Replace generic exception with ValueError
+            raise ValueError("No reference to index")  # Replace generic exception with ValueError
         return self._ix.latest_generation() == self.ixreader.generation()
 
     def refresh(self):
@@ -388,9 +380,7 @@ class Searcher:
         """
 
         ixreader = self.ixreader
-        return (
-            ixreader.stored_fields(docnum) for docnum in self.document_numbers(**kw)
-        )
+        return (ixreader.stored_fields(docnum) for docnum in self.document_numbers(**kw))
 
     def _kw_to_text(self, kw):
         for k, v in kw.items():
@@ -508,9 +498,7 @@ class Searcher:
         c = self.reader().corrector(fieldname)
         return c.suggest(text, limit=limit, maxdist=maxdist, prefix=prefix)
 
-    def key_terms(
-        self, docnums, fieldname, numterms=5, model=classify.Bo1Model, normalize=True
-    ):
+    def key_terms(self, docnums, fieldname, numterms=5, model=classify.Bo1Model, normalize=True):
         """Returns the 'numterms' most important terms from the documents
         listed (by number) in 'docnums'. You can get document numbers for the
         documents your interested in with the document_number() and
@@ -608,9 +596,7 @@ class Searcher:
                 [docnum], fieldname, numterms=numterms, model=model, normalize=normalize
             )
         # Create an Or query from the key terms
-        q = query.Or(
-            [query.Term(fieldname, word, boost=weight) for word, weight in kts]
-        )
+        q = query.Or([query.Term(fieldname, word, boost=weight) for word, weight in kts])
 
         return self.search(q, limit=top, filter=filter, mask={docnum})
 
@@ -1042,14 +1028,11 @@ class Results:
         if isinstance(n, slice):
             start, stop, step = n.indices(len(self.top_n))
             return [
-                Hit(self, self.top_n[i][1], i, self.top_n[i][0])
-                for i in range(start, stop, step)
+                Hit(self, self.top_n[i][1], i, self.top_n[i][0]) for i in range(start, stop, step)
             ]
         else:
             if n >= len(self.top_n):
-                raise IndexError(
-                    f"results[{n!r}]: Results only has {len(self.top_n)} hits"
-                )
+                raise IndexError(f"results[{n!r}]: Results only has {len(self.top_n)} hits")
             return Hit(self, self.top_n[n][1], n, self.top_n[n][0])
 
     def __iter__(self):
@@ -1224,9 +1207,7 @@ class Results:
         return self.top_n[n][1]
 
     def query_terms(self, expand=False, fieldname=None):
-        return self.q.existing_terms(
-            self.searcher.reader(), fieldname=fieldname, expand=expand
-        )
+        return self.q.existing_terms(self.searcher.reader(), fieldname=fieldname, expand=expand)
 
     def has_matched_terms(self):
         """Returns True if the search recorded which terms matched in which
@@ -1295,9 +1276,7 @@ class Results:
 
     order = property(_get_order, _set_order)
 
-    def key_terms(
-        self, fieldname, docs=10, numterms=5, model=classify.Bo1Model, normalize=True
-    ):
+    def key_terms(self, fieldname, docs=10, numterms=5, model=classify.Bo1Model, normalize=True):
         """Returns the 'numterms' most important terms from the top 'docs'
         documents in these results. "Most important" is generally defined as
         terms that occur frequently in the top hits but relatively infrequently

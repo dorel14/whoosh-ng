@@ -2,6 +2,7 @@ import random
 from array import array
 
 import pytest
+
 from whoosh import analysis, fields, formats, query
 from whoosh.codec import default_codec, memory
 from whoosh.codec.memory import MemoryCodec, MemSegment, MemTermsReader, MemWriter
@@ -73,9 +74,7 @@ def test_random_termkeys():
         a = array("H", (random.randint(0, 0xD7FF) for _ in range(1, 20)))
         return a.tobytes().decode("utf-16")
 
-    domain = sorted(
-        {(random_fieldname(), random_btext().encode("utf-8")) for _ in range(1000)}
-    )
+    domain = sorted({(random_fieldname(), random_btext().encode("utf-8")) for _ in range(1000)})
 
     st, codec, seg = _make_codec()
     fieldobj = fields.TEXT()
@@ -253,10 +252,7 @@ def test_vector_values():
 
     dw = codec.per_document_writer(st, seg)
     dw.start_doc(0)
-    vals = (
-        (t, w, v)
-        for t, _, w, v in sorted(field.vector.word_values(content, field.analyzer))
-    )
+    vals = ((t, w, v) for t, _, w, v in sorted(field.vector.word_values(content, field.analyzer)))
     dw.add_vector_items("f1", field, vals)
     dw.finish_doc()
     dw.close()
@@ -548,19 +544,11 @@ def test_plaintext_codec():
     st = RamStorage()
     ix = st.create_index(schema)
     with ix.writer(codec=W3Codec()) as w:
-        w.add_document(
-            a="alfa bravo charlie", b="hello", c=100, d="quelling whining echoing"
-        )
-        w.add_document(
-            a="bravo charlie delta", b=1000, c=200, d="rolling timing yelling"
-        )
+        w.add_document(a="alfa bravo charlie", b="hello", c=100, d="quelling whining echoing")
+        w.add_document(a="bravo charlie delta", b=1000, c=200, d="rolling timing yelling")
         w.add_document(a=u(cde), b=5.5, c=300, d="using opening pulling")
-        w.add_document(
-            a="delta echo foxtrot", b=True, c=-100, d="aching selling dipping"
-        )
-        w.add_document(
-            a="echo foxtrot india", b=None, c=-200, d="filling going hopping"
-        )
+        w.add_document(a="delta echo foxtrot", b=True, c=-100, d="aching selling dipping")
+        w.add_document(a="echo foxtrot india", b=None, c=-200, d="filling going hopping")
 
     with ix.reader() as r:
         assert r.has_column("a")
@@ -578,10 +566,7 @@ def test_plaintext_codec():
         assert len(r) == 3
         assert [hit["b"] for hit in r] == [1000, 5.5, True]
 
-        assert (
-            " ".join(s.field_terms("a"))
-            == "alfa bravo charlie delta echo foxtrot india"
-        )
+        assert " ".join(s.field_terms("a")) == "alfa bravo charlie delta echo foxtrot india"
 
         storage = ix.storage
         for fname in storage.list():
@@ -622,19 +607,11 @@ def test_memory_codec():
 
     codec = MemoryCodec()
     with codec.writer(schema) as w:
-        w.add_document(
-            a="alfa bravo charlie", b="hello", c=100, d="quelling whining echoing"
-        )
-        w.add_document(
-            a="bravo charlie delta", b=1000, c=200, d="rolling timing yelling"
-        )
+        w.add_document(a="alfa bravo charlie", b="hello", c=100, d="quelling whining echoing")
+        w.add_document(a="bravo charlie delta", b=1000, c=200, d="rolling timing yelling")
         w.add_document(a=u(cde), b=5.5, c=300, d="using opening pulling")
-        w.add_document(
-            a="delta echo foxtrot", b=True, c=-100, d="aching selling dipping"
-        )
-        w.add_document(
-            a="echo foxtrot india", b=None, c=-200, d="filling going hopping"
-        )
+        w.add_document(a="delta echo foxtrot", b=True, c=-100, d="aching selling dipping")
+        w.add_document(a="echo foxtrot india", b=None, c=-200, d="filling going hopping")
 
     reader = codec.reader(schema)
     s = Searcher(reader)
@@ -680,8 +657,7 @@ def test_memory_multiwrite():
     reader = codec.reader(schema)
     assert [sf["line"] for sf in reader.all_stored_fields()] == domain
     assert (
-        " ".join(reader.field_terms("line"))
-        == "alfa bravo charlie delta echo foxtrot india juliet"
+        " ".join(reader.field_terms("line")) == "alfa bravo charlie delta echo foxtrot india juliet"
     )
 
 

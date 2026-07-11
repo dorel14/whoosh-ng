@@ -647,11 +647,8 @@ class RamStorage(Storage):
         return self.locks[name]
 
     def temp_storage(self, name=None):
-        tdir = tempfile.gettempdir()
-        name = name or f"{random_name()}.tmp"
-        path = os.path.join(tdir, name)
-        tempstore = FileStorage(path)
-        return tempstore.create()
+        # Return a new RamStorage instead of using the filesystem temp directory
+        return RamStorage()
 
 
 def copy_storage(sourcestore, deststore):
