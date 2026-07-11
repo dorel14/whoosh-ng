@@ -2,7 +2,7 @@
 name: Documentation
 on:
   push:
-    branches: [master, dev]
+    branches: [main, dev]
     paths:
       - "docs/**"
       - ".github/workflows/docs.yml"
@@ -12,14 +12,16 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write # Required to delete old Pages artifacts
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
     name: Build and deploy
+    environment: github-pages
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,6 +29,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Delete old Pages artifacts
+        uses: actions/delete-artifact@v5
+        with:
+          pattern: github-pages
+          if-no-artifact-found: ignore
+        continue-on-error: true
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
