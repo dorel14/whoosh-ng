@@ -1,4 +1,0 @@
-pytest
-pythomata
-versioneer
--e .

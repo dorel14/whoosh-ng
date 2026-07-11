@@ -40,10 +40,7 @@ class CombinationMatcher(mcore.Matcher):
         return all(m.supports_block_quality() for m in self._submatchers)
 
     def max_quality(self):
-        return (
-            max(m.max_quality() for m in self._submatchers if m.is_active())
-            * self._boost
-        )
+        return max(m.max_quality() for m in self._submatchers if m.is_active()) * self._boost
 
     def supports(self, astype):
         return all(m.supports(astype) for m in self._submatchers)

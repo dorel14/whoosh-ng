@@ -34,11 +34,7 @@ from whoosh.matching.binary import (
     IntersectionMatcher,
     UnionMatcher,
 )
-from whoosh.matching.combo import (
-    ArrayUnionMatcher,
-    CombinationMatcher,
-    PreloadedUnionMatcher,
-)
+from whoosh.matching.combo import ArrayUnionMatcher, CombinationMatcher, PreloadedUnionMatcher
 from whoosh.matching.mcore import (
     ConstantScoreMatcher,
     LeafMatcher,

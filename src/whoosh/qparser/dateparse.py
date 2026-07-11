@@ -33,14 +33,7 @@ from whoosh.qparser import plugins, syntax
 from whoosh.qparser.taggers import Tagger
 from whoosh.support.relativedelta import relativedelta
 from whoosh.util.text import rcompile
-from whoosh.util.times import (
-    TimeError,
-    adatetime,
-    fill_in,
-    is_void,
-    relative_days,
-    timespan,
-)
+from whoosh.util.times import TimeError, adatetime, fill_in, is_void, relative_days, timespan
 
 
 class DateParseError(Exception):
@@ -140,9 +133,7 @@ class Sequence(MultiBase):
         foundall = False
         failed = False
 
-        print_debug(
-            debug, "Seq %s sep=%r text=%r", self.name, self.sep_pattern, text[pos:]
-        )
+        print_debug(debug, "Seq %s sep=%r text=%r", self.name, self.sep_pattern, text[pos:])
         for e in self.elements:
             print_debug(debug, "Seq %s text=%r", self.name, text[pos:])
             if self.sep_expr and not first:
@@ -194,9 +185,7 @@ class Combo(Sequence):
     from the sub-elements and turn them into a range.
     """
 
-    def __init__(
-        self, elements, fn=None, sep="(\\s+|\\s*,\\s*)", min=2, max=2, name=None
-    ):
+    def __init__(self, elements, fn=None, sep="(\\s+|\\s*,\\s*)", min=2, max=2, name=None):
         """
         :param elements: the sequence of sub-elements to parse.
         :param fn: a function to run on all dates found. It should return a
@@ -218,14 +207,10 @@ class Combo(Sequence):
         dates = []
         first = True
 
-        print_debug(
-            debug, "Combo %s sep=%r text=%r", self.name, self.sep_pattern, text[pos:]
-        )
+        print_debug(debug, "Combo %s sep=%r text=%r", self.name, self.sep_pattern, text[pos:])
         for e in self.elements:
             if self.sep_expr and not first:
-                print_debug(
-                    debug, "Combo %s looking for sep at %r", self.name, text[pos:]
-                )
+                print_debug(debug, "Combo %s looking for sep at %r", self.name, text[pos:])
                 m = self.sep_expr.match(text, pos)
                 if m:
                     pos = m.end()
@@ -493,9 +478,7 @@ class Month(Regex):
         self.patterns = patterns
         self.exprs = [rcompile(pat, re.IGNORECASE) for pat in self.patterns]
 
-        self.pattern = (
-            "(?P<month>" + "|".join(f"({pat})" for pat in self.patterns) + ")"
-        )
+        self.pattern = "(?P<month>" + "|".join(f"({pat})" for pat in self.patterns) + ")"
         self.expr = rcompile(self.pattern, re.IGNORECASE)
 
     def modify_props(self, p):
@@ -612,9 +595,7 @@ class DateParser:
         "(?P<hour>([0-1][0-9])|(2[0-3])):(?P<mins>[0-5][0-9])"
         "(:(?P<secs>[0-5][0-9])(\\.(?P<usecs>[0-9]{1,5}))?)?"
         "(?=(\\W|$))",
-        lambda p, dt: adatetime(
-            hour=p.hour, minute=p.mins, second=p.secs, microsecond=p.usecs
-        ),
+        lambda p, dt: adatetime(hour=p.hour, minute=p.mins, second=p.secs, microsecond=p.usecs),
     )
     time12 = Time12()
 
@@ -726,12 +707,8 @@ class English(DateParser):
         yesterday = Regex("yesterday", yesterday_to_date)
 
         thisyear = Regex("this year", lambda p, dt: adatetime(year=dt.year))
-        thismonth = Regex(
-            "this month", lambda p, dt: adatetime(year=dt.year, month=dt.month)
-        )
-        today = Regex(
-            "today", lambda p, dt: adatetime(year=dt.year, month=dt.month, day=dt.day)
-        )
+        thismonth = Regex("this month", lambda p, dt: adatetime(year=dt.year, month=dt.month))
+        today = Regex("today", lambda p, dt: adatetime(year=dt.year, month=dt.month, day=dt.day))
 
         self.month = Month(
             "january|jan",
@@ -892,9 +869,7 @@ class DateParserPlugin(plugins.Plugin):
         from whoosh.fields import DATETIME
 
         datefields = frozenset(
-            fieldname
-            for fieldname, field in parser.schema.items()
-            if isinstance(field, DATETIME)
+            fieldname for fieldname, field in parser.schema.items() if isinstance(field, DATETIME)
         )
 
         for i, node in enumerate(group):

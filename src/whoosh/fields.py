@@ -26,7 +26,7 @@
 # policies, either expressed or implied, of Matt Chaput.
 
 """
- Contains functions and classes related to fields.
+Contains functions and classes related to fields.
 """
 
 import datetime
@@ -167,8 +167,7 @@ class FieldType:
 
         if not self.format:
             raise Exception(
-                "%s field %r cannot index without a format"
-                % (self.__class__.__name__, self)
+                "%s field %r cannot index without a format" % (self.__class__.__name__, self)
             )
         if not isinstance(value, (str, list, tuple)):
             raise ValueError(f"{value!r} is not unicode or sequence")
@@ -479,9 +478,7 @@ class ID(FieldType):
     of a file.
     """
 
-    def __init__(
-        self, stored=False, unique=False, field_boost=1.0, sortable=False, analyzer=None
-    ):
+    def __init__(self, stored=False, unique=False, field_boost=1.0, sortable=False, analyzer=None):
         """
         :param stored: Whether the value of this field is stored with the
             document.
@@ -598,16 +595,14 @@ class NUMERIC(FieldType):
             numtype = int
             if not decimal_places:
                 raise TypeError(
-                    "To store Decimal instances, you must set the "
-                    "decimal_places argument"
+                    "To store Decimal instances, you must set the decimal_places argument"
                 )
         elif numtype not in (int, float):
             raise TypeError(f"Can't use {numtype!r} as a type, use int or float")
         # Sanity check
         if numtype is float and decimal_places:
             raise Exception(
-                "A float type and decimal_places argument %r are "
-                "incompatible" % decimal_places
+                "A float type and decimal_places argument %r are incompatible" % decimal_places
             )
 
         intsizes = [8, 16, 32, 64]
@@ -641,9 +636,7 @@ class NUMERIC(FieldType):
             else:
                 default = NaN
         elif not self.is_valid(default):
-            raise Exception(
-                f"The default {default!r} is not a valid number for this field"
-            )
+            raise Exception(f"The default {default!r} is not a valid number for this field")
 
         self.default = default
         self.set_sortable(sortable)
@@ -707,8 +700,7 @@ class NUMERIC(FieldType):
             x = Decimal(x) * (10**dc)
         elif isinstance(x, Decimal):
             raise TypeError(
-                "Can't index a Decimal object unless you specified "
-                "decimal_places on the field"
+                "Can't index a Decimal object unless you specified decimal_places on the field"
             )
 
         try:
@@ -718,8 +710,7 @@ class NUMERIC(FieldType):
 
         if x < self.min_value or x > self.max_value:
             raise ValueError(
-                "Numeric field value %s out of range [%s, %s]"
-                % (x, self.min_value, self.max_value)
+                "Numeric field value %s out of range [%s, %s]" % (x, self.min_value, self.max_value)
             )
         return x
 
@@ -796,9 +787,7 @@ class NUMERIC(FieldType):
             if not self.is_valid(end):
                 raise QueryParserError(f"Range end {end!r} is not a valid number")
             end = self.prepare_number(end)
-        return query.NumericRange(
-            fieldname, start, end, startexcl, endexcl, boost=boost
-        )
+        return query.NumericRange(fieldname, start, end, startexcl, endexcl, boost=boost)
 
     def sortable_terms(self, ixreader, fieldname):
         zero = b"\x00"
@@ -835,9 +824,7 @@ class DATETIME(NUMERIC):
         :param unique: Whether the value of this field is unique per-document.
         """
 
-        super().__init__(
-            int, 64, stored=stored, unique=unique, shift_step=8, sortable=sortable
-        )
+        super().__init__(int, 64, stored=stored, unique=unique, shift_step=8, sortable=sortable)
 
     def prepare_datetime(self, x):
         from whoosh.util.times import floor
@@ -1418,9 +1405,7 @@ class Schema:
         return self.__class__(**self._fields)
 
     def __eq__(self, other):
-        return other.__class__ is self.__class__ and list(self.items()) == list(
-            other.items()
-        )
+        return other.__class__ is self.__class__ and list(self.items()) == list(other.items())
 
     def __ne__(self, other):
         return not (self.__eq__(other))
@@ -1502,9 +1487,7 @@ class Schema:
         fieldnames = set(self._fields.keys())
         if check_names is not None:
             check_names = set(check_names) - fieldnames
-            fieldnames.update(
-                fieldname for fieldname in check_names if fieldname in self
-            )
+            fieldnames.update(fieldname for fieldname in check_names if fieldname in self)
         return sorted(fieldnames)
 
     def clean(self):

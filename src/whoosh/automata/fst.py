@@ -38,22 +38,14 @@ Whoosh uses these structures to store a directed acyclic word graph (DAWG) for
 use in (at least) spell checking.
 """
 
-
 import copy
 import sys
 from array import array
-from hashlib import sha1  # type: ignore @UnresolvedImport
+from hashlib import sha1  # type: ignore
 from io import BytesIO
 
 from whoosh.filedb.structfile import StructFile
-from whoosh.system import (
-    _INT_SIZE,
-    emptybytes,
-    pack_byte,
-    pack_int,
-    pack_long,
-    pack_uint,
-)
+from whoosh.system import _INT_SIZE, emptybytes, pack_byte, pack_int, pack_long, pack_uint
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.util.varints import varint
 
@@ -207,8 +199,8 @@ class SequenceValues(Values):
     """Abstract base class for value types that store sequences."""
 
     @staticmethod
-    def is_valid(self, v):
-        return isinstance(self, (list, tuple))
+    def is_valid(v):
+        return isinstance(v, (list, tuple))
 
     @staticmethod
     def common(v1, v2):
@@ -374,9 +366,9 @@ class Node:
         self.accept = accept
 
     def __iter__(self):
-        if not self._edges:
+        if self._edges is None:
             self._load()
-        return self._edges.keys()
+        return iter(self._edges)
 
     def __contains__(self, key):
         if self._edges is None:
@@ -1524,9 +1516,7 @@ def within(graph, text, k=1, prefix=0, address=None):
 
         arcs = graph.arc_dict(address)
         # Insertions
-        stack.extend(
-            (arc.target, k, i, sofar + char, arc.accept) for char, arc in arcs.items()
-        )
+        stack.extend((arc.target, k, i, sofar + char, arc.accept) for char, arc in arcs.items())
 
         # Deletion, replacement, and transpo only work before the end
         if i >= len(text):
@@ -1548,9 +1538,7 @@ def within(graph, text, k=1, prefix=0, address=None):
                 if target:
                     arc = graph.find_arc(target, char)
                     if arc:
-                        stack.append(
-                            (arc.target, k, i + 2, sofar + char2 + char, arc.accept)
-                        )
+                        stack.append((arc.target, k, i + 2, sofar + char2 + char, arc.accept))
 
 
 # Utility functions

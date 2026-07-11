@@ -427,11 +427,7 @@ class SpanNear(SpanQuery):
 
     def __hash__(self):
         return (
-            hash(self.a)
-            ^ hash(self.b)
-            ^ hash(self.slop)
-            ^ hash(self.ordered)
-            ^ hash(self.mindist)
+            hash(self.a) ^ hash(self.b) ^ hash(self.slop) ^ hash(self.ordered) ^ hash(self.mindist)
         )
 
     def is_leaf(self):
@@ -507,9 +503,7 @@ class SpanNear(SpanQuery):
             bspans = self.b.spans()
             for aspan in self.a.spans():
                 for bspan in bspans:
-                    if bspan.end < aspan.start - slop or (
-                        ordered and aspan.start > bspan.start
-                    ):
+                    if bspan.end < aspan.start - slop or (ordered and aspan.start > bspan.start):
                         # B is too far in front of A, or B is in front of A
                         # *at all* when ordered is True
                         continue
@@ -623,9 +617,7 @@ class SpanNear2(SpanQuery):
 
     def matcher(self, searcher, context=None):
         ms = [q.matcher(searcher, context) for q in self.qs]
-        return self.SpanNear2Matcher(
-            ms, slop=self.slop, ordered=self.ordered, mindist=self.mindist
-        )
+        return self.SpanNear2Matcher(ms, slop=self.slop, ordered=self.ordered, mindist=self.mindist)
 
     class SpanNear2Matcher(SpanWrappingMatcher):
         def __init__(self, ms, slop=1, ordered=True, mindist=1):

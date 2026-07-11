@@ -54,13 +54,9 @@ _vowel_seq = "[aeiou]+"
 # m > 0
 _mgr0 = re.compile("^(" + _cons_seq + ")?" + _vowel_seq + _cons_seq)
 # m == 0
-_meq1 = re.compile(
-    "^(" + _cons_seq + ")?" + _vowel_seq + _cons_seq + "(" + _vowel_seq + ")?$"
-)
+_meq1 = re.compile("^(" + _cons_seq + ")?" + _vowel_seq + _cons_seq + "(" + _vowel_seq + ")?$")
 # m > 1
-_mgr1 = re.compile(
-    "^(" + _cons_seq + ")?" + _vowel_seq + _cons_seq + _vowel_seq + _cons_seq
-)
+_mgr1 = re.compile("^(" + _cons_seq + ")?" + _vowel_seq + _cons_seq + _vowel_seq + _cons_seq)
 # vowel in stem
 _s_v = re.compile("^(" + _cons_seq + ")?" + _vowel)
 # ???

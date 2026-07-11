@@ -1,0 +1,45 @@
+title: Whoosh-NG Documentation
+description: Pure-Python full-text indexing and search library, modernized for 2025+
+lang: en
+timezone: UTC
+
+baseurl: "/Whoosh-NG"
+
+remote_theme: just-the-docs/just-the-docs
+
+collections:
+  en:
+    output: true
+    sort_by: nav_order
+  fr:
+    output: true
+    sort_by: nav_order
+
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default
+  - scope:
+      path: "en"
+      type: en
+    values:
+      layout: default
+      lang: en
+  - scope:
+      path: "fr"
+      type: fr
+    values:
+      layout: default
+      lang: fr
+
+include:
+  - favicon.ico
+  - logo.png
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed

@@ -96,9 +96,7 @@ class adatetime:
     None, meaning unspecified.
     """
 
-    units = frozenset(
-        ("year", "month", "day", "hour", "minute", "second", "microsecond")
-    )
+    units = frozenset(("year", "month", "day", "hour", "minute", "second", "microsecond"))
 
     def __init__(
         self,
@@ -467,12 +465,7 @@ def has_no_time(at):
 
     if isinstance(at, datetime):
         return False
-    return (
-        at.hour is None
-        and at.minute is None
-        and at.second is None
-        and at.microsecond is None
-    )
+    return at.hour is None and at.minute is None and at.second is None and at.microsecond is None
 
 
 def is_ambiguous(at):

@@ -49,11 +49,7 @@ class Analyzer(Composable):
         return f"{self.__class__.__name__}()"
 
     def __eq__(self, other):
-        return (
-            other
-            and self.__class__ is other.__class__
-            and self.__dict__ == other.__dict__
-        )
+        return other and self.__class__ is other.__class__ and self.__dict__ == other.__dict__
 
     def __call__(self, value, **kwargs):
         raise NotImplementedError

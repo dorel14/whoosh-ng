@@ -16,7 +16,7 @@ class DutchStemmer(_StandardStemmer):
            http://snowball.tartarus.org/algorithms/dutch/stemmer.html
     """
 
-    __vowels = "aeiouy\xE8"
+    __vowels = "aeiouy\xe8"
     __step1_suffixes = ("heden", "ene", "en", "se", "s")
     __step3b_suffixes = ("baar", "lijk", "bar", "end", "ing", "ig")
 
@@ -36,16 +36,16 @@ class DutchStemmer(_StandardStemmer):
 
         # Vowel accents are removed.
         word = (
-            word.replace("\xE4", "a")
-            .replace("\xE1", "a")
-            .replace("\xEB", "e")
-            .replace("\xE9", "e")
-            .replace("\xED", "i")
-            .replace("\xEF", "i")
-            .replace("\xF6", "o")
-            .replace("\xF3", "o")
-            .replace("\xFC", "u")
-            .replace("\xFA", "u")
+            word.replace("\xe4", "a")
+            .replace("\xe1", "a")
+            .replace("\xeb", "e")
+            .replace("\xe9", "e")
+            .replace("\xed", "i")
+            .replace("\xef", "i")
+            .replace("\xf6", "o")
+            .replace("\xf3", "o")
+            .replace("\xfc", "u")
+            .replace("\xfa", "u")
         )
 
         # An initial 'y', a 'y' after a vowel,
@@ -59,11 +59,7 @@ class DutchStemmer(_StandardStemmer):
                 word = "".join((word[:i], "Y", word[i + 1 :]))
 
         for i in range(1, len(word) - 1):
-            if (
-                word[i - 1] in self.__vowels
-                and word[i] == "i"
-                and word[i + 1] in self.__vowels
-            ):
+            if word[i - 1] in self.__vowels and word[i] == "i" and word[i + 1] in self.__vowels:
                 word = "".join((word[:i], "I", word[i + 1 :]))
 
         r1, r2 = self._r1r2_standard(word, self.__vowels)
@@ -129,11 +125,7 @@ class DutchStemmer(_StandardStemmer):
             r1 = r1[:-4]
             r2 = r2[:-4]
 
-            if (
-                r1.endswith("en")
-                and word[-3] not in self.__vowels
-                and word[-5:-2] != "gem"
-            ):
+            if r1.endswith("en") and word[-3] not in self.__vowels and word[-5:-2] != "gem":
                 word = word[:-2]
                 r1 = r1[:-2]
                 r2 = r2[:-2]

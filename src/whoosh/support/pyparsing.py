@@ -259,16 +259,11 @@ class ParseBaseException(Exception):
         line_str = self.line
         line_column = self.column - 1
         if marker_string:
-            line_str = "".join(
-                [line_str[:line_column], marker_string, line_str[line_column:]]
-            )
+            line_str = "".join([line_str[:line_column], marker_string, line_str[line_column:]])
         return line_str.strip()
 
     def __dir__(self):
-        return (
-            "loc msg pstr parserElement lineno col line "
-            "markInputLine __str__ __repr__".split()
-        )
+        return "loc msg pstr parserElement lineno col line markInputLine __str__ __repr__".split()
 
 
 class ParseException(ParseBaseException):
@@ -368,9 +363,7 @@ class ParseResults:
             self.__name = None
             self.__parent = None
             self.__accum_names = {}
-            self.__toklist = (
-                list(toklist) if not isinstance(toklist, list) else toklist[:]
-            )
+            self.__toklist = list(toklist) if not isinstance(toklist, list) else toklist[:]
             self.__tokdict = {}
 
         if name:
@@ -415,9 +408,7 @@ class ParseResults:
             self.__toklist[k] = v
             sub = v
         else:
-            self.__tokdict[k] = self.__tokdict.get(k, []) + [
-                _ParseResultsWithOffset(v, 0)
-            ]
+            self.__tokdict[k] = self.__tokdict.get(k, []) + [_ParseResultsWithOffset(v, 0)]
             sub = v
         if isinstance(sub, ParseResults):
             sub.__parent = wkref(self)
@@ -440,9 +431,7 @@ class ParseResults:
                 occurrences = self.__tokdict[name]
                 for j in removed:
                     for k, (value, position) in enumerate(occurrences):
-                        occurrences[k] = _ParseResultsWithOffset(
-                            value, position - (position > j)
-                        )
+                        occurrences[k] = _ParseResultsWithOffset(value, position - (position > j))
         else:
             del self.__tokdict[i]
 
@@ -489,9 +478,7 @@ class ParseResults:
         for name in self.__tokdict:
             occurrences = self.__tokdict[name]
             for k, (value, position) in enumerate(occurrences):
-                occurrences[k] = _ParseResultsWithOffset(
-                    value, position + (position > index)
-                )
+                occurrences[k] = _ParseResultsWithOffset(value, position + (position > index))
 
     def items(self):
         """Returns all named result keys and values as a list of tuples."""
@@ -747,9 +734,7 @@ def col(loc, strg):
     consistent view of the parsed string, the parse location, and line and column
     positions within the parsed string.
     """
-    return (
-        (loc < len(strg) and strg[loc] == "\n") and 1 or loc - strg.rfind("\n", 0, loc)
-    )
+    return (loc < len(strg) and strg[loc] == "\n") and 1 or loc - strg.rfind("\n", 0, loc)
 
 
 def lineno(loc, strg):
@@ -826,7 +811,9 @@ class ParserElement:
         self.streamlined = False
         self.may_index_error = True  # used to optimize exception handling for subclasses that don't advance parse index
         self.errmsg = ""
-        self.modal_results = True  # used to mark results names as modal (report only last) or cumulative (list all)
+        self.modal_results = (
+            True  # used to mark results names as modal (report only last) or cumulative (list all)
+        )
         self.debug_actions = (None, None, None)  # custom debug actions
         self.re = None
         self.call_preparse = True  # used to avoid redundant calls to pre_parse
@@ -1115,8 +1102,7 @@ class ParserElement:
                         ret_tokens = ParseResults(
                             tokens,
                             self.results_name,
-                            as_list=self.saveas_list
-                            and isinstance(tokens, (ParseResults, list)),
+                            as_list=self.saveas_list and isinstance(tokens, (ParseResults, list)),
                             modal=self.modal_results,
                         )
 
@@ -1295,9 +1281,7 @@ class ParserElement:
         max_matches argument, to clip searching after 'n' matches are found.
         """
         try:
-            return ParseResults(
-                [t for t, s, e in self.scan_string(instring, max_matches)]
-            )
+            return ParseResults([t for t, s, e in self.scan_string(instring, max_matches)])
         except ParseBaseException as pe:
             raise pe
 
@@ -1377,16 +1361,12 @@ class ParserElement:
                     type(other[1]),
                 )
         else:
-            raise TypeError(
-                "cannot multiply 'ParserElement' and '%s' objects", type(other)
-            )
+            raise TypeError("cannot multiply 'ParserElement' and '%s' objects", type(other))
 
         if min_elements < 0:
             raise ValueError("cannot multiply ParserElement by negative value")
         if opt_elements < 0:
-            raise ValueError(
-                "second tuple value must be greater or equal to first tuple value"
-            )
+            raise ValueError("second tuple value must be greater or equal to first tuple value")
         if min_elements == opt_elements == 0:
             raise ValueError("cannot multiply ParserElement by 0 or (0,0)")
 
@@ -1857,9 +1837,7 @@ class Word(Token):
     are 0, meaning no maximum or exact length restriction.
     """
 
-    def __init__(
-        self, init_chars, body_chars=None, min=1, max=0, exact=0, as_keyword=False
-    ):
+    def __init__(self, init_chars, body_chars=None, min=1, max=0, exact=0, as_keyword=False):
         super().__init__()
         self.init_charsOrig = init_chars
         self.init_chars = set(init_chars)
@@ -1978,7 +1956,9 @@ class Word(Token):
                     return s
 
             if self.init_charsOrig != self.body_charsOrig:
-                self.str_repr = f"W:({chars_as_str(self.init_charsOrig)},{chars_as_str(self.body_charsOrig)})"
+                self.str_repr = (
+                    f"W:({chars_as_str(self.init_charsOrig)},{chars_as_str(self.body_charsOrig)})"
+                )
             else:
                 self.str_repr = f"W:({chars_as_str(self.init_charsOrig)})"
 
@@ -2075,9 +2055,7 @@ class QuotedString(Token):
         # remove white space from quote chars - wont work anyway
         quote_char = quote_char.strip()
         if len(quote_char) == 0:
-            warnings.warn(
-                "quote_char cannot be the empty string", SyntaxWarning, stacklevel=2
-            )
+            warnings.warn("quote_char cannot be the empty string", SyntaxWarning, stacklevel=2)
             raise SyntaxError()
 
         if end_quote_char is None:
@@ -2155,11 +2133,7 @@ class QuotedString(Token):
         self.may_return_empty = True
 
     def parse_impl(self, instring, loc, do_actions=True):
-        result = (
-            instring[loc] == self.firstQuoteChar
-            and self.re.match(instring, loc)
-            or None
-        )
+        result = instring[loc] == self.firstQuoteChar and self.re.match(instring, loc) or None
         if not result:
             exc = self.my_exception
             exc.loc = loc
@@ -2191,7 +2165,9 @@ class QuotedString(Token):
             pass
 
         if self.str_repr is None:
-            self.str_repr = f"quoted string, starting with {self.quote_char} ending with {self.end_quote_char}"
+            self.str_repr = (
+                f"quoted string, starting with {self.quote_char} ending with {self.end_quote_char}"
+            )
 
         return self.str_repr
 
@@ -2352,11 +2328,7 @@ class GoToColumn(_PositionToken):
             instrlen = len(instring)
             if self.ignore_exprs:
                 loc = self._skip_ignorables(instring, loc)
-            while (
-                loc < instrlen
-                and instring[loc].isspace()
-                and col(loc, instring) != self.col
-            ):
+            while loc < instrlen and instring[loc].isspace() and col(loc, instring) != self.col:
                 loc += 1
         return loc
 
@@ -2386,9 +2358,7 @@ class LineStart(_PositionToken):
 
     def parse_impl(self, instring, loc, do_actions=True):
         if not (
-            loc == 0
-            or (loc == self.pre_parse(instring, 0))
-            or (instring[loc - 1] == "\n")
+            loc == 0 or (loc == self.pre_parse(instring, 0)) or (instring[loc - 1] == "\n")
         ):  # col(loc, instring) != 1:
             # ~ raise ParseException( instring, loc, "Expected start of line" )
             exc = self.my_exception
@@ -2510,10 +2480,7 @@ class WordEnd(_PositionToken):
         if (
             instrlen > 0
             and loc < instrlen
-            and (
-                instring[loc] in self.word_chars
-                or instring[loc - 1] not in self.word_chars
-            )
+            and (instring[loc] in self.word_chars or instring[loc - 1] not in self.word_chars)
         ):
             # ~ raise ParseException( instring, loc, "Expected end of word" )
             exc = self.my_exception
@@ -2650,9 +2617,7 @@ class And(ParseExpression):
     def parse_impl(self, instring, loc, do_actions=True):
         # pass False as last arg to _parse for first element, since we already
         # pre-parsed the string as part of our And pre-parsing
-        loc, resultlist = self.exprs[0]._parse(
-            instring, loc, do_actions, call_pre_parse=False
-        )
+        loc, resultlist = self.exprs[0]._parse(instring, loc, do_actions, call_pre_parse=False)
         error_stop = False
         for e in self.exprs[1:]:
             if isinstance(e, And._ErrorStop):
@@ -2724,9 +2689,7 @@ class Or(ParseExpression):
                     max_exc_loc = err.loc
             except IndexError:
                 if len(instring) > max_exc_loc:
-                    max_exception = ParseException(
-                        instring, len(instring), e.errmsg, self
-                    )
+                    max_exception = ParseException(instring, len(instring), e.errmsg, self)
                     max_exc_loc = len(instring)
             else:
                 if loc2 > max_match_loc:
@@ -2737,9 +2700,7 @@ class Or(ParseExpression):
             if max_exception is not None:
                 raise max_exception
             else:
-                raise ParseException(
-                    instring, loc, "no defined alternatives to match", self
-                )
+                raise ParseException(instring, loc, "no defined alternatives to match", self)
 
         return max_match_exp._parse(instring, loc, do_actions)
 
@@ -2793,9 +2754,7 @@ class MatchFirst(ParseExpression):
                     max_exc_loc = err.loc
             except IndexError:
                 if len(instring) > max_exc_loc:
-                    max_exception = ParseException(
-                        instring, len(instring), e.errmsg, self
-                    )
+                    max_exception = ParseException(instring, len(instring), e.errmsg, self)
                     max_exc_loc = len(instring)
 
         # only got here if no expression matched, raise exception for match that made it the furthest
@@ -2803,9 +2762,7 @@ class MatchFirst(ParseExpression):
             if max_exception is not None:
                 raise max_exception
             else:
-                raise ParseException(
-                    instring, loc, "no defined alternatives to match", self
-                )
+                raise ParseException(instring, loc, "no defined alternatives to match", self)
 
     def __ior__(self, other):
         if isinstance(other, str):
@@ -2846,16 +2803,10 @@ class Each(ParseExpression):
     def parse_impl(self, instring, loc, do_actions=True):
         if self.initExprGroups:
             self.optionals = [e.expr for e in self.exprs if isinstance(e, Optional)]
-            self.multioptionals = [
-                e.expr for e in self.exprs if isinstance(e, ZeroOrMore)
-            ]
-            self.multirequired = [
-                e.expr for e in self.exprs if isinstance(e, OneOrMore)
-            ]
+            self.multioptionals = [e.expr for e in self.exprs if isinstance(e, ZeroOrMore)]
+            self.multirequired = [e.expr for e in self.exprs if isinstance(e, OneOrMore)]
             self.required = [
-                e
-                for e in self.exprs
-                if not isinstance(e, (Optional, ZeroOrMore, OneOrMore))
+                e for e in self.exprs if not isinstance(e, (Optional, ZeroOrMore, OneOrMore))
             ]
             self.required += self.multirequired
             self.initExprGroups = False
@@ -2889,9 +2840,7 @@ class Each(ParseExpression):
             )
 
         # add any unmatched Optionals, in case they have default values defined
-        match_order += [
-            e for e in self.exprs if isinstance(e, Optional) and e.expr in tmp_opt
-        ]
+        match_order += [e for e in self.exprs if isinstance(e, Optional) and e.expr in tmp_opt]
 
         resultlist = []
         for e in match_order:
@@ -3024,7 +2973,9 @@ class NotAny(ParseElementEnhance):
     def __init__(self, expr):
         super().__init__(expr)
         # ~ self.leave_whitespace()
-        self.skip_whitespace = False  # do NOT use self.leave_whitespace(), don't want to propagate to exprs
+        self.skip_whitespace = (
+            False  # do NOT use self.leave_whitespace(), don't want to propagate to exprs
+        )
         self.may_return_empty = True
         self.errmsg = "Found unwanted token, " + str(self.expr)
         # self.my_exception = ParseException("",0,self.errmsg,self)
@@ -3062,9 +3013,7 @@ class ZeroOrMore(ParseElementEnhance):
     def parse_impl(self, instring, loc, do_actions=True):
         tokens = []
         try:
-            loc, tokens = self.expr._parse(
-                instring, loc, do_actions, call_pre_parse=False
-            )
+            loc, tokens = self.expr._parse(instring, loc, do_actions, call_pre_parse=False)
             has_ignore_exprs = len(self.ignore_exprs) > 0
             while 1:
                 if has_ignore_exprs:
@@ -3156,9 +3105,7 @@ class Optional(ParseElementEnhance):
 
     def parse_impl(self, instring, loc, do_actions=True):
         try:
-            loc, tokens = self.expr._parse(
-                instring, loc, do_actions, call_pre_parse=False
-            )
+            loc, tokens = self.expr._parse(instring, loc, do_actions, call_pre_parse=False)
         except (ParseException, IndexError):
             if self.default_value is not _optionalNotMatched:
                 if self.expr.results_name:
@@ -3216,9 +3163,7 @@ class SkipTo(ParseElementEnhance):
                         pass
                     else:
                         fail_parse = True
-                        raise ParseException(
-                            instring, loc, "Found expression " + str(self.fail_on)
-                        )
+                        raise ParseException(instring, loc, "Found expression " + str(self.fail_on))
                     fail_parse = False
                 if self.ignore_expr is not None:
                     while 1:
@@ -3230,9 +3175,7 @@ class SkipTo(ParseElementEnhance):
                 expr._parse(instring, loc, do_actions=False, call_pre_parse=False)
                 skip_text = instring[start_loc:loc]
                 if self.includeMatch:
-                    loc, mat = expr._parse(
-                        instring, loc, do_actions, call_pre_parse=False
-                    )
+                    loc, mat = expr._parse(instring, loc, do_actions, call_pre_parse=False)
                     if mat:
                         skip_res = ParseResults(skip_text)
                         skip_res += mat
@@ -3475,9 +3418,7 @@ def trace_parse_action(f):
         s, l, t = pa_args[-3:]
         if len(pa_args) > 3:
             this_func = pa_args[0].__class__.__name__ + "." + this_func
-        sys.stderr.write(
-            ">>entering %s(line: '%s', %d, %s)\n" % (this_func, line(l, s), l, t)
-        )
+        sys.stderr.write(">>entering %s(line: '%s', %d, %s)\n" % (this_func, line(l, s), l, t))
         try:
             ret = f(*pa_args)
         except ValueError as exc:
@@ -3661,9 +3602,7 @@ def one_of(strs, caseless=False, use_regex=True):
         # ~ print (strs,"->", "|".join( [ _escapeRegexChars(sym) for sym in symbols] ))
         try:
             if len(symbols) == len("".join(symbols)):
-                return Regex(
-                    f"[{''.join([_escape_regex_range_chars(sym) for sym in symbols])}]"
-                )
+                return Regex(f"[{''.join([_escape_regex_range_chars(sym) for sym in symbols])}]")
             else:
                 return Regex("|".join([re.escape(sym) for sym in symbols]))
         except:
@@ -3725,9 +3664,7 @@ lineEnd = LineEnd().set_name("lineEnd")
 stringStart = StringStart().set_name("stringStart")
 stringEnd = StringEnd().set_name("stringEnd")
 
-_escapedPunc = Word(_bslash, r"\[]-*.$+^?()~ ", exact=2).set_parse_action(
-    lambda s, l, t: t[0][1]
-)
+_escapedPunc = Word(_bslash, r"\[]-*.$+^?()~ ", exact=2).set_parse_action(lambda s, l, t: t[0][1])
 _printables_less_backslash = "".join([c for c in printables if c not in r"\]"])
 _escapedHexChar = Combine(Suppress(_bslash + "0x") + Word(hexnums)).set_parse_action(
     lambda s, l, t: chr(int(t[0], 16))
@@ -3736,10 +3673,7 @@ _escapedOctChar = Combine(Suppress(_bslash) + Word("0", "01234567")).set_parse_a
     lambda s, l, t: chr(int(t[0], 8))
 )
 _singleChar = (
-    _escapedPunc
-    | _escapedHexChar
-    | _escapedOctChar
-    | Word(_printables_less_backslash, exact=1)
+    _escapedPunc | _escapedHexChar | _escapedOctChar | Word(_printables_less_backslash, exact=1)
 )
 _charRange = Group(_singleChar + Suppress("-") + _singleChar)
 _reBracketExpr = (
@@ -3750,9 +3684,7 @@ _reBracketExpr = (
 )
 
 _expanded = lambda p: (
-    isinstance(p, ParseResults)
-    and "".join([chr(c) for c in range(ord(p[0]), ord(p[1]) + 1)])
-    or p
+    isinstance(p, ParseResults) and "".join([chr(c) for c in range(ord(p[0]), ord(p[1]) + 1)]) or p
 )
 
 
@@ -3773,9 +3705,7 @@ def srange(s):
        any combination of the above ('aeiouy', 'a-zA-Z0-9_$', etc.)
     """
     try:
-        return "".join(
-            [_expanded(part) for part in _reBracketExpr.parse_string(s).body]
-        )
+        return "".join([_expanded(part) for part in _reBracketExpr.parse_string(s).body])
     except:
         return ""
 
@@ -3944,10 +3874,7 @@ def with_attribute(*args, **attr_dict):
         for attr_name, attr_value in attrs:
             if attr_name not in tokens:
                 raise ParseException(s, l, "no matching attribute " + attr_name)
-            if (
-                attr_value != with_attribute.ANY_VALUE
-                and tokens[attr_name] != attr_value
-            ):
+            if attr_value != with_attribute.ANY_VALUE and tokens[attr_name] != attr_value:
                 raise ParseException(
                     s,
                     l,
@@ -4002,9 +3929,7 @@ def operator_precedence(base_expr, op_list):
         this_expr = Forward()  # .set_name("expr%d" % i)
         if right_left_assoc == opAssoc.LEFT:
             if arity == 1:
-                match_expr = FollowedBy(last_expr + op_expr) + Group(
-                    last_expr + OneOrMore(op_expr)
-                )
+                match_expr = FollowedBy(last_expr + op_expr) + Group(last_expr + OneOrMore(op_expr))
             elif arity == 2:
                 if op_expr is not None:
                     match_expr = FollowedBy(last_expr + op_expr + last_expr) + Group(
@@ -4019,17 +3944,13 @@ def operator_precedence(base_expr, op_list):
                     last_expr + op_expr1 + last_expr + op_expr2 + last_expr
                 ) + Group(last_expr + op_expr1 + last_expr + op_expr2 + last_expr)
             else:
-                raise ValueError(
-                    "operator must be unary (1), binary (2), or ternary (3)"
-                )
+                raise ValueError("operator must be unary (1), binary (2), or ternary (3)")
         elif right_left_assoc == opAssoc.RIGHT:
             if arity == 1:
                 # try to avoid LR with this extra test
                 if not isinstance(op_expr, Optional):
                     op_expr = Optional(op_expr)
-                match_expr = FollowedBy(op_expr.expr + this_expr) + Group(
-                    op_expr + this_expr
-                )
+                match_expr = FollowedBy(op_expr.expr + this_expr) + Group(op_expr + this_expr)
             elif arity == 2:
                 if op_expr is not None:
                     match_expr = FollowedBy(last_expr + op_expr + this_expr) + Group(
@@ -4044,9 +3965,7 @@ def operator_precedence(base_expr, op_list):
                     last_expr + op_expr1 + this_expr + op_expr2 + this_expr
                 ) + Group(last_expr + op_expr1 + this_expr + op_expr2 + this_expr)
             else:
-                raise ValueError(
-                    "operator must be unary (1), binary (2), or ternary (3)"
-                )
+                raise ValueError("operator must be unary (1), binary (2), or ternary (3)")
         else:
             raise ValueError("operator must indicate right or left associativity")
         if pa:
@@ -4057,14 +3976,14 @@ def operator_precedence(base_expr, op_list):
     return ret
 
 
-dblQuotedString = Regex(
-    r'"(?:[^"\n\r\\]|(?:"")|(?:\\x[0-9a-fA-F]+)|(?:\\.))*"'
-).set_name("string enclosed in double quotes")
-sglQuotedString = Regex(
-    r"'(?:[^'\n\r\\]|(?:'')|(?:\\x[0-9a-fA-F]+)|(?:\\.))*'"
-).set_name("string enclosed in single quotes")
+dblQuotedString = Regex(r'"(?:[^"\n\r\\]|(?:"")|(?:\\x[0-9a-fA-F]{2})|(?:\\.))*"').set_name(
+    "string enclosed in double quotes"
+)
+sglQuotedString = Regex(r"'(?:[^'\n\r\\]|(?:'')|(?:\\x[0-9a-fA-F]{2})|(?:\\.))*'").set_name(
+    "string enclosed in single quotes"
+)
 quotedString = Regex(
-    r"""(?:"(?:[^"\n\r\\]|(?:"")|(?:\\x[0-9a-fA-F]+)|(?:\\.))*")|(?:'(?:[^'\n\r\\]|(?:'')|(?:\\x[0-9a-fA-F]+)|(?:\\.))*')"""
+    r"""(?:"(?:[^"\n\r\\]|(?:"")|(?:\\x[0-9a-fA-F]{2})|(?:\\.))*")|(?:'(?:[^'\n\r\\]|(?:'')|(?:\\x[0-9a-fA-F]{2})|(?:\\.))*')"""
 ).set_name("quotedString using single or double quotes")
 unicodeString = Combine(_L("u") + quotedString.copy())
 
@@ -4133,11 +4052,7 @@ def nested_expr(opener="(", closer=")", content=None, ignore_expr=quotedString):
             )
     ret = Forward()
     if ignore_expr is not None:
-        ret << Group(
-            Suppress(opener)
-            + ZeroOrMore(ignore_expr | ret | content)
-            + Suppress(closer)
-        )
+        ret << Group(Suppress(opener) + ZeroOrMore(ignore_expr | ret | content) + Suppress(closer))
     else:
         ret << Group(Suppress(opener) + ZeroOrMore(ret | content) + Suppress(closer))
     return ret
@@ -4180,9 +4095,7 @@ def indented_block(block_statement_expr, indent_stack, indent=True):
         if l >= len(s):
             return
         cur_col = col(l, s)
-        if not (
-            indent_stack and cur_col < indent_stack[-1] and cur_col <= indent_stack[-2]
-        ):
+        if not (indent_stack and cur_col < indent_stack[-1] and cur_col <= indent_stack[-2]):
             raise ParseException(s, l, "not an unindent")
         indent_stack.pop()
 
@@ -4200,8 +4113,7 @@ def indented_block(block_statement_expr, indent_stack, indent=True):
         )
     else:
         sm_expr = Group(
-            Optional(NL)
-            + (OneOrMore(PEER + Group(block_statement_expr) + Optional(NL)))
+            Optional(NL) + (OneOrMore(PEER + Group(block_statement_expr) + Optional(NL)))
         )
     block_statement_expr.ignore(_bslash + LineEnd())
     return sm_expr
@@ -4215,33 +4127,29 @@ commonHTMLEntity = Combine(
     _L("&") + one_of("gt lt amp nbsp quot").set_results_name("entity") + ";"
 ).streamline()
 _htmlEntityMap = dict(zip("gt lt amp nbsp quot".split(), '><& "'))
-replaceHTMLEntity = (
-    lambda t: t.entity in _htmlEntityMap and _htmlEntityMap[t.entity] or None
-)
+replaceHTMLEntity = lambda t: t.entity in _htmlEntityMap and _htmlEntityMap[t.entity] or None
 
 # it's easy to get these comment structures wrong - they're very common, so may as well make them available
-cStyleComment = Regex(r"/\*(?:[^*]*\*+)+?/").set_name("C style comment")
+cStyleComment = Regex(r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/").set_name("C style comment")
 
 htmlComment = Regex(r"<!--[\s\S]*?-->")
 restOfLine = Regex(r".*").leave_whitespace()
 dblSlashComment = Regex(r"\/\/(\\\n|.)*").set_name("// comment")
-cppStyleComment = Regex(
-    r"/(?:\*(?:[^*]*\*+)+?/|/[^\n]*(?:\n[^\n]*)*?(?:(?<!\\)|\Z))"
-).set_name("C++ style comment")
+cppStyleComment = Regex(r"/(?:\*[^*]*\*+(?:[^/*][^*]*\*+)*/|/[^\n]*(?:\n[^\n]*)*?(?:(?<!\\)|\Z))").set_name(
+    "C++ style comment"
+)
 
 javaStyleComment = cppStyleComment
 pythonStyleComment = Regex(r"#.*").set_name("Python style comment")
 _noncomma = "".join([c for c in printables if c != ","])
 _commasepitem = (
-    Combine(
-        OneOrMore(Word(_noncomma) + Optional(Word(" \t") + ~Literal(",") + ~LineEnd()))
-    )
+    Combine(OneOrMore(Word(_noncomma) + Optional(Word(" \t") + ~Literal(",") + ~LineEnd())))
     .streamline()
     .set_name("commaItem")
 )
-commaSeparatedList = delimited_list(
-    Optional(quotedString | _commasepitem, default="")
-).set_name("commaSeparatedList")
+commaSeparatedList = delimited_list(Optional(quotedString | _commasepitem, default="")).set_name(
+    "commaSeparatedList"
+)
 
 
 if __name__ == "__main__":
@@ -4266,9 +4174,7 @@ if __name__ == "__main__":
     fromToken = CaselessLiteral("from")
 
     ident = Word(alphas, alphanums + "_$")
-    columnName = delimited_list(ident, ".", combine=True).set_parse_action(
-        upcase_tokens
-    )
+    columnName = delimited_list(ident, ".", combine=True).set_parse_action(upcase_tokens)
     columnNameList = Group(delimited_list(columnName))  # .set_name("columns")
     tableName = delimited_list(ident, ".", combine=True).set_parse_action(upcase_tokens)
     tableNameList = Group(delimited_list(tableName))  # .set_name("tables")

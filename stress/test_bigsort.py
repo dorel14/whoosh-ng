@@ -23,9 +23,7 @@ def test_bigsort():
     t = now()
     w = ix.writer(limitmb=512)
     for i in range(times):
-        dt = datetime.fromtimestamp(
-            random.randint(15839593, 1294102139), tz=timezone.utc
-        )
+        dt = datetime.fromtimestamp(random.randint(15839593, 1294102139), tz=timezone.utc)
         w.add_document(id=str(i), date=dt)
     w.commit()
     print("Writing took ", now() - t)
