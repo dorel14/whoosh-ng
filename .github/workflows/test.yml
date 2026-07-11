@@ -17,6 +17,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      workflows: write # Required to push workflow changes
     steps:
       - uses: actions/checkout@v4
         with:
