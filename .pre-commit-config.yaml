@@ -22,5 +22,4 @@ repos:
     rev: v1.16.1
     hooks:
       - id: mypy
-        args: [src/whoosh]
         additional_dependencies: [cached-property>=2.0.1]

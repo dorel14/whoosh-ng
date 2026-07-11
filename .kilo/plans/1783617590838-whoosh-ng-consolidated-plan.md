@@ -29,13 +29,13 @@ This plan covers:
 ## Ordered Task List
 
 ### 1. Repository Hygiene & Naming (Immediate)
-- [x] Delete untracked cruft files:  
+- [x] Delete untracked cruft files:
   `fix_file.py`, `fix_integration.py`, `src/whoosh/providers/hnsw.py.tmp`, entire `testindex/` directory.
-- [ ] Commit the documentation scaffolding that is currently untracked (pending user approval — not committed by the agent):  
+- [ ] Commit the documentation scaffolding that is currently untracked (pending user approval — not committed by the agent):
   `docs/en/`, `docs/fr/`, `docs/guides/`, `docs/_config.yml`, `docs/Gemfile`, `docs/make.bat`, `docs/Makefile`.
-- [x] Update `pyproject.toml` to reflect **whoosh-ng**:  
-  - Change `name = "whoosh-ng"` (keep `whoosh` as the import package).  
-  - Update `description`, `Homepage`, `Documentation`, `Repository`, `Issues` URLs to point to the GitHub Pages site `https://dorel14.github.io/Whoosh-NG/` and repo `https://github.com/dorel14/whoosh-NG`.  
+- [x] Update `pyproject.toml` to reflect **whoosh-ng**:
+  - Change `name = "whoosh-ng"` (keep `whoosh` as the import package).
+  - Update `description`, `Homepage`, `Documentation`, `Repository`, `Issues` URLs to point to the GitHub Pages site `https://dorel14.github.io/Whoosh-NG/` and repo `https://github.com/dorel14/whoosh-NG`.
   - Entry points unchanged (`whoosh_fastapi`, `whoosh_admin`, etc.).
 - [x] Create a `CHANGELOG.md` entry for the upcoming 4.0.0 release summarizing completed phases (0‑10) and this plan’s outcomes.
 - [ ] Bump version in `pyproject.toml` to `4.0.0` (or `4.0.0a1` if preferred) after naming is final.
@@ -79,10 +79,10 @@ Based on `whoosh-ng-async-migration-plan.md` and `whoosh-ng-async-migration-file
 ### 6. Pre‑Release Validation (Before 4.0.0)
 - [ ] Run the complete test suite on multiple Python versions (via CI matrix) to confirm compatibility with `>=3.11`.
 - [ ] Verify that the documentation builds without warnings and that all public API references are present.
-- [ ] Check that the package can be installed in a clean environment:  
-  `uv pip install .[dev]` (or `pip install .[dev]`).  
+- [ ] Check that the package can be installed in a clean environment:
+  `uv pip install .[dev]` (or `pip install .[dev]`).
   Import `whoosh` and instantiate a simple index to ensure no import errors.
-- [ ] Confirm that the entry points work:  
+- [ ] Confirm that the entry points work:
   `whoosh-plugins` should discover `whoosh_autocomplete`, `whoosh_vector`, `whoosh_fastapi`, `whoosh_observability`, `whoosh_admin`.
 - [ ] Create a release tag (e.g., `v4.0.0`) and generate a GitHub Release with the changelog.
 
@@ -107,9 +107,9 @@ Each task is considered done when:
 
 ## Open Questions (for Lead Dev/Team)
 
-1. Should the distribution name on PyPI be exactly `whoosh-ng` while keeping the import namespace as `whoosh` (to ease migration)?  
-2. What is the desired timeline for the 4.0.0 release (e.g., after async migration, after docs publish, or both)?  
-3. Are there any additional optional dependencies (e.g., `hnswlib`, `numpy`, `fastapi`) that should be moved to explicit `[project.optional-dependencies]` groups?  
+1. Should the distribution name on PyPI be exactly `whoosh-ng` while keeping the import namespace as `whoosh` (to ease migration)?
+2. What is the desired timeline for the 4.0.0 release (e.g., after async migration, after docs publish, or both)?
+3. Are there any additional optional dependencies (e.g., `hnswlib`, `numpy`, `fastapi`) that should be moved to explicit `[project.optional-dependencies]` groups?
 4. Should we adopt a conventional changelog format (e.g., Keep a Changelog) and automate versioning with tools like `towncrier`?
 
 ---

@@ -858,7 +858,7 @@ class GenshiFormatter(Formatter):
         self.qname = qname
         self.between = between
 
-        from genshi.core import (  # type: ignore @UnresolvedImport  # type: ignore @UnresolvedImport
+        from genshi.core import (  # type: ignore  # type: ignore
             END,
             START,
             TEXT,
