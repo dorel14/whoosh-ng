@@ -1,6 +1,6 @@
-# Taskiq-Flow
+# whoosh-ng
 
-> Orchestration de tâches asynchrones pour taskiq (Sequential & Dataflow).
+> Documentation technique complète pour whoosh-ng.
 
 ## Core Documentation
 
