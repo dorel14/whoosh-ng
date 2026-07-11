@@ -428,7 +428,9 @@ class IndexWriter:
     def _unique_fields(self, fields):
         # Check which of the supplied fields are unique
         unique_fields = [
-            name for name, field in self.schema.items() if name in fields and field.unique  # type: ignore[attr-defined]
+            name
+            for name, field in self.schema.items()
+            if name in fields and field.unique  # type: ignore[attr-defined]
         ]
         return unique_fields
 
