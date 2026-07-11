@@ -13,9 +13,9 @@ def _blocking_compute(x: int) -> int:
     return x * x
 
 
-@pytest.mark.asyncio
-async def test_run_sync_overhead(benchmark) -> None:
-    result = await run_sync(_blocking_compute, 21)
+def test_run_sync_overhead(benchmark) -> None:
+    # Vérification de base (hors benchmark)
+    result = asyncio.run(run_sync(_blocking_compute, 21))
     assert result == 441
 
     def _run() -> int:
