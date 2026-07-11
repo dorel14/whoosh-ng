@@ -1,11 +1,7 @@
 title: Whoosh-NG Documentation
 description: Pure-Python full-text indexing and search library, modernized for 2025+
-lang: en
-timezone: UTC
-
-baseurl: "/Whoosh-NG"
-
 remote_theme: just-the-docs/just-the-docs
+baseurl: "/Whoosh-NG"
 
 collections:
   en:
@@ -18,17 +14,12 @@ collections:
 defaults:
   - scope:
       path: ""
-      type: pages
-    values:
-      layout: default
-  - scope:
-      path: "en"
       type: en
     values:
       layout: default
       lang: en
   - scope:
-      path: "fr"
+      path: ""
       type: fr
     values:
       layout: default

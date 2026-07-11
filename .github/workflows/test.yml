@@ -34,7 +34,7 @@ jobs:
       - name: Run pre-commit and auto-fix
         run: |
           set +e
-          uv run pre-commit run --all-files 2>&1 | tee precommit.log
+          uv run pre-commit run --all-files 2>&1 | tee /tmp/precommit.log
           first_status=${PIPESTATUS[0]}
           set -e
           if [ $first_status -eq 0 ]; then
