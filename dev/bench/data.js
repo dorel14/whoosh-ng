@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783872855718,
+  "lastUpdate": 1783873293096,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -377,6 +377,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.0000355828631124884",
             "extra": "mean: 932.3949723318391 usec\nrounds: 506"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "035a9827985347fad82a6305efc36b486dcd4cb8",
+          "message": "chore: 🗑️ Suppression de la documentation obsolète\n\n* Suppression du fichier `README.md` qui n'est plus nécessaire.\n* Mise à jour de `_config.yml` pour exclure `README.md` du processus de construction.\n* Révision de `index.md` pour améliorer la structure et la clarté de la documentation.",
+          "timestamp": "2026-07-12T18:20:49+02:00",
+          "tree_id": "3a046c3ee70079ff201476cafd0b2ea3ef97d451",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/035a9827985347fad82a6305efc36b486dcd4cb8"
+        },
+        "date": 1783873292765,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1075.2422870896603,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000407853701504595",
+            "extra": "mean: 930.0229464623111 usec\nrounds: 523"
           }
         ]
       }
