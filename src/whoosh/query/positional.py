@@ -173,7 +173,7 @@ class Phrase(qcore.Query):
         )
 
     def __str__(self):
-        return f"{self.fieldname}:\"{' '.join(self.words)}\""
+        return f'{self.fieldname}:"{" ".join(self.words)}"'
 
     def __hash__(self):
         h = hash(self.fieldname) ^ hash(self.slop) ^ hash(self.boost)
@@ -249,9 +249,7 @@ class Phrase(qcore.Query):
 
         field = searcher.schema[fieldname]
         if not field.format or not field.format.supports("positions"):
-            raise qcore.QueryError(
-                f"Phrase search: {self.fieldname!r} field has no positions"
-            )
+            raise qcore.QueryError(f"Phrase search: {self.fieldname!r} field has no positions")
 
         terms = []
         # Build a list of Term queries from the words in the phrase

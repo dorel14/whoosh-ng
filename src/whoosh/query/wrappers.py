@@ -139,9 +139,7 @@ class Not(qcore.Query):
         # as And and Or do special handling of Not subqueries.
         reader = searcher.reader()
         child = self.query.matcher(searcher, searcher.boolean_context())
-        return matching.InverseMatcher(
-            child, reader.doc_count_all(), missing=reader.is_deleted
-        )
+        return matching.InverseMatcher(child, reader.doc_count_all(), missing=reader.is_deleted)
 
 
 class ConstantScoreQuery(WrappingQuery):

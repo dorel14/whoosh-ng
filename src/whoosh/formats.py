@@ -69,11 +69,7 @@ class Format:
         self.options = options
 
     def __eq__(self, other):
-        return (
-            other
-            and self.__class__ is other.__class__
-            and self.__dict__ == other.__dict__
-        )
+        return other and self.__class__ is other.__class__ and self.__dict__ == other.__dict__
 
     def __repr__(self):
         return f"{self.__class__.__name__}(boost={self.field_boost})"
@@ -241,7 +237,7 @@ class Positions(Format):
         for pos in poslist:
             deltas.append(pos - base)
             base = pos
-        return pack_uint(len(deltas)) + dumps(deltas, 2)
+        return pack_uint(len(deltas)) + dumps(deltas)
 
     def decode_positions(self, valuestring):
         if not valuestring.endswith(b"."):
@@ -302,7 +298,7 @@ class Characters(Positions):
             deltas.append((pos - posbase, startchar - charbase, endchar - startchar))
             posbase = pos
             charbase = endchar
-        return pack_uint(len(deltas)) + dumps(deltas, 2)
+        return pack_uint(len(deltas)) + dumps(deltas)
 
     def decode_characters(self, valuestring):
         if not valuestring.endswith(b"."):
@@ -372,7 +368,7 @@ class PositionBoosts(Positions):
             summedboost += boost
             codes.append((pos - base, boost))
             base = pos
-        return pack_uint(len(poses)) + pack_float(summedboost) + dumps(codes, 2)
+        return pack_uint(len(poses)) + pack_float(summedboost) + dumps(codes)
 
     def decode_position_boosts(self, valuestring):
         if not valuestring.endswith(b"."):
@@ -437,15 +433,13 @@ class CharacterBoosts(Characters):
         charbase = 0
         summedboost = 0
         for pos, startchar, endchar, boost in poses:
-            codes.append(
-                (pos - posbase, startchar - charbase, endchar - startchar, boost)
-            )
+            codes.append((pos - posbase, startchar - charbase, endchar - startchar, boost))
             posbase = pos
             charbase = endchar
             summedboost += boost
 
         return (
-            (pack_uint(len(poses)) + pack_float(summedboost * fb) + dumps(codes, 2)),
+            (pack_uint(len(poses)) + pack_float(summedboost * fb) + dumps(codes)),
             summedboost,
         )
 
@@ -473,10 +467,7 @@ class CharacterBoosts(Characters):
         ]
 
     def decode_position_boosts(self, valuestring):
-        return [
-            (pos, boost)
-            for pos, _, _, boost in self.decode_character_boosts(valuestring)
-        ]
+        return [(pos, boost) for pos, _, _, boost in self.decode_character_boosts(valuestring)]
 
     def combine(self, vs):
         s = {}

@@ -40,9 +40,7 @@ def unstopped(tokenstream):
     return (t for t in tokenstream if not t.stopped)
 
 
-def entoken(
-    textstream, positions=False, chars=False, start_pos=0, start_char=0, **kwargs
-):
+def entoken(textstream, positions=False, chars=False, start_pos=0, start_char=0, **kwargs):
     """Takes a sequence of unicode strings and yields a series of Token objects
     (actually the same Token object over and over, for performance reasons),
     with the attributes filled in with reasonable values (for example, if
@@ -101,9 +99,7 @@ class Token:
     ...or, call token.copy() to get a copy of the token object.
     """
 
-    def __init__(
-        self, positions=False, chars=False, removestops=True, mode="", **kwargs
-    ):
+    def __init__(self, positions=False, chars=False, removestops=True, mode="", **kwargs):
         """
         :param positions: Whether tokens should have the token position in the
             'pos' attribute.
@@ -148,9 +144,7 @@ class Composable:
     def __repr__(self):
         attrs = ""
         if self.__dict__:
-            attrs = ", ".join(
-                f"{key}={value!r}" for key, value in self.__dict__.items()
-            )
+            attrs = ", ".join(f"{key}={value!r}" for key, value in self.__dict__.items())
         return self.__class__.__name__ + f"({attrs})"
 
     def has_morph(self):

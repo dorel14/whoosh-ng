@@ -83,8 +83,7 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
                     or text[pos + 2] in ["T", "S"]
                     or (
                         (text[pos - 1] in ["A", "O", "U", "E"] or pos == first)
-                        and text[pos + 2]
-                        in ["L", "R", "N", "M", "B", "H", "F", "V", "W", " "]
+                        and text[pos + 2] in ["L", "R", "N", "M", "B", "H", "F", "V", "W", " "]
                     )
                 ):
                     next = ("K", 1)
@@ -103,15 +102,14 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
             elif text[pos + 1 : pos + 4] == "CIA":
                 next = ("X", 3)
             # double 'C', but not if e.g. 'McClellan'
-            elif text[pos : pos + 2] == "CC" and not (
-                pos == (first + 1) and text[first] == "M"
-            ):
+            elif text[pos : pos + 2] == "CC" and not (pos == (first + 1) and text[first] == "M"):
                 # 'bellocchio' but not 'bacchus'
                 if text[pos + 2] in ["I", "E", "H"] and text[pos + 2 : pos + 4] != "HU":
                     # 'accident', 'accede' 'succeed'
-                    if (pos == (first + 1) and text[first] == "A") or text[
-                        pos - 1 : pos + 4
-                    ] in ["UCCEE", "UCCES"]:
+                    if (pos == (first + 1) and text[first] == "A") or text[pos - 1 : pos + 4] in [
+                        "UCCEE",
+                        "UCCES",
+                    ]:
                         next = ("KS", 3)
                     # 'bacci', 'bertucci', other italian
                     else:
@@ -131,9 +129,10 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
                 if text[pos + 1 : pos + 3] in [" C", " Q", " G"]:
                     next = ("K", 3)
                 else:
-                    if text[pos + 1] in ["C", "K", "Q"] and text[
-                        pos + 1 : pos + 3
-                    ] not in ["CE", "CI"]:
+                    if text[pos + 1] in ["C", "K", "Q"] and text[pos + 1 : pos + 3] not in [
+                        "CE",
+                        "CI",
+                    ]:
                         next = ("K", 2)
                     else:  # default for 'C'
                         next = ("K", 1)
@@ -244,9 +243,7 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
         elif ch == "J":
             # obvious spanish, 'jose', 'san jacinto'
             if text[pos : pos + 4] == "JOSE" or text[first : first + 4] == "SAN ":
-                if (pos == first and text[pos + 4] == " ") or text[
-                    first : first + 4
-                ] == "SAN ":
+                if (pos == first and text[pos + 4] == " ") or text[first : first + 4] == "SAN ":
                     next = ("H",)
                 else:
                     next = ("J", "H")
@@ -254,11 +251,7 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
                 next = ("J", "A")  # Yankelovich/Jankelowicz
             else:
                 # spanish pron. of e.g. 'bajador'
-                if (
-                    text[pos - 1] in vowels
-                    and not slavo_germanic
-                    and text[pos + 1] in ["A", "O"]
-                ):
+                if text[pos - 1] in vowels and not slavo_germanic and text[pos + 1] in ["A", "O"]:
                     next = ("J", "H")
                 else:
                     if pos == last:
@@ -289,14 +282,8 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
         elif ch == "L":
             if text[pos + 1] == "L":
                 # spanish e.g. 'cabrillo', 'gallegos'
-                if (
-                    pos == (last - 2)
-                    and text[pos - 1 : pos + 3] in ["ILLO", "ILLA", "ALLE"]
-                ) or (
-                    (
-                        text[last - 1 : last + 1] in ["AS", "OS"]
-                        or text[last] in ["A", "O"]
-                    )
+                if (pos == (last - 2) and text[pos - 1 : pos + 3] in ["ILLO", "ILLA", "ALLE"]) or (
+                    (text[last - 1 : last + 1] in ["AS", "OS"] or text[last] in ["A", "O"])
                     and text[pos - 1 : pos + 3] == "ALLE"
                 ):
                     next = ("L", "", 2)
@@ -371,9 +358,7 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
                     next = ("S", 3)
             # german & anglicisations, e.g. 'smith' match 'schmidt', 'snider' match 'schneider'
             # also, -sz- in slavic language altho in hungarian it is pronounced 's'
-            elif (pos == first and text[pos + 1] in ["M", "N", "L", "W"]) or text[
-                pos + 1
-            ] == "Z":
+            elif (pos == first and text[pos + 1] in ["M", "N", "L", "W"]) or text[pos + 1] == "Z":
                 next = ("S", "X")
                 if text[pos + 1] == "Z":
                     next = next + (2,)
@@ -439,9 +424,7 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
             # can also be in middle of word
             if text[pos : pos + 2] == "WR":
                 next = ("R", 2)
-            elif pos == first and (
-                text[pos + 1] in vowels or text[pos : pos + 2] == "WH"
-            ):
+            elif pos == first and (text[pos + 1] in vowels or text[pos : pos + 2] == "WH"):
                 # Wasserman should match Vasserman
                 if text[pos + 1] in vowels:
                     next = ("A", "F", 1)
@@ -464,10 +447,7 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
             next = (None,)
             if not (
                 pos == last
-                and (
-                    text[pos - 3 : pos] in ["IAU", "EAU"]
-                    or text[pos - 2 : pos] in ["AU", "OU"]
-                )
+                and (text[pos - 3 : pos] in ["IAU", "EAU"] or text[pos - 2 : pos] in ["AU", "OU"])
             ):
                 next = ("KS",)
             if text[pos + 1] in ["C", "X"]:

@@ -1,6 +1,7 @@
 from itertools import permutations
 
 import pytest
+
 from whoosh import analysis, fields, formats, highlight, qparser, query
 from whoosh.codec.whoosh3 import W3Codec
 from whoosh.filedb.filestore import RamStorage
@@ -8,9 +9,7 @@ from whoosh.util.testing import TempIndex, TempStorage
 
 
 def test_score_retrieval():
-    schema = fields.Schema(
-        title=fields.TEXT(stored=True), content=fields.TEXT(stored=True)
-    )
+    schema = fields.Schema(title=fields.TEXT(stored=True), content=fields.TEXT(stored=True))
     storage = RamStorage()
     ix = storage.create_index(schema)
     writer = ix.writer()
@@ -439,9 +438,7 @@ def test_snippets():
 def test_keyterms():
     ana = analysis.StandardAnalyzer()
     vectorformat = formats.Frequency()
-    schema = fields.Schema(
-        path=fields.ID, content=fields.TEXT(analyzer=ana, vector=vectorformat)
-    )
+    schema = fields.Schema(path=fields.ID, content=fields.TEXT(analyzer=ana, vector=vectorformat))
     st = RamStorage()
     ix = st.create_index(schema)
     w = ix.writer()
@@ -672,9 +669,7 @@ def test_every_keywords():
 
 
 def test_filter_by_result():
-    schema = fields.Schema(
-        title=fields.TEXT(stored=True), content=fields.TEXT(stored=True)
-    )
+    schema = fields.Schema(title=fields.TEXT(stored=True), content=fields.TEXT(stored=True))
 
     with TempIndex(schema, "filter") as ix:
         words = "foo bar baz qux barney".split()

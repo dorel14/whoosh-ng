@@ -1,6 +1,7 @@
 import copy
 
 import pytest
+
 from whoosh import fields, qparser, query
 from whoosh.filedb.filestore import RamStorage
 from whoosh.qparser import QueryParser
@@ -125,9 +126,7 @@ def test_apply():
 
     before = And([Not(Term("a", "b")), Variations("a", "c"), Not(FuzzyTerm("a", "d"))])
     after = visit(before)
-    assert after == And(
-        [Not(Term("a", "B")), Variations("a", "C"), Not(FuzzyTerm("a", "D"))]
-    )
+    assert after == And([Not(Term("a", "B")), Variations("a", "C"), Not(FuzzyTerm("a", "D"))])
 
     def term2var(q):
         if isinstance(q, Term):
@@ -414,9 +413,7 @@ def test_highlight_daterange():
     w.update_document(
         id="2",
         title="Darjeeling Limited",
-        content=(
-            "Three brothers meet in India for a life changing train " + "journey."
-        ),
+        content=("Three brothers meet in India for a life changing train " + "journey."),
         released=datetime(2007, 10, 27, tzinfo=timezone.utc),
     )
     w.commit()
@@ -426,8 +423,7 @@ def test_highlight_daterange():
     assert len(r) == 1
     assert r[0]["id"] == "2"
     assert (
-        r[0].highlights("content")
-        == 'for a life changing <b class="match term0">train</b> journey'
+        r[0].highlights("content") == 'for a life changing <b class="match term0">train</b> journey'
     )
 
     r = s.search(DateRange("released", datetime(2007, 1, 1, tzinfo=timezone.utc), None))
@@ -437,8 +433,7 @@ def test_highlight_daterange():
 
 def test_patterns():
     domain = (
-        "aaron able acre adage aether after ago ahi aim ajax akimbo "
-        "alembic all amiga amount ampere"
+        "aaron able acre adage aether after ago ahi aim ajax akimbo alembic all amiga amount ampere"
     ).split()
     schema = fields.Schema(word=fields.KEYWORD(stored=True))
     ix = RamStorage().create_index(schema)
@@ -518,9 +513,7 @@ def test_or_nots2():
 
 
 def test_or_nots3():
-    schema = fields.Schema(
-        title=fields.TEXT(stored=True), itemtype=fields.ID(stored=True)
-    )
+    schema = fields.Schema(title=fields.TEXT(stored=True), itemtype=fields.ID(stored=True))
     with TempIndex(schema, "ornot") as ix:
         w = ix.writer()
         w.add_document(title="a1", itemtype="a")

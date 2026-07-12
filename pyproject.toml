@@ -1,90 +1,313 @@
+# Reference: https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+[build-system]
+requires = ["setuptools>=75.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whoosh-ng"
+version = "4.0.0.dev0"
+description = "Fast, pure-Python full-text indexing, search, and spell checking library."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "BSD-2-Clause"
+authors = [
+  { name = "Matt Chaput", email = "matt@whoosh.ca" },
+]
+maintainers = [
+  { name = "Sygil-Dev" },
+]
+keywords = ["index", "search", "text", "spell", "whoosh"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Text Processing :: Indexing",
+  "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+  "cached-property>=2.0.1",
+]
+
+[project.optional-dependencies]
+models = [
+  "pydantic>=2",
+  "msgspec>=0.19",
+]
+vector = [
+  "numpy>=2",
+]
+hnsw = [
+  "hnswlib",
+]
+faiss = [
+  "faiss-cpu",
+]
+embeddings = [
+  "sentence-transformers",
+]
+fastembed = [
+  "fastembed",
+]
+async = []
+sqlite = []
+postgres = [
+  "psycopg[binary]>=3",
+  "asyncpg",
+]
+s3 = [
+  "boto3",
+]
+watch = [
+  "watchdog",
+]
+fuzzy = [
+  "rapidfuzz",
+]
+phonetic = [
+  "metaphone",
+]
+api = [
+  "fastapi",
+  "uvicorn[standard]",
+  "orjson",
+]
+metrics = [
+  "prometheus-client",
+]
+dev = [
+  "ruff>=0.11",
+  "mypy>=1.15",
+  "pyright>=1.1",
+  "pytest>=9",
+  "pytest-cov>=6",
+  "pytest-asyncio>=1",
+  "pre-commit>=4",
+  "build>=1.2",
+  "twine>=6",
+  "python-semantic-release>=10.5",
+  "isort>=8.0.1",
+  "nose>=1.3.7",
+  "pre-commit>=4.6.0",
+]
+benchmark = []
+
+[project.entry-points."whoosh_ng.plugins"]
+whoosh_autocomplete = "whoosh_modern.autocomplete.plugin:AutocompletePlugin"
+whoosh_vector = "whoosh_modern.vector.plugin:VectorPlugin"
+whoosh_fastapi = "whoosh_fastapi:create_app"
+whoosh_observability = "whoosh.middleware.metrics:PrometheusMiddleware"
+whoosh_admin = "whoosh_admin:create_admin_app"
+
+[project.urls]
+Documentation = "https://dorel14.github.io/Whoosh-NG/"
+Homepage = "https://github.com/dorel14/whoosh-NG"
+Issues = "https://github.com/dorel14/whoosh-NG/issues"
+Repository = "https://github.com/dorel14/whoosh-NG.git"
+Changelog = "https://github.com/dorel14/whoosh-NG/releases"
+
+[tool.setuptools]
+include-package-data = true
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+whoosh = ["py.typed"]
+
 [tool.ruff]
-target-version = "py38"
+target-version = "py311"
+line-length = 100
+force-exclude = true
+output-format = "grouped"
+show-fixes = true
+src = ["src", "tests"]
+exclude = [
+  ".git",
+  ".hg",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+  ".tox",
+  ".venv",
+  ".kilo",
+  "build",
+  "dist",
+  "docs/build",
+  "htmlcov",
+]
 
 [tool.ruff.lint]
 select = [
-  "AIR",    # Airflow
-  "ASYNC",  # flake8-async
-  "BLE",    # flake8-blind-except
-  "C4",     # flake8-comprehensions
-  "C90",    # McCabe cyclomatic complexity
-  "DJ",     # flake8-django
-  "DTZ",    # flake8-datetimez
-  "EXE",    # flake8-executable
-  "F",      # Pyflakes
-  "FA",     # flake8-future-annotations
-  "G",      # flake8-logging-format
-  "I",      # isort
-  "ICN",    # flake8-import-conventions
-  "INT",    # flake8-gettext
-  "LOG",    # flake8-logging
-  "NPY",    # NumPy-specific rules
-  "PERF",   # Perflint
-  "PLC",    # Pylint conventions
-  "PLE",    # Pylint errors
-  "PLR091", # Pylint Refactor just for max-args, max-branches, etc.
-  "PYI",    # flake8-pyi
-  "Q",      # flake8-quotes
-  "SLOT",   # flake8-slots
-  "TCH",    # flake8-type-checking
-  "TID",    # flake8-tidy-imports
-  "TRIO",   # flake8-trio
-  "UP",     # pyupgrade
-  "W",      # pycodestyle
-  "YTT",    # flake8-2020
-  # "A",    # flake8-builtins
-  # "ANN",  # flake8-annotations
-  # "ARG",  # flake8-unused-arguments
-  # "B",    # flake8-bugbear
-  # "COM",  # flake8-commas
-  # "CPY",  # flake8-copyright
-  # "D",    # pydocstyle
-  # "E",    # pycodestyle
-  # "EM",   # flake8-errmsg
-  # "ERA",  # eradicate
-  # "FBT",  # flake8-boolean-trap
-  # "FIX",  # flake8-fixme
-  # "FLY",  # flynt
-  # "FURB", # refurb
-  # "INP",  # flake8-no-pep420
-  # "ISC",  # flake8-implicit-str-concat
-  # "N",    # pep8-naming
-  # "PD",   # pandas-vet
-  # "PGH",  # pygrep-hooks
-  # "PIE",  # flake8-pie
-  # "PL",   # Pylint
-  # "PT",   # flake8-pytest-style
-  # "PTH",  # flake8-use-pathlib
-  # "RET",  # flake8-return
-  # "RSE",  # flake8-raise
-  # "RUF",  # Ruff-specific rules
-  # "S",    # flake8-bandit
-  # "SIM",  # flake8-simplify
-  # "SLF",  # flake8-self
-  # "T10",  # flake8-debugger
-  # "T20",  # flake8-print
-  # "TD",   # flake8-todos
-  # "TRY",  # tryceratops
+  "E4",
+  "E9",
+  "F",
 ]
 ignore = [
-  "EXE001",
+  "E402",
   "F401",
   "F811",
   "F841",
-  "PERF203",
-  "UP031",
 ]
 
 [tool.ruff.lint.mccabe]
-max-complexity = 45  # Default is 10
+max-complexity = 45
 
 [tool.ruff.lint.per-file-ignores]
 "src/whoosh/compat.py" = ["F821"]
 "src/whoosh/filedb/filestore.py" = ["UP024"]
 "src/whoosh/util/__init__.py" = ["F821"]
+"tests/*" = ["E402"]
 
-[tool.ruff.lint.pylint]
-max-args = 22  # Default is 5
-max-branches = 79  # Default is 12
-max-returns = 16  # Default is 6
-max-statements = 256  # Default is 50
+[tool.ruff.format]
+indent-style = "space"
+line-ending = "lf"
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+show_column_numbers = true
+show_error_context = true
+pretty = true
+error_summary = true
+follow_imports = "normal"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_optional = true
+no_implicit_optional = true
+check_untyped_defs = false
+disallow_untyped_decorators = false
+warn_return_any = false
+disable_error_code = [
+  "abstract",
+  "arg-type",
+  "assignment",
+  "attr-defined",
+  "call-overload",
+  "import-not-found",
+  "index",
+  "method-assign",
+  "misc",
+  "no-redef",
+  "operator",
+  "override",
+  "return-value",
+  "syntax",
+  "union-attr",
+  "unused-ignore",
+  "var-annotated",
+]
+cache_dir = ".mypy_cache"
+
+[[tool.mypy.overrides]]
+module = [
+  "whoosh.support.pyparsing",
+  "whoosh.lang.wordnet",
+]
+disable_error_code = ["assignment", "attr-defined", "no-redef", "union-attr"]
+
+[[tool.mypy.overrides]]
+module = "cached_property"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = [
+  "-ra",
+  "--tb=short",
+  "--cov=whoosh",
+  "--cov-report=term",
+  "--cov-report=html:htmlcov",
+  "--cov-report=xml:coverage.xml",
+]
+testpaths = ["tests"]
+norecursedirs = [
+  ".git",
+  ".hg",
+  ".tox",
+  "_build",
+  "tmp*",
+  "env*",
+  "benchmark",
+  "stress",
+]
+python_files = ["test_*.py"]
+markers = [
+  "slow: marks tests as slower integration-style checks",
+  "asyncio: marks tests as async",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src/whoosh"]
+omit = [
+  "*/tests/*",
+  "docs/*",
+  "benchmark/*",
+  "stress/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise NotImplementedError",
+  "raise ValueError",
+  "raise TypeError",
+  "raise RuntimeError",
+]
+
+[tool.semantic_release]
+commit_parser = "conventional"
+commit_parser_options = { ignore_merge_commits = true }
+commit_message = """\
+chore(release): v{version}
+
+Automatically generated by python-semantic-release.
+"""
+build_command = "uv build"
+major_on_zero = true
+version_variables = [
+  "src/whoosh/__init__.py:__version_string__",
+]
+version_toml = [
+  "pyproject.toml:project.version",
+]
+
+[tool.semantic_release.changelog]
+exclude_commit_patterns = [
+  '''chore(?:\([^)]*?\))?: .+''',
+  '''ci(?:\([^)]*?\))?: .+''',
+  '''refactor(?:\([^)]*?\))?: .+''',
+  '''style(?:\([^)]*?\))?: .+''',
+  '''test(?:\([^)]*?\))?: .+''',
+  '''build\((?!deps\): .+)''',
+  '''^Merge''',
+  '''^\d+\.\d+\.\d+''',
+]
+
+[tool.semantic_release.branches.master]
+match = "^master$"
+prerelease = false
+prerelease_token = "rc"
+
+[tool.semantic_release.branches.dev]
+match = "^dev$"
+prerelease = true
+prerelease_token = "dev"
+
+[tool.semantic_release.remote]
+type = "github"
+token = { env = "GH_TOKEN" }
+
+[tool.semantic_release.publish]
+upload_to_vcs_release = true

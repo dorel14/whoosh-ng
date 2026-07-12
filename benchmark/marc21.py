@@ -14,9 +14,9 @@ log = logging.getLogger(__name__)
 LEADER = (" " * 10) + "22" + (" " * 8) + "4500"
 LEADER_LEN = len(LEADER)
 DIRECTORY_ENTRY_LEN = 12
-SUBFIELD_INDICATOR = "\x1F"
-END_OF_FIELD = "\x1E"
-END_OF_RECORD = "\x1D"
+SUBFIELD_INDICATOR = "\x1f"
+END_OF_FIELD = "\x1e"
+END_OF_RECORD = "\x1d"
 isbn_regex = re.compile(r"[-0-9xX]+")
 
 
@@ -174,7 +174,7 @@ def make_index(basedir, ixdir, procs=4, limitmb=128, multisegment=True, glob="*.
 
     # Multi-lingual stop words
     stoplist = analysis.STOP_WORDS | set(
-        "de la der und le die et en al no von di du da " "del zur ein".split()
+        "de la der und le die et en al no von di du da del zur ein".split()
     )
     # Schema
     ana = analysis.StemmingAnalyzer(stoplist=stoplist)
@@ -197,9 +197,7 @@ def make_index(basedir, ixdir, procs=4, limitmb=128, multisegment=True, glob="*.
     ix = index.create_in(ixdir, schema)
     with ix.writer(procs=procs, limitmb=limitmb, multisegment=multisegment) as w:
         filenames = [
-            filename
-            for filename in os.listdir(basedir)
-            if fnmatch.fnmatch(filename, glob)
+            filename for filename in os.listdir(basedir) if fnmatch.fnmatch(filename, glob)
         ]
         for filename in filenames:
             path = os.path.join(basedir, filename)
