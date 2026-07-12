@@ -4,7 +4,6 @@
 
 ## Core Documentation
 
-- [Readme](https://dorel14.github.io/Whoosh-NG//README)
 - [Backends](https://dorel14.github.io/Whoosh-NG//en/api/backends)
 - [Core](https://dorel14.github.io/Whoosh-NG//en/api/core)
 - [Events](https://dorel14.github.io/Whoosh-NG//en/api/events)
