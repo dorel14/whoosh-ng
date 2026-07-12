@@ -11,7 +11,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = "BSD-2-Clause"
 authors = [
-  { name = "Matt Chaput, David Orel", email = "matt@whoosh.ca, d.orel@free.fr" },
+  { name = "David Orel", email = "d.orel@free.fr" },
 ]
 maintainers = [
   { name = "dorel14", email = "d.orel@free.fr" },
