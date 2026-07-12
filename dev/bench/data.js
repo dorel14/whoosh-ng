@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783871223080,
+  "lastUpdate": 1783871262005,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -290,6 +290,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.00003352119876153523",
             "extra": "mean: 944.7941821633128 usec\nrounds: 527"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "9aa4cf779e7c69b1fae6735f6804772914d79526",
+          "message": ".",
+          "timestamp": "2026-07-12T17:46:44+02:00",
+          "tree_id": "ff8c866c6aeb2c07a55e9095901a33690bd5236b",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/9aa4cf779e7c69b1fae6735f6804772914d79526"
+        },
+        "date": 1783871261626,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1376.6389058252478,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00005395727805909633",
+            "extra": "mean: 726.4069000000652 usec\nrounds: 550"
           }
         ]
       }
