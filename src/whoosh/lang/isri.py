@@ -33,7 +33,6 @@ discarded because it increases the word ambiguities and changes the original
 root.
 """
 
-
 import re
 
 
@@ -112,7 +111,7 @@ class ISRIStemmer:
         self.pr4 = {
             0: ["\u0645"],
             1: ["\u0627"],
-            2: ["\u0627", "\u0648", "\u064A"],
+            2: ["\u0627", "\u0648", "\u064a"],
             3: ["\u0629"],
         }  # groups of length four patterns
         self.pr53 = {
@@ -125,7 +124,7 @@ class ISRIStemmer:
             6: ["\u0627", "\u0645"],
         }  # Groups of length five patterns and length three roots
 
-        self.re_short_vowels = re.compile("[\u064B-\u0652]")
+        self.re_short_vowels = re.compile("[\u064b-\u0652]")
         self.re_hamza = re.compile("[\u0621\u0624\u0626]")
         self.re_intial_hamza = re.compile("^[\u0622\u0623\u0625]")
 
@@ -292,9 +291,7 @@ class ISRIStemmer:
 
     def pro_w53(self):
         """process length five patterns and extract length three roots"""
-        if (self.stm[2] in self.pr53[0]) & (
-            self.stm[0] == "\u0627"
-        ):  #  افتعل   -  افاعل
+        if (self.stm[2] in self.pr53[0]) & (self.stm[0] == "\u0627"):  #  افتعل   -  افاعل
             self.stm = self.stm[1] + self.stm[3:]
             return self.stm
         elif (self.stm[3] in self.pr53[1]) & (
@@ -312,19 +309,13 @@ class ISRIStemmer:
         ):  #  مفتعل  -    يفتعل   -  تفتعل
             self.stm = self.stm[1] + self.stm[3:]
             return self.stm
-        elif (self.stm[0] in self.pr53[4]) & (
-            self.stm[2] == "\u0627"
-        ):  # مفاعل  -  تفاعل
+        elif (self.stm[0] in self.pr53[4]) & (self.stm[2] == "\u0627"):  # مفاعل  -  تفاعل
             self.stm = self.stm[1] + self.stm[3:]
             return self.stm
-        elif (self.stm[2] in self.pr53[5]) & (
-            self.stm[4] == "\u0629"
-        ):  #     فعولة  -   فعالة
+        elif (self.stm[2] in self.pr53[5]) & (self.stm[4] == "\u0629"):  #     فعولة  -   فعالة
             self.stm = self.stm[:2] + self.stm[3]
             return self.stm
-        elif (self.stm[0] in self.pr53[6]) & (
-            self.stm[1] == "\u0646"
-        ):  #     انفعل   -   منفعل
+        elif (self.stm[0] in self.pr53[6]) & (self.stm[1] == "\u0646"):  #     انفعل   -   منفعل
             self.stm = self.stm[2:]
             return self.stm
         elif (self.stm[3] == "\u0627") & (self.stm[0] == "\u0627"):  #   افعال
@@ -388,30 +379,22 @@ class ISRIStemmer:
             self.stm = self.stm[3:]
             return self.stm
         elif (
-            self.stm[0] == "\u0645"
-            and self.stm[3] == "\u0627"
-            and self.stm[5] == "\u0629"
+            self.stm[0] == "\u0645" and self.stm[3] == "\u0627" and self.stm[5] == "\u0629"
         ):  #     مفعالة
             self.stm = self.stm[1:3] + self.stm[4]
             return self.stm
         elif (
-            self.stm[0] == "\u0627"
-            and self.stm[2] == "\u062a"
-            and self.stm[4] == "\u0627"
+            self.stm[0] == "\u0627" and self.stm[2] == "\u062a" and self.stm[4] == "\u0627"
         ):  #     افتعال
             self.stm = self.stm[1] + self.stm[3] + self.stm[5]
             return self.stm
         elif (
-            self.stm[0] == "\u0627"
-            and self.stm[3] == "\u0648"
-            and self.stm[2] == self.stm[4]
+            self.stm[0] == "\u0627" and self.stm[3] == "\u0648" and self.stm[2] == self.stm[4]
         ):  #    افعوعل
             self.stm = self.stm[1] + self.stm[4:]
             return self.stm
         elif (
-            self.stm[0] == "\u062a"
-            and self.stm[2] == "\u0627"
-            and self.stm[4] == "\u064a"
+            self.stm[0] == "\u062a" and self.stm[2] == "\u0627" and self.stm[4] == "\u064a"
         ):  #     تفاعيل    new pattern
             self.stm = self.stm[1] + self.stm[3] + self.stm[5]
             return self.stm

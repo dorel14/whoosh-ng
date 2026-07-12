@@ -102,9 +102,7 @@ class CompoundQuery(qcore.Query):
         from whoosh.query import Not
 
         subs = self.subqueries
-        qs = [
-            (q, q.estimate_min_size(ixreader)) for q in subs if not isinstance(q, Not)
-        ]
+        qs = [(q, q.estimate_min_size(ixreader)) for q in subs if not isinstance(q, Not)]
         pos = [minsize for q, minsize in qs if minsize > 0]
         if pos:
             neg = [q.estimate_size(ixreader) for q in subs if isinstance(q, Not)]
@@ -357,9 +355,9 @@ class Or(CompoundQuery):
         else:
             raise ValueError(f"Unknown matcher_type {self.matcher_type!r}")
 
-        return cls(
-            subs, boost=self.boost, minmatch=self.minmatch, scale=self.scale
-        ).matcher(searcher, context)
+        return cls(subs, boost=self.boost, minmatch=self.minmatch, scale=self.scale).matcher(
+            searcher, context
+        )
 
 
 class DefaultOr(Or):
@@ -368,9 +366,7 @@ class DefaultOr(Or):
     def _matcher(self, subs, searcher, context):
         reader = searcher.reader()
         q_weight_fn = lambda q: q.estimate_size(reader)
-        m = self._tree_matcher(
-            subs, matching.UnionMatcher, searcher, context, q_weight_fn
-        )
+        m = self._tree_matcher(subs, matching.UnionMatcher, searcher, context, q_weight_fn)
 
         # If a scaling factor was given, wrap the matcher in a CoordMatcher to
         # alter scores based on term coordination
@@ -504,10 +500,7 @@ class BinaryQuery(CompoundQuery):
 
     def __eq__(self, other):
         return (
-            other
-            and self.__class__ is other.__class__
-            and self.a == other.a
-            and self.b == other.b
+            other and self.__class__ is other.__class__ and self.a == other.a and self.b == other.b
         )
 
     def __hash__(self):

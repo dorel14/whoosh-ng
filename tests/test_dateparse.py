@@ -1,12 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from whoosh.qparser.dateparse import (
-    English,
-    adatetime,
-    relative_days,
-    relativedelta,
-    timespan,
-)
+from whoosh.qparser.dateparse import English, adatetime, relative_days, relativedelta, timespan
 
 basedate = datetime(2010, 9, 20, 15, 16, 6, 454000, tzinfo=timezone.utc)
 english = English()
@@ -48,9 +42,7 @@ def test_simple_dateparse(t=english.simple):
     assert_adatetime(t.date_from("2005", basedate), year=2005)
     assert_adatetime(t.date_from("200505", basedate), year=2005, month=5)
     assert_adatetime(t.date_from("20050510", basedate), year=2005, month=5, day=10)
-    assert_adatetime(
-        t.date_from("2005051001", basedate), year=2005, month=5, day=10, hour=1
-    )
+    assert_adatetime(t.date_from("2005051001", basedate), year=2005, month=5, day=10, hour=1)
     assert_adatetime(
         t.date_from("200505100108", basedate),
         year=2005,
@@ -71,9 +63,7 @@ def test_simple_dateparse(t=english.simple):
 
     assert_adatetime(t.date_from("2005-05", basedate), year=2005, month=5)
     assert_adatetime(t.date_from("2005 05 10", basedate), year=2005, month=5, day=10)
-    assert_adatetime(
-        t.date_from("2005.05.10.01", basedate), year=2005, month=5, day=10, hour=1
-    )
+    assert_adatetime(t.date_from("2005.05.10.01", basedate), year=2005, month=5, day=10, hour=1)
     assert_adatetime(
         t.date_from("2005/05/10 01:08", basedate),
         year=2005,
@@ -111,12 +101,8 @@ def test_time(t=english.time):
     assert_adatetime(t.date_from("12:45pm", basedate), hour=12, minute=45)
     assert_adatetime(t.date_from("5:45:05 pm", basedate), hour=17, minute=45, second=5)
 
-    assert_adatetime(
-        t.date_from("noon", basedate), hour=12, minute=0, second=0, microsecond=0
-    )
-    assert_adatetime(
-        t.date_from("midnight", basedate), hour=0, minute=0, second=0, microsecond=0
-    )
+    assert_adatetime(t.date_from("noon", basedate), hour=12, minute=0, second=0, microsecond=0)
+    assert_adatetime(t.date_from("midnight", basedate), hour=0, minute=0, second=0, microsecond=0)
 
     assert t.date_from("15 am", basedate) is None
     assert t.date_from("24:00", basedate) is None
@@ -160,16 +146,12 @@ def test_plustime(rt=english.plusdate):
     assert rt.date_from("-400 secs", basedate) == basedate + timedelta(seconds=-400)
 
     assert rt.date_from("+1hr 5m", basedate) == basedate + timedelta(hours=1, minutes=5)
-    assert rt.date_from("-8hr 12m", basedate) == basedate + timedelta(
-        hours=-8, minutes=-12
-    )
+    assert rt.date_from("-8hr 12m", basedate) == basedate + timedelta(hours=-8, minutes=-12)
     assert rt.date_from("+1hr 5s", basedate) == basedate + timedelta(hours=1, seconds=5)
     assert rt.date_from("+1hr 12m 5s", basedate) == basedate + timedelta(
         hours=1, minutes=12, seconds=5
     )
-    assert rt.date_from("-1hr 5s", basedate) == basedate + timedelta(
-        hours=-1, seconds=-5
-    )
+    assert rt.date_from("-1hr 5s", basedate) == basedate + timedelta(hours=-1, seconds=-5)
     assert rt.date_from("-1hr 12m 5s", basedate) == basedate + timedelta(
         hours=-1, minutes=-12, seconds=-5
     )
@@ -225,15 +207,9 @@ def test_reldate(p=english.plusdate):
     assert p.date_from("+1y 12mo 400d", basedate) == basedate + relativedelta(
         years=1, months=12, days=400
     )
-    assert p.date_from("-7mo 8d", basedate) == basedate + relativedelta(
-        months=-7, days=-8
-    )
-    assert p.date_from("+5wks 2d", basedate) == basedate + relativedelta(
-        weeks=5, days=2
-    )
-    assert p.date_from("-1y 1w", basedate) == basedate + relativedelta(
-        years=-1, weeks=-1
-    )
+    assert p.date_from("-7mo 8d", basedate) == basedate + relativedelta(months=-7, days=-8)
+    assert p.date_from("+5wks 2d", basedate) == basedate + relativedelta(weeks=5, days=2)
+    assert p.date_from("-1y 1w", basedate) == basedate + relativedelta(years=-1, weeks=-1)
 
     assert p.date_from("+1y 2d 5h 12s", basedate) == basedate + relativedelta(
         years=1, days=2, hours=5, seconds=12
@@ -355,9 +331,7 @@ def test_all():
 
 
 def test_final_dates(p=english):
-    assert_unamb(
-        p.date_from("5:10pm", basedate), year=2010, month=9, day=20, hour=17, minute=10
-    )
+    assert_unamb(p.date_from("5:10pm", basedate), year=2010, month=9, day=20, hour=17, minute=10)
 
     assert p.date_from("may 32 2005", basedate) is None
     assert p.date_from("2005 may 32", basedate) is None

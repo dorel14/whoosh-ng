@@ -100,9 +100,7 @@ class Enron(Spec):
         print(f"Cached messages in {now() - t} seconds")
 
     def setup(self):
-        archive = os.path.abspath(
-            os.path.join(self.options.dir, self.enron_archive_filename)
-        )
+        archive = os.path.abspath(os.path.join(self.options.dir, self.enron_archive_filename))
         cache = os.path.abspath(os.path.join(self.options.dir, self.cache_filename))
 
         if not os.path.exists(archive):
@@ -155,9 +153,7 @@ class Enron(Spec):
         conn.add_field_action("frm", xappy.FieldActions.STORE_CONTENT)
         conn.add_field_action("to", xappy.FieldActions.INDEX_EXACT)
         conn.add_field_action("to", xappy.FieldActions.STORE_CONTENT)
-        conn.add_field_action(
-            "subject", xappy.FieldActions.INDEX_FREETEXT, language="en"
-        )
+        conn.add_field_action("subject", xappy.FieldActions.INDEX_FREETEXT, language="en")
         conn.add_field_action("subject", xappy.FieldActions.STORE_CONTENT)
         conn.add_field_action("cc", xappy.FieldActions.INDEX_EXACT)
         conn.add_field_action("bcc", xappy.FieldActions.INDEX_EXACT)

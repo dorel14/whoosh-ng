@@ -21,12 +21,7 @@ from whoosh.fields import UnknownFieldError
 from whoosh.filedb import misc
 from whoosh.filedb.fileindex import Segment, SegmentDeletionMixin, SegmentSet
 from whoosh.filedb.filepostings import FilePostingWriter
-from whoosh.filedb.filetables import (
-    FileListWriter,
-    FileTableWriter,
-    LengthWriter,
-    StructHashWriter,
-)
+from whoosh.filedb.filetables import FileListWriter, FileTableWriter, LengthWriter, StructHashWriter
 from whoosh.filedb.pools import MultiPool, TempfilePool
 from whoosh.index import LockError
 from whoosh.support import unicode
@@ -179,9 +174,7 @@ class SegmentWriter(SegmentDeletionMixin, IndexWriter):
                     )
                 for fieldnum in vectored_fieldnums:
                     if reader.has_vector(docnum, fieldnum):
-                        self._add_vector(
-                            fieldnum, reader.vector(docnum, fieldnum).items()
-                        )
+                        self._add_vector(fieldnum, reader.vector(docnum, fieldnum).items())
                 self.docnum += 1
 
         current_fieldnum = None
@@ -231,9 +224,7 @@ class SegmentWriter(SegmentDeletionMixin, IndexWriter):
                 if vformat:
                     vlist = sorted(
                         (w, valuestring)
-                        for w, freq, valuestring in vformat.word_values(
-                            value, mode="index"
-                        )
+                        for w, freq, valuestring in vformat.word_values(value, mode="index")
                     )
                     self._add_vector(fieldnum, vlist)
 

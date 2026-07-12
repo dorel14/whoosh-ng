@@ -3,6 +3,7 @@ from collections import deque
 from itertools import permutations
 
 import pytest
+
 from whoosh import fields, query
 from whoosh.util.numeric import byte_to_length, length_to_byte
 from whoosh.util.testing import TempIndex
@@ -78,8 +79,7 @@ def _do_basic(writerclass):
 
             # Check there are lengths
             total = sum(
-                r.doc_field_length(docnum, "text", 0)
-                for docnum in range(r.doc_count_all())
+                r.doc_field_length(docnum, "text", 0) for docnum in range(r.doc_count_all())
             )
             assert total > 0
 

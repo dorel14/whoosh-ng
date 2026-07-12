@@ -1,0 +1,90 @@
+title: Whoosh-ng Documentation
+description: Pure-Python full-text indexing and search library, modernized for 2025+
+lang: en
+timezone: UTC
+
+# GitHub Pages: base URL for project pages
+baseurl: "/whoosh-ng"
+# url: "https://dorel14.github.io/whoosh-ng"  # Uncomment for absolute URLs in assets
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+
+# Use remote theme for Just the Docs (GitHub Pages compatible)
+remote_theme: just-the-docs/just-the-docs
+
+# Global theme settings
+color_scheme: dark
+search_enabled: true
+heading_anchors: true
+
+# Collections for organized content (en and fr)
+collections:
+  en:
+    output: true
+    sort_by: nav_order
+  fr:
+    output: true
+    sort_by: nav_order
+
+# Default front matter for markdown files
+defaults:
+  # Root pages
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default
+  # Collection: English
+  - scope:
+      path: "en"
+      type: en
+    values:
+      layout: default
+      lang: en
+  # Collection: French
+  - scope:
+      path: "fr"
+      type: fr
+    values:
+      layout: default
+      lang: fr
+
+# Include additional files
+include:
+  - favicon.ico
+  - logo.png
+  - _pages
+
+# Exclude from build
+exclude:
+  - archive/
+  - .kilo/
+  - .git/
+  - node_modules/
+  - vendor/
+  - "*.py"
+  - "*.json"
+  - "*.yaml"
+  - "*.yml"
+  - ".env*"
+  - "*.log"
+  - "__pycache__/"
+  - "*.egg-info/"
+  - ".venv/"
+  - "venv/"
+  - Gemfile
+  - Gemfile.lock
+
+# Plugins (GitHub Pages supported)
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+# SEO and social
+github_username: dorel14
+repository: whoosh-ng

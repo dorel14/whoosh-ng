@@ -25,8 +25,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-"""This module contains classes that allow reading from an index.
-"""
+"""This module contains classes that allow reading from an index."""
 
 from abc import abstractmethod
 from bisect import bisect_right
@@ -319,9 +318,7 @@ class IndexReader:
         """Returns an iterator of all (undeleted) document IDs in the reader."""
 
         is_deleted = self.is_deleted
-        return (
-            docnum for docnum in range(self.doc_count_all()) if not is_deleted(docnum)
-        )
+        return (docnum for docnum in range(self.doc_count_all()) if not is_deleted(docnum))
 
     def iter_docs(self):
         """Yields a series of ``(docnum, stored_fields_dict)``
@@ -547,10 +544,7 @@ class IndexReader:
         list of (frequency, text) tuples.
         """
 
-        gen = (
-            (terminfo.weight(), text)
-            for text, terminfo in self.iter_prefix(fieldname, prefix)
-        )
+        gen = ((terminfo.weight(), text) for text, terminfo in self.iter_prefix(fieldname, prefix))
         return nlargest(number, gen)
 
     def most_distinctive_terms(self, fieldname, number=5, prefix=""):
@@ -754,11 +748,7 @@ class SegmentReader(IndexReader):
         if self.is_closed:
             raise ReaderClosed
         schema = self.schema
-        return (
-            (fieldname, text)
-            for fieldname, text in self._terms.terms()
-            if fieldname in schema
-        )
+        return ((fieldname, text) for fieldname, text in self._terms.terms() if fieldname in schema)
 
     def terms_from(self, fieldname, prefix):
         self._test_field(fieldname)
@@ -791,11 +781,7 @@ class SegmentReader(IndexReader):
         if self.is_closed:
             raise ReaderClosed
         schema = self.schema
-        return (
-            (term, terminfo)
-            for term, terminfo in self._terms.items()
-            if term[0] in schema
-        )
+        return ((term, terminfo) for term, terminfo in self._terms.items() if term[0] in schema)
 
     def iter_from(self, fieldname, text):
         self._test_field(fieldname)
@@ -1030,9 +1016,7 @@ class MultiReader(IndexReader):
         return MultiCursor([r.cursor(fieldname) for r in self.readers])
 
     def segments(self):
-        return [
-            reader.segment() for reader in self.readers if reader.segment() is not None
-        ]
+        return [reader.segment() for reader in self.readers if reader.segment() is not None]
 
     def is_atomic(self):
         return False
@@ -1128,9 +1112,7 @@ class MultiReader(IndexReader):
         return self._merge_terms([r.all_terms() for r in self.readers])
 
     def terms_from(self, fieldname, prefix):
-        return self._merge_terms(
-            [r.terms_from(fieldname, prefix) for r in self.readers]
-        )
+        return self._merge_terms([r.terms_from(fieldname, prefix) for r in self.readers])
 
     def term_info(self, fieldname, text):
         term = (fieldname, text)
@@ -1211,9 +1193,7 @@ class MultiReader(IndexReader):
         doc_offsets = []
         for i, r in enumerate(self.readers):
             if r.has_column(fieldname):
-                cr = r.column_reader(
-                    fieldname, column=column, reverse=reverse, translate=translate
-                )
+                cr = r.column_reader(fieldname, column=column, reverse=reverse, translate=translate)
                 crs.append(cr)
                 doc_offsets.append(self.doc_offsets[i])
         return columns.MultiColumnReader(crs, doc_offsets)

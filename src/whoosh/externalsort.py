@@ -29,7 +29,6 @@
 This module implements a general external merge sort for Python objects.
 """
 
-
 import os
 import tempfile
 from heapq import heapify, heappop, heapreplace
@@ -121,9 +120,7 @@ class SortingPool:
         self.runs = []
 
     def _new_run(self):
-        fd, path = tempfile.mkstemp(
-            prefix=self.prefix, suffix=self.suffix, dir=self.tempdir
-        )
+        fd, path = tempfile.mkstemp(prefix=self.prefix, suffix=self.suffix, dir=self.tempdir)
         f = os.fdopen(fd, "wb")
         return path, f
 
@@ -157,7 +154,7 @@ class SortingPool:
 
     def _write_run(self, f, items):
         for item in items:
-            dump(item, f, 2)
+            dump(item, f)
         f.close()
 
     def _add_run(self, filename):
