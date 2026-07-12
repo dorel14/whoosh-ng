@@ -15,16 +15,10 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./docs
-
     steps:
       # 1. Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
       # 2. Set up Ruby and build the Jekyll site
       - name: Set up Ruby
@@ -36,6 +30,7 @@ jobs:
           bundler-cache: true
 
       - name: Build Jekyll site
+        working-directory: ./docs
         run: bundle exec jekyll build
 
       # 3. Configure git for pushing to gh-pages
@@ -55,8 +50,8 @@ jobs:
         run: |
           git rm -rf .
           rm -rf .git
-          cp -r _site/* .
-          rm -rf _site
+          cp -r docs/_site/* .
+          rm -rf docs/_site
 
       # 6. Commit and push to gh-pages
       - name: Commit and push
