@@ -5,7 +5,7 @@ timezone: UTC
 
 # GitHub Pages: base URL for project pages
 baseurl: "/whoosh-ng"
-# url: "https://dorel14.github.io/whoosh-ng"  # Uncomment for absolute URLs in assets
+# url: "https://dorel14.github.io/whoosh-ng"
 
 # Build settings
 markdown: kramdown
@@ -52,6 +52,7 @@ defaults:
 include:
   - favicon.ico
   - logo.png
+  - README.md
 
 # Exclude from build
 exclude:
