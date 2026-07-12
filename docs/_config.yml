@@ -1,7 +1,8 @@
 title: Whoosh-NG Documentation
 description: Pure-Python full-text indexing and search library, modernized for 2025+
 remote_theme: just-the-docs/just-the-docs
-baseurl: "/Whoosh-NG"
+url: "https://dorel14.github.io"
+baseurl: "/whoosh-ng"
 
 collections:
   en:
