@@ -52,7 +52,6 @@ defaults:
 include:
   - favicon.ico
   - logo.png
-  - README.md
 
 # Exclude from build
 exclude:
