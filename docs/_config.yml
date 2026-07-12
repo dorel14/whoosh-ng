@@ -3,9 +3,9 @@ description: Pure-Python full-text indexing and search library, modernized for 2
 lang: en
 timezone: UTC
 
-# GitHub Pages: base URL and site URL
-url: "https://dorel14.github.io/whoosh-ng"
+# GitHub Pages: base URL for project pages
 baseurl: "/whoosh-ng"
+# url: "https://dorel14.github.io/whoosh-ng"  # Uncomment for absolute URLs in assets
 
 # Build settings
 markdown: kramdown
@@ -19,10 +19,6 @@ remote_theme: just-the-docs/just-the-docs
 color_scheme: dark
 search_enabled: true
 heading_anchors: true
-
-# Site favicon and logo
-favicon_ico: "/assets/favico.ico"
-logo: "/assets/logo.png"
 
 # Collections for organized content (en and fr)
 collections:

@@ -69,10 +69,10 @@ pip install "whoosh-ng[dev]"
 
 ## Documentation
 
-- **[API Reference](https://dorel14.github.io/whoosh-ng/en/api/overview/)** - Complete module documentation
-- **[User Guides](https://dorel14.github.io/whoosh-ng/en/guides/)** - Tutorials and best practices
-- **[Examples](https://dorel14.github.io/whoosh-ng/en/examples/)** - Runnable code examples
-- **[French Documentation](https://dorel14.github.io/whoosh-ng/fr/)** - Documentation en français
+- **[API Reference](/whoosh-ng/en/api/overview/)** - Complete module documentation
+- **[User Guides](/whoosh-ng/en/guides/)** - Tutorials and best practices
+- **[Examples](/whoosh-ng/en/examples/)** - Runnable code examples
+- **[French Documentation](/whoosh-ng/fr/)** - Documentation en français
 
 ## Recent Changes in 4.0.0.dev0
 
