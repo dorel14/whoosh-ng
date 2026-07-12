@@ -61,9 +61,7 @@ def find_object(name, blacklist=None, whitelist=None):
     if blacklist:
         for pre in blacklist:
             if name.startswith(pre):
-                raise TypeError(
-                    f"{name!r}: can't instantiate names starting with {pre!r}"
-                )
+                raise TypeError(f"{name!r}: can't instantiate names starting with {pre!r}")
     if whitelist:
         passes = False
         for pre in whitelist:

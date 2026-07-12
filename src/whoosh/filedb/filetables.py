@@ -34,7 +34,7 @@ import os
 import struct
 import sys
 from binascii import crc32
-from hashlib import md5  # type: ignore @UnresolvedImport
+from hashlib import md5  # type: ignore
 
 from whoosh.system import _INT_SIZE, emptybytes
 from whoosh.util.numlists import GrowableArray

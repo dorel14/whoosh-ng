@@ -222,9 +222,7 @@ class W3PerDocWriter(base.PerDocWriterWithColumns):
         if self._indoc:
             raise Exception("Called start_doc when already in a doc")
         if docnum != self._doccount:
-            raise Exception(
-                f"Called start_doc({docnum!r}) was expecting {self._doccount!r}"
-            )
+            raise Exception(f"Called start_doc({docnum!r}) was expecting {self._doccount!r}")
 
         self._docnum = docnum
         self._doccount += 1
@@ -621,9 +619,7 @@ class W3TermsReader(base.TermsReader):
     def terms_from(self, fieldname, prefix):
         prefixbytes = self._keycoder(fieldname, prefix)
         keydecoder = self._keydecoder
-        return (
-            keydecoder(keybytes) for keybytes in self._tindex.keys_from(prefixbytes)
-        )
+        return (keydecoder(keybytes) for keybytes in self._tindex.keys_from(prefixbytes))
 
     def items(self):
         tidecoder = W3TermInfo.from_bytes
@@ -678,9 +674,7 @@ class W3PostingsWriter(base.PostingsWriter):
     through the postings.
     """
 
-    def __init__(
-        self, postfile, blocklimit, byteids=False, compression=3, inlinelimit=1
-    ):
+    def __init__(self, postfile, blocklimit, byteids=False, compression=3, inlinelimit=1):
         self._postfile = postfile
         self._blocklimit = blocklimit
         self._byteids = byteids
@@ -791,7 +785,7 @@ class W3PostingsWriter(base.PostingsWriter):
         # Minify the IDs, weights, and values, and put them in a tuple
         data = (self._mini_ids(), self._mini_weights(), self._mini_values())
         # Pickle the tuple
-        databytes = dumps(data, 2)
+        databytes = dumps(data)
         # If the pickle is less than 20 bytes, don't bother compressing
         if len(databytes) < 20:
             comp = 0
@@ -820,7 +814,6 @@ class W3PostingsWriter(base.PostingsWriter):
                 length_to_byte(self._minlength),
                 length_to_byte(self._maxlength),
             ),
-            2,
         )
 
         # Write block length
@@ -1168,9 +1161,7 @@ class W3LeafMatcher(LeafMatcher):
             self._values = (None,) * self._blocklength
         else:
             assert isinstance(vs, bytes)
-            self._values = tuple(
-                vs[i : i + fixedsize] for i in range(0, len(vs), fixedsize)
-            )
+            self._values = tuple(vs[i : i + fixedsize] for i in range(0, len(vs), fixedsize))
 
 
 # Term info implementation
@@ -1250,7 +1241,7 @@ class W3TermInfo(TermInfo):
 
         if isinlined:
             # Postings are inlined - dump them using the pickle protocol
-            postbytes = dumps(self._inlined, 2)
+            postbytes = dumps(self._inlined)
         else:
             postbytes = pack_long(self._offset) + pack_int(self._length)
         st += postbytes

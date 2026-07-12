@@ -250,9 +250,7 @@ def test_query_facet():
 
 def test_query_facet_overlap():
     domain = "abcdefghi"
-    schema = fields.Schema(
-        v=fields.KEYWORD(stored=True), num=fields.NUMERIC(stored=True)
-    )
+    schema = fields.Schema(v=fields.KEYWORD(stored=True), num=fields.NUMERIC(stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
         for i, ltr in enumerate(domain):
@@ -265,9 +263,7 @@ def test_query_facet_overlap():
         q3 = query.TermRange("v", "g", "i")
 
         facets = sorting.Facets()
-        facets.add_query(
-            "myfacet", {"a-c": q1, "d-f": q2, "g-i": q3}, allow_overlap=True
-        )
+        facets.add_query("myfacet", {"a-c": q1, "d-f": q2, "g-i": q3}, allow_overlap=True)
         r = s.search(query.Every(), groupedby=facets)
         gr = r.groups("myfacet")
         assert r.groups("myfacet") == {
@@ -646,33 +642,21 @@ def test_sort_filter():
 
         with ix.searcher() as s:
             r = s.search(query.Every(), sortedby=("key", "group"), filter=fq, limit=20)
-            assert [h.fields() for h in r] == [
-                d for d in source if d["group"] == "bravo"
-            ][:20]
+            assert [h.fields() for h in r] == [d for d in source if d["group"] == "bravo"][:20]
 
             fq = query.Term("group", "bravo")
-            r = s.search(
-                query.Every(), sortedby=("key", "group"), filter=fq, limit=None
-            )
-            assert [h.fields() for h in r] == [
-                d for d in source if d["group"] == "bravo"
-            ]
+            r = s.search(query.Every(), sortedby=("key", "group"), filter=fq, limit=None)
+            assert [h.fields() for h in r] == [d for d in source if d["group"] == "bravo"]
 
         ix.optimize()
 
         with ix.searcher() as s:
             r = s.search(query.Every(), sortedby=("key", "group"), filter=fq, limit=20)
-            assert [h.fields() for h in r] == [
-                d for d in source if d["group"] == "bravo"
-            ][:20]
+            assert [h.fields() for h in r] == [d for d in source if d["group"] == "bravo"][:20]
 
             fq = query.Term("group", "bravo")
-            r = s.search(
-                query.Every(), sortedby=("key", "group"), filter=fq, limit=None
-            )
-            assert [h.fields() for h in r] == [
-                d for d in source if d["group"] == "bravo"
-            ]
+            r = s.search(query.Every(), sortedby=("key", "group"), filter=fq, limit=None)
+            assert [h.fields() for h in r] == [d for d in source if d["group"] == "bravo"]
 
 
 def test_sorting_function():
@@ -706,7 +690,7 @@ def test_sorting_function():
             assert tks.count("alfa") == tks.count("bravo")
 
 
-class test_translate:
+def test_translate():
     domain = [
         ("alfa", 100, 50),
         ("bravo", 20, 80),

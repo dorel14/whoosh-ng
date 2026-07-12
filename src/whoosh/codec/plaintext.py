@@ -144,7 +144,7 @@ class PlainPerDocWriter(base.PerDocumentWriter, LineWriter):
 
     def add_field(self, fieldname, fieldobj, value, length):
         if value is not None:
-            value = dumps(value, 2)
+            value = dumps(value)
         self._print_line(2, "DOCFIELD", fn=fieldname, v=value, len=length)
 
     def add_column_value(self, fieldname, columnobj, value):
@@ -229,9 +229,7 @@ class PlainPerDocReader(base.PerDocumentReader, LineReader):
 
             c = self._find_line(2, "COLVAL", fn=fieldname)
             if c is None:
-                raise ValueError(
-                    f"Missing column value for field {fieldname} doc {docnum}"
-                )
+                raise ValueError(f"Missing column value for field {fieldname} doc {docnum}")
 
             yield c.get("v")
 

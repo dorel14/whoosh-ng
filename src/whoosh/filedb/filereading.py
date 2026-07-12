@@ -20,12 +20,7 @@ from threading import Lock
 from whoosh.fields import FieldConfigurationError
 from whoosh.filedb import misc
 from whoosh.filedb.filepostings import FilePostingReader
-from whoosh.filedb.filetables import (
-    FileListReader,
-    FileTableReader,
-    LengthReader,
-    StructHashReader,
-)
+from whoosh.filedb.filetables import FileListReader, FileTableReader, LengthReader, StructHashReader
 
 # from whoosh.postings import Exclude
 from whoosh.reading import IndexReader, TermNotFound
@@ -99,9 +94,7 @@ class SegmentReader(IndexReader):
     def _open_postfile(self):
         if self.postfile:
             return
-        self.postfile = self.storage.open_file(
-            self.segment.termposts_filename, mapped=False
-        )
+        self.postfile = self.storage.open_file(self.segment.termposts_filename, mapped=False)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.segment})"

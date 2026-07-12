@@ -46,7 +46,6 @@ provides two important methods: ``writer()`` to return a ``ColumnWriter`` object
 and ``reader()`` to return a ``ColumnReader`` object.
 """
 
-
 import struct
 import warnings
 from array import array
@@ -337,9 +336,7 @@ class FixedBytesColumn(Column):
         return self.Writer(dbfile, self._fixedlen, self._default)
 
     def reader(self, dbfile, basepos, length, doccount):
-        return self.Reader(
-            dbfile, basepos, length, doccount, self._fixedlen, self._default
-        )
+        return self.Reader(dbfile, basepos, length, doccount, self._fixedlen, self._default)
 
     class Writer(ColumnWriter):
         def __init__(self, dbfile, fixedlen, default):
@@ -487,9 +484,7 @@ class RefBytesColumn(Column):
                 self._refs.append(ref)
             else:
                 if ref > 65535:
-                    warnings.warn(
-                        f"RefBytesColumn dropped unique value {v!r}", UserWarning
-                    )
+                    warnings.warn(f"RefBytesColumn dropped unique value {v!r}", UserWarning)
                     ref = 0
                 dbfile.write_ushort(ref)
 
@@ -595,9 +590,7 @@ class NumericColumn(FixedBytesColumn):
         return self.Writer(dbfile, self._typecode, self._default)
 
     def reader(self, dbfile, basepos, length, doccount):
-        return self.Reader(
-            dbfile, basepos, length, doccount, self._typecode, self._default
-        )
+        return self.Reader(dbfile, basepos, length, doccount, self._typecode, self._default)
 
     def default_value(self, reverse=False):
         v = self._default
@@ -1207,7 +1200,7 @@ class PickleColumn(WrappedColumn):
             if v is None:
                 v = emptybytes
             else:
-                v = dumps(v, 2)
+                v = dumps(v)
             self._child.add(docnum, v)
 
     class Reader(WrappedColumnReader):

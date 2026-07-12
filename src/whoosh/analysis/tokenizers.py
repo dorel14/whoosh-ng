@@ -231,11 +231,7 @@ class CharsetTokenizer(Tokenizer):
         self.charmap = charmap
 
     def __eq__(self, other):
-        return (
-            other
-            and self.__class__ is other.__class__
-            and self.charmap == other.charmap
-        )
+        return other and self.__class__ is other.__class__ and self.charmap == other.charmap
 
     def __call__(
         self,

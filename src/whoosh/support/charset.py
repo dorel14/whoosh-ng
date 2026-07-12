@@ -1277,9 +1277,7 @@ U+FF10..U+FF19->0..9, U+FF21..U+FF3A->a..z, U+FF41..U+FF5A->a..z, 0..9, A..Z->a.
 _dewhite = re.compile(r"\s")
 _char = r"((?:U\+[0-9A-Fa-f]{4,6})|.)"
 _char_map = re.compile("^" + _char + "->" + _char + "$")
-_range_map = re.compile(
-    "^" + _char + r"\.\." + _char + "->" + _char + ".." + _char + "$"
-)
+_range_map = re.compile("^" + _char + r"\.\." + _char + "->" + _char + ".." + _char + "$")
 _stray_char = re.compile("^" + _char + "$")
 _stray_range = re.compile("^" + _char + r"\.\." + _char + "$")
 _checker_range = re.compile("^" + _char + r"\.\." + _char + "/2$")
@@ -1323,9 +1321,7 @@ def charset_table_to_dict(tablestring):
                 end2 = charspec_to_int(match.group(4))
                 assert (end1 - start1) == (end2 - start2)
                 try:
-                    for fromord, tooord in zip(
-                        range(start1, end1 + 1), range(start2, end2 + 1)
-                    ):
+                    for fromord, tooord in zip(range(start1, end1 + 1), range(start2, end2 + 1)):
                         map[fromord] = chr(tooord)
                 except ValueError:
                     pass

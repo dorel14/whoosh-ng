@@ -19,13 +19,7 @@ from marshal import loads as mloads
 from pickle import dumps, loads
 from struct import Struct
 
-from whoosh.system import (
-    _SHORT_SIZE,
-    pack_uint,
-    pack_ushort,
-    unpack_uint,
-    unpack_ushort,
-)
+from whoosh.system import _SHORT_SIZE, pack_uint, pack_ushort, unpack_uint, unpack_ushort
 from whoosh.util import utf8decode, utf8encode
 
 
@@ -46,7 +40,7 @@ decode_terminfo = _terminfo_struct.unpack
 encode_docnum = pack_uint
 decode_docnum = lambda x: unpack_uint(x)[0]
 
-enpickle = lambda data: dumps(data, -1)
+enpickle = lambda data: dumps(data)
 depickle = loads
 
 enmarshal = mdumps

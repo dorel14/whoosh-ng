@@ -1,0 +1,55 @@
+[INFO] Initializing environment for https://github.com/pre-commit/pre-commit-hooks.
+[INFO] Initializing environment for https://github.com/astral-sh/ruff-pre-commit.
+[INFO] Initializing environment for https://github.com/pre-commit/mirrors-mypy.
+[INFO] Initializing environment for https://github.com/pre-commit/mirrors-mypy:cached-property>=2.0.1.
+[INFO] Installing environment for https://github.com/pre-commit/pre-commit-hooks.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Installing environment for https://github.com/astral-sh/ruff-pre-commit.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+[INFO] Installing environment for https://github.com/pre-commit/mirrors-mypy.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+check python ast.........................................................Failed
+- hook id: check-ast
+- files were modified by this hook
+check for merge conflicts................................................Failed
+- hook id: check-merge-conflict
+- files were modified by this hook
+check toml...............................................................Failed
+- hook id: check-toml
+- files were modified by this hook
+check yaml...............................................................Failed
+- hook id: check-yaml
+- files were modified by this hook
+detect private key.......................................................Failed
+- hook id: detect-private-key
+- files were modified by this hook
+fix end of files.........................................................Failed
+- hook id: end-of-file-fixer
+- files were modified by this hook
+mixed line ending........................................................Failed
+- hook id: mixed-line-ending
+- files were modified by this hook
+trim trailing whitespace.................................................Failed
+- hook id: trailing-whitespace
+- files were modified by this hook
+ruff.....................................................................Failed
+- hook id: ruff
+- files were modified by this hook
+
+All checks passed!
+
+ruff-format..............................................................Failed
+- hook id: ruff-format
+- files were modified by this hook
+
+224 files left unchanged
+
+mypy.....................................................................Failed
+- hook id: mypy
+- files were modified by this hook
+
+Success: no issues found in 224 source files
+
