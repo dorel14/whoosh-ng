@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783867335586,
+  "lastUpdate": 1783869669926,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -174,6 +174,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.000030418265639086156",
             "extra": "mean: 946.2074387948763 usec\nrounds: 531"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "4ee9b4c595d5c5351a8b1635293d5a83e99057a4",
+          "message": "feat(examples): ✨ Add multiple examples for Whoosh‑NG integration\n\n- Introduced `autocomplete.md` demonstrating autocomplete functionality using `whoosh_modern.autocomplete`.\n- Added `fastapi-search.md` showcasing FastAPI integration with Whoosh‑NG for document search.\n- Created `movie-search.md` illustrating a movie search application with faceted search and filtering.\n- Implemented `vector-search.md` for semantic/vector search using document embeddings.\n- Translated examples into French for broader accessibility.",
+          "timestamp": "2026-07-12T17:20:26+02:00",
+          "tree_id": "e23e8b9ccbfef9b58c657e265f998ae08a943b64",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/4ee9b4c595d5c5351a8b1635293d5a83e99057a4"
+        },
+        "date": 1783869669650,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1155.9771082244388,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00003601147526841071",
+            "extra": "mean: 865.0690337077549 usec\nrounds: 534"
           }
         ]
       }
