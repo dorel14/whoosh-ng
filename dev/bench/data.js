@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783875570168,
+  "lastUpdate": 1783875823639,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -495,6 +495,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.0001156228001661295",
             "extra": "mean: 964.9508652482457 usec\nrounds: 564"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "386b0699ab927fcec6de012c74630040d064f127",
+          "message": "fix(authors): ✏️ Mise à jour des informations sur l'auteur\n\n* Suppression de l'auteur \"Matt Chaput\" pour ne conserver que \"David Orel\".\n* Mise à jour de l'email associé à l'auteur.",
+          "timestamp": "2026-07-12T19:02:56+02:00",
+          "tree_id": "864ce470319b58f572a0c1dbd50802da79c668ca",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/386b0699ab927fcec6de012c74630040d064f127"
+        },
+        "date": 1783875823307,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1081.5545801739177,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000043404898597185925",
+            "extra": "mean: 924.5950397058987 usec\nrounds: 680"
           }
         ]
       }
