@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783875824957,
+  "lastUpdate": 1783875857341,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -551,6 +551,37 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.000029883207397532428",
             "extra": "mean: 927.7736423077371 usec\nrounds: 520"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "d.orel@free.fr",
+            "name": "David Orel",
+            "username": "dorel14"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "792b62bd88becfd246865e0864cfb3d35c736632",
+          "message": "Merge pull request #4 from dorel14/dev\n\nDev",
+          "timestamp": "2026-07-12T19:03:24+02:00",
+          "tree_id": "6cb88e37adb502e782fdb3b9450d0764f1ccd485",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/792b62bd88becfd246865e0864cfb3d35c736632"
+        },
+        "date": 1783875856613,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1073.287241789826,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00004603625339199693",
+            "extra": "mean: 931.717028828544 usec\nrounds: 555"
           }
         ]
       }
