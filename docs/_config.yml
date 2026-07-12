@@ -1,0 +1,103 @@
+title: Whoosh-ng Documentation
+description: Pure-Python full-text indexing and search library, modernized for 2025+
+lang: en
+timezone: UTC
+
+# GitHub Pages: base URL (repo name for project pages)
+baseurl: "/whoosh-ng"
+url: "https://dorel14.github.io"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+
+# Use remote theme for Just the Docs (GitHub Pages compatible)
+remote_theme: just-the-docs/just-the-docs
+
+# Global theme
+color_scheme: dark
+
+# Site favicon and logo (served from docs/assets/)
+favicon_ico: "/assets/favico.ico"
+logo: "/assets/logo.png"
+
+# Just the Docs theme configuration
+just_the_docs:
+  search_enabled: true
+  search_preview: true
+  heading_break: 360
+  nav_sort: case_insensitive
+  nav_fold: true
+  collections:
+    en:
+      name: English
+      nav_fold: true
+    fr:
+      name: Français
+      nav_fold: true
+  footer_content: "Whoosh-NG Documentation | Last updated: 2026-07-12"
+
+# Collections for organized content
+collections:
+  en:
+    output: true
+    sort_by: nav_order
+  fr:
+    output: true
+    sort_by: nav_order
+
+# Default front matter for markdown files
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default
+  - scope:
+      path: "en"
+      type: en
+    values:
+      layout: default
+      lang: en
+  - scope:
+      path: "fr"
+      type: fr
+    values:
+      layout: default
+      lang: fr
+
+# Include additional files
+include:
+  - _pages
+
+# Exclude from build
+exclude:
+  - archive/
+  - .kilo/
+  - .git/
+  - node_modules/
+  - vendor/
+  - "*.py"
+  - "*.json"
+  - "*.yaml"
+  - "*.yml"
+  - ".env*"
+  - "*.log"
+  - "__pycache__/"
+  - "*.egg-info/"
+  - ".venv/"
+  - "venv/"
+  - Gemfile
+  - Gemfile.lock
+
+# Plugins (GitHub Pages supported)
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+# SEO and social
+github_username: dorel14
+repository: whoosh-ng

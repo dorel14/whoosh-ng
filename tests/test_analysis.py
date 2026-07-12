@@ -1,6 +1,7 @@
 from pickle import dumps
 
 import pytest
+
 from whoosh import analysis, fields, qparser
 from whoosh.filedb.filestore import RamStorage
 
@@ -120,11 +121,7 @@ def test_tee_filter():
 
     f1 = analysis.PassFilter()
     f2 = analysis.BiWordFilter()
-    ana = (
-        analysis.RegexTokenizer(r"\S+")
-        | analysis.TeeFilter(f1, f2)
-        | analysis.LowercaseFilter()
-    )
+    ana = analysis.RegexTokenizer(r"\S+") | analysis.TeeFilter(f1, f2) | analysis.LowercaseFilter()
     result = " ".join([t.text for t in ana(target)])
     assert result == "alfa alfa-bravo bravo bravo-charlie charlie"
 
@@ -307,11 +304,7 @@ def test_double_metaphone():
         dmn = double_metaphone(name)
     assert dmn == names[name]
 
-    mf = (
-        analysis.RegexTokenizer()
-        | analysis.LowercaseFilter()
-        | analysis.DoubleMetaphoneFilter()
-    )
+    mf = analysis.RegexTokenizer() | analysis.LowercaseFilter() | analysis.DoubleMetaphoneFilter()
     results = [(t.text, t.boost) for t in mf("Spruce View")]
     assert results == [("SPRS", 1.0), ("F", 1.0), ("FF", 0.5)]
 
@@ -342,9 +335,7 @@ def test_substitution():
         "four",
     ]
 
-    mf = analysis.RegexTokenizer(r"\S+") | analysis.SubstitutionFilter(
-        "([^=]*)=(.*)", r"\2=\1"
-    )
+    mf = analysis.RegexTokenizer(r"\S+") | analysis.SubstitutionFilter("([^=]*)=(.*)", r"\2=\1")
     assert [t.text for t in mf("a=b c=d ef")] == ["b=a", "d=c", "ef"]
 
 
@@ -643,7 +634,5 @@ def test_issue358():
 
 def test_ngramwords_tokenizer():
     tk = analysis.CommaSeparatedTokenizer()
-    tags = fields.NGRAMWORDS(
-        minsize=3, maxsize=50, tokenizer=tk, stored=True, queryor=True
-    )
+    tags = fields.NGRAMWORDS(minsize=3, maxsize=50, tokenizer=tk, stored=True, queryor=True)
     schema = fields.Schema(tags=tags)

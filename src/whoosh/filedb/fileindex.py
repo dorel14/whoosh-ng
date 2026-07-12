@@ -95,9 +95,7 @@ class FileIndex(SegmentDeletionMixin, Index):
         elif self.generation >= 0:
             self._read(schema)
         else:
-            raise EmptyIndexError(
-                f"No index named {indexname!r} in storage {storage!r}"
-            )
+            raise EmptyIndexError(f"No index named {indexname!r} in storage {storage!r}")
 
         # Open a reader for this index. This is used by the
         # deletion methods, but mostly it's to keep the underlying
@@ -159,10 +157,10 @@ class FileIndex(SegmentDeletionMixin, Index):
         stream.write_int(-12345)
 
         stream.write_int(_INDEX_VERSION)
-        for num in __version__[:3]:
+        for num in __version__:
             stream.write_varint(num)
 
-        stream.write_string(pickle.dumps(self.schema, -1))
+        stream.write_string(pickle.dumps(self.schema))
         stream.write_int(self.generation)
         stream.write_int(self.segment_counter)
         stream.write_pickle(self.segments)
@@ -176,9 +174,7 @@ class FileIndex(SegmentDeletionMixin, Index):
         stream = self.storage.open_file(self._toc_filename())
 
         if stream.read_varint() != _INT_SIZE or stream.read_varint() != _FLOAT_SIZE:
-            raise IndexError(
-                "Index was created on an architecture with different data sizes"
-            )
+            raise IndexError("Index was created on an architecture with different data sizes")
 
         if not stream.read_int() == -12345:
             raise IndexError("Number misread: byte order problem")
@@ -473,9 +469,7 @@ class Segment:
         "vectorposts": "vps",
     }
 
-    def __init__(
-        self, name, doccount, fieldlength_totals, fieldlength_maxes, deleted=None
-    ):
+    def __init__(self, name, doccount, fieldlength_totals, fieldlength_maxes, deleted=None):
         """
         :param name: The name of the segment (the Index object computes this
             from its name and the generation).
@@ -574,9 +568,7 @@ class Segment:
             if self.deleted is None:
                 self.deleted = set()
             elif docnum in self.deleted:
-                raise KeyError(
-                    f"Document {docnum} in segment {self.name!r} is already deleted"
-                )
+                raise KeyError(f"Document {docnum} in segment {self.name!r} is already deleted")
 
             self.deleted.add(docnum)
         else:

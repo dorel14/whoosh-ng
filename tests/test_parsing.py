@@ -11,26 +11,17 @@ def test_whitespace():
 
 
 def test_singlequotes():
-    p = default.QueryParser(
-        "t", None, [plugins.WhitespacePlugin(), plugins.SingleQuotePlugin()]
-    )
-    assert (
-        repr(p.process("a 'b c' d"))
-        == "<AndGroup <None:'a'>, <None:'b c'>, <None:'d'>>"
-    )
+    p = default.QueryParser("t", None, [plugins.WhitespacePlugin(), plugins.SingleQuotePlugin()])
+    assert repr(p.process("a 'b c' d")) == "<AndGroup <None:'a'>, <None:'b c'>, <None:'d'>>"
 
 
 def test_prefix():
-    p = default.QueryParser(
-        "t", None, [plugins.WhitespacePlugin(), plugins.PrefixPlugin()]
-    )
+    p = default.QueryParser("t", None, [plugins.WhitespacePlugin(), plugins.PrefixPlugin()])
     assert repr(p.process("a b* c")) == "<AndGroup <None:'a'>, <None:'b'*>, <None:'c'>>"
 
 
 def test_range():
-    p = default.QueryParser(
-        "t", None, [plugins.WhitespacePlugin(), plugins.RangePlugin()]
-    )
+    p = default.QueryParser("t", None, [plugins.WhitespacePlugin(), plugins.RangePlugin()])
     ns = p.tag("a [b to c} d")
     assert repr(ns) == "<AndGroup <None:'a'>, < >, <None:['b' 'c'}>, < >, <None:'d'>>"
 
@@ -53,15 +44,9 @@ def test_sq_range():
 
 
 def test_phrase():
-    p = default.QueryParser(
-        "t", None, [plugins.WhitespacePlugin(), plugins.PhrasePlugin()]
-    )
-    assert (
-        repr(p.process('a "b c"')) == "<AndGroup <None:'a'>, <None:PhraseNode 'b c'~1>>"
-    )
-    assert (
-        repr(p.process('"b c" d')) == "<AndGroup <None:PhraseNode 'b c'~1>, <None:'d'>>"
-    )
+    p = default.QueryParser("t", None, [plugins.WhitespacePlugin(), plugins.PhrasePlugin()])
+    assert repr(p.process('a "b c"')) == "<AndGroup <None:'a'>, <None:PhraseNode 'b c'~1>>"
+    assert repr(p.process('"b c" d')) == "<AndGroup <None:PhraseNode 'b c'~1>, <None:'d'>>"
     assert repr(p.process('"b c"')) == "<AndGroup <None:PhraseNode 'b c'~1>>"
 
     q = p.parse('alfa "bravo charlie"~2 delta')
@@ -71,9 +56,7 @@ def test_phrase():
 
 
 def test_groups():
-    p = default.QueryParser(
-        "t", None, [plugins.WhitespacePlugin(), plugins.GroupPlugin()]
-    )
+    p = default.QueryParser("t", None, [plugins.WhitespacePlugin(), plugins.GroupPlugin()])
 
     ns = p.process("a ((b c) d) e")
     assert (
@@ -98,14 +81,11 @@ def test_groups_with_range():
     )
 
     ns = p.process("a:b OR e:>=5 g:<6")
-    assert (
-        repr(ns) == "<AndGroup <OrGroup <'a':'b'>, <'e':['5' None]>>, <'g':[None '6'}>>"
-    )
+    assert repr(ns) == "<AndGroup <OrGroup <'a':'b'>, <'e':['5' None]>>, <'g':[None '6'}>>"
 
     ns = p.process("a:b OR (e:>=5 g:<6)")
     assert (
-        repr(ns)
-        == "<AndGroup <OrGroup <'a':'b'>, <AndGroup <'e':['5' None]>, <'g':[None '6'}>>>>"
+        repr(ns) == "<AndGroup <OrGroup <'a':'b'>, <AndGroup <'e':['5' None]>, <'g':[None '6'}>>>>"
     )
 
 
@@ -124,9 +104,7 @@ def test_fieldnames():
 
 
 def test_operators():
-    p = default.QueryParser(
-        "t", None, [plugins.WhitespacePlugin(), plugins.OperatorsPlugin()]
-    )
+    p = default.QueryParser("t", None, [plugins.WhitespacePlugin(), plugins.OperatorsPlugin()])
     ns = p.process("a OR b")
     assert repr(ns) == "<AndGroup <OrGroup <None:'a'>, <None:'b'>>>"
 
@@ -217,10 +195,7 @@ def test_fieldname_chars():
     q = qp.parse("abc123:456 def")
     assert str(q) == "(abc123:456 AND content:def)"
 
-    q = qp.parse(
-        "\u0646\u0633\u0628\u0629:\u0627\u0644\u0641\u0644\u0633"
-        "\u0637\u064a\u0646\u064a"
-    )
+    q = qp.parse("\u0646\u0633\u0628\u0629:\u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a")
     assert q.__class__ == query.Term
     assert q.fieldname == "nisbah"
     assert q.text == "\u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a"
@@ -326,13 +301,8 @@ def test_boosts():
 
 
 def test_wild():
-    qp = default.QueryParser(
-        "t", None, [plugins.WhitespacePlugin(), plugins.WildcardPlugin()]
-    )
-    assert (
-        repr(qp.process("a b*c? d"))
-        == "<AndGroup <None:'a'>, <None:Wild 'b*c?'>, <None:'d'>>"
-    )
+    qp = default.QueryParser("t", None, [plugins.WhitespacePlugin(), plugins.WildcardPlugin()])
+    assert repr(qp.process("a b*c? d")) == "<AndGroup <None:'a'>, <None:Wild 'b*c?'>, <None:'d'>>"
     assert (
         repr(qp.process("a * ? d"))
         == "<AndGroup <None:'a'>, <None:Wild '*'>, <None:Wild '?'>, <None:'d'>>"
@@ -664,9 +634,7 @@ def test_regressions():
     # From 0.3.18, these used to require escaping. Mostly good for
     # regression testing.
     assert qp.parse("re-inker") == query.Term("f", "re-inker")
-    assert qp.parse("0.7 wire") == query.And(
-        [query.Term("f", "0.7"), query.Term("f", "wire")]
-    )
+    assert qp.parse("0.7 wire") == query.And([query.Term("f", "0.7"), query.Term("f", "wire")])
     assert qp.parse("daler-rowney pearl 'bell bronze'") == query.And(
         [
             query.Term("f", "daler-rowney"),

@@ -390,9 +390,7 @@ class BitVector:
         return self._logic(operator.__xor__, other)
 
     def __invert__(self):
-        return BitVector(
-            self.size, source=(x for x in range(self.size) if x not in self)
-        )
+        return BitVector(self.size, source=(x for x in range(self.size) if x not in self))
 
     def count(self):
         """Returns the number of "on" bits in the bit array."""
@@ -405,9 +403,7 @@ class BitVector:
         """Turns the bit at the given position on."""
 
         if index >= self.size:
-            raise IndexError(
-                f"Position {repr(index)} greater than the size of the vector"
-            )
+            raise IndexError(f"Position {repr(index)} greater than the size of the vector")
         self.bits[index >> 3] |= 1 << (index & 7)
         self.bcount = None
 

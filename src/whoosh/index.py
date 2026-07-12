@@ -29,14 +29,13 @@
 an index.
 """
 
-
 import os.path
 import pickle
 import re
 import sys
 from time import sleep, time
 
-from whoosh import __version__
+from whoosh import __version__, __version_string__
 from whoosh.fields import ensure_schema
 from whoosh.legacy import toc_loaders
 from whoosh.system import _FLOAT_SIZE, _INT_SIZE, _LONG_SIZE
@@ -501,9 +500,7 @@ class FileIndex(Index):
 
         if reuse:
             # Merge segments with reuse segments
-            segments.extend(
-                [segment for segment in reuse.segments() if segment not in segments]
-            )
+            segments.extend([segment for segment in reuse.segments() if segment not in segments])
 
         reusable = {}
         try:
@@ -526,9 +523,7 @@ class FileIndex(Index):
                     del reusable[segment]
                     return r
                 else:
-                    return SegmentReader(
-                        storage, schema, segment, generation=generation
-                    )
+                    return SegmentReader(storage, schema, segment, generation=generation)
 
             if len(segments) == 1:
                 # This index has one segment, so return a SegmentReader object
@@ -584,7 +579,7 @@ class TOC:
         segments,
         generation,
         version=_CURRENT_TOC_VERSION,
-        release=__version__,
+        release=__version_string__,
     ):
         self.schema = schema
         self.segments = segments
@@ -634,9 +629,7 @@ class TOC:
         if gen is None:
             gen = cls._latest_generation(storage, indexname)
             if gen < 0:
-                raise EmptyIndexError(
-                    f"Index {indexname!r} does not exist in {storage!r}"
-                )
+                raise EmptyIndexError(f"Index {indexname!r} does not exist in {storage!r}")
 
         # Read the content of this index from the .toc file.
         tocfilename = cls._filename(indexname, gen)
@@ -700,11 +693,11 @@ class TOC:
         stream.write_int(-12345)
 
         stream.write_int(_CURRENT_TOC_VERSION)
-        for num in __version__[:3]:
+        for num in __version__:
             stream.write_varint(num)
 
         try:
-            stream.write_string(pickle.dumps(schema, 2))
+            stream.write_string(pickle.dumps(schema))
         except pickle.PicklingError:
             # Try to narrow down the error to a single field
             for fieldname, field in schema.items():

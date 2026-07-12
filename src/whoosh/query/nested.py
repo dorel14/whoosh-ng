@@ -281,9 +281,7 @@ class NestedChildren(WrappingQuery):
         )
 
     class NestedChildMatcher(matching.WrappingMatcher):
-        def __init__(
-            self, parent_comb, wanted_parent_matcher, limit, is_deleted, boost=1.0
-        ):
+        def __init__(self, parent_comb, wanted_parent_matcher, limit, is_deleted, boost=1.0):
             self.parent_comb = parent_comb
             self.child = wanted_parent_matcher
             self.limit = limit

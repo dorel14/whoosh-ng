@@ -1,12 +1,7 @@
 import random
 
 from whoosh.filedb.filestore import RamStorage
-from whoosh.filedb.filetables import (
-    HashReader,
-    HashWriter,
-    OrderedHashReader,
-    OrderedHashWriter,
-)
+from whoosh.filedb.filetables import HashReader, HashWriter, OrderedHashReader, OrderedHashWriter
 from whoosh.util.testing import TempStorage
 
 

@@ -203,9 +203,7 @@ class WhooshModule(Module):
         return self.parser.parse(qstring)
 
     def find(self, q):
-        return self.srch.search(
-            q, limit=int(self.options.limit), optimize=self.options.optimize
-        )
+        return self.srch.search(q, limit=int(self.options.limit), optimize=self.options.optimize)
 
     def findterms(self, terms):
         limit = int(self.options.limit)
@@ -303,9 +301,7 @@ class XapianModule(Module):
         hf = self.bench.spec.headline_field
         mf = self.bench.spec.main_field
         for m in matches:
-            yield self._process_result(
-                {hf: m.document.get_value(0), mf: m.document.get_data()}
-            )
+            yield self._process_result({hf: m.document.get_value(0), mf: m.document.get_data()})
 
 
 class SolrModule(Module):
@@ -344,12 +340,10 @@ class SolrModule(Module):
 
 class ZcatalogModule(Module):
     def indexer(self, **kwargs):
-        import transaction  # type: ignore # type: ignore @UnresolvedImport
-        from zcatalog import catalog  # type: ignore # type: ignore @UnresolvedImport
-        from ZODB.DB import DB  # type: ignore # type: ignore @UnresolvedImport
-        from ZODB.FileStorage import (
-            FileStorage,  # type: ignore # type: ignore @UnresolvedImport
-        )
+        import transaction  # type: ignore
+        from zcatalog import catalog  # type: ignore
+        from ZODB.DB import DB  # type: ignore
+        from ZODB.FileStorage import FileStorage  # type: ignore
 
         directory = os.path.join(self.options.dir, f"{self.options.indexname}_zcatalog")
         if os.path.exists(directory):
@@ -374,26 +368,22 @@ class ZcatalogModule(Module):
         self.cat.index_doc(doc)
         self.zcatalog_count += 1
         if self.zcatalog_count >= 100:
-            import transaction  # type: ignore # type: ignore @UnresolvedImport
+            import transaction  # type: ignore
 
             transaction.commit()
             self.zcatalog_count = 0
 
     def finish(self, **kwargs):
-        import transaction  # type: ignore # type: ignore @UnresolvedImport
+        import transaction  # type: ignore
 
         transaction.commit()
         del self.zcatalog_count
 
     def searcher(self):
-        from ZODB.DB import DB  # type: ignore # type: ignore @UnresolvedImport
-        from ZODB.FileStorage import (
-            FileStorage,  # type: ignore # type: ignore @UnresolvedImport
-        )
+        from ZODB.DB import DB  # type: ignore
+        from ZODB.FileStorage import FileStorage  # type: ignore
 
-        path = os.path.join(
-            self.options.dir, f"{self.options.indexname}_zcatalog", "index"
-        )
+        path = os.path.join(self.options.dir, f"{self.options.indexname}_zcatalog", "index")
         storage = FileStorage(path)
         db = DB(storage)
         conn = db.open()
@@ -422,7 +412,7 @@ class NucularModule(Module):
     def indexer(self, create=True):
         import shutil
 
-        from nucular import Nucular  # type: ignore # type: ignore @UnresolvedImport
+        from nucular import Nucular  # type: ignore
 
         directory = os.path.join(self.options.dir, f"{self.options.indexname}_nucular")
         if create:
@@ -453,11 +443,9 @@ class NucularModule(Module):
         self.archive.cleanUp()
 
     def searcher(self):
-        from nucular import Nucular  # type: ignore # type: ignore @UnresolvedImport
+        from nucular import Nucular  # type: ignore
 
-        directory = os.path.join(
-            self.options.directory, f"{self.options.indexname}_nucular"
-        )
+        directory = os.path.join(self.options.directory, f"{self.options.indexname}_nucular")
         self.archive = Nucular.Nucular(directory)
 
     def query(self):
@@ -607,9 +595,7 @@ class Bench:
             help="Solr URL",
             default="http://localhost:8983/solr",
         )
-        p.add_option(
-            "-m", "--mb", dest="limitmb", help="Max. memory usage, in MB", default="128"
-        )
+        p.add_option("-m", "--mb", dest="limitmb", help="Max. memory usage, in MB", default="128")
         p.add_option(
             "-c",
             "--chunk",

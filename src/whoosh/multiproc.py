@@ -154,9 +154,7 @@ class SubWriterTask(Process):
 
 
 class MpWriter(SegmentWriter):
-    def __init__(
-        self, ix, procs=None, batchsize=100, subargs=None, multisegment=False, **kwargs
-    ):
+    def __init__(self, ix, procs=None, batchsize=100, subargs=None, multisegment=False, **kwargs):
         # This is the "main" writer that will aggregate the results created by
         # the sub-tasks
         SegmentWriter.__init__(self, ix, **kwargs)
@@ -207,7 +205,7 @@ class MpWriter(SegmentWriter):
         filename = f"{random_name()}.doclist"
         with self.temp_storage().create_file(filename).raw_file() as f:
             for item in docbuffer:
-                dump(item, f, 2)
+                dump(item, f)
 
         if len(self.tasks) < self.procs:
             self._new_task()
@@ -262,9 +260,7 @@ class MpWriter(SegmentWriter):
             self._commit(mergetype, optimize, merge)
         else:
             # Otherwise, just do a regular-old commit
-            SegmentWriter.commit(
-                self, mergetype=mergetype, optimize=optimize, merge=merge
-            )
+            SegmentWriter.commit(self, mergetype=mergetype, optimize=optimize, merge=merge)
 
     def _commit(self, mergetype, optimize, merge):
         # Index the remaining documents in the doc buffer
@@ -360,9 +356,7 @@ class SerialMpWriter(MpWriter):
         self.procs = procs or cpu_count()
         self.batchsize = batchsize
         self.subargs = subargs if subargs else kwargs
-        self.tasks = [
-            SegmentWriter(ix, _lk=False, **self.subargs) for _ in range(self.procs)
-        ]
+        self.tasks = [SegmentWriter(ix, _lk=False, **self.subargs) for _ in range(self.procs)]
         self.pointer = 0
         self._added_sub = False
 
