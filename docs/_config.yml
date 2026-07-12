@@ -15,12 +15,16 @@ permalink: pretty
 # Use remote theme for Just the Docs (GitHub Pages compatible)
 remote_theme: just-the-docs/just-the-docs
 
-# Global theme settings
-color_scheme: dark
-search_enabled: true
-heading_anchors: true
+# Just the Docs theme configuration
+just_the_docs:
+  search_enabled: true
+  search_preview: true
+  heading_break: 360
+  nav_sort: case_insensitive
+  nav_fold: true
+  footer_content: "Whoosh-NG Documentation | Last updated: 2026-07-12"
 
-# Collections for organized content (en and fr)
+# Collections for organized content
 collections:
   en:
     output: true
@@ -31,7 +35,7 @@ collections:
 
 # Default front matter for markdown files
 defaults:
-  # Root pages
+  # Root pages (README.md, etc.)
   - scope:
       path: ""
       type: pages
@@ -56,7 +60,7 @@ defaults:
 include:
   - favicon.ico
   - logo.png
-  - _pages
+  - README.md
 
 # Exclude from build
 exclude:
