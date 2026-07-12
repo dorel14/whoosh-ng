@@ -2,7 +2,7 @@
 color_scheme: dark
 title: "Whoosh-NG Documentation"
 nav_order: 1
-permalink: /whoosh-ng
+permalink: /
 ---
 
 # Whoosh-NG Documentation
