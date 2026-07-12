@@ -1,7 +1,7 @@
 [![PyPI](https://img.shields.io/pypi/v/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
 [![License](https://img.shields.io/pypi/l/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
-[![Documentation](https://img.shields.io/badge/docs-yes-blue.svg)](https://dorel14.github.io/Whoosh-NG/)
+[![Documentation](https://img.shields.io/badge/docs-yes-blue.svg)](https://dorel14.github.io/whoosh-ng/)
 
 # Whoosh-NG
 
@@ -69,10 +69,10 @@ pip install "whoosh-ng[dev]"
 
 ## Documentation
 
-- **[API Reference](https://dorel14.github.io/Whoosh-NG/en/api/overview/)** - Complete module documentation
-- **[User Guides](https://dorel14.github.io/Whoosh-NG/en/guides/)** - Tutorials and best practices
-- **[Examples](https://dorel14.github.io/Whoosh-NG/en/examples/)** - Runnable code examples
-- **[French Documentation](https://dorel14.github.io/Whoosh-NG/fr/)** - Documentation en français
+- **[API Reference](https://dorel14.github.io/whoosh-ng/en/api/overview/)** - Complete module documentation
+- **[User Guides](https://dorel14.github.io/whoosh-ng/en/guides/)** - Tutorials and best practices
+- **[Examples](https://dorel14.github.io/whoosh-ng/en/examples/)** - Runnable code examples
+- **[French Documentation](https://dorel14.github.io/whoosh-ng/fr/)** - Documentation en français
 
 ## Recent Changes in 4.0.0.dev0
 
@@ -93,7 +93,7 @@ pip install "whoosh-ng[dev]"
 ### Changed
 
 - Distribution renamed from `whoosh-reloaded` to **`whoosh-ng`** (import namespace remains `whoosh`)
-- Documentation site moved to GitHub Pages: https://dorel14.github.io/Whoosh-NG/
+- Documentation site moved to GitHub Pages: https://dorel14.github.io/whoosh-ng/
 - **Python 3.11+ required** (dropped Python 3.9/3.10 support)
 - Packaging cleaned: consolidated extras in `pyproject.toml`
 - Type annotations modernized: `mypy src/whoosh` reports 0 errors, `py.typed` marker included

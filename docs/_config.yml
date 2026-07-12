@@ -3,9 +3,9 @@ description: Pure-Python full-text indexing and search library, modernized for 2
 lang: en
 timezone: UTC
 
-# GitHub Pages: base URL (repo name for project pages)
+# GitHub Pages: base URL and site URL
+url: "https://dorel14.github.io/whoosh-ng"
 baseurl: "/whoosh-ng"
-url: "https://dorel14.github.io"
 
 # Build settings
 markdown: kramdown
@@ -15,30 +15,16 @@ permalink: pretty
 # Use remote theme for Just the Docs (GitHub Pages compatible)
 remote_theme: just-the-docs/just-the-docs
 
-# Global theme
+# Global theme settings
 color_scheme: dark
+search_enabled: true
+heading_anchors: true
 
-# Site favicon and logo (served from docs/assets/)
+# Site favicon and logo
 favicon_ico: "/assets/favico.ico"
 logo: "/assets/logo.png"
 
-# Just the Docs theme configuration
-just_the_docs:
-  search_enabled: true
-  search_preview: true
-  heading_break: 360
-  nav_sort: case_insensitive
-  nav_fold: true
-  collections:
-    en:
-      name: English
-      nav_fold: true
-    fr:
-      name: Français
-      nav_fold: true
-  footer_content: "Whoosh-NG Documentation | Last updated: 2026-07-12"
-
-# Collections for organized content
+# Collections for organized content (en and fr)
 collections:
   en:
     output: true
@@ -49,17 +35,20 @@ collections:
 
 # Default front matter for markdown files
 defaults:
+  # Root pages
   - scope:
       path: ""
       type: pages
     values:
       layout: default
+  # Collection: English
   - scope:
       path: "en"
       type: en
     values:
       layout: default
       lang: en
+  # Collection: French
   - scope:
       path: "fr"
       type: fr
@@ -69,6 +58,8 @@ defaults:
 
 # Include additional files
 include:
+  - favicon.ico
+  - logo.png
   - _pages
 
 # Exclude from build
