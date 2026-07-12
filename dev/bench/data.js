@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783870566504,
+  "lastUpdate": 1783871223080,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -261,6 +261,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.00005345359315839586",
             "extra": "mean: 860.8413278388517 usec\nrounds: 546"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "e685c67e902be1914f394145fe00bd87ca8c5803",
+          "message": "fix(docs): 📝 Met à jour les liens dans la documentation\n\n* Corrige les liens des sections de documentation pour pointer vers les URL complètes.\n* Assure une navigation correcte pour les utilisateurs en fournissant des liens valides.",
+          "timestamp": "2026-07-12T17:46:21+02:00",
+          "tree_id": "add2eb49cf4ac6020851a548684433c2456e22a9",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/e685c67e902be1914f394145fe00bd87ca8c5803"
+        },
+        "date": 1783871222877,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1058.431581056396,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00003352119876153523",
+            "extra": "mean: 944.7941821633128 usec\nrounds: 527"
           }
         ]
       }
