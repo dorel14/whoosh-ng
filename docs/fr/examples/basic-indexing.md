@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Indexation de base"
 parent: "Exemples"
 lang: fr

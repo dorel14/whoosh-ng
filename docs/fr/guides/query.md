@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Langage de requête"
 nav_order: 25
 parent: "Guides"

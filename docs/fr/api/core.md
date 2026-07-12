@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Core"
 nav_order: 1
 parent: "Référence API"

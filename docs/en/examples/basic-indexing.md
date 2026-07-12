@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Basic Indexing"
 parent: "Exemples"
 nav_order: 1

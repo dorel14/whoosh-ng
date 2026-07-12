@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Monitoring"
 nav_order: 31
 parent: "Guides"

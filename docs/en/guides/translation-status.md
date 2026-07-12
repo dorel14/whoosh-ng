@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Translation Status"
 ---
 

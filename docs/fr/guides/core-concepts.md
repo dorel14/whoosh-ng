@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Concepts fondamentaux"
 nav_order: 21
 parent: "Prise en main"

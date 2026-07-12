@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Recherche"
 nav_order: 24
 parent: "Guides"

@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Core Concepts"
 nav_order: 21
 parent: "Getting Started"

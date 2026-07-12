@@ -1,0 +1,66 @@
+---
+name: Build and Deploy Documentation
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - "docs/**"
+      - ".github/workflows/deploy-docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Ruby and build the Jekyll site
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/docs/Gemfile
+        with:
+          ruby-version: 3.0
+          bundler-cache: true
+
+      - name: Build Jekyll site
+        working-directory: ./docs
+        run: bundle exec jekyll build
+
+      # 3. Configure git for pushing to gh-pages
+      - name: Configure git
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      # 4. Create orphan gh-pages branch (or use existing)
+      - name: Create gh-pages branch
+        run: |
+          git fetch origin gh-pages:gh-pages 2>/dev/null || true
+          git checkout --orphan gh-pages
+
+      # 5. Clean and copy built site
+      - name: Prepare deployment
+        run: |
+          git rm -rf .
+          rm -rf .git
+          cp -r docs/_site/* .
+          rm -rf docs/_site
+
+      # 6. Commit and push to gh-pages
+      - name: Commit and push
+        run: |
+          git add -A
+          git commit -m "Deploy documentation: ${{ github.sha }}" || exit 0
+          git push origin gh-pages --force
+
+      # 7. Return to original branch
+      - name: Return to original branch
+        if: github.ref != 'refs/heads/gh-pages'
+        run: git checkout ${{ github.ref }}

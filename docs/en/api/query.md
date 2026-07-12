@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Query API"
 nav_order: 5
 parent: "API Reference"

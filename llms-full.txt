@@ -2,6 +2,93 @@
 
 
 
+## DOCUMENT: Readme
+
+# Whoosh-NG Documentation
+
+> **Version**: Latest | Last updated: 2026-07-12
+
+Welcome to the official documentation for **Whoosh-NG**, a pure-Python full-text indexing and search library modernized for 2025+.
+
+## Language Selection
+
+This documentation is available in two languages:
+
+- **[English Documentation](/en/quickstart/)** — Complete technical documentation in English (source language)
+- **[Documentation Française](/fr/quickstart/)** — Traduction française complète
+
+Both versions are kept synchronized, with code examples remaining in English for consistency.
+
+## Documentation Structure
+
+### Getting Started
+
+- **[Installation](/en/guides/installation/)** — Setup instructions and configuration
+- **[Quick Start](/en/quickstart/)** — 5-minute tutorial to create your first index
+- **[Core Concepts](/en/guides/core-concepts/)** — Understanding schemas, fields, and search
+
+### User Guides
+
+- **[Indexing](/en/guides/indexing/)** — Adding, updating, and deleting documents
+- **[Searching](/en/guides/searching/)** — Query parsing, highlighting, and facets
+- **[Schema Design](/en/guides/schema/)** — Field types, storage, and indexing options
+- **[Query Language](/en/guides/query/)** — Lucene-like query syntax
+- **[Middleware](/en/guides/middleware/)** — Pipeline hooks and custom middleware
+- **[Backends](/en/guides/backends/)** — File, SQLite, and memory storage
+- **[Plugins](/en/guides/plugins/)** — Extending Whoosh-NG with plugins
+- **[Autocomplete](/en/guides/autocomplete/)** — Autocomplete providers
+- **[Vector Search](/en/guides/vector/)** — NumPy, HNSW, and Faiss integration
+- **[Monitoring](/en/guides/monitoring/)** — Metrics and observability
+- **[Migration](/en/guides/migration/)** — Migrating from classic Whoosh
+
+### API Reference
+
+- **[API Overview](/en/api/overview/)** — Complete module reference
+- **[Core API](/en/api/core/)** — Index creation and management
+- **[Fields](/en/api/fields/)** — Schema and field type definitions
+- **[Writing API](/en/api/writing/)** — IndexWriter interface
+- **[Searching API](/en/api/searching/)** — Searcher and Results
+- **[Query API](/en/api/query/)** — Query classes and parsers
+- **[Events](/en/api/events/)** — Event bus system
+- **[Middleware API](/en/api/middleware/)** — Middleware pipeline
+- **[Plugins API](/en/api/plugins/)** — Plugin system and registry
+- **[Backends API](/en/api/backends/)** — Storage backend abstractions
+- **[Modern API](/en/api/modern/)** — Modern extensions
+
+### Examples
+
+- **[Basic Indexing](/en/examples/basic-indexing/)** — Document indexing examples
+- **[Search Examples](/en/examples/search/)** — Querying and retrieving results
+- **[FastAPI Integration](/en/examples/fastapi/)** — REST API with FastAPI
+- **[Middleware Examples](/en/examples/middleware/)** — Custom middleware patterns
+- **[Plugin Development](/en/examples/plugin-dev/)** — Building plugins
+
+## Quick Overview
+
+Whoosh-NG combines classic Whoosh's pure-Python full-text search with modern features:
+
+- **Pure Python** — No native dependencies, works anywhere Python runs
+- **Embedded search engine** — No separate server required
+- **Plugin architecture** — Extensible with vector search, autocomplete, and more
+- **Middleware pipeline** — Cross-cutting concerns like metrics, caching, encryption
+- **Vector search support** — NumPy, HNSW, and Faiss integrations
+- **Async support** — Optional async/await support via extras
+
+## Quick Links
+
+- **Project Repository**: [GitHub - whoosh-ng](https://github.com/dorel14/whoosh-ng)
+- **PyPI Package**: [whoosh-ng](https://pypi.org/project/whoosh-ng/)
+- **Issue Tracker**: [GitHub Issues](https://github.com/dorel14/whoosh-ng/issues)
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guide for details on how to submit pull requests, add features, or report bugs.
+
+## License
+
+This project is licensed under the MIT License.
+
+
 ## DOCUMENT: Backends
 
 # Backends API
@@ -2478,6 +2565,94 @@ class whoosh.writing.IndexingError(Exception)
 Raised when an indexing operation fails.
 
 
+## DOCUMENT: Autocomplete
+
+# Autocomplete with Whoosh‑NG
+
+This example demonstrates **autocomplete/suggestion** functionality using the `whoosh_modern.autocomplete` plugin.
+
+## 1. Install
+
+```bash
+pip install "whoosh-ng[autocomplete]"
+```
+
+## 2. Schema with Keyword Field for Terms
+
+```python
+from whoosh import index
+from whoosh.fields import Schema, TEXT, KEYWORD
+from whoosh_modern.autocomplete.plugin import AutocompletePlugin
+from whoosh.plugins.manager import PluginManager
+
+schema = Schema(
+    title=TEXT(stored=True),
+    tags=KEYWORD(stored=True, commas=True),
+)
+
+ix = index.create_in("autocomplete_index", schema)
+```
+
+## 3. Register the Plugin
+
+```python
+# Register autocomplete plugin
+AutocompletePlugin().register(PluginManager())
+```
+
+## 4. Index Documents
+
+```python
+with ix.writer() as w:
+    w.add_document(title="Python Programming", tags="python,programming,language")
+    w.add_document(title="JavaScript Basics", tags="javascript,programming,web")
+    w.add_document(title="Machine Learning", tags="ml,ai,data-science")
+    w.add_document(title="Deep Learning", tags="ml,ai,neural-networks")
+    w.commit()
+```
+
+## 5. Use Inverted Index for Suggestions
+
+```python
+from whoosh_modern.autocomplete.factory import create_autocomplete
+from whoosh.registry import AutocompleteRegistry
+from whoosh.search import searcher
+
+# Get the registered autocomplete provider
+provider = AutocompleteRegistry.get("inverted")
+
+# Index terms from the 'tags' field
+with ix.searcher() as s:
+    for term in s.lexicon("tags"):
+        provider.add_term(term, s.doc_count_all())
+
+# Get suggestions
+suggestions = provider.suggest("py", maxdist=1, limit=5)
+print(suggestions)  # ['python', 'programming']
+```
+
+## 6. Real-time Suggestion Endpoint
+
+```python
+from fastapi import FastAPI
+from whoosh_modern.autocomplete.factory import create_autocomplete
+
+app = FastAPI()
+provider = create_autocomplete("inverted")
+
+@app.get("/suggest")
+async def suggest(q: str, limit: int = 5):
+    return {"suggestions": provider.suggest(q, limit=limit)}
+```
+
+## Key points
+
+- Install with `pip install whoosh-ng[autocomplete]`.
+- Use `KEYWORD` fields to store multi-value tags/terms.
+- Register `AutocompletePlugin` to enable suggestions.
+- The inverted index provider supports fuzzy matching (`maxdist`).
+
+
 ## DOCUMENT: Basic Indexing
 
 # Basic Indexing
@@ -2592,6 +2767,130 @@ finally:
 ```
 
 
+## DOCUMENT: Fastapi Search
+
+# FastAPI Integration
+
+A complete, runnable FastAPI service exposing Whoosh‑NG search via HTTP.
+
+## 1. Install
+
+```bash
+pip install whoosh-ng[api] fastapi uvicorn
+```
+
+## 2. Create the index
+
+```python
+# setup_index.py
+import json
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID
+
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    content=TEXT,
+)
+
+ix = index.create_in("docs_index", schema)
+
+with ix.writer() as w:
+    for doc in json.load(open("documents.json")):
+        w.add_document(
+            id=doc["id"],
+            title=doc["title"],
+            content=doc["content"],
+        )
+    w.commit()
+```
+
+## 3. REST API Service
+
+```python
+# main.py
+from fastapi import FastAPI, Query
+from typing import Optional
+from whoosh import index
+from whoosh.qparser import QueryParser
+from whoosh_fastapi import create_app
+
+ix = index.open_dir("docs_index")
+
+# Option A: Use the helper
+app = create_app(ix, prefix="/api/v1")
+
+# Option B: Manual endpoints
+# app = FastAPI(title="Document Search API", version="1.0.0")
+#
+# @app.get("/api/v1/health")
+# async def health():
+#     return {"status": "ok"}
+#
+# @app.post("/api/v1/search")
+# async def search(q: str = Query(...), limit: int = 10):
+#     with ix.searcher() as s:
+#         parser = QueryParser("content", ix.schema)
+#         results = s.search(parser.parse(q), limit=limit)
+#         return {"hits": [dict(h) for h in results], "total": len(results)}
+#
+# @app.get("/api/v1/documents/{doc_id}")
+# async def get_doc(doc_id: str):
+#     with ix.searcher() as s:
+#         from whoosh.query import Term
+#         results = s.search(Term("id", doc_id))
+#         if results:
+#             return dict(results[0])
+#         return {"error": "not found"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+## 4. Run the server
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+## 5. Test the API
+
+```bash
+# Health check
+curl http://localhost:8000/api/v1/health
+
+# Search
+curl -X POST http://localhost:8000/api/v1/search \
+  -H "Content-Type: application/json" \
+  -d '{"q": "python search"}'
+
+# Get document by ID
+curl http://localhost:8000/api/v1/documents/doc1
+```
+
+## 6. Bulk Indexing Endpoint
+
+```python
+# Add to main.py for dynamic indexing
+from fastapi import FastAPI
+from whoosh.writing import BufferedWriter
+
+@app.post("/api/v1/index")
+async def index_docs(docs: list[dict]):
+    with BufferedWriter(ix, period=30, limit=50) as w:
+        for doc in docs:
+            w.add_document(**doc)
+    return {"indexed": len(docs)}
+```
+
+## Key points
+
+- `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, and `/autocomplete` endpoints.
+- All blocking calls run off the event loop via `run_sync`.
+- Use `BufferedWriter` for high-throughput indexing via POST.
+
+
 ## DOCUMENT: Fastapi
 
 # FastAPI Integration
@@ -2666,124 +2965,463 @@ def search(q: str):
 
 # Middleware Examples
 
-Practical examples for indexing and search middleware.
+Practical examples for building and using Whoosh-NG middleware.
 
-## Logging middleware
+## 1. Logging Middleware
 
 ```python
-from whoosh.middleware.base import Middleware, MiddlewareContext
-from whoosh.middleware.integration import apply_middleware_to_writer, apply_middleware_to_searcher
+from whoosh.middleware.base import Middleware
+from whoosh.middleware.context import MiddlewareContext
 
 class LoggingMiddleware(Middleware):
     def before_search(self, context: MiddlewareContext) -> MiddlewareContext:
-        print(f"search: {context.query}")
+        print(f"[SEARCH] Query: {context.query}")
         return context
 
     def after_search(self, context: MiddlewareContext) -> MiddlewareContext:
         if context.results is not None:
-            print(f"results: {len(context.results)}")
+            print(f"[RESULTS] Found {len(context.results)} hits")
         return context
 ```
 
-## Cache middleware
+## 2. Metrics Middleware
 
 ```python
-from whoosh.middleware.base import Middleware, MiddlewareContext
+from whoosh.middleware.base import Middleware
+from whoosh.middleware.context import MiddlewareContext
 
-class SimpleCacheMiddleware(Middleware):
-    def before_search(self, context: MiddlewareContext) -> MiddlewareContext:
-        context.extra["cache_check"] = True
+class MetricsMiddleware(Middleware):
+    def __init__(self) -> None:
+        self._metrics = {}
+
+    def after_index(self, context: MiddlewareContext) -> MiddlewareContext:
+        self._metrics["documents_indexed"] = self._metrics.get("documents_indexed", 0) + 1
         return context
 
     def after_search(self, context: MiddlewareContext) -> MiddlewareContext:
-        context.extra["cache_save"] = True
+        self._metrics["searches_executed"] = self._metrics.get("searches_executed", 0) + 1
+        return context
+
+    def get_metrics(self) -> dict:
+        return dict(self._metrics)
+```
+
+## 3. Cache Middleware
+
+```python
+from whoosh.middleware.base import Middleware
+from whoosh.middleware.context import MiddlewareContext
+
+class SearchCacheMiddleware(Middleware):
+    def __init__(self) -> None:
+        self._cache = {}
+
+    def before_search(self, context: MiddlewareContext) -> MiddlewareContext:
+        if context.query and str(context.query) in self._cache:
+            context.metadata["_cached_result"] = self._cache[str(context.query)]
+        return context
+
+    def after_search(self, context: MiddlewareContext) -> MiddlewareContext:
+        if context.query and context.results is not None:
+            self._cache[str(context.query)] = context.results
         return context
 ```
 
-## Applied to searcher
+## 4. Applying Middleware to an Index
 
 ```python
-chain = MiddlewareChain([LoggingMiddleware(), SimpleCacheMiddleware()])
-searcher = apply_middleware_to_searcher(ix.searcher(), chain.middlewares)
-results = searcher.search(q)
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.integration import apply_middleware_to_searcher
+
+# Create middleware chain
+chain = MiddlewareChain([
+    LoggingMiddleware(),
+    MetricsMiddleware(),
+])
+
+# Apply to a searcher
+with ix.searcher() as base_searcher:
+    searcher = apply_middleware_to_searcher(base_searcher, chain.middlewares)
+    results = searcher.search(query)
 ```
+
+## 5. Middleware Lifecycle
+
+```python
+class LifecycleMiddleware(Middleware):
+    def startup(self, context):
+        print("Middleware initialized")
+
+    def shutdown(self, context):
+        print("Middleware shutting down")
+
+    def on_error(self, context, exc):
+        print(f"Error: {exc}")
+        raise exc
+```
+
+## Key Hooks
+
+| Hook | Phase | Context |
+|------|-------|---------|
+| `startup` | Init | Called once on middleware init |
+| `shutdown` | Cleanup | Called once on teardown |
+| `before_index` | Indexing | Before document added |
+| `after_index` | Indexing | After document added |
+| `before_delete` | Deletion | Before document deleted |
+| `after_delete` | Deletion | After document deleted |
+| `before_search` | Search | Before query executed |
+| `after_search` | Search | After results returned |
+| `on_error` | Error | When exception occurs |
+| `on_commit` | Commit | After writer.commit() |
+
+
+## DOCUMENT: Movie Search
+
+# Movie Search Application
+
+A complete, runnable example showing how to build a small **movie search** application with Whoosh‑NG: schema design, indexing from a JSON dataset, faceted search, highlighting, and filtering.
+
+## 1. Schema
+
+```python
+from whoosh.fields import Schema, TEXT, ID, KEYWORD, NUMERIC
+
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    director=TEXT(stored=True),
+    genre=KEYWORD(stored=True, commas=True, scorable=True),
+    year=NUMERIC(int, stored=True),
+    synopsis=TEXT,
+)
+```
+
+## 2. Index the dataset
+
+```python
+import json
+import shutil
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID, KEYWORD, NUMERIC
+
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    director=TEXT(stored=True),
+    genre=KEYWORD(stored=True, commas=True, scorable=True),
+    year=NUMERIC(int, stored=True),
+    synopsis=TEXT,
+)
+
+# Clean and create new index
+shutil.rmtree("movies", ignore_errors=True)
+ix = index.create_in("movies", schema)
+
+movies = json.load(open("movies.json"))  # list of dicts
+
+with ix.writer() as w:
+    for m in movies:
+        w.add_document(
+            id=str(m["id"]),
+            title=m["title"],
+            director=m["director"],
+            genre=",".join(m["genres"]),
+            year=m["year"],
+            synopsis=m["synopsis"],
+        )
+    w.commit()
+```
+
+Example `movies.json`:
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Blade Runner",
+    "director": "Ridley Scott",
+    "genres": ["sci-fi", "thriller"],
+    "year": 1982,
+    "synopsis": "A replicant hunter questions humanity in a rain-soaked future."
+  },
+  {
+    "id": 2,
+    "title": "Inception",
+    "director": "Christopher Nolan",
+    "genres": ["sci-fi", "action"],
+    "year": 2010,
+    "synopsis": "A thief who steals corporate secrets through dream-sharing technology."
+  }
+]
+```
+
+## 3. Search with facets and highlighting
+
+```python
+from whoosh import index
+from whoosh.qparser import MultifieldParser
+from whoosh.sorting import FieldFacet
+
+ix = index.open_dir("movies")
+
+qp = MultifieldParser(["title", "synopsis", "director"], ix.schema)
+
+with ix.searcher() as s:
+    q = qp.parse("future")
+
+    # Search with sorting by year descending, grouped by genre
+    results = s.search(
+        q,
+        sortedby=FieldFacet("year", reverse=True),
+        groupedby=FieldFacet("genre", allow_overlap=True),
+        limit=20,
+    )
+
+    for hit in results:
+        print(hit["title"], hit["year"], "|", round(hit.score, 2))
+        print("  ", hit.highlights("synopsis"))
+
+    # Show genre facets
+    print("\nGenres:", results.groups("genre"))
+```
+
+## 4. Filtering
+
+Find sci-fi movies after 1990:
+
+```python
+from whoosh import index
+from whoosh.qparser import QueryParser
+from whoosh.query import Term, And, NumericRange
+
+ix = index.open_dir("movies")
+qp = QueryParser("synopsis", ix.schema)
+
+with ix.searcher() as s:
+    user_q = qp.parse("dream")
+    filters = And([
+        Term("genre", "sci-fi"),
+        NumericRange("year", 1990, None),
+    ])
+    results = s.search(user_q, filter=filters)
+    for hit in results:
+        print(hit["title"], hit["year"])
+```
+
+## 5. Key takeaways
+
+- `KEYWORD(commas=True)` stores multi-value fields that can be faceted.
+- `MultifieldParser` searches multiple fields with optional boosts.
+- `FieldFacet` enables faceted grouping and sorting.
+- `hit.highlights()` returns highlighted snippets ready for display.
 
 
 ## DOCUMENT: Plugin Dev
 
 # Plugin Development
 
-How to build and register a custom Whoosh-NG plugin.
+Complete guide to building, registering, and testing custom Whoosh-NG plugins.
 
-## Minimal Plugin
+## 1. Plugin Base Class
+
+All plugins inherit from `whoosh.plugins.base.Plugin`:
 
 ```python
-from whoosh.plugins.base import BasePlugin
+from whoosh.plugins.base import Plugin
 
-class MyPlugin(BasePlugin):
+class MyPlugin(Plugin):
     name = "my_plugin"
     version = "1.0.0"
-    dependencies = []
+    depends_on = []  # Other plugins this requires
+    conflicts_with = []  # Plugins that conflict
+    priority = 0  # Load order (higher = later)
+    middleware = []  # List of middleware class names
 
-    def setup(self, registry):
-        registry.register("my_handler", MyHandler())
+    def register(self, manager):
+        """Called when plugin is loaded. Register your handlers here."""
+        manager.register("my_handler", MyHandler())
 
-    def teardown(self, registry):
-        registry.unregister("my_handler")
+    def register_hooks(self):
+        """Register hooks using hookimpl decorator."""
+        from whoosh.hooks import hookimpl, register_hook
+
+        @hookimpl
+        def on_search(request, response):
+            # Hook logic here
+            pass
+
+        register_hook("on_search", hookimpl(on_search))
 ```
 
-## Registration
+## 2. Registering a Plugin
+
+### Manual Registration
 
 ```python
 from whoosh.plugins.manager import PluginManager
 
-PluginManager.register("my_plugin", MyPlugin())
-PluginManager.enable("my_plugin")
+plugin = MyPlugin()
+PluginManager.register(plugin)
 ```
 
-## Entry Points
+### Auto-Discovery via Entry Points
+
+In `pyproject.toml`:
 
 ```toml
-# pyproject.toml
+[project]
+name = "whoosh-ng-my-plugin"
+
 [project.entry-points."whoosh_ng.plugins"]
 my_plugin = "my_package.plugin:MyPlugin"
 ```
 
+Auto-load all registered plugins:
+
 ```python
-# Auto-discovery
 from whoosh.plugins.manager import PluginManager
-PluginManager.load_plugins()
+
+PluginManager.load_plugins()  # Uses 'whoosh.plugins' group by default
 ```
 
-## Standalone Provider Plugin
+## 3. Provider Plugin Example
+
+A provider plugin registers a new implementation for a registry:
 
 ```python
-class MyProviderPlugin(BasePlugin):
-    name = "my_provider"
+from whoosh.plugins.base import Plugin
+from whoosh.registry import VectorRegistry
 
-    def setup(self, registry):
-        registry.register("generator", MyGenerator(), "autocomplete")
+class MyVectorProvider:
+    def search(self, query_vector, k=10):
+        # Your vector similarity logic
+        return [{"doc_id": "1", "score": 0.95}]
+
+class MyVectorPlugin(Plugin):
+    name = "my_vector"
+    version = "1.0.0"
+
+    def register(self, manager):
+        provider = MyVectorProvider()
+        VectorRegistry.register("my_vector", provider, self.name)
 ```
 
-## Testable Plugin
+## 4. Creating a Custom Field Type
+
+```python
+from whoosh.fields import FieldType, TEXT
+from whoosh.formats import Postings
+
+class TagField(FieldType):
+    scorable = True
+    stored = True
+    indexed = True
+    format = Postings()
+
+    def __init__(self, stored=True, scorable=True):
+        super().__init__(format=Postings(), analyzer=None,
+                        scorable=scorable, stored=stored)
+```
+
+## 5. Testing Your Plugin
 
 ```python
 import pytest
-from whoosh.plugins.base import BasePlugin
+from whoosh.plugins.manager import PluginManager
+from whoosh.registry.base import Registry
 
 class TestMyPlugin:
-    def test_setup_registers(self):
+    def test_register(self):
         plugin = MyPlugin()
-        registry = InMemoryRegistry()
-        plugin.setup(registry)
-        assert registry.get("my_handler") is not None
+        manager = PluginManager()
+        plugin.register(manager)
+        assert "my_handler" in manager._plugins
 
-    def test_teardown_unregisters(self):
-        plugin = MyPlugin()
-        registry = InMemoryRegistry()
-        plugin.setup(registry)
-        plugin.teardown(registry)
-        assert registry.get("my_handler") is None
+    def test_entry_point(self):
+        """Test that entry point loading works."""
+        manager = PluginManager()
+        manager.register(MyPlugin())
+        assert "my_plugin" in manager.list_enabled()
+
+    def test_conflict_detection(self):
+        plugin1 = MyPlugin()
+        plugin2 = ConflictingPlugin()
+        manager = PluginManager()
+        manager.register(plugin1)
+        assert manager.detect_conflicts("my_plugin", "conflicting_plugin")
+```
+
+## 6. Async Plugin Methods
+
+Plugins support async methods:
+
+```python
+from whoosh.plugins.base import Plugin
+from typing import Awaitable
+
+class AsyncPlugin(Plugin):
+    name = "async_plugin"
+    version = "1.0.0"
+
+    async def register(self, manager):
+        # Async initialization
+        await some_async_setup()
+
+    def register_hooks(self):
+        from whoosh.hooks import hookimpl
+
+        @hookimpl
+        async def on_search(request, response):
+            # Async hook
+            await log_search_async(request)
+```
+
+## 7. Plugin Manager API
+
+```python
+from whoosh.plugins.manager import PluginManager
+
+manager = PluginManager()
+
+# Register a plugin instance
+manager.register(MyPlugin())
+
+# Enable/disable
+manager.enable("my_plugin")
+manager.disable("my_plugin")
+
+# Check status
+manager.list_plugins()   # All registered
+manager.list_enabled()   # Enabled plugins
+
+# Get plugin
+plugin = manager.get("my_plugin")
+
+# Version checking
+manager.validate_version("my_plugin", "1.0.0")
+```
+
+## 8. Built-in Plugins
+
+Whoosh-NG includes several built-in plugins:
+
+- `whoosh_modern.vector` - Vector similarity search (NumPy provider)
+- `whoosh_modern.autocomplete` - Inverted index autocomplete
+- `whoosh_fastapi` - FastAPI REST endpoints
+
+Load them:
+
+```python
+from whoosh.plugins.manager import PluginManager
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh_modern.autocomplete.plugin import AutocompletePlugin
+
+PluginManager.load_plugins()  # Auto-loads entry points
+# Or manually:
+manager = PluginManager()
+manager.register(VectorPlugin())
+manager.register(AutocompletePlugin())
 ```
 
 
@@ -2791,102 +3429,224 @@ class TestMyPlugin:
 
 # Search Examples
 
-Examples for querying and retrieving results.
+Real, runnable examples for querying and retrieving results with Whoosh‑NG.
 
-## Basic Search
+## 1. Basic Search
 
 ```python
-from whoosh.qparser import QueryParser
 from whoosh import index
+from whoosh.qparser import QueryParser
 
 ix = index.open_dir("indexdir")
-with ix.searcher() as searcher:
+
+with ix.searcher() as s:
     qp = QueryParser("content", ix.schema)
-    q = qp.parse("hello python")
-    results = searcher.search(q)
+    q = qp.parse("python search")
 
+    results = s.search(q, limit=10)
     for hit in results:
-        print(hit["title"], hit.score)
+        print(f"{hit['title']}: score={hit.score:.2f}")
 ```
 
-## Pagination
-
-```python
-with ix.searcher() as searcher:
-    page = 1
-    results = searcher.search_page(q, page, pagelen=10)
-    total = len(results)
-    print(f"Total: {total} results")
-```
-
-## Multi-field Search
+## 2. Multi-field Search
 
 ```python
 from whoosh.qparser import MultifieldParser
 
 ix = index.open_dir("indexdir")
 qp = MultifieldParser(
-    ["title", "content"],
+    ["title", "content", "tags"],
     ix.schema,
-    fieldboosts={"title": 2.0}
+    fieldboosts={"title": 2.0, "tags": 1.5}
 )
-q = qp.parse("python")
-```
 
-## Sort and Filter
-
-```python
-from whoosh.query import Term
-
-ix = index.open_dir("indexdir")
-with ix.searcher() as searcher:
-    qp = QueryParser("content", ix.schema)
-    q = qp.parse("python")
-    results = searcher.search(
-        q,
-        filter=Term("rating", 5.0),
-        sortedby="rating",
-        reverse=True
-    )
-```
-
-## Highlighting
-
-```python
-with ix.searcher() as searcher:
-    results = searcher.search_page(q, 1)
+q = qp.parse("fastapi")
+with ix.searcher() as s:
+    results = s.search(q)
     for hit in results:
-        highlights = hit.highlights("content", top=3)
-        print(f"{hit['title']}: {highlights}")
+        print(hit["title"])
 ```
 
-## Time-Limited Search
+## 3. Pagination
 
 ```python
-from whoosh.collectors import TimeLimitCollector
+with ix.searcher() as s:
+    page = s.search_page(q, 2, pagelen=10)  # Page 2, 10 per page
 
-with ix.searcher() as searcher:
-    c = searcher.collector(limit=50)
-    tlc = TimeLimitCollector(c, timelimit=2.0)
-    try:
-        searcher.search_with_collector(q, tlc)
-    except Exception as exc:
-        print(f"Timed out or failed: {exc}")
-    results = tlc.results()
+    print(f"Page {page.number} / {page.pagecount}")
+    for hit in page:
+        print(hit["title"])
 ```
 
-## Facet and Group
+## 4. Sort and Filter
 
 ```python
-from whoosh import sorting
+from whoosh.query import Term, And, NumericRange
+from whoosh.sorting import FieldFacet, ScoreFacet
 
-with ix.searcher() as searcher:
-    facet = sorting.FieldFacet("rating")
-    results = searcher.search(
+with ix.searcher() as s:
+    filters = And([
+        Term("tags", "python"),
+        NumericRange("year", 2020, None),
+    ])
+
+    results = s.search(
         q,
-        sortedby=[facet, sorting.ScoreFacet()]
+        filter=filters,
+        sortedby=[FieldFacet("year", reverse=True), ScoreFacet()],
+        limit=20
     )
 ```
+
+## 5. Highlighting
+
+```python
+with ix.searcher() as s:
+    results = s.search(q, limit=5)
+
+    for hit in results:
+        snippet = hit.highlights("content", top=2)
+        print(f"{hit['title']}:")
+        print(f"  {snippet}")
+```
+
+## 6. Date Range Search
+
+```python
+from whoosh.query import DateRange
+from datetime import datetime
+
+with ix.searcher() as s:
+    start = datetime(2024, 1, 1)
+    end = datetime(2024, 12, 31)
+    q = DateRange("published", start, end)
+
+    results = s.search(q)
+```
+
+## 7. Prefix Search
+
+```python
+from whoosh.query import Prefix
+
+with ix.searcher() as s:
+    q = Prefix("title", "Py")  # All titles starting with "Py"
+    results = s.search(q)
+```
+
+## Key points
+
+- `QueryParser` parses a string into a `Query` object.
+- `MultifieldParser` searches multiple fields with optional boosts.
+- `search_page()` handles pagination.
+- `filter` restricts results without affecting scores.
+- `sortedby` sorts by field value or relevance score.
+
+
+## DOCUMENT: Vector Search
+
+# Vector Search with Whoosh‑NG
+
+This example shows how to enable **semantic/vector search** using the optional `vector` extra. We index document embeddings and perform k-nearest neighbour (k-NN) search.
+
+## 1. Install Optional Dependencies
+
+```bash
+pip install "whoosh-ng[vector]" numpy
+```
+
+## 2. Schema with a Vector Field
+
+```python
+from whoosh.fields import Schema, TEXT, ID, VECTOR
+from whoosh.vector import VectorField
+
+schema = Schema(
+    doc_id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    content=TEXT,
+    embedding=VECTOR(stored=True, dim=128),  # 128-dimensional embedding
+)
+```
+
+## 3. Indexing Vectors
+
+```python
+import numpy as np
+from whoosh import index
+
+shutil.rmtree("vector_index", ignore_errors=True)
+ix = index.create_in("vector_index", schema)
+
+# Simulate embeddings (in practice, use a model like SentenceTransformer)
+documents = [
+    {"doc_id": "doc1", "title": "Python Basics", "content": "Learn Python programming fundamentals."},
+    {"doc_id": "doc2", "title": "Advanced Python", "content": "Deep dive into Python decorators and metaclasses."},
+    {"doc_id": "doc3", "title": "Data Science", "content": "Pandas and NumPy for data analysis."},
+]
+
+# Generate random embeddings for demo
+np.random.seed(42)
+embeddings = {d["doc_id"]: np.random.rand(128).astype(np.float32) for d in documents}
+
+with ix.writer() as w:
+    for doc in documents:
+        w.add_document(
+            doc_id=doc["doc_id"],
+            title=doc["title"],
+            content=doc["content"],
+            embedding=embeddings[doc["doc_id"]].tobytes(),
+        )
+    w.commit()
+```
+
+## 4. Vector Search with NumpyProvider
+
+```python
+from whoosh_modern.vector import VectorField
+from whoosh_modern.vector.numpy_provider import NumpyProvider
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh.plugins.manager import PluginManager
+
+# Register the vector plugin
+VectorPlugin().register(PluginManager())
+
+# Create provider and add vectors
+provider = NumpyProvider()
+for doc_id, vec in embeddings.items():
+    provider.add([(doc_id, vec.tolist())])
+
+# Search: find 2 most similar docs to a query vector
+query_vec = embeddings["doc1"]  # use doc1's embedding as query
+hits = provider.search(query_vec, k=2)
+
+for hit in hits:
+    print(f"doc_id={hit.doc_id}, score={hit.score:.3f}")
+```
+
+## 5. Using VectorField for Serialization
+
+```python
+from whoosh.vector import VectorField
+
+vf = VectorField(dimension=128, name="embedding")
+
+# Convert list to bytes for storage
+values = [0.1, 0.2, 0.3, 0.4] + [0.0] * 124  # 128 values
+raw = vf.vector_to_bytes(values)
+
+# Restore from bytes
+restored = vf.bytes_to_vector(raw)
+print(restored == tuple(values))  # True
+```
+
+## 6. Key Takeaways
+
+- Install with `pip install whoosh-ng[vector]` to get `whoosh_modern.vector`.
+- `VECTOR` field stores raw bytes; use `VectorField` to convert to/from Python lists.
+- `NumpyProvider` implements cosine similarity via dot product.
+- Register the plugin via `VectorPlugin().register(manager)` or use `PluginManager.load_plugins()`.
+- Use `filter_ids` in `provider.search()` to restrict to a subset of documents.
 
 
 ## DOCUMENT: Autocomplete
@@ -4606,6 +5366,20 @@ best_bet_results.upgrade_and_extend(main_results)
 ```
 
 
+## DOCUMENT: Translation Status
+
+# Translation Completion Tracking
+
+- [x] EN quickstart
+- [x] EN guides
+- [x] EN API pages
+- [x] EN examples
+- [x] FR quickstart
+- [x] FR guides
+- [x] FR API pages
+- [x] FR examples
+
+
 ## DOCUMENT: Vector
 
 # Vector Search
@@ -4765,37 +5539,87 @@ indexer.commit()
 
 # Whoosh-NG Documentation
 
-Pure-Python full-text indexing and search library, modernized for 2025+.
+> **Version**: Latest | Last updated: 2026-07-12
 
-## Quick Start
+Welcome to the official documentation for **Whoosh-NG**, a pure-Python full-text indexing and search library modernized for 2025+.
 
-```bash
-pip install whoosh-ng
-```
+## Language Selection
 
-```python
-import whoosh.index as index
-from whoosh.fields import Schema, TEXT, ID
+This documentation is available in two languages:
 
-schema = Schema(id=ID(stored=True), content=TEXT())
-ix = index.create_in("indexdir", schema)
+- **[English Documentation](/en/quickstart/)** — Complete technical documentation in English (source language)
+- **[Documentation Française](/fr/quickstart/)** — Traduction française complète
 
-with ix.writer() as w:
-    w.add_document(id="1", content="hello world")
+Both versions are kept synchronized, with code examples remaining in English for consistency.
 
-with ix.searcher() as s:
-    results = s.search("world")
-    print(results[0])
-```
+## Documentation Structure
 
-## Features
+### Getting Started
 
-- Pure Python, no native dependencies
-- Embedded search engine
-- Plugin architecture for extensibility
-- Middleware pipeline for cross-cutting concerns
-- Vector search support (NumPy, HNSW, Faiss)
-- Async support via optional extra
+- **[Installation](/en/guides/installation/)** — Setup instructions and configuration
+- **[Quick Start](/en/quickstart/)** — 5-minute tutorial to create your first index
+- **[Core Concepts](/en/guides/core-concepts/)** — Understanding schemas, fields, and search
+
+### User Guides
+
+- **[Indexing](/en/guides/indexing/)** — Adding, updating, and deleting documents
+- **[Searching](/en/guides/searching/)** — Query parsing, highlighting, and facets
+- **[Schema Design](/en/guides/schema/)** — Field types, storage, and indexing options
+- **[Query Language](/en/guides/query/)** — Lucene-like query syntax
+- **[Middleware](/en/guides/middleware/)** — Pipeline hooks and custom middleware
+- **[Backends](/en/guides/backends/)** — File, SQLite, and memory storage
+- **[Plugins](/en/guides/plugins/)** — Extending Whoosh-NG with plugins
+- **[Autocomplete](/en/guides/autocomplete/)** — Autocomplete providers
+- **[Vector Search](/en/guides/vector/)** — NumPy, HNSW, and Faiss integration
+- **[Monitoring](/en/guides/monitoring/)** — Metrics and observability
+- **[Migration](/en/guides/migration/)** — Migrating from classic Whoosh
+
+### API Reference
+
+- **[API Overview](/en/api/overview/)** — Complete module reference
+- **[Core API](/en/api/core/)** — Index creation and management
+- **[Fields](/en/api/fields/)** — Schema and field type definitions
+- **[Writing API](/en/api/writing/)** — IndexWriter interface
+- **[Searching API](/en/api/searching/)** — Searcher and Results
+- **[Query API](/en/api/query/)** — Query classes and parsers
+- **[Events](/en/api/events/)** — Event bus system
+- **[Middleware API](/en/api/middleware/)** — Middleware pipeline
+- **[Plugins API](/en/api/plugins/)** — Plugin system and registry
+- **[Backends API](/en/api/backends/)** — Storage backend abstractions
+- **[Modern API](/en/api/modern/)** — Modern extensions
+
+### Examples
+
+- **[Basic Indexing](/en/examples/basic-indexing/)** — Document indexing examples
+- **[Search Examples](/en/examples/search/)** — Querying and retrieving results
+- **[FastAPI Integration](/en/examples/fastapi/)** — REST API with FastAPI
+- **[Middleware Examples](/en/examples/middleware/)** — Custom middleware patterns
+- **[Plugin Development](/en/examples/plugin-dev/)** — Building plugins
+
+## Quick Overview
+
+Whoosh-NG combines classic Whoosh's pure-Python full-text search with modern features:
+
+- **Pure Python** — No native dependencies, works anywhere Python runs
+- **Embedded search engine** — No separate server required
+- **Plugin architecture** — Extensible with vector search, autocomplete, and more
+- **Middleware pipeline** — Cross-cutting concerns like metrics, caching, encryption
+- **Vector search support** — NumPy, HNSW, and Faiss integrations
+- **Async support** — Optional async/await support via extras
+
+## Quick Links
+
+- **Project Repository**: [GitHub - whoosh-ng](https://github.com/dorel14/whoosh-ng)
+- **PyPI Package**: [whoosh-ng](https://pypi.org/project/whoosh-ng/)
+- **Issue Tracker**: [GitHub Issues](https://github.com/dorel14/whoosh-ng/issues)
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guide for details on how to submit pull requests, add features, or report bugs.
+
+## License
+
+This project is licensed under the MIT License.
 
 
 ## DOCUMENT: Middleware
@@ -6136,6 +6960,74 @@ class whoosh.writing.IndexingError(Exception)
 Levée quand une opération d'indexation échoue.
 
 
+## DOCUMENT: Autocomplete
+
+# Autocomplétion avec Whoosh‑NG
+
+Cet exemple démontre la fonctionnalité **autocomplete/suggestion** avec le plugin `whoosh_modern.autocomplete`.
+
+## 1. Installation
+
+```bash
+pip install "whoosh-ng[autocomplete]"
+```
+
+## 2. Schéma avec champ Keyword pour les termes
+
+```python
+from whoosh import index
+from whoosh.fields import Schema, TEXT, KEYWORD
+from whoosh_modern.autocomplete.plugin import AutocompletePlugin
+from whoosh.plugins.manager import PluginManager
+
+schema = Schema(
+    title=TEXT(stored=True),
+    tags=KEYWORD(stored=True, commas=True),
+)
+
+ix = index.create_in("autocomplete_index", schema)
+```
+
+## 3. Enregistrer le plugin
+
+```python
+AutocompletePlugin().register(PluginManager())
+```
+
+## 4. Indexer les documents
+
+```python
+with ix.writer() as w:
+    w.add_document(title="Python Programming", tags="python,programming,language")
+    w.add_document(title="JavaScript Basics", tags="javascript,programming,web")
+    w.add_document(title="Machine Learning", tags="ml,ai,data-science")
+    w.commit()
+```
+
+## 5. Utiliser l’index inversé pour les suggestions
+
+```python
+from whoosh_modern.autocomplete.factory import create_autocomplete
+from whoosh.registry import AutocompleteRegistry
+
+provider = AutocompleteRegistry.get("inverted")
+
+with ix.searcher() as s:
+    for term in s.lexicon("tags"):
+        provider.add_term(term, s.doc_count_all())
+
+suggestions = provider.suggest("py", maxdist=1, limit=5)
+print(suggestions)  # ['python', 'programming']
+```
+
+## Points clés
+
+- Installez avec `pip install whoosh-ng[autocomplete]`.
+- Utilisez des champs `KEYWORD` pour les tags/mots-clés.
+- Enregistrez `AutocompletePlugin` pour activer les suggestions.
+- Le provider inverted supporte les correspondances floues (`maxdist`).
+
+
 ## DOCUMENT: Basic Indexing
 
 # Indexation de base
@@ -6211,142 +7103,542 @@ with ix.writer() as writer:
 ```
 
 
+## DOCUMENT: Fastapi Search
+
+# Intégration FastAPI
+
+Un service FastAPI complet exposant la recherche Whoosh‑NG via HTTP.
+
+## 1. Installation
+
+```bash
+pip install "whoosh-ng[api]" fastapi uvicorn
+```
+
+## 2. Créer l’index
+
+```python
+# setup_index.py
+import json
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID
+
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    content=TEXT,
+)
+
+ix = index.create_in("docs_index", schema)
+
+with ix.writer() as w:
+    for doc in json.load(open("documents.json")):
+        w.add_document(
+            id=doc["id"],
+            title=doc["title"],
+            content=doc["content"],
+        )
+    w.commit()
+```
+
+## 3. Service REST
+
+```python
+# main.py
+from fastapi import FastAPI, Query
+from typing import Optional
+from whoosh import index
+from whoosh.qparser import QueryParser
+from whoosh_fastapi import create_app
+
+ix = index.open_dir("docs_index")
+
+# Utiliser l’aide
+app = create_app(ix, prefix="/api/v1")
+
+# Option B: endpoints manuels
+# app = FastAPI(title="Document Search API", version="1.0.0")
+#
+# @app.get("/api/v1/health")
+# async def health():
+#     return {"status": "ok"}
+#
+# @app.post("/api/v1/search")
+# async def search(q: str = Query(...), limit: int = 10):
+#     with ix.searcher() as s:
+#         parser = QueryParser("content", ix.schema)
+#         results = s.search(parser.parse(q), limit=limit)
+#         return {"hits": [dict(h) for h in results], "total": len(results)}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+## 4. Démarrer le serveur
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+## 5. Tester l’API
+
+```bash
+# Vérification de santé
+curl http://localhost:8000/api/v1/health
+
+# Recherche
+curl -X POST http://localhost:8000/api/v1/search \
+  -H "Content-Type: application/json" \
+  -d '{"q": "python recherche"}'
+```
+
+## Points clés
+
+- `create_app()` de `whoosh_fastapi` fournit les endpoints `/health`, `/search` et `/autocomplete`.
+- Tous les appels bloquants s’exécutent hors boucle d’événements via `run_sync`.
+
+
 ## DOCUMENT: Fastapi
 
 # Intégration FastAPI
 
-Exemple de service REST indexé par Whoosh-NG.
+Un service REST complet exposant la recherche Whoosh‑NG via HTTP.
 
-## Dépendances
+## 1. Installation
 
 ```bash
-pip install whoosh-ng[api] fastapi uvicorn
+pip install "whoosh-ng[api]" fastapi uvicorn
 ```
 
-## Application minimale
+## 2. Schéma et création de l’index
 
 ```python
-from fastapi import FastAPI
 from whoosh import index
 from whoosh.fields import Schema, TEXT, ID
-from whoosh_fastapi import WhooshFastAPI
 
-app = FastAPI()
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    content=TEXT,
+)
 
-schema = Schema(title=TEXT(stored=True), content=TEXT)
-ix = index.create_in("indexdir", schema)
-api = WhooshFastAPI(ix)
-api.register_search_endpoint("/search", "content")
+ix = index.create_in("docs_index", schema)
+
+# Indexer des documents
+with ix.writer() as w:
+    w.add_document(id="1", title="Python Basics", content="Learn Python fundamentals.")
+    w.add_document(id="2", title="FastAPI Tutorial", content="REST API with FastAPI.")
+    w.commit()
 ```
 
-## Endpoint manuel
+## 3. Service REST avec create_app
 
 ```python
 from fastapi import FastAPI
-from whoosh.qparser import QueryParser
+from whoosh_fastapi import create_app
 
-@app.get("/search")
-def search(q: str):
-    with ix.searcher() as searcher:
-        parser = QueryParser("content", ix.schema)
-        results = searcher.search(parser.parse(q))
-        return [hit.fields() for hit in results]
+app = create_app(ix, prefix="/api/v1")
+
+# L’application fournit automatiquement :
+# - GET  /api/v1/health   → {"status": "ok"}
+# - POST /api/v1/search   → {"hits": [...], "total": N}
+# - GET  /api/v1/autocomplete?q=... → {"suggestions": [...]}
 ```
 
-## Chargement en masse
+## 4. Démarrer le serveur
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+## 5. Requêtes de test
+
+```bash
+# Vérification de santé
+curl http://localhost:8000/api/v1/health
+
+# Recherche
+curl -X POST http://localhost:8000/api/v1/search \
+  -H "Content-Type: application/json" \
+  -d '{"q": "python"}'
+
+# Autocomplétion
+curl "http://localhost:8000/api/v1/autocomplete?q=py"
+```
+
+## 6. Indexation en lot
 
 ```python
 from fastapi import FastAPI
 from whoosh.writing import BufferedWriter
 
-@app.post("/load")
-def load(docs: list[dict]):
+ix = index.open_dir("docs_index")
+
+@app.post("/api/v1/index")
+async def index_docs(docs: list[dict]):
     with BufferedWriter(ix, period=30, limit=50) as w:
         for doc in docs:
             w.add_document(**doc)
-    return {"loaded": len(docs)}
+    return {"indexed": len(docs)}
 ```
+
+## Points clés
+
+- `create_app()` de `whoosh_fastapi` expose `/health`, `/search` et `/autocomplete`.
+- Les appels bloquants s’exécutent hors boucle d’événements.
+- Utilisez `BufferedWriter` pour l’indexation en masse.
 
 
 ## DOCUMENT: Middleware
 
-# Exemples de middleware
+# Exemples de Middleware
 
-Exemples pratiques de middlewares d'indexation et de recherche.
+Des exemples pratiques pour construire et utiliser les middleware de Whoosh-NG.
 
-## Middleware de logging
+## 1. Middleware de Logging
 
 ```python
-from whoosh.middleware.base import Middleware, MiddlewareContext
-from whoosh.middleware.integration import apply_middleware_to_writer, apply_middleware_to_searcher
+from whoosh.middleware.base import Middleware
+from whoosh.middleware.context import MiddlewareContext
 
 class LoggingMiddleware(Middleware):
     def before_search(self, context: MiddlewareContext) -> MiddlewareContext:
-        print(f"search: {context.query}")
+        print(f"[RECHERCHE] Requête: {context.query}")
         return context
 
     def after_search(self, context: MiddlewareContext) -> MiddlewareContext:
         if context.results is not None:
-            print(f"results: {len(context.results)}")
+            print(f"[RÉSULTATS] {len(context.results)} résultats trouvés")
         return context
 ```
 
-## Appliqué au searcher
+## 2. Middleware de Metrics
 
 ```python
-chain = MiddlewareChain([LoggingMiddleware()])
-searcher = apply_middleware_to_searcher(ix.searcher(), chain.middlewares)
-results = searcher.search(q)
+from whoosh.middleware.base import Middleware
+from whoosh.middleware.context import MiddlewareContext
+
+class MetricsMiddleware(Middleware):
+    def __init__(self) -> None:
+        self._metrics = {}
+
+    def after_index(self, context: MiddlewareContext) -> MiddlewareContext:
+        self._metrics["documents_indexés"] = self._metrics.get("documents_indexés", 0) + 1
+        return context
+
+    def after_search(self, context: MiddlewareContext) -> MiddlewareContext:
+        self._metrics["recherches_executées"] = self._metrics.get("recherches_executées", 0) + 1
+        return context
+
+    def get_metrics(self) -> dict:
+        return dict(self._metrics)
 ```
+
+## 3. Middleware de Cache
+
+```python
+from whoosh.middleware.base import Middleware
+from whoosh.middleware.context import MiddlewareContext
+
+class SearchCacheMiddleware(Middleware):
+    def __init__(self) -> None:
+        self._cache = {}
+
+    def before_search(self, context: MiddlewareContext) -> MiddlewareContext:
+        if context.query and str(context.query) in self._cache:
+            context.metadata["_résultat_cache"] = self._cache[str(context.query)]
+        return context
+
+    def after_search(self, context: MiddlewareContext) -> MiddlewareContext:
+        if context.query and context.results is not None:
+            self._cache[str(context.query)] = context.results
+        return context
+```
+
+## 4. Appliquer un Middleware
+
+```python
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.integration import apply_middleware_to_searcher
+
+chain = MiddlewareChain([
+    LoggingMiddleware(),
+    MetricsMiddleware(),
+])
+
+with ix.searcher() as base_searcher:
+    searcher = apply_middleware_to_searcher(base_searcher, chain.middlewares)
+    results = searcher.search(query)
+```
+
+## Points clés
+
+| Hook | Phase | Description |
+|------|-------|-------------|
+| `startup` | Init | Appelé une fois à l'initialisation |
+| `shutdown` | Nettoyage | Appelé à la fermeture |
+| `before_index` | Indexation | Avant l'ajout d'un document |
+| `after_index` | Indexation | Après l'ajout d'un document |
+| `before_delete` | Suppression | Avant la suppression |
+| `after_delete` | Suppression | Après la suppression |
+| `before_search` | Recherche | Avant l'exécution de la requête |
+| `after_search` | Recherche | Après le retour des résultats |
+| `on_error` | Erreur | En cas d'exception |
+| `on_commit` | Commit | Après writer.commit() |
+
+
+## DOCUMENT: Movie Search
+
+# Application de Recherche de Films
+
+Exemple complet montrant comment créer une petite **application de recherche de films** avec Whoosh‑NG : conception du schéma, indexation à partir d’un fichier JSON, recherche facettée, mise en évidence et filtrage.
+
+## 1. Schéma
+
+```python
+from whoosh.fields import Schema, TEXT, ID, KEYWORD, NUMERIC
+
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    director=TEXT(stored=True),
+    genre=KEYWORD(stored=True, commas=True, scorable=True),
+    year=NUMERIC(int, stored=True),
+    synopsis=TEXT,
+)
+```
+
+## 2. Indexer les documents
+
+```python
+import json
+import shutil
+from whoosh import index
+
+shutil.rmtree("movies", ignore_errors=True)
+ix = index.create_in("movies", schema)
+
+movies = json.load(open("movies.json"))
+
+with ix.writer() as w:
+    for m in movies:
+        w.add_document(
+            id=str(m["id"]),
+            title=m["title"],
+            director=m["director"],
+            genre=",".join(m["genres"]),
+            year=m["year"],
+            synopsis=m["synopsis"],
+        )
+    w.commit()
+```
+
+Fichier `movies.json` :
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Blade Runner",
+    "director": "Ridley Scott",
+    "genres": ["sci-fi", "thriller"],
+    "year": 1982,
+    "synopsis": "Un chasseur de replicants questionne l’humanité dans un futur pluvieux."
+  }
+]
+```
+
+## 3. Recherche avec facettes et mise en évidence
+
+```python
+from whoosh import index
+from whoosh.qparser import MultifieldParser
+from whoosh.sorting import FieldFacet
+
+ix = index.open_dir("movies")
+
+qp = MultifieldParser(["title", "synopsis", "director"], ix.schema)
+
+with ix.searcher() as s:
+    q = qp.parse("sci-fi")
+
+    results = s.search(
+        q,
+        sortedby=FieldFacet("year", reverse=True),
+        groupedby=FieldFacet("genre", allow_overlap=True),
+        limit=20,
+    )
+
+    for hit in results:
+        print(hit["title"], hit["year"], "|", round(hit.score, 2))
+        print("  ", hit.highlights("synopsis"))
+
+    print("\nGenres:", results.groups("genre"))
+```
+
+## 4. Filtrage
+
+Filtrer les films de science-fiction après 1990 :
+
+```python
+from whoosh import index
+from whoosh.qparser import QueryParser
+from whoosh.query import Term, And, NumericRange
+
+ix = index.open_dir("movies")
+qp = QueryParser("synopsis", ix.schema)
+
+with ix.searcher() as s:
+    user_q = qp.parse("future")
+    filters = And([
+        Term("genre", "sci-fi"),
+        NumericRange("year", 1990, None),
+    ])
+    results = s.search(user_q, filter=filters)
+    for hit in results:
+        print(hit["title"], hit["year"])
+```
+
+## Points clés
+
+- `KEYWORD(commas=True)` stocke des champs multi-valeurs facetables.
+- `MultifieldParser` recherche sur plusieurs champs avec des boosts optionnels.
+- `FieldFacet` permet les facettes et le tri.
+- `hit.highlights()` renvoie des fragments mis en évidence prêts à afficher.
 
 
 ## DOCUMENT: Plugin Dev
 
-# Développement de plugin
+# Développement de Plugins
 
-Créer un plugin personnalisé avec point d'entrée, setup/teardown, et test unitaire.
+Guide complet pour créer, enregistrer et tester vos propres plugins Whoosh-NG.
+
+## 1. Classe de base des Plugins
+
+Tous les plugins héritent de `whoosh.plugins.base.Plugin` :
 
 ```python
-from whoosh.plugins.base import BasePlugin
+from whoosh.plugins.base import Plugin
 
-class MonPlugin(BasePlugin):
-    name = "mon_plugin"
+class MyPlugin(Plugin):
+    name = "my_plugin"
     version = "1.0.0"
-    dependencies = []
+    depends_on = []
+    conflicts_with = []
+    priority = 0
+    middleware = []
 
-    def setup(self, registry):
-        registry.register("generator", MonGenerator(), "autocomplete")
+    def register(self, manager):
+        """Appelé quand le plugin est chargé."""
+        manager.register("my_handler", MyHandler())
 
-    def teardown(self, registry):
-        registry.unregister("generator", "autocomplete")
+    def register_hooks(self):
+        """Enregistrer les hooks avec le décorateur hookimpl."""
+        from whoosh.hooks import hookimpl, register_hook
+
+        @hookimpl
+        def on_search(request, response):
+            pass
+
+        register_hook("on_search", hookimpl(on_search))
 ```
 
-## Enregistrement programmatique
+## 2. Enregistrement d’un Plugin
+
+### Enregistrement manuel
 
 ```python
 from whoosh.plugins.manager import PluginManager
 
-p = MonPlugin()
-PluginManager.register("mon_plugin", p)
-PluginManager.enable("mon_plugin")
+plugin = MyPlugin()
+PluginManager.register(plugin)
 ```
 
-## Entry point
+### Auto-découverte via Entry Points
+
+Dans `pyproject.toml` :
 
 ```toml
-# pyproject.toml
+[project]
+name = "whoosh-ng-my-plugin"
+
 [project.entry-points."whoosh_ng.plugins"]
-mon_plugin = "mon_package.plugin:MonPlugin"
+my_plugin = "my_package.plugin:MyPlugin"
 ```
 
-## Test
+Auto-chargement :
 
 ```python
-def test_plugin_setup():
-    plugin = MonPlugin()
-    registry = InMemoryRegistry()
-    plugin.setup(registry)
-    assert registry.get("generator", "autocomplete") is not None
+from whoosh.plugins.manager import PluginManager
+
+PluginManager.load_plugins()
+```
+
+## 3. Exemple de Plugin Provider
+
+```python
+from whoosh.plugins.base import Plugin
+from whoosh.registry import VectorRegistry
+
+class MyVectorProvider:
+    def search(self, query_vector, k=10):
+        return [{"doc_id": "1", "score": 0.95}]
+
+class MyVectorPlugin(Plugin):
+    name = "my_vector"
+    version = "1.0.0"
+
+    def register(self, manager):
+        provider = MyVectorProvider()
+        VectorRegistry.register("my_vector", provider, self.name)
+```
+
+## 4. Tester son Plugin
+
+```python
+import pytest
+from whoosh.plugins.manager import PluginManager
+
+class TestMyPlugin:
+    def test_register(self):
+        plugin = MyPlugin()
+        manager = PluginManager()
+        plugin.register(manager)
+        assert "my_handler" in manager._plugins
+
+    def test_entry_point(self):
+        manager = PluginManager()
+        manager.register(MyPlugin())
+        assert "my_plugin" in manager.list_enabled()
+```
+
+## 5. API du PluginManager
+
+```python
+from whoosh.plugins.manager import PluginManager
+
+manager = PluginManager()
+manager.register(MyPlugin())
+manager.enable("my_plugin")
+manager.disable("my_plugin")
+manager.list_plugins()
+manager.list_enabled()
+plugin = manager.get("my_plugin")
+```
+
+## 6. Plugins Intégrés
+
+- `whoosh_modern.vector` - Recherche vectorielle (NumPy)
+- `whoosh_modern.autocomplete` - Autocomplétion par index inversé
+- `whoosh_fastapi` - Endpoints REST FastAPI
+
+```python
+from whoosh.plugins.manager import PluginManager
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh_modern.autocomplete.plugin import AutocompletePlugin
+
+PluginManager.load_plugins()
 ```
 
 
@@ -6354,69 +7646,214 @@ def test_plugin_setup():
 
 # Recherche
 
-Exemples d'interrogation de l'index avec Whoosh-NG.
+Exemples d’interrogation de l’index avec Whoosh‑NG.
 
-## Recherche basique
+## 1. Recherche basique
 
 ```python
-from whoosh.qparser import QueryParser
 from whoosh import index
+from whoosh.qparser import QueryParser
 
 ix = index.open_dir("indexdir")
-with ix.searcher() as searcher:
+
+with ix.searcher() as s:
     qp = QueryParser("content", ix.schema)
-    q = qp.parse("bonjour qui")
-    results = searcher.search(q)
+    q = qp.parse("python recherche")
+
+    results = s.search(q, limit=10)
     for hit in results:
-        print(hit["title"], hit.score)
+        print(f"{hit['title']}: {hit.score:.2f}")
 ```
 
-## MultifieldParser
+## 2. Recherche multi-champs
 
 ```python
-from whoosh.qparser import MultifieldParser, OrGroup
+from whoosh.qparser import MultifieldParser
 
 ix = index.open_dir("indexdir")
 qp = MultifieldParser(
-    ["title", "content"],
+    ["title", "content", "tags"],
     ix.schema,
-    fieldboosts={"title": 2.0}
+    fieldboosts={"title": 2.0, "tags": 1.5}
 )
-q = qp.parse("python recherche")
+
+q = qp.parse("fastapi")
+results = s.search(q)
 ```
 
-## Pagination
+## 3. Pagination
 
 ```python
-with ix.searcher() as searcher:
-    results = searcher.search_page(q, 1, pagelen=10)
-    total = len(results)
-    print(f"Total: {total} résultats")
+with ix.searcher() as s:
+    page = s.search_page(q, 2, pagelen=10)  # Page 2, 10 results/page
+
+    print(f"Page {page.number} / {page.pagecount}")
+    for hit in page:
+        print(hit["title"])
 ```
 
-## Tri et filtre
+## 4. Tri et filtres
 
 ```python
-from whoosh.query import Term
-from whoosh import sorting
+from whoosh.query import Term, And, NumericRange
+from whoosh.sorting import FieldFacet, ScoreFacet
 
-with ix.searcher() as searcher:
-    q = qp.parse("python")
-    results = searcher.search(
+with ix.searcher() as s:
+    # Filtrer par tags et année
+    filters = And([
+        Term("tags", "python"),
+        NumericRange("year", 2020, None),
+    ])
+
+    results = s.search(
         q,
-        filter=Term("published", True),
-        sortedby=sorting.FieldFacet("date")
+        filter=filters,
+        sortedby=[FieldFacet("year", reverse=True), ScoreFacet()],
+        limit=20
     )
 ```
 
-## Surbrillance
+## 5. Mise en évidence (highlighting)
 
 ```python
-with ix.searcher() as searcher:
-    results = searcher.search_page(q, 1)
+with ix.searcher() as s:
+    results = s.search(q, limit=5)
+
     for hit in results:
-        print(hit.highlights("content", top=3))
+        snippet = hit.highlights("content", top=2)
+        print(f"{hit['title']}:")
+        print(f"  {snippet}")
 ```
+
+## 6. Recherche avec plage de dates
+
+```python
+from whoosh.query import DateRange
+from datetime import datetime, timedelta
+
+ix = index.open_dir("indexdir")
+with ix.searcher() as s:
+    start = datetime(2024, 1, 1)
+    end = datetime(2024, 12, 31)
+    q = DateRange("published", start, end)
+
+    results = s.search(q)
+```
+
+## 7. Recherche par préfixe
+
+```python
+from whoosh.query import Prefix
+
+with ix.searcher() as s:
+    q = Prefix("title", "Py")  # Tous les titres commençant par "Py"
+    results = s.search(q)
+```
+
+## Points clés
+
+- `QueryParser` analyse la chaîne de requête en objet `Query`.
+- `MultifieldParser` recherche sur plusieurs champs avec des boosts.
+- `search_page()` pour la pagination.
+- `filter` pour les filtres (ne pas inclure dans le score).
+- `sortedby` pour trier par champ ou score.
+
+
+## DOCUMENT: Vector Search
+
+# Recherche Vectorielle avec Whoosh‑NG
+
+Cet exemple montre comment activer la **recherche sémantique/vectorielle** avec l’option `vector` supplémentaire. Nous indexons des embeddings et effectuons une recherche de plus proches voisins (k-NN).
+
+## 1. Installer les dépendances optionnelles
+
+```bash
+pip install "whoosh-ng[vector]" numpy
+```
+
+## 2. Schéma avec champ Vectoriel
+
+```python
+from whoosh.fields import Schema, TEXT, ID, VECTOR
+
+schema = Schema(
+    doc_id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    content=TEXT,
+    embedding=VECTOR(stored=True, dim=128),
+)
+```
+
+## 3. Indexer les vecteurs
+
+```python
+import numpy as np
+from whoosh import index
+import shutil
+
+shutil.rmtree("vector_index", ignore_errors=True)
+ix = index.create_in("vector_index", schema)
+
+documents = [
+    {"doc_id": "doc1", "title": "Python Basics", "content": "Learn Python programming."},
+    {"doc_id": "doc2", "title": "Advanced Python", "content": "Deep dive into decorators."},
+    {"doc_id": "doc3", "title": "Data Science", "content": "Pandas and NumPy."},
+]
+
+np.random.seed(42)
+embeddings = {d["doc_id"]: np.random.rand(128).astype(np.float32) for d in documents}
+
+with ix.writer() as w:
+    for doc in documents:
+        w.add_document(
+            doc_id=doc["doc_id"],
+            title=doc["title"],
+            content=doc["content"],
+            embedding=embeddings[doc["doc_id"]].tobytes(),
+        )
+    w.commit()
+```
+
+## 4. Recherche vectorielle avec NumpyProvider
+
+```python
+from whoosh_modern.vector.numpy_provider import NumpyProvider
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh.plugins.manager import PluginManager
+
+VectorPlugin().register(PluginManager())
+
+provider = NumpyProvider()
+for doc_id, vec in embeddings.items():
+    provider.add([(doc_id, vec.tolist())])
+
+query_vec = embeddings["doc1"]
+hits = provider.search(query_vec, k=2)
+
+for hit in hits:
+    print(f"doc_id={hit.doc_id}, score={hit.score:.3f}")
+```
+
+## 5. Utiliser VectorField pour la sérialisation
+
+```python
+from whoosh.vector import VectorField
+
+vf = VectorField(dimension=128, name="embedding")
+
+values = [0.1, 0.2, 0.3, 0.4] + [0.0] * 124
+raw = vf.vector_to_bytes(values)
+restored = vf.bytes_to_vector(raw)
+print(restored == tuple(values))  # True
+```
+
+## Points clés
+
+- Installez avec `pip install whoosh-ng[vector]`.
+- `VECTOR` stocke les octets bruts ; utilisez `VectorField` pour convertir.
+- `NumpyProvider` implémente la similarité cosinus.
+- Enregistrez le plugin via `VectorPlugin().register(manager)`.
+- Utilisez `filter_ids` dans `provider.search()` pour restreindre les documents.
 
 
 ## DOCUMENT: Autocomplete
@@ -7759,18 +9196,85 @@ with ix.searcher() as searcher:
 5. **Indexation par lots**: Indexez les vecteurs en lots pour l'efficacité
 
 
-## DOCUMENT: Translation Status
+## DOCUMENT: Index
 
-# Translation Completion Tracking
+# Documentation Whoosh-NG
 
-- [x] EN quickstart
-- [x] EN guides
-- [x] EN API pages
-- [x] EN examples
-- [x] FR quickstart
-- [x] FR guides
-- [x] FR API pages
-- [x] FR examples
+Bibliothèque d'indexation et de recherche full-text purement Python, modernisée pour 2025+.
+
+## Démarrage rapide
+
+```bash
+pip install whoosh-ng
+```
+
+```python
+import whoosh.index as index
+from whoosh.fields import Schema, TEXT, ID
+
+schema = Schema(id=ID(stored=True), content=TEXT())
+ix = index.create_in("indexdir", schema)
+
+with ix.writer() as w:
+    w.add_document(id="1", content="hello world")
+
+with ix.searcher() as s:
+    results = s.search("world")
+    print(results[0])
+```
+
+## Fonctionnalités
+
+- Pur Python, aucune dépendance native
+- Moteur de recherche embarqué
+- Architecture de plugins pour l'extensibilité
+- Pipeline de middleware pour les préoccupations transversales
+- Support de recherche vectorielle (NumPy, HNSW, Faiss)
+- Support asynchrone via extra optionnel
+
+
+## DOCUMENT: Quickstart
+
+# Démarrage rapide
+
+## Installation
+
+```bash
+pip install whoosh-ng
+uv pip install whoosh-ng
+```
+
+## Exemple basique
+
+```python
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID
+
+schema = Schema(id=ID(stored=True), content=TEXT())
+ix = index.create_in("indexdir", schema)
+
+with ix.writer() as w:
+    w.add_document(id="1", content="hello world")
+    w.add_document(id="2", content="goodbye world")
+
+with ix.searcher() as s:
+    results = s.search("world")
+    for hit in results:
+        print(hit["id"], hit.score)
+```
+
+## Avec plugins
+
+```bash
+pip install whoosh-ng[vector,autocomplete,api]
+```
+
+```python
+from whoosh.plugins.manager import PluginManager
+from whoosh_modern.vector.plugin import VectorPlugin
+
+PluginManager.load_plugins()
+```
 
 
 # Code Examples

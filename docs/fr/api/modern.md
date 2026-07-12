@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Moderne"
 nav_order: 10
 parent: "Référence API"

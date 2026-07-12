@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Middleware"
 nav_order: 7
 parent: "Référence API"

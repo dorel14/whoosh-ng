@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Champs"
 nav_order: 2
 parent: "Référence API"

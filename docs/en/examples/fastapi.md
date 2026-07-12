@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "FastAPI Integration"
 parent: "Exemples"
 nav_order: 4

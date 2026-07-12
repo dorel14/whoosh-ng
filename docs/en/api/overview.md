@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Overview"
 nav_order: 0
 parent: "API Reference"

@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Backends"
 nav_order: 9
 parent: "Référence API"
