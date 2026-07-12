@@ -5,16 +5,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "whoosh-ng"
-version = "4.0.0.dev0"
+version = "1.0.0.dev0"
 description = "Fast, pure-Python full-text indexing, search, and spell checking library."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "BSD-2-Clause"
 authors = [
-  { name = "Matt Chaput", email = "matt@whoosh.ca" },
+  { name = "David Orel", email = "d.orel@free.fr" },
 ]
 maintainers = [
-  { name = "Sygil-Dev" },
+  { name = "dorel14", email = "d.orel@free.fr" },
 ]
 keywords = ["index", "search", "text", "spell", "whoosh"]
 classifiers = [
@@ -107,11 +107,11 @@ whoosh_observability = "whoosh.middleware.metrics:PrometheusMiddleware"
 whoosh_admin = "whoosh_admin:create_admin_app"
 
 [project.urls]
-Documentation = "https://dorel14.github.io/Whoosh-NG/"
-Homepage = "https://github.com/dorel14/whoosh-NG"
-Issues = "https://github.com/dorel14/whoosh-NG/issues"
-Repository = "https://github.com/dorel14/whoosh-NG.git"
-Changelog = "https://github.com/dorel14/whoosh-NG/releases"
+Documentation = "https://dorel14.github.io/whoosh-ng/"
+Homepage = "https://github.com/dorel14/whoosh-ng"
+Issues = "https://github.com/dorel14/whoosh-ng/issues"
+Repository = "https://github.com/dorel14/whoosh-ng.git"
+Changelog = "https://github.com/dorel14/whoosh-ng/releases"
 
 [tool.setuptools]
 include-package-data = true
