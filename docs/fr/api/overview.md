@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Vue d'ensemble API"
 nav_order: 0
 parent: "Référence API"

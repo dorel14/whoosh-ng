@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Écriture"
 nav_order: 3
 parent: "Référence API"

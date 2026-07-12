@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Installation"
 nav_order: 20
 parent: "Prise en main"

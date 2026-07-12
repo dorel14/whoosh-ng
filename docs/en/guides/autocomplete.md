@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Autocomplete"
 nav_order: 30
 parent: "Guides"

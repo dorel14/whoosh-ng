@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Conception de schéma"
 nav_order: 22
 parent: "Guides"

@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Schema Design"
 parent: "Guides"
 nav_order: 22

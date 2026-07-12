@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Vector Search"
 nav_order: 29
 parent: "Guides"

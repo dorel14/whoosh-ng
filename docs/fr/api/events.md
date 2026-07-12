@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Events"
 nav_order: 8
 parent: "Référence API"

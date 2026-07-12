@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "API Plugins"
 nav_order: 6
 parent: "Référence API"

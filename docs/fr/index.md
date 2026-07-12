@@ -1,4 +1,5 @@
 ---
+color_scheme: dark
 title: "Documentation Whoosh-NG"
 nav_order: 0
 lang: fr
