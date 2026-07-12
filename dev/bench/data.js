@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783867302637,
+  "lastUpdate": 1783867335586,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -145,6 +145,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.00007100171229066114",
             "extra": "mean: 884.7782273567686 usec\nrounds: 541"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "071013cc8709817e96de883b3e4e7f13df319e1c",
+          "message": "fix(docs): 🐛 Correction du titre de la documentation Whoosh-ng\n\n* Mise à jour du titre pour respecter la casse correcte.",
+          "timestamp": "2026-07-12T16:41:26+02:00",
+          "tree_id": "ee30cb7b1d9cc9d4282bd58ac980021196c16671",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/071013cc8709817e96de883b3e4e7f13df319e1c"
+        },
+        "date": 1783867335114,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1056.8507063035097,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000030418265639086156",
+            "extra": "mean: 946.2074387948763 usec\nrounds: 531"
           }
         ]
       }
