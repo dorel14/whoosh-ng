@@ -33,22 +33,14 @@ collections:
     output: true
     sort_by: nav_order
 
-# Default front matter for markdown files
+# Default front matter for collection pages
 defaults:
-  # Root pages (README.md, etc.)
-  - scope:
-      path: ""
-      type: pages
-    values:
-      layout: default
-  # Collection: English
   - scope:
       path: "en"
       type: en
     values:
       layout: default
       lang: en
-  # Collection: French
   - scope:
       path: "fr"
       type: fr
