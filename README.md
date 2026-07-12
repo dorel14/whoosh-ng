@@ -1,110 +1,228 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/sygil-dev/whoosh-reloaded/badge/main)](https://www.codefactor.io/repository/github/sygil-dev/whoosh-reloaded/overview/main)
-[![codecov](https://codecov.io/gh/Sygil-Dev/whoosh-reloaded/graph/badge.svg?token=O3Z2DFB8UA)](https://codecov.io/gh/Sygil-Dev/whoosh-reloaded)
-[![Documentation Status](https://readthedocs.org/projects/whoosh-reloaded/badge/?version=latest)](https://whoosh-reloaded.readthedocs.io/en/latest/?badge=latest)
-[![PyPI version](https://badge.fury.io/py/Whoosh-Reloaded.svg)](https://badge.fury.io/py/Whoosh-Reloaded) [![Downloads](https://pepy.tech/badge/whoosh-reloaded)](https://pepy.tech/project/whoosh-reloaded) [![License](https://img.shields.io/pypi/l/Whoosh-Reloaded)](https://pypi.org/project/Whoosh-Reloaded/) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Whoosh-Reloaded)](https://pypi.org/project/Whoosh-Reloaded/) [![PyPI - Wheel](https://img.shields.io/pypi/wheel/Whoosh-Reloaded)](https://pypi.org/project/Whoosh-Reloaded/) [![PyPI - Format](https://img.shields.io/pypi/format/Whoosh-Reloaded)](https://pypi.org/project/Whoosh-Reloaded/) [![PyPI - Status](https://img.shields.io/pypi/status/Whoosh-Reloaded)](https://pypi.org/project/Whoosh-Reloaded/)
+[![PyPI](https://img.shields.io/pypi/v/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
+[![License](https://img.shields.io/pypi/l/whoosh-ng.svg)](https://pypi.org/project/whoosh-ng/)
+[![Documentation](https://img.shields.io/badge/docs-yes-blue.svg)](https://dorel14.github.io/whoosh-ng/)
 
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Sygil-Dev_whoosh-reloaded&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=Sygil-Dev_whoosh-reloaded)
+# Whoosh-NG
 
---------------------------------------
+**Whoosh-Reloaded** is a modern, pure-Python full-text indexing and search library. Version 4.0 brings a complete modernization with Python 3.11+ support, strict type annotations, optional feature profiles, and automated semantic releases.
 
-# **Notice:** This repository (**whoosh-reloaded**) is **NO LONGER MAINTAINED**.
-
---------------------------------------
-
-About Whoosh
-============
-
-Whoosh is a fast, featureful full-text indexing and searching library
-implemented in pure Python. Programmers can use it to easily add search
-functionality to their applications and websites. Every part of how Whoosh
-works can be extended or replaced to meet your needs exactly.
-
-Some of Whoosh's features include:
-
-* Pythonic API.
-* Pure-Python. No compilation or binary packages are needed, no mysterious crashes.
-* Fielded indexing and search.
-* Fast indexing and retrieval -- faster than any other pure-Python, scoring,
-  full-text search solution I know of.
-* Pluggable scoring algorithm (including BM25F), text analysis, storage,
-  posting format, etc.
-* Powerful query language.
-* Pure Python spell-checker (as far as I know, the only one).
-
-Whoosh might be useful in the following circumstances:
-
-* Anywhere a pure-Python solution is desirable to avoid having to build/compile
-  native libraries (or force users to build/compile them).
-* As a research platform (at least for programmers who find Python easier to
-  read and work with Java ;)
-* When an easy-to-use Pythonic interface is more important to you than raw
-  speed.
-
-Whoosh was created by Matt Chaput and is maintained currently by the Sygil-Dev Organization. It was created for use in the online help system of Side Effects Software's 3D animation software Houdini. Side Effects Software Inc. graciously agreed to open-source the code.
-
-This software is licensed under the terms of the simplified BSD (A.K.A. "two
-clause" or "FreeBSD") license. See LICENSE.txt for information.
-
-Installing Whoosh
-=================
-
-If you have ``setuptools`` or ``pip`` installed, you can use ``easy_install``
-or ``pip`` to download and install Whoosh automatically::
-
-    # Install the stable version from Pypi
-    $ pip install whoosh-reloaded
-
-    # Install the development version from GitHub.
-    $ pip install git+https://github.com/Sygil-Dev/whoosh-reloaded.git
-
-Getting the source.
-==================
-
-You can check out the latest version of the source code on GitHub using git:
-
-    $ git clone https://github.com/Sygil-Dev/whoosh-reloaded.git
-
-Contributing
-============
-
-We use pre-commit to format the code and run some checks before committing to avoid common mistakes. To install it, run the following commands:
+## Quick Start
 
 ```bash
-$ pip install pre-commit
-$ pre-commit install
+pip install whoosh-ng
 ```
 
-Learning more
-=============
+## Features
 
-* Online Documentation:
+- **Pure Python** - No native dependencies, works everywhere Python runs
+- **Full-text search** - BM25/BM25F scoring with phrase queries
+- **Fielded documents** - Structured indexing with typed fields
+- **Query parsing** - Flexible parser with boosting and syntax options
+- **Facets & sorting** - Group and sort results by any field
+- **Highlighting** - Snippet extraction with customizable formatters
+- **Spell checking** - Built-in spelling correction
+- **Event-driven architecture** - Plugin system with hooks and middleware
+- **Optional extensions** - Vector search, async, FastAPI, metrics, and more
 
-  *   [GitHub Pages](https://sygil-dev.github.io/whoosh-reloaded/)
+## Installation
 
-  *   [Read the Docs](https://whoosh-reloaded.readthedocs.io/en/latest/)
+### Core Installation
 
-* Read the old online documentation at https://docs.red-dove.com/whoosh-reloaded/ (Search work properly).
+```bash
+pip install whoosh-ng
+```
 
-* Read the old online documentation at https://whoosh-reloaded.readthedocs.org/en/latest/ (Search DOES NOT work).
+### Optional Profiles
 
-* File bug reports and issues at https://github.com/Sygil-Dev/whoosh-reloaded/issues
+```bash
+# Vector search with NumPy
+pip install "whoosh-ng[vector]"
 
-Maintainers
-===========
+# Async wrappers
+pip install "whoosh-ng[async]"
 
-* [Sygil-Dev Organization](https://github.com/Sygil-Dev)
-* [ZeroCool940711](https://github.com/ZeroCool940711)
+# FastAPI REST API integration
+pip install "whoosh-ng[api]"
 
-Discord Server
-==============
+# Prometheus metrics
+pip install "whoosh-ng[metrics]"
 
-- [Sygil-Dev - Resources](https://discord.gg/H5mftKP5S9)
+# PostgreSQL backend
+pip install "whoosh-ng[postgres]"
+
+# Fuzzy matching
+pip install "whoosh-ng[fuzzy]"
+
+# Phonetic search
+pip install "whoosh-ng[phonetic]"
+
+# All optional features
+pip install "whoosh-ng[vector,async,api,metrics,postgres,fuzzy,phonetic]"
+```
+
+### Development Installation
+
+```bash
+pip install "whoosh-ng[dev]"
+```
+
+## Documentation
+
+- **[API Reference](https://dorel14.github.io/whoosh-ng/en/api/overview/)** - Complete module documentation
+- **[User Guides](https://dorel14.github.io/whoosh-ng/en/guides/)** - Tutorials and best practices
+- **[Examples](https://dorel14.github.io/whoosh-ng/en/examples/)** - Runnable code examples
+- **[French Documentation](https://dorel14.github.io/whoosh-ng/fr/)** - Documentation en français
+
+## Recent Changes in 4.0.0.dev0
+
+### Added
+
+- **Plugin System** (`whoosh.plugins`): `Plugin` base class and `PluginManager` with entry-point auto-discovery, version validation, conflict detection, enable/disable, and dependency management
+- **Registry System** (`whoosh.registry`): Generic registry plus `StorageRegistry`, `AnalyzerRegistry`, `RankingRegistry`, `SuggestRegistry`, `VectorRegistry`, `AutocompleteRegistry`, and `BackendRegistry`
+- **Middleware Pipeline** (`whoosh.middleware`): `Middleware` base class (sync + async), `MiddlewareContext`, `MiddlewareChain`, `MiddlewareRegistry`, with official `MetricsMiddleware`, `CacheMiddleware`, `CompressionMiddleware`, `EncryptionMiddleware`, and `PrometheusMiddleware`
+- **Event Bus** (`whoosh.event_bus`): `EventBus` with subscribe/publish/clear
+- **Hook System** (`whoosh.hooks`): `hookimpl`, `register_hook`, `call_hook`
+- **Backends**: `Backend` ABC with lifecycle hooks, `FileBackend`, and `SQLiteBackend`
+- **Provider Architecture**: `VectorProvider`/`VectorField`, `NumpyProvider` for vector similarity search
+- **Autocomplete Plugin** (`whoosh_modern.autocomplete`): Inverted index and edge-ngram autocomplete
+- **FastAPI Plugin** (`whoosh_fastapi`): REST endpoints for search, autocomplete, vector search, and health checks
+- **Admin UI Plugin** (`whoosh_admin`): Dashboard for index administration
+- **Entry Points**: Auto-loaded plugins under `whoosh.plugins` group
+
+### Changed
+
+- Distribution renamed from `whoosh-reloaded` to **`whoosh-ng`** (import namespace remains `whoosh`)
+- Documentation site moved to GitHub Pages: https://dorel14.github.io/whoosh-ng/
+- **Python 3.11+ required** (dropped Python 3.9/3.10 support)
+- Packaging cleaned: consolidated extras in `pyproject.toml`
+- Type annotations modernized: `mypy src/whoosh` reports 0 errors, `py.typed` marker included
+
+## Example: Simple Search
+
+```python
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID
+from whoosh.qparser import QueryParser
+
+# Define schema
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    content=TEXT,
+)
+
+# Create index
+ix = index.create_in("my_index", schema)
+
+# Index documents
+with ix.writer() as w:
+    w.add_document(id="1", title="Hello World", content="Welcome to Whoosh-NG")
+    w.add_document(id="2", title="Python Search", content="Fast text search library")
+
+# Search
+with ix.searcher() as s:
+    qp = QueryParser("content", ix.schema)
+    q = qp.parse("search library")
+    results = s.search(q)
+    for hit in results:
+        print(hit["title"], hit.score)
+```
+
+## Example: FastAPI Integration
+
+```python
+from fastapi import FastAPI
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID
+from whoosh_fastapi import create_app
+
+schema = Schema(id=ID(), title=TEXT(), content=TEXT())
+ix = index.create_in("docs", schema)
+
+# Create FastAPI app with Whoosh-NG endpoints
+app = create_app(ix, prefix="/api/v1")
+
+# Endpoints available:
+# GET  /api/v1/health          - Health check
+# POST /api/v1/search          - Full-text search
+# GET  /api/v1/autocomplete?q= - Autocomplete suggestions
+```
+
+## Example: Vector Search
+
+```bash
+pip install "whoosh-ng[vector]" numpy
+```
+
+```python
+from whoosh.fields import Schema, TEXT, ID, VECTOR
+from whoosh.vector import VectorField
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh.plugins.manager import PluginManager
+import numpy as np
+
+# Create index with vector field
+schema = Schema(
+    id=ID(stored=True),
+    title=TEXT(stored=True),
+    embedding=VECTOR(dim=384),
+)
+
+# Register vector plugin
+VectorPlugin().register(PluginManager())
+
+# Index with embeddings
+ix = index.create_in("vector_db", schema)
+with ix.writer() as w:
+    w.add_document(
+        id="doc1",
+        title="Python tutorial",
+        embedding=np.random.rand(384).astype(np.float32).tobytes()
+    )
+```
+
+## Quality Gates
+
+The 4.0 quality policy requires every merged PR to pass:
+
+```bash
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src/whoosh
+uv run pytest tests
+uv run python -m build
+uv run twine check dist/*
+```
+
+CI validates these checks on Windows and Linux before merge.
+
+## Development
+
+```bash
+# Install uv (if not already)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Setup
+uv python install 3.11
+uv venv --python 3.11
+uv sync --extra dev
+
+# Run tests
+uv run pytest
+```
+
+## Contributing
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/) so `python-semantic-release` can generate versions, changelogs, tags, GitHub releases, and PyPI publications automatically.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+## Maintainers
+
+- [Sygil-Dev Organization](https://github.com/Sygil-Dev)
+- Matt Chaput (original Whoosh author)
+
+## License
+
+BSD-2-Clause. See [LICENSE](LICENSE) for details.

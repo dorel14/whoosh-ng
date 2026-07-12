@@ -30,9 +30,7 @@ def test_list_corrector():
     for lev_dist in range(1, 3):
         # sugs will return suggest first ordered by levenshtein distance
         # then second order by dictionary order
-        target += [
-            w for w in _wordlist if levenshtein(typo, w) <= lev_dist and w not in target
-        ]
+        target += [w for w in _wordlist if levenshtein(typo, w) <= lev_dist and w not in target]
     assert sugs == target
 
 
@@ -171,10 +169,7 @@ def test_correct_query():
             qtext = 'alpha b:("brovo november" a:delta) detail'
             q = qp.parse(qtext, ix.schema)
             c = s.correct_query(q, qtext)
-            assert (
-                str(c.query)
-                == '(a:alfa AND b:"brovo november" AND a:delta AND a:detail)'
-            )
+            assert str(c.query) == '(a:alfa AND b:"brovo november" AND a:delta AND a:detail)'
             assert c.string == 'alfa b:("brovo november" a:delta) detail'
 
             hf = highlight.HtmlFormatter(classname="c")
@@ -252,10 +247,8 @@ def test_suggest_prefix():
         "Bloom, Split and Deviate",
         "Rankle the Seas and the Skies",
         "Lightning Flash Flame Shell",
-        "Flower Wind Rage and Flower God Roar, Heavenly Wind Rage and "
-        "Heavenly Demon Sneer",
-        "All Waves, Rise now and Become my Shield, Lightning, Strike "
-        "now and Become my Blade",
+        "Flower Wind Rage and Flower God Roar, Heavenly Wind Rage and Heavenly Demon Sneer",
+        "All Waves, Rise now and Become my Shield, Lightning, Strike now and Become my Blade",
         "Cry, Raise Your Head, Rain Without end",
         "Sting All Enemies To Death",
         "Reduce All Creation to Ash",

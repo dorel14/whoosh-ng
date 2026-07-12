@@ -244,9 +244,7 @@ def test_concat():
 
 
 def test_choice():
-    n = fsa.choice_nfa(
-        fsa.basic_nfa("a"), fsa.choice_nfa(fsa.basic_nfa("b"), fsa.basic_nfa("c"))
-    )
+    n = fsa.choice_nfa(fsa.basic_nfa("a"), fsa.choice_nfa(fsa.basic_nfa("b"), fsa.basic_nfa("c")))
     assert not n.accept("")
     assert n.accept("a")
     assert n.accept("b")

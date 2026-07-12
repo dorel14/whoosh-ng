@@ -60,13 +60,7 @@ The first item must be a tokenizer and the rest must be filters (you can't put
 a filter first or a tokenizer after the first item).
 """
 
-from whoosh.analysis.acore import (
-    Composable,
-    CompositionError,
-    Token,
-    entoken,
-    unstopped,
-)
+from whoosh.analysis.acore import Composable, CompositionError, Token, entoken, unstopped
 from whoosh.analysis.analyzers import (
     Analyzer,
     FancyAnalyzer,
@@ -102,12 +96,7 @@ from whoosh.analysis.intraword import (
     ShingleFilter,
 )
 from whoosh.analysis.morph import DoubleMetaphoneFilter, PyStemmerFilter, StemFilter
-from whoosh.analysis.ngrams import (
-    NgramAnalyzer,
-    NgramFilter,
-    NgramTokenizer,
-    NgramWordAnalyzer,
-)
+from whoosh.analysis.ngrams import NgramAnalyzer, NgramFilter, NgramTokenizer, NgramWordAnalyzer
 from whoosh.analysis.tokenizers import (
     CharsetTokenizer,
     CommaSeparatedTokenizer,

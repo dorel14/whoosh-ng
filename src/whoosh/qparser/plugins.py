@@ -144,7 +144,7 @@ class WildcardPlugin(TaggingPlugin):
     # \u055E = Armenian question mark
     # \u061F = Arabic question mark
     # \u1367 = Ethiopic question mark
-    qmarks = "?\u055E\u061F\u1367"
+    qmarks = "?\u055e\u061f\u1367"
     expr = f"(?P<text>[*{qmarks}])"
 
     def filters(self, parser):
@@ -541,9 +541,7 @@ class FuzzyTermPlugin(TaggingPlugin):
             if i < len(group) - 1 and isinstance(node, syntax.WordNode):
                 nextnode = group[i + 1]
                 if isinstance(nextnode, self.FuzzinessNode):
-                    node = self.FuzzyTermNode(
-                        node, nextnode.maxdist, nextnode.prefixlength
-                    )
+                    node = self.FuzzyTermNode(node, nextnode.maxdist, nextnode.prefixlength)
                     i += 1
             if isinstance(node, self.FuzzinessNode):
                 node = syntax.to_word(node)
@@ -916,9 +914,7 @@ class OperatorsPlugin(Plugin):
     """
 
     class OpTagger(RegexTagger):
-        def __init__(
-            self, expr, grouptype, optype=syntax.InfixOperator, leftassoc=True, memo=""
-        ):
+        def __init__(self, expr, grouptype, optype=syntax.InfixOperator, leftassoc=True, memo=""):
             RegexTagger.__init__(self, expr)
             self.grouptype = grouptype
             self.optype = optype
@@ -950,9 +946,7 @@ class OperatorsPlugin(Plugin):
         if not clean:
             ot = self.OpTagger
             if Not:
-                ops.append(
-                    (ot(Not, syntax.NotGroup, syntax.PrefixOperator, memo="not"), 0)
-                )
+                ops.append((ot(Not, syntax.NotGroup, syntax.PrefixOperator, memo="not"), 0))
             if And:
                 ops.append((ot(And, syntax.AndGroup, memo="and"), 0))
             if Or:

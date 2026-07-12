@@ -41,9 +41,7 @@ def test_nested_parent():
 
 
 def test_scoring():
-    schema = fields.Schema(
-        kind=fields.ID, name=fields.KEYWORD(scorable=True, stored=True)
-    )
+    schema = fields.Schema(kind=fields.ID, name=fields.KEYWORD(scorable=True, stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
         with w.group():
@@ -69,9 +67,7 @@ def test_scoring():
 
 
 def test_missing():
-    schema = fields.Schema(
-        kind=fields.ID, name=fields.KEYWORD(scorable=True, stored=True)
-    )
+    schema = fields.Schema(kind=fields.ID, name=fields.KEYWORD(scorable=True, stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
         with w.group():
@@ -119,9 +115,7 @@ def test_missing():
 
 
 def test_nested_delete():
-    schema = fields.Schema(
-        kind=fields.ID, name=fields.KEYWORD(scorable=True, stored=True)
-    )
+    schema = fields.Schema(kind=fields.ID, name=fields.KEYWORD(scorable=True, stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
         with w.group():
@@ -147,9 +141,7 @@ def test_nested_delete():
 
     # Delete "Accumulator" class
     with ix.writer() as w:
-        q = query.NestedParent(
-            query.Term("kind", "class"), query.Term("name", "Accumulator")
-        )
+        q = query.NestedParent(query.Term("kind", "class"), query.Term("name", "Accumulator"))
         w.delete_by_query(q)
 
     # Check that Accumulator AND ITS METHODS are deleted
@@ -186,9 +178,7 @@ def test_nested_delete():
 
 
 def test_all_parents_deleted():
-    schema = fields.Schema(
-        kind=fields.ID, name=fields.KEYWORD(scorable=True, stored=True)
-    )
+    schema = fields.Schema(kind=fields.ID, name=fields.KEYWORD(scorable=True, stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
         with w.group():
@@ -225,9 +215,7 @@ def test_all_parents_deleted():
 
 
 def test_everything_is_a_parent():
-    schema = fields.Schema(
-        id=fields.STORED, kind=fields.ID, name=fields.ID(stored=True)
-    )
+    schema = fields.Schema(id=fields.STORED, kind=fields.ID, name=fields.ID(stored=True))
     k = "alfa"
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
@@ -253,9 +241,7 @@ def test_everything_is_a_parent():
 
 
 def test_no_parents():
-    schema = fields.Schema(
-        id=fields.STORED, kind=fields.ID, name=fields.ID(stored=True)
-    )
+    schema = fields.Schema(id=fields.STORED, kind=fields.ID, name=fields.ID(stored=True))
     k = "alfa"
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
@@ -392,9 +378,7 @@ def test_nested_skip():
         with ix.searcher() as s:
             all_parents = query.Term("type", "book")
             wanted_parents = query.Term("name", "dark")
-            children_of_wanted_parents = query.NestedChildren(
-                all_parents, wanted_parents
-            )
+            children_of_wanted_parents = query.NestedChildren(all_parents, wanted_parents)
 
             r1 = s.search(children_of_wanted_parents)
             assert r1.scored_length() == 4
@@ -405,9 +389,7 @@ def test_nested_skip():
                 "chapter_4",
             ]
 
-            wanted_children = query.And(
-                [query.Term("type", "chapter"), query.Term("name", "hunt")]
-            )
+            wanted_children = query.And([query.Term("type", "chapter"), query.Term("name", "hunt")])
 
             r2 = s.search(wanted_children)
             assert r2.scored_length() == 1

@@ -1,0 +1,51 @@
+name: Update LLM Context Files
+
+on:
+  push:
+    branches: [ dev ]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'src/**'
+      - '.github/workflows/llms-doc.yml'
+
+jobs:
+  generate-llm-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate llms.txt / llms-full.txt
+        run: python scripts/generate_llm_docs.py
+        # NOTE: whoosh-ng does not yet ship a docs generator. Add a
+        # scripts/generate_llm_docs.py that writes llms.txt (index) and
+        # llms-full.txt (full corpus) from docs/ + README.md. A ready-to-use
+        # reference implementation:
+        #
+        #   import pathlib
+        #   root = pathlib.Path(".")
+        #   docs = sorted((root / "docs").rglob("*.md")) + [root / "README.md"]
+        #   full = []
+        #   for p in docs:
+        #       rel = p.relative_to(root).as_posix()
+        #       text = p.read_text(encoding="utf-8")
+        #       full.append(f"# {rel}\n\n{text}")
+        #   (root / "llms-full.txt").write_text("\n\n".join(full), encoding="utf-8")
+        #   index = "\n".join(f"- {p.relative_to(root).as_posix()}" for p in docs)
+        #   (root / "llms.txt").write_text(f"# whoosh-ng\n\n{index}\n", encoding="utf-8")
+
+      - name: Deploy LLM files
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add llms.txt llms-full.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: auto-update llms context files" && git push origin dev)
