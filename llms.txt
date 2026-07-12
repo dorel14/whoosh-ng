@@ -32,6 +32,7 @@
 - [Query](https://dorel14.github.io/Whoosh-NG//en/guides/query)
 - [Schema](https://dorel14.github.io/Whoosh-NG//en/guides/schema)
 - [Searching](https://dorel14.github.io/Whoosh-NG//en/guides/searching)
+- [Translation Status](https://dorel14.github.io/Whoosh-NG//en/guides/translation-status)
 - [Vector](https://dorel14.github.io/Whoosh-NG//en/guides/vector)
 - [Index](https://dorel14.github.io/Whoosh-NG//en/index)
 - [Middleware](https://dorel14.github.io/Whoosh-NG//en/middleware)
@@ -65,6 +66,7 @@
 - [Schema](https://dorel14.github.io/Whoosh-NG//fr/guides/schema)
 - [Searching](https://dorel14.github.io/Whoosh-NG//fr/guides/searching)
 - [Vector](https://dorel14.github.io/Whoosh-NG//fr/guides/vector)
-- [Translation Status](https://dorel14.github.io/Whoosh-NG//guides/translation-status)
+- [Index](https://dorel14.github.io/Whoosh-NG//fr/index)
+- [Quickstart](https://dorel14.github.io/Whoosh-NG//fr/quickstart)
 
 ## Code Examples & Recipes

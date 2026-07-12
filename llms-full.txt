@@ -4606,6 +4606,20 @@ best_bet_results.upgrade_and_extend(main_results)
 ```
 
 
+## DOCUMENT: Translation Status
+
+# Translation Completion Tracking
+
+- [x] EN quickstart
+- [x] EN guides
+- [x] EN API pages
+- [x] EN examples
+- [x] FR quickstart
+- [x] FR guides
+- [x] FR API pages
+- [x] FR examples
+
+
 ## DOCUMENT: Vector
 
 # Vector Search
@@ -7759,18 +7773,85 @@ with ix.searcher() as searcher:
 5. **Indexation par lots**: Indexez les vecteurs en lots pour l'efficacité
 
 
-## DOCUMENT: Translation Status
+## DOCUMENT: Index
 
-# Translation Completion Tracking
+# Documentation Whoosh-NG
 
-- [x] EN quickstart
-- [x] EN guides
-- [x] EN API pages
-- [x] EN examples
-- [x] FR quickstart
-- [x] FR guides
-- [x] FR API pages
-- [x] FR examples
+Bibliothèque d'indexation et de recherche full-text purement Python, modernisée pour 2025+.
+
+## Démarrage rapide
+
+```bash
+pip install whoosh-ng
+```
+
+```python
+import whoosh.index as index
+from whoosh.fields import Schema, TEXT, ID
+
+schema = Schema(id=ID(stored=True), content=TEXT())
+ix = index.create_in("indexdir", schema)
+
+with ix.writer() as w:
+    w.add_document(id="1", content="hello world")
+
+with ix.searcher() as s:
+    results = s.search("world")
+    print(results[0])
+```
+
+## Fonctionnalités
+
+- Pur Python, aucune dépendance native
+- Moteur de recherche embarqué
+- Architecture de plugins pour l'extensibilité
+- Pipeline de middleware pour les préoccupations transversales
+- Support de recherche vectorielle (NumPy, HNSW, Faiss)
+- Support asynchrone via extra optionnel
+
+
+## DOCUMENT: Quickstart
+
+# Démarrage rapide
+
+## Installation
+
+```bash
+pip install whoosh-ng
+uv pip install whoosh-ng
+```
+
+## Exemple basique
+
+```python
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID
+
+schema = Schema(id=ID(stored=True), content=TEXT())
+ix = index.create_in("indexdir", schema)
+
+with ix.writer() as w:
+    w.add_document(id="1", content="hello world")
+    w.add_document(id="2", content="goodbye world")
+
+with ix.searcher() as s:
+    results = s.search("world")
+    for hit in results:
+        print(hit["id"], hit.score)
+```
+
+## Avec plugins
+
+```bash
+pip install whoosh-ng[vector,autocomplete,api]
+```
+
+```python
+from whoosh.plugins.manager import PluginManager
+from whoosh_modern.vector.plugin import VectorPlugin
+
+PluginManager.load_plugins()
+```
 
 
 # Code Examples
