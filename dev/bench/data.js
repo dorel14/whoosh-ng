@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783871737483,
+  "lastUpdate": 1783872855718,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -348,6 +348,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.0000288439375053202",
             "extra": "mean: 918.1831158880901 usec\nrounds: 535"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "0d8af2e32e492273b15066c184e4409b88e192d4",
+          "message": "chore: 🔧 Réorganisation des étapes de déploiement de la documentation\n\n* Suppression des paramètres par défaut inutiles dans le job de déploiement.\n* Ajout de la directive `working-directory` pour la construction du site Jekyll.\n* Correction du chemin de copie des fichiers générés vers la racine du dépôt.",
+          "timestamp": "2026-07-12T18:13:29+02:00",
+          "tree_id": "a46aec009f326931f124a4cdb58d5cf20e5878f1",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/0d8af2e32e492273b15066c184e4409b88e192d4"
+        },
+        "date": 1783872855095,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1072.5068556505475,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0000355828631124884",
+            "extra": "mean: 932.3949723318391 usec\nrounds: 506"
           }
         ]
       }
