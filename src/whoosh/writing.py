@@ -312,7 +312,7 @@ class IndexWriter:
         :returns: the number of documents deleted.
         """
 
-        from whoosh.query import Term
+        from whoosh.query.terms import Term
 
         q = Term(fieldname, text)
         return self.delete_by_query(q, searcher=searcher)
@@ -429,7 +429,7 @@ class IndexWriter:
         # Check which of the supplied fields are unique
         unique_fields = [
             name
-            for name, field in self.schema.items()
+            for name, field in self.schema.items()   # type: ignore[attr-defined]
             if name in fields and field.unique  # type: ignore[attr-defined]
         ]
         return unique_fields
@@ -1025,6 +1025,10 @@ class AsyncWriter(threading.Thread, IndexWriter):
 
         threading.Thread.__init__(self)
         self.running = False
+        self.started = False
+        self.committed = False
+        self.cancelled = False
+        self.error = None
         self.index = index
         self.writerargs = writerargs or {}
         self.delay = delay
@@ -1050,15 +1054,46 @@ class AsyncWriter(threading.Thread, IndexWriter):
 
     def run(self):
         self.running = True
-        writer = self.writer
-        while writer is None:
-            try:
-                writer = self.index.writer(**self.writerargs)
-            except LockError:
-                time.sleep(self.delay)
-        for method, args, kwargs in self.events:
-            getattr(writer, method)(*args, **kwargs)
-        writer.commit(*self.commitargs, **self.commitkwargs)
+        try:
+            # If cancel() was called before the thread started, do nothing.
+            if self.cancelled:
+                return
+
+            writer = self.writer
+            # Acquire the underlying writer, retrying if the index is locked
+            # (issue #369).
+            while writer is None:
+                try:
+                    writer = self.index.writer(**self.writerargs)
+                except LockError:
+                    time.sleep(self.delay)
+
+            # Replay the buffered calls and commit.
+            for method, args, kwargs in self.events:
+                getattr(writer, method)(*args, **kwargs)
+            writer.commit(*self.commitargs, **self.commitkwargs)
+            self.committed = True
+        except Exception as e:
+            # Surface the failure so it is observable via wait()/self.error
+            # instead of being swallowed by the background thread (issue #578).
+            self.error = e
+            raise
+        finally:
+            self.running = False
+
+    def wait(self, timeout=None):
+        """Joins the background thread (if it was started) and re-raises any
+        exception that occurred during the asynchronous commit, so failures are
+        observable (issue #578). Returns ``True`` if the commit completed.
+
+        :param timeout: maximum time (seconds) to wait for the thread.
+        """
+
+        if self.started:
+            self.join(timeout)
+        if self.error is not None:
+            raise self.error
+        return self.committed
 
     def delete_document(self, *args, **kwargs):
         self._record("delete_document", args, kwargs)
@@ -1079,15 +1114,31 @@ class AsyncWriter(threading.Thread, IndexWriter):
         self._record("delete_by_term", args, kwargs)
 
     def commit(self, *args, **kwargs):
+        if self.committed:
+            raise RuntimeError(
+                "AsyncWriter.commit() has already been called; this writer is spent"
+            )
         if self.writer:
             self.writer.commit(*args, **kwargs)
+            self.committed = True
         else:
             self.commitargs, self.commitkwargs = args, kwargs
+            if self.started:
+                raise RuntimeError(
+                    "AsyncWriter.commit() is already running in a background "
+                    "thread; call commit() only once"
+                )
+            self.started = True
             self.start()
 
     def cancel(self, *args, **kwargs):
         if self.writer:
             self.writer.cancel(*args, **kwargs)
+            self.committed = True
+        else:
+            # The buffered events are dropped; the background thread, if
+            # started, should not replay or commit anything.
+            self.cancelled = True
 
 
 # Ex post factor functions
@@ -1242,16 +1293,20 @@ class BufferedWriter(IndexWriter):
     def reader(self, **kwargs):
         from whoosh.reading import MultiReader
 
-        reader = self.writer.reader()
+        # Hold the writer lock for the whole assembly so a concurrent commit()
+        # cannot swap out self.writer (and its backing index) mid-read, which
+        # previously caused crashes when .searcher() was called from multiple
+        # threads (issue #449).
         with self.lock:
+            reader = self.writer.reader()
             ramreader = self._get_ram_reader()
 
-        # If there are in-memory docs, combine the readers
-        if ramreader.doc_count():
-            if reader.is_atomic():
-                reader = MultiReader([reader, ramreader])
-            else:
-                reader.add_reader(ramreader)
+            # If there are in-memory docs, combine the readers
+            if ramreader.doc_count():
+                if reader.is_atomic():
+                    reader = MultiReader([reader, ramreader])
+                else:
+                    reader.add_reader(ramreader)
 
         return reader
 
@@ -1267,20 +1322,26 @@ class BufferedWriter(IndexWriter):
         if self.period:
             self.timer.cancel()
 
+        # Hold the writer lock for the entire swap so a concurrent
+        # ``reader()``/``searcher()`` (which also takes this lock) never
+        # observes ``self.writer`` mid-replacement -- i.e. never calls
+        # ``CodeWriter.reader()`` on a writer that has just been closed, which
+        # previously raised ``IndexingError("This writer is closed")`` from
+        # other threads (issue #449).
         with self.lock:
             ramreader = self._get_ram_reader()
             self._make_ram_index()
 
-        if self.bufferedcount:
-            self.writer.add_reader(ramreader)
-        self.writer.commit(**self.commitargs)
-        self.bufferedcount = 0
+            if self.bufferedcount:
+                self.writer.add_reader(ramreader)
+            self.writer.commit(**self.commitargs)
+            self.bufferedcount = 0
 
-        if restart:
-            self.writer = self.index.writer(**self.writerargs)
-            if self.period:
-                self.timer = threading.Timer(self.period, self.commit)
-                self.timer.start()
+            if restart:
+                self.writer = self.index.writer(**self.writerargs)
+                if self.period:
+                    self.timer = threading.Timer(self.period, self.commit)
+                    self.timer.start()
 
     def add_reader(self, reader):
         # Pass through to the underlying on-disk index

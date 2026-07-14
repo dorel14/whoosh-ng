@@ -22,10 +22,9 @@ eggs/
 /lcov.info
 /htmlcov/
 /.codiumai.local.toml
-./kilo
-./kilo/*
-./kilo/plans/
-./kilo/plans/*.md
+/.kilo
+
+/.vscode
 
 # Cruft / local scratch
 *.tmp
@@ -36,4 +35,4 @@ src/**/*.tmp
 
 # Pre-commit log artifact
 precommit.log
-.kilo/plans/1784045178434-issue-prioritized-fixes.md
+

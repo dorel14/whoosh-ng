@@ -1,10 +1,11 @@
+import asyncio
 import random
 import threading
 import time
 
 import pytest
 
-from whoosh import analysis, fields, query, writing
+from whoosh import analysis, async_writer, fields, query, writing
 from whoosh.filedb.filestore import RamStorage
 from whoosh.util.testing import TempIndex
 
@@ -568,3 +569,134 @@ def test_delete_add_churn_no_leak():
     # Soft guard: a gross leak would push traced peak far beyond a single
     # round's worth of small documents.
     assert peak < 50 * 1024 * 1024
+
+
+# --- Sprint 2: AsyncWriter reliability (issues #578 / #437 / #369) -----------
+
+
+def test_asyncwriter_double_commit_raises():
+    # issue #437: a second commit() must not raise "threads can only be started
+    # once"; it should fail loudly instead of corrupting state.
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "asyncwriterdouble") as ix:
+        w = writing.AsyncWriter(ix)
+        w.add_document(id="1", text="hello world")
+        # Eager writer acquisition commits synchronously here.
+        w.commit()
+        with pytest.raises(RuntimeError):
+            w.commit()
+
+
+def test_asyncwriter_lockerror_recovery():
+    # issue #369: if the index is locked when the writer is created, the
+    # buffered calls must be replayed once the lock is released (no crash).
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "asyncwriterlock") as ix:
+        # Hold a real writer so the AsyncWriter's writer acquisition raises
+        # LockError and the calls are buffered instead.
+        holder = ix.writer()
+        try:
+            w = writing.AsyncWriter(ix)
+            assert w.writer is None  # buffered because the index was locked
+            w.add_document(id="1", text="hello world")
+            w.add_document(id="2", text="foo bar")
+            w.commit()  # starts the background retry thread
+            # Let the thread attempt (and fail) at least once before releasing.
+            time.sleep(0.1)
+        finally:
+            holder.cancel()  # release the lock; background thread can proceed
+
+        # The buffered documents are eventually committed without crashing.
+        assert w.wait(timeout=10)
+        with ix.reader() as r:
+            assert sorted(r.lexicon("id")) == [b"1", b"2"]
+
+
+@pytest.mark.asyncio
+async def test_async_writer_await_api():
+    # asyncio-native AsyncWriter: buffered writes are committed via await.
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "asyncnative") as ix:
+        w = async_writer.AsyncWriter(ix)
+        w.add_document(id="1", text="hello world")
+        w.add_document(id="2", text="foo bar")
+        await w.commit(timeout=30)
+        assert w._committed
+
+        with ix.reader() as r:
+            assert sorted(r.lexicon("id")) == [b"1", b"2"]
+
+        # A second commit must be refused.
+        with pytest.raises(RuntimeError):
+            await w.commit()
+
+        # A cancel on a spent writer must also be refused.
+        with pytest.raises(RuntimeError):
+            await w.acancel()
+
+
+@pytest.mark.asyncio
+async def test_async_writer_locked_then_commit_recovers():
+    # The asyncio writer must also recover from a LockError and still commit.
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "asyncnativelock") as ix:
+        holder = ix.writer()
+        try:
+            w = async_writer.AsyncWriter(ix)
+            assert w._writer is None
+            w.add_document(id="1", text="hello world")
+            task = asyncio.ensure_future(w.commit(timeout=10))
+            await asyncio.sleep(0.1)
+        finally:
+            holder.cancel()
+
+        await task
+        assert w._committed
+        with ix.reader() as r:
+            assert b"1" in list(r.lexicon("id"))
+
+
+# --- Sprint 2: BufferedWriter thread-safety (issue #449) ---------------------
+
+
+def test_bufferedwriter_concurrent_search():
+    # issue #449: searching (and committing) from multiple threads on a shared
+    # BufferedWriter must not crash or return inconsistent results.
+    schema = fields.Schema(id=fields.ID(stored=True), content=fields.TEXT)
+    with TempIndex(schema, "bufferedconcurrent") as ix:
+        w = writing.BufferedWriter(ix, period=None, limit=100)
+
+        errors = []
+        stop = threading.Event()
+        seen = set()
+
+        def searcher():
+            try:
+                while not stop.is_set():
+                    with w.searcher() as s:
+                        r = s.search(query.Every(), limit=None)
+                        # The buffered docs are always visible to the searcher.
+                        for doc in r:
+                            seen.add(doc["id"])
+            except Exception as e:  # surface any race-induced failure
+                errors.append(e)
+
+        threads = [threading.Thread(target=searcher) for _ in range(4)]
+        for t in threads:
+            t.start()
+
+        # Add documents from the main thread while searches run concurrently.
+        for i in range(100):
+            w.add_document(id=str(i), content=f"doc number {i}")
+
+        # Force a flush to disk so the on-disk/ram composite reader is rebuilt.
+        w.commit()
+        stop.set()
+        for t in threads:
+            t.join(timeout=10)
+
+        w.close()
+
+        assert not errors, f"concurrent search failed: {errors}"
+        # All 100 documents must have been visible to at least one search.
+        assert seen == set(str(i) for i in range(100))
