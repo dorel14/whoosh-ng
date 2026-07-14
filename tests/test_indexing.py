@@ -791,3 +791,40 @@ def test_stored_tuple():
         with ix.searcher() as s:
             doc = s.document(b="f")
             assert doc["a"] == ("foxtrot", 6)
+
+
+def test_corrupted_segment_detected():
+    # Issue #481: a corrupted/missing segment file must be detected with a
+    # clear IndexCorruptedError instead of a cryptic struct/read failure.
+    from whoosh.index import IndexCorruptedError
+
+    schema = fields.Schema(content=fields.TEXT, title=fields.TEXT(stored=True))
+    st = RamStorage()
+    ix = st.create_index(schema)
+    w = ix.writer()
+    w.add_document(title="a", content="alfa bravo")
+    w.add_document(title="b", content="bravo charlie")
+    w.commit()
+
+    assert ix.is_corrupted() is False
+    with ix.searcher() as s:
+        assert s.doc_count() == 2
+        seg = s.reader().segments()[0]
+
+    files = seg.list_files(st)
+    assert files
+
+    # Corrupt the index by removing one of the segment's data files.
+    st.delete_file(files[0])
+
+    assert ix.is_corrupted() is True
+    with pytest.raises(IndexCorruptedError):
+        seg.validate(st)
+
+
+def test_empty_segment_not_flagged_corrupted():
+    # A freshly created, empty index must NOT be reported as corrupted.
+    schema = fields.Schema(content=fields.TEXT, title=fields.TEXT(stored=True))
+    st = RamStorage()
+    ix = st.create_index(schema)
+    assert ix.is_corrupted() is False

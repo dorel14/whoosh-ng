@@ -529,3 +529,42 @@ def test_add_fail_with_absorbed_exception():
         # Assert that correct exception is raised, not the cryptic one
         assert "already" not in ex.value.args[0]
         assert "unicode" in ex.value.args[0]
+
+
+def test_delete_add_churn_no_leak():
+    # Issue #492: repeatedly deleting and re-adding documents must not leak
+    # the deleted documents' accounting/memory. The deleted set must stay
+    # bounded and doc counts must remain correct across many churn cycles.
+    import gc
+    import tracemalloc
+
+    schema = fields.Schema(content=fields.TEXT(stored=True))
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    N = 50
+    tracemalloc.start()
+    for rnd in range(10):
+        w = ix.writer()
+        # "number" survives the default analyzer (single-char tokens like "x"
+        # are stopped), so this deletes every previously added document.
+        w.delete_by_query(query.Term("content", "number"))
+        w.commit()
+        w = ix.writer()
+        for i in range(N):
+            w.add_document(content=f"doc number {i} x round{rnd}")
+        # optimize merges segments and reclaims deleted documents, so the
+        # deleted docs must not accumulate (issue #492).
+        w.commit(optimize=True)
+        with ix.searcher() as s:
+            # Only the live documents remain.
+            assert s.doc_count() == N
+            # Deleted documents were reclaimed, not leaked.
+            assert s.doc_count_all() == N
+    gc.collect()
+    _current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    # Soft guard: a gross leak would push traced peak far beyond a single
+    # round's worth of small documents.
+    assert peak < 50 * 1024 * 1024

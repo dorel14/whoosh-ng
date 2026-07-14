@@ -286,12 +286,19 @@ class UnionMatcher(AdditiveBiMatcher):
         bq = b.block_quality()
         while a.is_active() and b.is_active() and aq + bq < minquality:
             if aq < bq:
-                skipped += a.skip_to_quality(minquality - bq)
+                sk = a.skip_to_quality(minquality - bq)
+                skipped += sk
+                if not sk and a.is_active():
+                    # The matcher couldn't skip ahead for some reason, so just
+                    # advance and try again (issue #446)
+                    a.next()
                 aq = a.block_quality()
             else:
-                skipped += b.skip_to_quality(minquality - aq)
+                sk = b.skip_to_quality(minquality - aq)
+                skipped += sk
+                if not sk and b.is_active():
+                    b.next()
                 bq = b.block_quality()
-
         return skipped
 
 
@@ -392,13 +399,21 @@ class DisjunctionMaxMatcher(UnionMatcher):
         skipped = 0
         aq = a.block_quality()
         bq = b.block_quality()
+        # Same progress guard as UnionMatcher (issue #446): if a sub-matcher
+        # can't skip ahead, advance it by one document to guarantee termination.
         while a.is_active() and b.is_active() and max(aq, bq) < minquality:
             if aq < minquality:
-                skipped += a.skip_to_quality(minquality)
-                aq = a.block_quality()
+                sk = a.skip_to_quality(minquality)
+                skipped += sk
+                if not sk and a.is_active():
+                    a.next()
+                aq = a.block_quality() if a.is_active() else 0.0
             if bq < minquality:
-                skipped += b.skip_to_quality(minquality)
-                bq = b.block_quality()
+                sk = b.skip_to_quality(minquality)
+                skipped += sk
+                if not sk and b.is_active():
+                    b.next()
+                bq = b.block_quality() if b.is_active() else 0.0
         return skipped
 
 
@@ -752,7 +767,6 @@ class AndMaybeMatcher(AdditiveBiMatcher):
     def skip_to_quality(self, minquality):
         a = self.a
         b = self.b
-        minquality = minquality
 
         if not a.is_active():
             raise mcore.ReadTooFar
@@ -764,10 +778,18 @@ class AndMaybeMatcher(AdditiveBiMatcher):
         bq = b.block_quality()
         while a.is_active() and b.is_active() and aq + bq < minquality:
             if aq < bq:
-                skipped += a.skip_to_quality(minquality - bq)
+                sk = a.skip_to_quality(minquality - bq)
+                skipped += sk
+                if not sk and a.is_active():
+                    # The matcher couldn't skip ahead for some reason, so just
+                    # advance and try again
+                    a.next()
                 aq = a.block_quality()
             else:
-                skipped += b.skip_to_quality(minquality - aq)
+                sk = b.skip_to_quality(minquality - aq)
+                skipped += sk
+                if not sk and b.is_active():
+                    b.next()
                 bq = b.block_quality()
 
         return skipped
