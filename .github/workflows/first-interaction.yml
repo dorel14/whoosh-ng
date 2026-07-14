@@ -7,6 +7,11 @@ on:
     branches: [master]
     types: [opened]
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   check_for_first_interaction:
     runs-on: ubuntu-latest
