@@ -2,7 +2,7 @@
 
 **Goal:** Merge all existing planning documents into a single, actionable roadmap for the Whoosh-NG project, targeting the `whoosh-ng` name and documentation at https://dorel14.github.io/Whoosh-NG/. This plan consolidates completed work, outlines remaining work, and provides clear priorities for the lead developer and team.
 
-> **Status update — 2026-07-10 (execution pass 1):** Immediate hygiene, naming (`whoosh-ng`), CHANGELOG, the full async migration core (bridge helpers, async plugin registration, `AsyncStorageProvider`/`AsyncVectorProvider`, async FastAPI endpoints, and the complete async test/benchmark suite), mypy (0 errors), and the pyright CI step are **done**. Full suite: **698 passed, 4 skipped**. Remaining before a 4.0.0 tag: bump version, commit/polish docs (`docs/en`,`docs/fr` ~61 files + `README`), run `ruff format` cleanup on pre-existing unrelated files, and finalize + publish docs. No commit was made by the agent (pending your approval).
+> **Status update — 2026-07-10 (execution pass 1):** Immediate hygiene, naming (`whoosh-ng`), CHANGELOG, the full async migration core (bridge helpers, async plugin registration, `AsyncStorageProvider`/`AsyncVectorProvider`, async FastAPI endpoints, and the complete async test/benchmark suite), mypy (0 errors), and the pyright CI step are **done**. Full suite: **698 passed, 4 skipped**. Remaining before a 1.0.0 tag: bump version from 1.0.0.dev0 to 1.0.0, commit/polish docs (`docs/en`,`docs/fr` ~61 files + `README`), run `ruff format` cleanup on pre-existing unrelated files, and finalize + publish docs. No commit was made by the agent (pending your approval).
 
 ## Decisions & Assumptions
 
@@ -24,7 +24,7 @@ This plan covers:
 4. Alignment of middleware placement (Compression/Encryption → backend level).
 5. Integration of pyright into CI.
 6. Publication of documentation.
-7. Preparation for a 4.0.0 release (version bump, changelog, etc.).
+7. Preparation for a 1.0.0 release (version bump, changelog, etc.).
 
 ## Ordered Task List
 
@@ -37,8 +37,8 @@ This plan covers:
   - Change `name = "whoosh-ng"` (keep `whoosh` as the import package).
   - Update `description`, `Homepage`, `Documentation`, `Repository`, `Issues` URLs to point to the GitHub Pages site `https://dorel14.github.io/Whoosh-NG/` and repo `https://github.com/dorel14/whoosh-NG`.
   - Entry points unchanged (`whoosh_fastapi`, `whoosh_admin`, etc.).
-- [x] Create a `CHANGELOG.md` entry for the upcoming 4.0.0 release summarizing completed phases (0‑10) and this plan’s outcomes.
-- [ ] Bump version in `pyproject.toml` to `4.0.0` (or `4.0.0a1` if preferred) after naming is final.
+- [x] Create a `CHANGELOG.md` entry for the upcoming 1.0.0 release summarizing completed phases (0‑10) and this plan’s outcomes.
+- [ ] Bump version in `pyproject.toml` from `1.0.0.dev0` to `1.0.0` after naming is final.
 
 ### 2. Documentation Publication (Short‑Term)
 - [ ] Verify Jekyll build locally: `cd docs && bundle exec jekyll serve` (ensure no errors) — blocked locally (no Ruby), but `.github/workflows/docs.yml` already builds & deploys via `actions/deploy-pages`.
@@ -76,7 +76,7 @@ Based on `whoosh-ng-async-migration-plan.md` and `whoosh-ng-async-migration-file
 - [ ] Consider adding a `ruff` strict rule set gradually (e.g., enable `UP001`, `UP002`, `B008`, `C4` in phases) — deferred.
 - **Pre-existing ruff-format debt:** `ruff format --check` already failed on unrelated files (`src/whoosh_admin/__init__.py`, `tests/test_fastapi_plugin.py`, `tests/test_providers.py`) before this work. Only files touched by this plan were reformatted; the pre-existing debt should be cleaned in a separate pass.
 
-### 6. Pre‑Release Validation (Before 4.0.0)
+### 6. Pre‑Release Validation (Before 1.0.0)
 - [ ] Run the complete test suite on multiple Python versions (via CI matrix) to confirm compatibility with `>=3.11`.
 - [ ] Verify that the documentation builds without warnings and that all public API references are present.
 - [ ] Check that the package can be installed in a clean environment:
@@ -84,7 +84,7 @@ Based on `whoosh-ng-async-migration-plan.md` and `whoosh-ng-async-migration-file
   Import `whoosh` and instantiate a simple index to ensure no import errors.
 - [ ] Confirm that the entry points work:
   `whoosh-plugins` should discover `whoosh_autocomplete`, `whoosh_vector`, `whoosh_fastapi`, `whoosh_observability`, `whoosh_admin`.
-- [ ] Create a release tag (e.g., `v4.0.0`) and generate a GitHub Release with the changelog.
+- [ ] Create a release tag (e.g., `v1.0.0`) and generate a GitHub Release with the changelog.
 
 ## Risks & Mitigations
 
@@ -108,7 +108,7 @@ Each task is considered done when:
 ## Open Questions (for Lead Dev/Team)
 
 1. Should the distribution name on PyPI be exactly `whoosh-ng` while keeping the import namespace as `whoosh` (to ease migration)?
-2. What is the desired timeline for the 4.0.0 release (e.g., after async migration, after docs publish, or both)?
+2. What is the desired timeline for the 1.0.0 release (e.g., after async migration, after docs publish, or both)?
 3. Are there any additional optional dependencies (e.g., `hnswlib`, `numpy`, `fastapi`) that should be moved to explicit `[project.optional-dependencies]` groups?
 4. Should we adopt a conventional changelog format (e.g., Keep a Changelog) and automate versioning with tools like `towncrier`?
 

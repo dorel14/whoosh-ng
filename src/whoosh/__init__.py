@@ -29,8 +29,8 @@ from __future__ import annotations
 
 import re
 
-__version__ = (4, 0, 0)
-__version_string__ = "4.0.0.dev0"
+__version__ = (1, 0, 0)
+__version_string__ = "1.0.0"
 
 
 def versionstring(build=True, extra=True):
