@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783876556594,
+  "lastUpdate": 1784041265803,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -611,6 +611,35 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.000046955655495343524",
             "extra": "mean: 917.0432971016032 usec\nrounds: 552"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "committer": {
+            "email": "david.orel@sfr.fr",
+            "name": "David Orel"
+          },
+          "distinct": true,
+          "id": "dc2ca4fea3ff9ebc3225a345563e63c8c95e51db",
+          "message": "chore: ✏️ Mise à jour de la version dans le README\n\n- Changement de la version de développement 4.0.0.dev0 à 1.0.0\n- Suppression des sections obsolètes concernant les politiques de qualité et le développement",
+          "timestamp": "2026-07-14T17:00:20+02:00",
+          "tree_id": "a44281269141256f061b0a1beb37a14b18e7d970",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/dc2ca4fea3ff9ebc3225a345563e63c8c95e51db"
+        },
+        "date": 1784041265452,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1582.9036373066867,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00012078347725477182",
+            "extra": "mean: 631.750396190574 usec\nrounds: 525"
           }
         ]
       }
