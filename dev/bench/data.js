@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784041265803,
+  "lastUpdate": 1784042648653,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -640,6 +640,33 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.00012078347725477182",
             "extra": "mean: 631.750396190574 usec\nrounds: 525"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "dorel14",
+            "username": "dorel14"
+          },
+          "committer": {
+            "name": "dorel14",
+            "username": "dorel14"
+          },
+          "id": "9aa2d3b8032027befa028908375fc4c44a4e7367",
+          "message": "Potential fix for code scanning alert no. 1: Workflow does not contain permissions",
+          "timestamp": "2026-07-12T17:15:21Z",
+          "url": "https://github.com/dorel14/whoosh-ng/pull/5/commits/9aa2d3b8032027befa028908375fc4c44a4e7367"
+        },
+        "date": 1784042648248,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1080.3670733441486,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00003713144329603845",
+            "extra": "mean: 925.6113266249572 usec\nrounds: 646"
           }
         ]
       }
