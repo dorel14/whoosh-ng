@@ -62,7 +62,7 @@ class SubWriterTask(Process):
     # This is a Process object that takes "jobs" off a job Queue, processes
     # them, and when it's done, puts a summary of its work on a results Queue
 
-    def __init__(self, storage, indexname, jobqueue, resultqueue, kwargs, multisegment):
+    def __init__(self, storage, indexname, jobqueue, resultqueue, kwargs, multisegment, tempname):
         Process.__init__(self)
         self.storage = storage
         self.indexname = indexname
@@ -70,6 +70,7 @@ class SubWriterTask(Process):
         self.resultqueue = resultqueue
         self.kwargs = kwargs
         self.multisegment = multisegment
+        self.tempname = tempname
         self.running = True
 
     def run(self):
@@ -95,7 +96,7 @@ class SubWriterTask(Process):
         # Open a writer for the index. The _lk=False parameter means to not try
         # to lock the index (the parent object that started me takes care of
         # locking the index)
-        writer = self.writer = SegmentWriter(ix, _lk=False, **self.kwargs)
+        writer = self.writer = SegmentWriter(ix, _lk=False, tempname=self.tempname, **self.kwargs)
 
         # If the parent task calls cancel() on me, it will set self.running to
         # False, so I'll notice the next time through the loop
@@ -155,9 +156,13 @@ class SubWriterTask(Process):
 
 class MpWriter(SegmentWriter):
     def __init__(self, ix, procs=None, batchsize=100, subargs=None, multisegment=False, **kwargs):
+        # One isolated, uniquely-named temporary storage shared between this
+        # parent writer and all of its sub-processes, so job files can be passed
+        # around without colliding with other writers (issue #391).
+        self.tempname = f"{ix.indexname}.tmp.{random_name()}"
         # This is the "main" writer that will aggregate the results created by
         # the sub-tasks
-        SegmentWriter.__init__(self, ix, **kwargs)
+        SegmentWriter.__init__(self, ix, tempname=self.tempname, **kwargs)
 
         self.procs = procs or cpu_count()
         # The maximum number of documents in each job file submitted to the
@@ -190,6 +195,7 @@ class MpWriter(SegmentWriter):
             self.resultqueue,
             self.subargs,
             self.multisegment,
+            self.tempname,
         )
         self.tasks.append(task)
         task.start()
@@ -351,12 +357,17 @@ class SerialMpWriter(MpWriter):
     # A non-parallel version of the MpWriter for testing purposes
 
     def __init__(self, ix, procs=None, batchsize=100, subargs=None, **kwargs):
-        SegmentWriter.__init__(self, ix, **kwargs)
+        # Same shared temp storage as the parallel MpWriter (issue #391).
+        self.tempname = f"{ix.indexname}.tmp.{random_name()}"
+        SegmentWriter.__init__(self, ix, tempname=self.tempname, **kwargs)
 
         self.procs = procs or cpu_count()
         self.batchsize = batchsize
         self.subargs = subargs if subargs else kwargs
-        self.tasks = [SegmentWriter(ix, _lk=False, **self.subargs) for _ in range(self.procs)]
+        self.tasks = [
+            SegmentWriter(ix, _lk=False, tempname=self.tempname, **self.subargs)
+            for _ in range(self.procs)
+        ]
         self.pointer = 0
         self._added_sub = False
 

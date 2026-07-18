@@ -525,6 +525,7 @@ class SegmentWriter(IndexWriter):
         docbase=0,
         codec=None,
         compound=True,
+        tempname=None,
         **kwargs,
     ):
         # Lock the index
@@ -551,7 +552,14 @@ class SegmentWriter(IndexWriter):
         self._setup_doc_offsets()
 
         # Internals
-        self._tempstorage = self.storage.temp_storage(f"{self.indexname}.tmp")
+        # Each writer gets an ISOLATED temporary storage so concurrent writers
+        # (threads or processes) never share scratch files (issue #391). When
+        # ``tempname`` is None a unique directory is created automatically; the
+        # multiprocessing writer passes a single shared ``tempname`` so its
+        # parent and sub-processes can exchange job files through the same
+        # directory without colliding with other writers.
+        self.tempname = tempname
+        self._tempstorage = self.storage.temp_storage(tempname)
         newsegment = codec.new_segment(self.storage, self.indexname)
         self.newsegment = newsegment
         self.compound = compound and newsegment.should_assemble()

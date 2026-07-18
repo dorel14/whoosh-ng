@@ -1,4 +1,5 @@
 import asyncio
+import os
 import random
 import threading
 import time
@@ -700,3 +701,69 @@ def test_bufferedwriter_concurrent_search():
         assert not errors, f"concurrent search failed: {errors}"
         # All 100 documents must have been visible to at least one search.
         assert seen == set(str(i) for i in range(100))
+
+
+# --- Sprint 2: temp storage isolation (issue #391) ---------------------------
+
+
+def test_temp_storage_concurrent():
+    # issue #391: concurrent temp-storage creation must yield ISOLATED,
+    # non-colliding scratch storages (no shared files, no destroyed-data
+    # races between writers).
+    from whoosh.filedb.filestore import FileStorage
+
+    import shutil
+    import tempfile
+
+    d = tempfile.mkdtemp()
+    try:
+        st = FileStorage(d)
+
+        folders = []
+        errors = []
+        lock = threading.Lock()
+
+        def make():
+            try:
+                ts = st.temp_storage()  # no name -> unique, isolated directory
+                marker = f"marker-{random.randint(0, 1_000_000)}"
+                with ts.create_file(marker) as f:
+                    f.write(marker.encode("ascii"))
+                with lock:
+                    folders.append(ts.folder)
+                # The marker must only be visible in THIS temp storage.
+                assert ts.file_exists(marker)
+            except Exception as e:  # surface any race-induced failure
+                errors.append(e)
+
+        threads = [threading.Thread(target=make) for _ in range(30)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=10)
+
+        assert not errors, f"concurrent temp_storage failed: {errors}"
+        # Every concurrent call produced a distinct directory.
+        assert len(set(folders)) == len(folders), "temp storages collided"
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def test_writer_temp_storage_isolated():
+    # issue #391: two independent writers on the same index get isolated temp
+    # storages, so one writer destroying its scratch never affects the other.
+    # We use ``_lk=False`` to bypass the index write lock (which serializes
+    # real writers) and focus purely on temp-storage isolation.
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "tempisolated") as ix:
+        w1 = writing.SegmentWriter(ix, _lk=False)
+        w2 = writing.SegmentWriter(ix, _lk=False)
+        try:
+            # The two writers must not share a temporary storage directory.
+            assert w1._tempstorage.folder != w2._tempstorage.folder
+            # Each temp storage is a distinct subdirectory of the index dir.
+            assert os.path.dirname(w1._tempstorage.folder) == ix.storage.folder
+            assert os.path.dirname(w2._tempstorage.folder) == ix.storage.folder
+        finally:
+            w1.cancel()
+            w2.cancel()

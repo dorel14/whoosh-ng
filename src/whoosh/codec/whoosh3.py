@@ -179,7 +179,12 @@ class W3PerDocWriter(base.PerDocWriterWithColumns):
         self._storage = storage
         self._segment = segment
 
-        tempst = storage.temp_storage(f"{segment.indexname}.tmp")
+        # Use an isolated, uniquely-named temporary storage for the column
+        # compound file so concurrent writers (or repeated commits) never share
+        # scratch space (issue #391). It is removed in ``close()`` once the
+        # columns have been flushed to the main storage.
+        tempst = storage.temp_storage()
+        self._tempst = tempst
         self._cols = compound.CompoundWriter(tempst)
         self._colwriters = {}
         self._create_column("_stored", STORED_COLUMN)
@@ -288,6 +293,9 @@ class W3PerDocWriter(base.PerDocWriterWithColumns):
         for writer in self._colwriters.values():
             writer.finish(self._doccount)
         self._cols.save_as_files(self._storage, self._column_filename)
+        # The columns have been flushed to the main storage, so the isolated
+        # scratch storage is no longer needed (issue #391).
+        self._tempst.destroy()
 
         # If vectors were written, close the vector writers
         if self._vpostfile:
