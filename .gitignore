@@ -22,8 +22,9 @@ eggs/
 /lcov.info
 /htmlcov/
 /.codiumai.local.toml
-./kilo
-./kilo/*
+/.kilo
+
+/.vscode
 
 # Cruft / local scratch
 *.tmp
@@ -34,3 +35,4 @@ src/**/*.tmp
 
 # Pre-commit log artifact
 precommit.log
+

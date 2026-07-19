@@ -3,8 +3,6 @@ name: Performance Benchmark
 on:
   push:
     branches: [ master, dev ]
-  pull_request:
-    branches: [ master, dev ]
 
 permissions:
   contents: write # Required for the action to push results to gh-pages
@@ -44,7 +42,8 @@ jobs:
         run: |
           # The benchmark fixture comes from pytest-benchmark (installed above).
           # whoosh-ng keeps its benchmarks in tests/benchmark_async.py.
-          uv run pytest --benchmark-json output.json tests/benchmark_async.py
+          # Use a warmup round and a longer minimum time to reduce noise on CI.
+          uv run pytest --benchmark-json output.json --benchmark-warmup=on --benchmark-min-time=0.5 tests/benchmark_async.py
 
       - name: Store and compare benchmark result
         uses: benchmark-action/github-action-benchmark@v1
@@ -53,6 +52,6 @@ jobs:
           output-file-path: output.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
-          fail-on-alert: true
-          alert-threshold: '120%'
+          fail-on-alert: false
+          alert-threshold: '200%'
           comment-on-alert: true

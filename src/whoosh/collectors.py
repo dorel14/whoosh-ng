@@ -728,6 +728,26 @@ class FilterCollector(WrappingCollector):
         else:
             return ilen(self.all_ids())
 
+    def matches(self):
+        # Re-apply the allow/restrict filtering at the "matches" level so that
+        # wrapping collectors which iterate ``child.matches()`` (for example
+        # :class:`TimeLimitCollector`) still respect the filter, instead of
+        # bypassing :meth:`collect_matches` (issue #567).
+        _allow = self._allow
+        _restrict = self._restrict
+        if _allow is None and _restrict is None:
+            yield from self.child.matches()
+            return
+
+        offset = getattr(self, "offset", 0)
+        for sub_docnum in self.child.matches():
+            global_docnum = offset + sub_docnum
+            if (_allow is not None and global_docnum not in _allow) or (
+                _restrict is not None and global_docnum in _restrict
+            ):
+                continue
+            yield sub_docnum
+
     def collect_matches(self):
         child = self.child
         _allow = self._allow

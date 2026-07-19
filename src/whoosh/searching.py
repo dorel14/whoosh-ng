@@ -140,6 +140,12 @@ class Searcher:
 
         if type(weighting) is type:
             self.weighting = weighting()
+        elif isinstance(weighting, str):
+            # Issue #494: accept a registered weighting name, e.g.
+            # weighting="BM25F" / "TFIDF".
+            from whoosh import scoring
+
+            self.weighting = scoring.weighting_from_name(weighting)
         else:
             self.weighting = weighting
 
@@ -174,10 +180,10 @@ class Searcher:
         self.close()
 
     def _subsearcher(self, reader):
-        return self.__class__(reader, fromindex=self._ix, weighting=self.weighting, parent=self)
+        return self.__class__(reader, fromindex=self._ix, weighting=self.weighting, parent=self)  # type: ignore[arg-type]
 
     def _offset_for_subsearcher(self, subsearcher):
-        for ss, offset in self.subsearchers:
+        for ss, offset in self.subsearchers:  # type: ignore[union-attr]
             if ss is subsearcher:
                 return offset
 
@@ -193,14 +199,14 @@ class Searcher:
     def has_parent(self):
         return self.parent is not None
 
-    def get_parent(self):
+    def get_parent(self) -> "Searcher":
         """Returns the parent of this searcher (if has_parent() is True), or
         else self.
         """
 
         if self.has_parent():
             # Call the weak reference to get the parent searcher
-            return self.parent()
+            return self.parent()  # type: ignore[operator]
         else:
             return self
 
@@ -259,7 +265,7 @@ class Searcher:
         # possible
         self.is_closed = True
         newreader = self._ix.reader(reuse=self.ixreader)
-        return self.__class__(newreader, fromindex=self._ix, weighting=self.weighting)
+        return self.__class__(newreader, fromindex=self._ix, weighting=self.weighting)  # type: ignore[arg-type]
 
     def close(self):
         if self._closereader:
@@ -298,7 +304,7 @@ class Searcher:
         """
 
         weighting = weighting or self.weighting
-        globalscorer = weighting.scorer(self, fieldname, text, qf=qf)
+        globalscorer = weighting.scorer(self, fieldname, text, qf=qf)  # type: ignore[attr-defined]
 
         if self.is_atomic():
             return self.ixreader.postings(fieldname, text, scorer=globalscorer)
@@ -308,12 +314,12 @@ class Searcher:
             matchers = []
             docoffsets = []
             term = (fieldname, text)
-            for subsearcher, offset in self.subsearchers:
+            for subsearcher, offset in self.subsearchers:  # type: ignore[union-attr]
                 r = subsearcher.reader()
                 if term in r:
                     # Make a segment-specific scorer; the scorer should call
                     # searcher.parent() to get global stats
-                    scorer = weighting.scorer(subsearcher, fieldname, text, qf=qf)
+                    scorer = weighting.scorer(subsearcher, fieldname, text, qf=qf)  # type: ignore[attr-defined]
                     m = r.postings(fieldname, text, scorer=scorer)
                     matchers.append(m)
                     docoffsets.append(offset)
@@ -337,7 +343,7 @@ class Searcher:
         if term in cache:
             return cache[term]
 
-        idf = self.weighting.idf(self, fieldname, text)
+        idf = self.weighting.idf(self, fieldname, text)  # type: ignore[attr-defined]
         cache[term] = idf
         return idf
 
@@ -1021,7 +1027,7 @@ class Results:
         """
 
         if self._total is None:
-            self._total = self.collector.count()
+            self._total = self.collector.count()  # type: ignore[union-attr]
         return self._total
 
     def __getitem__(self, n):
@@ -1179,7 +1185,7 @@ class Results:
         """
 
         if self.docset is None:
-            self.docset = set(self.collector.all_ids())
+            self.docset = set(self.collector.all_ids())  # type: ignore[union-attr]
         return self.docset
 
     def copy(self):
@@ -1242,7 +1248,7 @@ class Results:
 
         if not self.has_matched_terms():
             raise NoTermsException
-        return set(self.termdocs.keys())
+        return set(self.termdocs.keys())  # type: ignore[attr-defined]
 
     def _get_fragmenter(self):
         return self.highlighter.fragmenter
@@ -1554,7 +1560,7 @@ class Hit:
 
     def __getitem__(self, fieldname):
         if fieldname in self.fields():
-            return self._fields[fieldname]
+            return self._fields[fieldname]  # type: ignore[index]
 
         reader = self.reader
         if reader.has_column(fieldname):

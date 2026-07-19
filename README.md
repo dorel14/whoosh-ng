@@ -74,7 +74,7 @@ pip install "whoosh-ng[dev]"
 - **[Examples](/whoosh-ng/en/examples/)** - Runnable code examples
 - **[French Documentation](/whoosh-ng/fr/)** - Documentation en français
 
-## Recent Changes in 4.0.0.dev0
+## Recent Changes in 1.0.0
 
 ### Added
 
@@ -180,49 +180,3 @@ with ix.writer() as w:
         title="Python tutorial",
         embedding=np.random.rand(384).astype(np.float32).tobytes()
     )
-```
-
-## Quality Gates
-
-The 4.0 quality policy requires every merged PR to pass:
-
-```bash
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy src/whoosh
-uv run pytest tests
-uv run python -m build
-uv run twine check dist/*
-```
-
-CI validates these checks on Windows and Linux before merge.
-
-## Development
-
-```bash
-# Install uv (if not already)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Setup
-uv python install 3.11
-uv venv --python 3.11
-uv sync --extra dev
-
-# Run tests
-uv run pytest
-```
-
-## Contributing
-
-Commits follow [Conventional Commits](https://www.conventionalcommits.org/) so `python-semantic-release` can generate versions, changelogs, tags, GitHub releases, and PyPI publications automatically.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
-
-## Maintainers
-
-- [Sygil-Dev Organization](https://github.com/Sygil-Dev)
-- Matt Chaput (original Whoosh author)
-
-## License
-
-BSD-2-Clause. See [LICENSE](LICENSE) for details.

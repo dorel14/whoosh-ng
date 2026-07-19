@@ -650,8 +650,71 @@ class Segment:
     def should_assemble(self):
         return True
 
+    def validate(self, storage):
+        """Checks the on-disk integrity of this segment. Subclasses should
+        override this to verify format-specific files (magic numbers, required
+        extensions). The base implementation detects the most common
+        corruptions: missing, empty, or unreadable segment files (issue #481).
 
-# Wrapping Segment
+        :raises whoosh.index.IndexCorruptedError: if the segment is missing,
+            empty, or otherwise unreadable.
+        """
+
+        if self.is_compound():
+            # Compound segments store everything in a single ".seg" file. Open
+            # it as a compound storage and read its directory; this detects
+            # truncated/garbage files that a plain non-empty check would miss.
+            from whoosh.filedb.compound import CompoundStorage
+            from whoosh.index import IndexCorruptedError
+
+            name = self.make_filename(self.COMPOUND_EXT)
+            if not storage.file_exists(name):
+                raise IndexCorruptedError(f"Segment file {name!r} is missing")
+            try:
+                dbfile = storage.open_file(name)
+                cs = CompoundStorage(dbfile)
+                cs.list()
+                cs.close()
+            except IndexCorruptedError:
+                raise
+            except Exception as e:
+                raise IndexCorruptedError(
+                    f"Corrupted compound segment file {name!r}: {e}"
+                ) from e
+            return
+
+        files = self.list_files(storage)
+        if not files:
+            from whoosh.index import IndexCorruptedError
+
+            raise IndexCorruptedError(
+                f"Segment {self.segment_id()} has no data files"
+            )
+        for name in files:
+            self._validate_named(storage, name)
+
+    def _validate_named(self, storage, fname):
+        """Open and sanity-check a single segment file. Raises
+        IndexCorruptedError if it is missing, empty, or cannot be opened."""
+
+        from whoosh.index import IndexCorruptedError
+
+        try:
+            if not storage.file_exists(fname):
+                raise IndexCorruptedError(f"Segment file {fname!r} is missing")
+            f = storage.open_file(fname)
+        except IndexCorruptedError:
+            raise
+        except Exception as e:  # pragma: no cover - defensive
+            raise IndexCorruptedError(
+                f"Segment file {fname!r} could not be opened: {e}"
+            ) from e
+        try:
+            if f.read(1) == b"":
+                raise IndexCorruptedError(f"Segment file {fname!r} is empty")
+        finally:
+            f.close()
+
 
 
 class WrappingSegment(Segment):

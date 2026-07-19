@@ -578,6 +578,7 @@ class MultiWeighting(WeightingModel):
 
     def scorer(self, searcher, fieldname, text, qf=1):
         w = self.weightings.get(fieldname, self.default)
+        assert w is not None
         return w.scorer(searcher, fieldname, text, qf=qf)
 
 
@@ -610,17 +611,199 @@ class ReverseWeighting(WeightingModel):
             return 0 - self.subscorer.block_quality(matcher)
 
 
-# class PositionWeighting(WeightingModel):
-#    def __init__(self, reversed=False):
-#        self.reversed = reversed
-#
-#    def scorer(self, searcher, fieldname, text, qf=1):
-#        return PositionWeighting.PositionScorer()
-#
-#    class PositionScorer(BaseScorer):
-#        def score(self, matcher):
-#            p = min(span.pos for span in matcher.spans())
-#            if self.reversed:
-#                return p
-#            else:
-#                return 0 - p
+# Configurable weighting registry (issue #494)
+
+
+# Registry mapping case-insensitive names to WeightingModel classes.
+# Third-party packages can extend this via ``entry_points`` (group
+# ``whoosh.weighting``); see :func:`weighting_from_name`.
+_WEIGHTINGS = {
+    "bm25f": BM25F,
+    "bm25": BM25F,
+    "tfidf": TF_IDF,
+    "tf_idf": TF_IDF,
+    "tf-idf": TF_IDF,
+    "pl2": PL2,
+    "dfree": DFree,
+    "frequency": Frequency,
+}
+
+
+def weighting_from_name(name, **kwargs):
+    """Returns a :class:`WeightingModel` instance from a string name.
+
+    Accepts a string name (``"BM25F"``, ``"TFIDF"``, ``"PL2"``...),
+    a :class:`WeightingModel` **class**, or an already-instantiated
+    :class:`WeightingModel` (returned unchanged). This is the
+    implementation of issue #494.
+
+    :param name: a weighting name, class, or instance.
+    :param kwargs: keyword arguments forwarded to the model's
+        constructor when ``name`` is a string or a class.
+    :raises ValueError: if a string ``name`` is not a known weighting.
+    :rtype: :class:`WeightingModel`
+    """
+    # Already an instance -> return as-is.
+    if isinstance(name, WeightingModel):
+        return name
+
+    # A class -> instantiate it.
+    if isinstance(name, type) and issubclass(name, WeightingModel):
+        return name(**kwargs)
+
+    if isinstance(name, str):
+        # Allow entry-point-provided weightings to be discovered.
+        _load_entry_points()
+        key = name.lower()
+        if key in _WEIGHTINGS:
+            return _WEIGHTINGS[key](**kwargs)
+        raise ValueError(
+            f"Unknown weighting {name!r}; available: "
+            f"{sorted(set(_WEIGHTINGS))!r}"
+        )
+
+    raise ValueError(f"Cannot interpret weighting {name!r}")
+
+
+def _load_entry_points():
+    """Lazily pull in any ``whoosh.weighting`` entry points so they are
+    registered in :data:`_WEIGHTINGS` without a hard import.
+    """
+    try:
+        from importlib.metadata import entry_points
+    except ImportError:  # pragma: no cover (py<3.8)
+        return
+    try:
+        eps = entry_points(group="whoosh.weighting")  # type: ignore[call-arg]
+    except Exception:
+        return
+    for ep in eps:
+        try:
+            cls = ep.load()
+        except Exception:
+            continue
+        if isinstance(cls, type) and issubclass(cls, WeightingModel):
+            _WEIGHTINGS.setdefault(ep.name.lower(), cls)
+
+
+# Proximity / position-boosting model (issue #560 / #3)
+
+
+class PositionBoostWeighting(WeightingModel):
+    """Wraps a :class:`BM25F` model and adds a **proximity bonus**
+    to documents where the query terms appear dose together.
+
+    The base BM25F score is computed normally; on top of it a
+    configurable bonus is added that rewards shorter distances between
+    the matched term positions. Documents whose terms are
+    **contiguous** (distance ``1``) receive the full ``phrase_boost``
+    and are therefore ranked above documents where the same terms
+    are scattered further apart.
+
+    This is the implementation of issues #560 (proximity boost)
+    and #3 (phrase-position boost), combined into one model.
+
+    >>> from whoosh import scoring
+    >>> w = scoring.PositionBoostWeighting()
+
+    :param phrase_boost: the maximum bonus (added to the score) awarded
+        to a document when the query terms are contiguous (distance 1).
+    :param k: steepness of the distance falloff. Higher values make
+        the bonus drop off more quickly as the term distance grows.
+    :param kwargs: keyword arguments forwarded to the underlying
+        :class:`BM25F` model (e.g. ``B``, ``K1``, ``fieldname_B``).
+    """
+
+    use_final = False
+
+    def __init__(self, phrase_boost=1.0, k=1.0, **kwargs):
+        self.phrase_boost = phrase_boost
+        self.k = k
+        self.bm25f = BM25F(**kwargs)
+
+    def scorer(self, searcher, fieldname, text, qf=1):
+        if not searcher.schema[fieldname].scorable:
+            return WeightScorer.for_(searcher, fieldname, text)
+
+        # Non-phrase (single-term) queries: delegate entirely to BM25F.
+        if not _is_multiword(text):
+            return self.bm25f.scorer(searcher, fieldname, text, qf=qf)
+
+        return PositionBoostScorer(
+            searcher, fieldname, text, self.bm25f, self.phrase_boost, self.k,
+        )
+
+    def final(self, searcher, docnum, score):
+        return score
+
+
+def _is_multiword(text):
+    # A phrase-like term is anything the query parser represents with a
+    # space (it is stored that way by Phrase/Sequence queries). A plain
+    # single term never contains a space. ``text`` is bytes (e.g. b"a b").
+    text = text.decode("utf-8", "replace") if isinstance(text, (bytes, bytearray)) else text
+    return isinstance(text, str) and " " in text
+
+
+class PositionBoostScorer(WeightLengthScorer):
+    """Scorer for :class:`PositionBoostWeighting`.
+
+    Computes the BM25F base score, then adds a proximity bonus
+    ``phrase_boost / (1 + k * (min_distance - 1))`` where
+    ``min_distance`` is the smallest gap between two matched term
+    positions in the document. Contiguous matches (distance 1) get
+    the full ``phrase_boost``; the bonus decays toward 0 as the
+    distance grows.
+    """
+
+    def __init__(self, searcher, fieldname, text, bm25f, phrase_boost, k, qf=1):
+        self.bm25f = bm25f
+        self.phrase_boost = phrase_boost
+        self.k = k
+        self.text = text
+        # Reuse BM25F's scorer for the base score and quality.
+        self._base = bm25f.scorer(searcher, fieldname, text, qf=qf)
+        # WeightLengthScorer needs dfl/maxquality; mirror what BM25FScorer set up.
+        self.searcher = searcher
+        self.fieldname = fieldname
+        parent = searcher.get_parent()
+        ti = searcher.term_info(fieldname, text)
+        self._maxweight = ti.max_weight()
+        self._avgfl = parent.avg_field_length(fieldname) or 1
+        self.setup(searcher, fieldname, text)
+
+    def supports_block_quality(self):
+        return True
+
+    def score(self, matcher):
+        base = self._base.score(matcher)
+        dist = self._min_distance(matcher)
+        if dist is None:
+            return base
+        bonus = self.phrase_boost / (1.0 + self.k * (dist - 1.0))
+        return base + bonus
+
+    def max_quality(self):
+        return self._base.max_quality() + self.phrase_boost
+
+    def block_quality(self, matcher):
+        return self._base.block_quality(matcher) + self.phrase_boost
+
+    def _min_distance(self, matcher):
+        # Only meaningful for phrase/sequence matchers that expose term
+        # positions. If unavailable, no proximity bonus is applied.
+        if not matcher.supports("positions"):
+            return None
+        try:
+            spans = matcher.spans()
+        except Exception:
+            return None
+        if not spans:
+            return None
+        # The matcher yields one span per query term; the minimum gap
+        # between consecutive term positions is the proximity signal.
+        positions = sorted(pos for span in spans for pos in span)
+        if len(positions) < 2:
+            return 1.0
+        gaps = [positions[i + 1] - positions[i] for i in range(len(positions) - 1)]
+        return float(min(gaps))

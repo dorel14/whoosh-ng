@@ -338,9 +338,16 @@ class Matcher:
 class ConstantScoreMatcher(Matcher):
     def __init__(self, score=1.0):
         self._score = score
+        self._active = True
 
     def supports_block_quality(self):
         return True
+
+    def is_active(self):
+        return self._active
+
+    def go_inactive(self):
+        self._active = False
 
     def max_quality(self):
         return self._score

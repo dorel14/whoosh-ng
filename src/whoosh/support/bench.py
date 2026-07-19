@@ -26,12 +26,20 @@
 # policies, either expressed or implied, of Matt Chaput.
 
 
+import argparse
 import os.path
 from optparse import OptionParser
 from shutil import rmtree
+from typing import Any
 
 from whoosh import index, qparser, query, scoring
-from whoosh.util import find_object, now
+from whoosh.util import now
+from whoosh.util.loading import find_object  # type: ignore[import]
+
+try:
+    import tracemalloc
+except ImportError:
+    tracemalloc = None  # type: ignore[assignment]
 
 try:
     import xappy  # type: ignore
@@ -97,10 +105,10 @@ class Module:
         attrname = f"process_result_{self.options.lib}"
         if hasattr(self.bench.spec, attrname):
             method = getattr(self.bench.spec, attrname)
-            self._process_result = method
+            self._process_result = method  # type: ignore[assignment]
             return method(d)
         else:
-            self._process_result = lambda x: x
+            self._process_result = lambda x: x  # type: ignore[assignment]
             return d
 
     def searcher(self):
@@ -150,7 +158,7 @@ class Spec:
 
             print("%d. %s" % (i + 1, hit.get(self.headline_field)))
             if snippets:
-                print(self.show_snippet(hit))
+                print(self.show_snippet(hit))  # type: ignore[attr-defined]
             if showbody:
                 print(hit.get(self.main_field))
 
@@ -199,19 +207,19 @@ class WhooshModule(Module):
         self.parser = qparser.QueryParser(self.bench.spec.main_field, schema=ix.schema)
 
     def query(self):
-        qstring = " ".join(self.args).decode("utf-8")
+        qstring = " ".join(self.args)
         return self.parser.parse(qstring)
 
     def find(self, q):
-        return self.srch.search(q, limit=int(self.options.limit), optimize=self.options.optimize)
+        return self.srch.search(q, limit=int(self.options.limit), optimize=self.options.optimize)  # type: ignore[union-attr]
 
     def findterms(self, terms):
         limit = int(self.options.limit)
-        s = self.srch
-        q = query.Term(self.bench.spec.main_field, None)
+        s = self.srch  # type: ignore[union-attr]
+        q = query.Term(self.bench.spec.main_field, None)  # type: ignore[call-issue]
         for term in terms:
             q.text = term
-            yield s.search(q, limit=limit)
+            yield s.search(q, limit=limit)  # type: ignore[union-attr]
 
 
 class XappyModule(Module):
@@ -223,32 +231,32 @@ class XappyModule(Module):
     def index_document(self, conn=None, d=None):
         if hasattr(self.bench, "process_document_xappy"):
             self.bench.process_document_xappy(d)
-        doc = xappy.UnprocessedDocument()
-        for key, values in d:
+        doc = xappy.UnprocessedDocument()  # type: ignore[union-attr]
+        for key, values in d: # pyright: ignore[reportOptionalIterable]
             if not isinstance(values, list):
                 values = [values]
             for value in values:
-                doc.fields.append(xappy.Field(key, value))
-        conn.add(doc)
+                doc.fields.append(xappy.Field(key, value))  # type: ignore[union-attr]
+        conn.add(doc)  # type: ignore[union-attr]
 
     def finish(self, conn):
-        conn.flush()
+        conn.flush()  # type: ignore[union-attr]
 
     def searcher(self):
         path = os.path.join(self.options.dir, f"{self.options.indexname}_xappy")
-        return xappy.SearchConnection(path)
+        return xappy.SearchConnection(path)  # type: ignore[union-attr]
 
     def query(self, conn=None):
-        return conn.query_parse(" ".join(self.args))
+        return conn.query_parse(" ".join(self.args))  # type: ignore[union-attr]
 
     def find(self, conn=None, q=None):
-        return conn.search(q, 0, int(self.options.limit))
+        return conn.search(q, 0, int(self.options.limit))  # type: ignore[union-attr]
 
     def findterms(self, conn=None, terms=None):
         limit = int(self.options.limit)
-        for term in terms:
-            q = conn.query_field(self.bench.spec.main_field, term)
-            yield conn.search(q, 0, limit)
+        for term in terms: # pyright: ignore[reportOptionalIterable]
+            q = conn.query_field(self.bench.spec.main_field, term)  # type: ignore[union-attr]
+            yield conn.search(q, 0, limit)  # type: ignore[union-attr]
 
     def results(self, r):
         hf = self.bench.spec.headline_field
@@ -260,42 +268,42 @@ class XappyModule(Module):
 class XapianModule(Module):
     def indexer(self, **kwargs):
         path = os.path.join(self.options.dir, f"{self.options.indexname}_xapian")
-        self.database = xapian.WritableDatabase(path, xapian.DB_CREATE_OR_OPEN)
-        self.ixer = xapian.TermGenerator()
+        self.database = xapian.WritableDatabase(path, xapian.DB_CREATE_OR_OPEN)  # type: ignore[union-attr]
+        self.ixer = xapian.TermGenerator()  # type: ignore[union-attr]
 
     def index_document(self, d):
         if hasattr(self.bench, "process_document_xapian"):
             self.bench.process_document_xapian(d)
-        doc = xapian.Document()
+        doc = xapian.Document()  # type: ignore[union-attr]
         doc.add_value(0, d.get(self.bench.spec.headline_field, "-"))
         doc.set_data(d[self.bench.spec.main_field])
-        self.ixer.set_document(doc)
-        self.ixer.index_text(d[self.bench.spec.main_field])
-        self.database.add_document(doc)
+        self.ixer.set_document(doc)  # type: ignore[union-attr]
+        self.ixer.index_text(d[self.bench.spec.main_field])  # type: ignore[union-attr]
+        self.database.add_document(doc)  # type: ignore[union-attr]
 
     def finish(self, **kwargs):
-        self.database.flush()
+        self.database.flush()  # type: ignore[union-attr]
 
     def searcher(self):
         path = os.path.join(self.options.dir, f"{self.options.indexname}_xappy")
-        self.db = xapian.Database(path)
-        self.enq = xapian.Enquire(self.db)
-        self.qp = xapian.QueryParser()
-        self.qp.set_database(self.db)
+        self.db = xapian.Database(path)  # type: ignore[union-attr]
+        self.enq = xapian.Enquire(self.db)  # type: ignore[union-attr]
+        self.qp = xapian.QueryParser()  # type: ignore[union-attr]
+        self.qp.set_database(self.db)  # type: ignore[union-attr]
 
     def query(self):
-        return self.qp.parse_query(" ".join(self.args))
+        return self.qp.parse_query(" ".join(self.args))  # type: ignore[union-attr]
 
     def find(self, q):
-        self.enq.set_query(q)
-        return self.enq.get_mset(0, int(self.options.limit))
+        self.enq.set_query(q)  # type: ignore[union-attr]
+        return self.enq.get_mset(0, int(self.options.limit))  # type: ignore[union-attr]
 
     def findterms(self, terms):
         limit = int(self.options.limit)
         for term in terms:
-            q = self.qp.parse_query(term)
-            self.enq.set_query(q)
-            yield self.enq.get_mset(0, limit)
+            q = self.qp.parse_query(term)  # type: ignore[union-attr]
+            self.enq.set_query(q)  # type: ignore[union-attr]
+            yield self.enq.get_mset(0, limit)  # type: ignore[union-attr]
 
     def results(self, matches):
         hf = self.bench.spec.headline_field
@@ -307,35 +315,35 @@ class XapianModule(Module):
 class SolrModule(Module):
     def indexer(self, **kwargs):
         self.solr_doclist = []
-        self.conn = pysolr.Solr(self.options.url)
-        self.conn.delete("*:*")
-        self.conn.commit()
+        self.conn = pysolr.Solr(self.options.url)  # type: ignore[union-attr]
+        self.conn.delete("*:*")  # type: ignore[union-attr]
+        self.conn.commit()  # type: ignore[union-attr]
 
     def index_document(self, d):
-        self.solr_doclist.append(d)
-        if len(self.solr_doclist) >= int(self.options.batch):
-            self.conn.add(self.solr_doclist, commit=False)
-            self.solr_doclist = []
+        self.solr_doclist.append(d)  # type: ignore[union-attr]
+        if len(self.solr_doclist) >= int(self.options.batch):  # type: ignore[union-attr]
+            self.conn.add(self.solr_doclist, commit=False)  # type: ignore[union-attr]
+            self.solr_doclist = []  # type: ignore[union-attr]
 
     def finish(self, **kwargs):
-        if self.solr_doclist:
-            self.conn.add(self.solr_doclist)
-        del self.solr_doclist
-        self.conn.optimize(block=True)
+        if self.solr_doclist:  # type: ignore[union-attr]
+            self.conn.add(self.solr_doclist)  # type: ignore[union-attr]
+        del self.solr_doclist  # type: ignore[union-attr]
+        self.conn.optimize(block=True)  # type: ignore[union-attr]
 
     def searcher(self):
-        self.solr = pysolr.Solr(self.options.url)
+        self.solr = pysolr.Solr(self.options.url)  # type: ignore[union-attr]
 
     def query(self):
         return " ".join(self.args)
 
     def find(self, q):
-        return self.solr.search(q, limit=int(self.options.limit))
+        return self.solr.search(q, limit=int(self.options.limit))  # type: ignore[union-attr]
 
     def findterms(self, terms):
         limit = int(self.options.limit)
         for term in terms:
-            yield self.solr.search("body:" + term, limit=limit)
+            yield self.solr.search("body:" + term, limit=limit)  # type: ignore[union-attr]
 
 
 class ZcatalogModule(Module):
@@ -365,19 +373,19 @@ class ZcatalogModule(Module):
         if hasattr(self.bench, "process_document_zcatalog"):
             self.bench.process_document_zcatalog(d)
         doc = ZDoc(d)
-        self.cat.index_doc(doc)
-        self.zcatalog_count += 1
-        if self.zcatalog_count >= 100:
+        self.cat.index_doc(doc)  # type: ignore[union-attr]
+        self.zcatalog_count += 1  # type: ignore[union-attr]
+        if self.zcatalog_count >= 100:  # type: ignore[union-attr]
             import transaction  # type: ignore
 
             transaction.commit()
-            self.zcatalog_count = 0
+            self.zcatalog_count = 0  # type: ignore[union-attr]
 
     def finish(self, **kwargs):
         import transaction  # type: ignore
 
         transaction.commit()
-        del self.zcatalog_count
+        del self.zcatalog_count  # type: ignore[union-attr]
 
     def searcher(self):
         from ZODB.DB import DB  # type: ignore
@@ -388,17 +396,17 @@ class ZcatalogModule(Module):
         db = DB(storage)
         conn = db.open()
 
-        self.cat = conn.root()["cat"]
+        self.cat = conn.root()["cat"]  # type: ignore[union-attr]
 
     def query(self):
         return " ".join(self.args)
 
     def find(self, q):
-        return self.cat.searchResults(body=q)
+        return self.cat.searchResults(body=q)  # type: ignore[union-attr]
 
     def findterms(self, terms):
         for term in terms:
-            yield self.cat.searchResults(body=term)
+            yield self.cat.searchResults(body=term)  # type: ignore[union-attr]
 
     def results(self, r):
         hf = self.bench.spec.headline_field
@@ -452,13 +460,13 @@ class NucularModule(Module):
         return " ".join(self.args)
 
     def find(self, q):
-        return self.archive.dictionaries(q)
+        return self.archive.dictionaries(q)  # type: ignore[union-attr]
 
     def findterms(self, terms):
         for term in terms:
-            q = self.archive.Query()
+            q = self.archive.Query()  # type: ignore[union-attr]
             q.anyWord(term)
-            yield q.resultDictionaries()
+            yield q.resultDictionaries()  # type: ignore[union-attr]
 
 
 class Bench:
@@ -471,19 +479,28 @@ class Bench:
         "nucular": NucularModule,
     }
 
+    def __init__(self) -> None:
+        self._last_index_count: int = 0
+        self._last_index_time: float = 0.0
+        self._last_search_time: float = 0.0
+        self._last_index_peak_rss: float = 0.0
+        self._last_search_peak_rss: float = 0.0
+        self.options: Any | None = None
+
     def index(self, lib):
         print(f"Indexing with {lib}...")
 
         options = self.options
-        every = None if options.every is None else int(options.every)
-        merge = options.merge
-        chunk = int(options.chunk)
-        skip = int(options.skip)
-        upto = int(options.upto)
+        every = None if options.every is None else int(options.every)  # type: ignore[union-attr]
+        merge = options.merge  # type: ignore[union-attr]
+        chunk = int(options.chunk)  # type: ignore[union-attr]
+        skip = int(options.skip)  # type: ignore[union-attr]
+        upto = int(options.upto)  # type: ignore[union-attr]
         count = 0
         skipc = skip
 
         starttime = chunkstarttime = now()
+        mem_start = self._start_mem_tracing()
 
         lib.indexer()
 
@@ -520,21 +537,45 @@ class Bench:
         )
         print(f"Indexed {count / totaltime:0.3f} docs/s")
 
+        self._last_index_count = count
+        self._last_index_time = totaltime
+        self._last_index_peak_rss = self._stop_mem_tracing(mem_start)
+
     def search(self, lib):
         lib.searcher()
 
         t = now()
+        mem_start = self._start_mem_tracing()
         q = lib.query()
         print("Query:", q)
         r = lib.find(q)
-        print("Search time:", now() - t)
+        search_time = now() - t
+        print("Search time:", search_time)
 
         t = now()
         self.spec.print_results(lib.results(r))
         print("Print time:", now() - t)
 
+        self._last_search_time = search_time
+        self._last_search_peak_rss = self._stop_mem_tracing(mem_start)
+
+    def _start_mem_tracing(self):
+        if tracemalloc is None:
+            return None
+        if not tracemalloc.is_tracing():
+            tracemalloc.start()
+        return tracemalloc.take_snapshot()
+
+    def _stop_mem_tracing(self, snapshot):
+        if tracemalloc is None or snapshot is None:
+            return 0.0
+        current = tracemalloc.take_snapshot()
+        stats = current.compare_to(snapshot, "lineno")
+        peak = sum(s.size_diff for s in stats if s.size_diff > 0) / (1024 * 1024)
+        return max(peak, 0.0)
+
     def search_file(self, lib):
-        f = open(self.options.termfile, "rb")
+        f = open(self.options.termfile, "rb")  # type: ignore[union-attr]
         terms = [line.strip() for line in f]
         f.close()
 
@@ -545,6 +586,9 @@ class Bench:
             pass
         searchtime = now() - starttime
         print("Search time:", searchtime, "searches/s:", float(len(terms)) / searchtime)
+
+    def generate_search_file(self, lib):
+        print("Generating search terms file is not yet implemented")
 
     def _parser(self, name):
         p = OptionParser()
@@ -736,7 +780,7 @@ class Bench:
     def run(self, specclass):
         parser = self._parser(specclass.name)
         options, args = parser.parse_args()
-        self.options = options
+        self.options = options  # type: ignore[assignment]
         self.args = args
 
         if options.lib not in self.libs:
