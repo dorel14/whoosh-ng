@@ -400,3 +400,31 @@ def test_nested_skip():
             r3 = s.search(complex_query)
             assert r3.scored_length() == 1
             assert [hit["id"] for hit in r3] == ["chapter_3"]
+
+
+def test_nestedparent_returns_all_matches():
+    """Issue #573: NestedParent must return all matching parent documents."""
+    schema = fields.Schema(type=fields.ID, text=fields.TEXT(stored=True))
+    ix = RamStorage().create_index(schema)
+
+    with ix.writer() as w:
+        with w.group():
+            w.add_document(type="chap", text="Chapter 1")
+            w.add_document(type="p", text="Able baker")
+            w.add_document(type="p", text="Bright morning")
+        with w.group():
+            w.add_document(type="chap", text="Chapter 2")
+            w.add_document(type="p", text="Car trip")
+            w.add_document(type="p", text="Dog eared")
+            w.add_document(type="p", text="Every day")
+        with w.group():
+            w.add_document(type="chap", text="Chapter 3")
+            w.add_document(type="p", text="Fine day")
+
+    with ix.searcher() as s:
+        parents = query.Term("type", "chap")
+        child = query.Term("text", "day")
+        q = query.NestedParent(parents, child)
+        r = s.search(q)
+        assert len(r) == 2
+        assert sorted(hit["text"] for hit in r) == ["Chapter 2", "Chapter 3"]

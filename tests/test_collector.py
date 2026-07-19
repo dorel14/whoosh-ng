@@ -307,3 +307,64 @@ def test_timelimit_preserves_filter():
         # The filter (status == "public") must NOT be dropped by the
         # TimeLimitCollector, even though it iterates child.matches().
         assert result_ids == {1, 3}
+
+
+def test_unlimited_collector_returns_all():
+    """Issue #479: UnlimitedCollector must return all matching documents."""
+    from whoosh.collectors import UnlimitedCollector
+
+    schema = fields.Schema(content=fields.TEXT)
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    with ix.writer() as w:
+        for i in range(100):
+            w.add_document(content=f"doc {i}")
+
+    with ix.searcher() as s:
+        q = query.Every()
+        uc = UnlimitedCollector()
+        s.search_with_collector(q, uc)
+        r = uc.results()
+        assert len(r) == 100
+
+
+def test_or_groups():
+    """Issue #454: OR queries should preserve grouped results correctly."""
+    schema = fields.Schema(content=fields.TEXT(stored=True), category=fields.KEYWORD)
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    with ix.writer() as w:
+        w.add_document(content="hello world", category="A")
+        w.add_document(content="hello there", category="A")
+        w.add_document(content="help me", category="B")
+        w.add_document(content="world peace", category="B")
+
+    with ix.searcher() as s:
+        q = query.Or([query.Term("content", "hello"), query.Term("content", "world")])
+        r = s.search(q, groupedby="category")
+        groups = r.groups("category")
+        assert set(groups.keys()) == {"A", "B"}
+        assert len(groups["A"]) == 2
+        assert len(groups["B"]) == 1
+
+
+def test_collapse_with_order_length():
+    """Issue #453: collapse + collapse_order should report correct result length."""
+    schema = fields.Schema(content=fields.TEXT(stored=True), category=fields.KEYWORD, sort=fields.NUMERIC)
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    with ix.writer() as w:
+        w.add_document(content="hello world", category="A", sort=1)
+        w.add_document(content="hello there", category="A", sort=2)
+        w.add_document(content="help me", category="B", sort=3)
+        w.add_document(content="world peace", category="B", sort=4)
+
+    with ix.searcher() as s:
+        q = query.Every()
+        r = s.search(q, collapse="category", collapse_order=sorting.FieldFacet("sort"), limit=10)
+        assert len(r) == 2
+        assert r.collapsed_counts["A"] == 1
+        assert r.collapsed_counts["B"] == 1
