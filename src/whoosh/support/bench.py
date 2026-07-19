@@ -216,7 +216,7 @@ class WhooshModule(Module):
     def findterms(self, terms):
         limit = int(self.options.limit)
         s = self.srch  # type: ignore[union-attr]
-        q = query.Term(self.bench.spec.main_field, None)
+        q = query.Term(self.bench.spec.main_field, None)  # type: ignore[call-issue]
         for term in terms:
             q.text = term
             yield s.search(q, limit=limit)  # type: ignore[union-attr]
