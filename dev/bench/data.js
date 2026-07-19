@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784042648653,
+  "lastUpdate": 1784474564465,
   "repoUrl": "https://github.com/dorel14/whoosh-ng",
   "entries": {
     "Benchmark": [
@@ -667,6 +667,37 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.00003713144329603845",
             "extra": "mean: 925.6113266249572 usec\nrounds: 646"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "d.orel@free.fr",
+            "name": "David Orel",
+            "username": "dorel14"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "68e67aaefb0d48f136d53576e00f10d68f77f15a",
+          "message": "Merge pull request #5 from dorel14/alert-autofix-1\n\nPotential fix for code scanning alert no. 1: Workflow does not contain permissions",
+          "timestamp": "2026-07-19T17:21:59+02:00",
+          "tree_id": "69db453a3f232e8b6358f9f64a75b2a303c4034d",
+          "url": "https://github.com/dorel14/whoosh-ng/commit/68e67aaefb0d48f136d53576e00f10d68f77f15a"
+        },
+        "date": 1784474563851,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/benchmark_async.py::test_run_sync_overhead",
+            "value": 1052.0949616248113,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00007034425520873551",
+            "extra": "mean: 950.4845441476517 usec\nrounds: 487"
           }
         ]
       }
