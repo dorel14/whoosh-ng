@@ -494,10 +494,46 @@ class IndexWriter:
                 uniqueterms = [(name, fields[name]) for name in unique_fields]
                 docs = s._find_unique(uniqueterms)
                 for docnum in docs:
-                    self.delete_document(docnum)
+                     self.delete_document(docnum)
 
         # Add the given fields
         self.add_document(**fields)
+
+    def batch_update_documents(self, docs):
+        """Batch version of :meth:`update_document`.
+
+        Accepts an iterable of field mappings. For each document, deletes any
+        existing documents matching the unique fields, then adds the new
+        document. Opens a single searcher for the whole batch instead of one
+        per document, which is significantly faster for large batches.
+
+        :param docs: iterable of ``dict``-like objects mapping field names to
+            values, e.g. ``[{"id": "1", "content": "..."}, ...]``.
+        """
+        if not docs:
+            return
+
+        unique_fields = set()
+        batch = []
+        for fields in docs:
+            uf = self._unique_fields(fields)
+            if uf:
+                unique_fields.update(uf)
+            batch.append(fields)
+
+        if not unique_fields:
+            for fields in batch:
+                self.add_document(**fields)
+            return
+
+        with self.searcher() as s:
+            for fields in batch:
+                uniqueterms = [(name, fields[name]) for name in unique_fields if name in fields]
+                if uniqueterms:
+                    docs_to_delete = s._find_unique(uniqueterms)
+                    for docnum in docs_to_delete:
+                        self.delete_document(docnum)
+                self.add_document(**fields)
 
     def commit(self):
         """Finishes writing and unlocks the index."""
@@ -941,7 +977,7 @@ class SegmentWriter(IndexWriter):
 
     # Finalization methods
 
-    def commit(self, mergetype=None, optimize=None, merge=None):
+    def commit(self, mergetype=None, optimize=None, merge=None, callback=None):
         """Finishes writing and saves all additions and changes to disk.
 
         There are four possible ways to use this method::
@@ -967,23 +1003,40 @@ class SegmentWriter(IndexWriter):
             documents you've added to this writer (and the value of the
             ``merge`` argument is ignored).
         :param merge: if False, do not merge small segments.
+        :param callback: optional callable ``callback(stage, **kwargs)`` called
+            at key points during commit. Stages are ``"merge"``, ``"segment"``,
+            ``"toc"``, and ``"finish"``.
         """
 
         self._check_state()
         # Merge old segments if necessary
+        if callback:
+            callback("merge", segments=len(self.segments))
         finalsegments = self._merge_segments(mergetype, optimize, merge)
+        if callback:
+            callback("merge", segments=len(finalsegments))
         if self._added:
             # Flush the current segment being written and add it to the
             # list of remaining segments returned by the merge policy
             # function
+            if callback:
+                callback("segment", started=True)
             finalsegments.append(self._finalize_segment())
+            if callback:
+                callback("segment", ended=True)
         else:
             # Close segment files
             self._close_segment()
         # Write TOC
+        if callback:
+            callback("toc", started=True, segments=len(finalsegments))
         self._commit_toc(finalsegments)
+        if callback:
+            callback("toc", ended=True)
 
         # Final cleanup
+        if callback:
+            callback("finish")
         self._finish()
 
     def cancel(self):

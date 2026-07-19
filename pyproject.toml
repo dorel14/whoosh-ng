@@ -40,6 +40,9 @@ dependencies = [
 models = [
   "pydantic>=2",
   "msgspec>=0.19",
+  "xappy",
+  "xapian",
+  "pysolr",
 ]
 vector = [
   "numpy>=2",
