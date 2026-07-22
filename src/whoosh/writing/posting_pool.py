@@ -49,6 +49,10 @@ def _posting_size(item):
                 size += sys.getsizeof(sub)
             except Exception:
                 size += 1
+        fieldname, textbytes, docnum, weight, vbytes = item
+        size += len(fieldname) + len(textbytes)
+        if vbytes is not None:
+            size += len(vbytes)
         return size
     except Exception:
         return 1 + len(item)
