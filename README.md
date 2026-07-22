@@ -5,17 +5,10 @@
 
 # Whoosh-NG
 
-**Whoosh-Reloaded** is a modern, pure-Python full-text indexing and search library. Version 4.0 brings a complete modernization with Python 3.11+ support, strict type annotations, optional feature profiles, and automated semantic releases.
+**Whoosh-NG** is a modern, pure-Python full-text indexing and search library. Version 4.0 brings a complete modernization with Python 3.11+ support, strict type annotations, optional feature profiles, and automated semantic releases.
 
 ## Quick Start
 
-```bash
-pip install whoosh-ng
-```
-
-## Features
-
-- **Pure Python** - No native dependencies, works everywhere Python runs
 - **Full-text search** - BM25/BM25F scoring with phrase queries
 - **Fielded documents** - Structured indexing with typed fields
 - **Query parsing** - Flexible parser with boosting and syntax options

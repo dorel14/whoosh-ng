@@ -23,7 +23,8 @@ eggs/
 /htmlcov/
 /.codiumai.local.toml
 /.kilo
-
+/benchmark/dictionary_index_whoosh/
+/benchmark/reuters_index_whoosh/
 /.vscode
 
 # Cruft / local scratch

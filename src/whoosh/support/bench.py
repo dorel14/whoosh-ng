@@ -27,6 +27,7 @@
 
 
 import argparse
+import inspect
 import os.path
 from optparse import OptionParser
 from shutil import rmtree
@@ -491,17 +492,20 @@ class Bench:
         print(f"Indexing with {lib}...")
 
         options = self.options
-        every = None if options.every is None else int(options.every)  # type: ignore[union-attr]
-        merge = options.merge  # type: ignore[union-attr]
-        chunk = int(options.chunk)  # type: ignore[union-attr]
-        skip = int(options.skip)  # type: ignore[union-attr]
-        upto = int(options.upto)  # type: ignore[union-attr]
+        every = None if options.every is None else int(options.every)
+        merge = options.merge
+        chunk = int(options.chunk)
+        skip = int(options.skip)
+        upto = int(options.upto)
         count = 0
         skipc = skip
 
         starttime = chunkstarttime = now()
         mem_start = self._start_mem_tracing()
 
+        if inspect.isclass(lib):
+            lib = lib()
+        self.spec = lib
         lib.indexer()
 
         for d in self.spec.documents():
@@ -542,6 +546,9 @@ class Bench:
         self._last_index_peak_rss = self._stop_mem_tracing(mem_start)
 
     def search(self, lib):
+        if inspect.isclass(lib):
+            lib = lib()
+        self.spec = lib
         lib.searcher()
 
         t = now()

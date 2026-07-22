@@ -63,6 +63,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--limit", default=10, help="Max search results to retrieve")
     parser.add_argument("--procs", default=0, help="Number of processors for indexing")
     parser.add_argument("--limitmb", default=128, help="Max memory usage per writer in MB")
+    parser.add_argument("--every", default=None, help="Report progress every N docs")
+    parser.add_argument("--merge", default=1, help="Merge policy (1=SMALL, 0=none)")
+    parser.add_argument("--chunk", default=0, help="Chunk size for indexing progress")
+    parser.add_argument("--skip", default=0, help="Initial docs to skip")
+    parser.add_argument("--upto", default=0, help="Maximum docs to index (0=unlimited)")
 
     args = parser.parse_args(list(argv) if argv is not None else None)
 
