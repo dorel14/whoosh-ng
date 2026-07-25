@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import collections.abc
 import os
 import tempfile
@@ -134,3 +135,25 @@ def test_sqlite_optimize(tmp_sqlite_path) -> None:
     w.commit()
     backend.optimize()
     assert backend.doc_count() == 100
+
+
+# ---------------------------------------------------------------------------
+# LMDB backend
+# ---------------------------------------------------------------------------
+
+
+def test_lmdb_backend_registration() -> None:
+    from whoosh.registry import BackendRegistry
+
+    assert "lmdb" in BackendRegistry.list_keys()
+    backend_cls = BackendRegistry.get("lmdb")
+    assert backend_cls.name == "lmdb"
+
+
+def test_lmdb_backend_requires_lmdb_package() -> None:
+    pytest.importorskip("lmdb")
+    from whoosh.backends.lmdb import LmdbBackend
+
+    backend = LmdbBackend(":memory:")
+    assert backend.name == "lmdb"
+

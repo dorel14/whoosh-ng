@@ -1,20 +1,21 @@
 import gzip
 import os
 
+from benchmark import WhooshLikeSpec
 from whoosh import analysis, fields
-from whoosh.support.bench import Bench, Spec
 
 
-class VulgarTongue(Spec):
+class VulgarTongue(WhooshLikeSpec):
     name = "dictionary"
     filename = "dcvgr10.txt.gz"
+    main_field = "body"
     headline_field = "head"
+    default_query = "bawd"
 
     def documents(self):
         path = os.path.join(self.options.dir, self.filename)
         f = gzip.GzipFile(path)
-
-        head = body = None
+        head = body = ""
         for line in f:
             line = line.decode("latin1")
             if line[0].isalpha():
@@ -23,24 +24,12 @@ class VulgarTongue(Spec):
                 head, body = line.split(".", 1)
             else:
                 body += line
-
         if head:
             yield {"head": head, "body": head + body}
 
     def whoosh_schema(self):
         ana = analysis.StemmingAnalyzer()
-
         schema = fields.Schema(
             head=fields.ID(stored=True), body=fields.TEXT(analyzer=ana, stored=True)
         )
         return schema
-
-    def zcatalog_setup(self, cat):
-        from zcatalog import indexes  # type: ignore
-
-        cat["head"] = indexes.FieldIndex(field_name="head")
-        cat["body"] = indexes.TextIndex(field_name="body")
-
-
-if __name__ == "__main__":
-    Bench().run(VulgarTongue)

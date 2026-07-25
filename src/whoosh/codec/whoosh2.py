@@ -1582,6 +1582,26 @@ class W2Segment(base.Segment):
         else:
             return iter(self.deleted)
 
+    def validate(self, storage):
+        # Run the generic file-existence/emptiness checks first.
+        super().validate(storage)
+
+        # Verify the postings file block magic to catch block corruption
+        # (issue #481). An empty file is already reported by the base check.
+        pst = self.make_filename(W2Codec.POSTS_EXT)
+        if storage.file_exists(pst):
+            f = storage.open_file(pst)
+            try:
+                magic = f.read(4)
+                if magic and magic != W2Block.magic:
+                    from whoosh.index import IndexCorruptedError
+
+                    raise IndexCorruptedError(
+                        f"Postings file {pst!r} has invalid magic {magic!r}"
+                    )
+            finally:
+                f.close()
+
 
 # Posting blocks
 

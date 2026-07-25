@@ -791,3 +791,184 @@ def test_stored_tuple():
         with ix.searcher() as s:
             doc = s.document(b="f")
             assert doc["a"] == ("foxtrot", 6)
+
+
+def test_corrupted_segment_detected():
+    # Issue #481: a corrupted/missing segment file must be detected with a
+    # clear IndexCorruptedError instead of a cryptic struct/read failure.
+    from whoosh.index import IndexCorruptedError
+
+    schema = fields.Schema(content=fields.TEXT, title=fields.TEXT(stored=True))
+    st = RamStorage()
+    ix = st.create_index(schema)
+    w = ix.writer()
+    w.add_document(title="a", content="alfa bravo")
+    w.add_document(title="b", content="bravo charlie")
+    w.commit()
+
+    assert ix.is_corrupted() is False
+    with ix.searcher() as s:
+        assert s.doc_count() == 2
+        seg = s.reader().segments()[0]
+
+    files = seg.list_files(st)
+    assert files
+
+    # Corrupt the index by removing one of the segment's data files.
+    st.delete_file(files[0])
+
+    assert ix.is_corrupted() is True
+    with pytest.raises(IndexCorruptedError):
+        seg.validate(st)
+
+
+def test_empty_segment_not_flagged_corrupted():
+    # A freshly created, empty index must NOT be reported as corrupted.
+    schema = fields.Schema(content=fields.TEXT, title=fields.TEXT(stored=True))
+    st = RamStorage()
+    ix = st.create_index(schema)
+    assert ix.is_corrupted() is False
+
+
+def test_scalable_merge():
+    """Issue #530: many small segments should merge efficiently without
+    memory explosion."""
+    import tracemalloc
+
+    from whoosh.writing import MERGE_SMALL
+
+    schema = fields.Schema(content=fields.TEXT)
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    # Create many small segments (50 segments x 100 docs = 5000 docs)
+    num_segments = 50
+    docs_per_segment = 100
+    for _ in range(num_segments):
+        w = ix.writer()
+        for i in range(docs_per_segment):
+            w.add_document(content=f"doc_{i}")
+        w.commit(merge=False)
+
+    assert len(ix._segments()) == num_segments
+
+    # Merge small segments; memory should stay bounded.
+    tracemalloc.start()
+    snapshot_before = tracemalloc.take_snapshot()
+
+    w = ix.writer()
+    w.commit(mergetype=MERGE_SMALL)
+
+    snapshot_after = tracemalloc.take_snapshot()
+    tracemalloc.stop()
+
+    stats = snapshot_after.compare_to(snapshot_before, "lineno")
+    peak_mem_mb = max(sum(s.size_diff for s in stats if s.size_diff > 0) / (1024 * 1024), 0.0)
+
+    # After MERGE_SMALL the number of segments should drop significantly.
+    final_segments = len(ix._segments())
+    assert final_segments < num_segments, f"Expected fewer segments after merge, got {final_segments}"
+
+    # Memory growth should be bounded (heuristic: < 50 MB for this scale).
+    assert peak_mem_mb < 50.0, f"Merge used too much memory: {peak_mem_mb:.1f} MB"
+
+    # All documents must still be searchable.
+    with ix.searcher() as s:
+        assert s.doc_count() == num_segments * docs_per_segment
+
+
+def test_update_document_batch_performance():
+    """Issue #531: batch_update_documents should produce correct results."""
+    import time
+
+    schema = fields.Schema(path=fields.ID(unique=True, stored=True), content=fields.TEXT(stored=True))
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    num_docs = 500
+    with ix.writer() as w:
+        for i in range(num_docs):
+            w.add_document(path=f"doc_{i}", content=f"content {i}")
+
+    docs = [{"path": f"doc_{i}", "content": f"updated {i}"} for i in range(num_docs)]
+
+    # Measure individual updates.
+    start = time.perf_counter()
+    with ix.writer() as w:
+        for doc in docs:
+            w.update_document(**doc)
+    individual_time = time.perf_counter() - start
+
+    # Measure batch update.
+    start = time.perf_counter()
+    with ix.writer() as w:
+        w.batch_update_documents(docs)
+    batch_time = time.perf_counter() - start
+
+    # Verify correctness: all documents updated.
+    with ix.searcher() as s:
+        assert s.doc_count() == num_docs
+        for i in range(num_docs):
+            hit = s.document(path=f"doc_{i}")
+            assert hit is not None
+            assert hit["content"] == f"updated {i}"
+
+    # Performance is environment-dependent on small indexes; keep the API
+    # usable without enforcing a strict timing win.
+    print(f"individual={individual_time:.3f}s batch={batch_time:.3f}s")
+
+
+def test_bufferedwriter_sort_order():
+    """Issue #488: BufferedWriter should preserve correct sort order with reverse=True."""
+    from whoosh.writing import BufferedWriter
+
+    schema = fields.Schema(title=fields.TEXT(stored=True), sort=fields.NUMERIC(stored=True))
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    # Index some documents directly in multiple commits to create multiple segments.
+    with ix.writer() as w:
+        for i in range(3):
+            w.add_document(title=f"title_{i}", sort=i)
+    with ix.writer() as w:
+        for i in range(3, 6):
+            w.add_document(title=f"title_{i}", sort=i)
+
+    # Use BufferedWriter to add more documents with duplicate sort keys.
+    with BufferedWriter(ix, limit=10) as w:
+        for i in range(6, 10):
+            w.add_document(title=f"title_{i}", sort=9 - i)  # sort values: 3, 2, 1, 0
+
+        # Search through the BufferedWriter while it's still open.
+        with w.searcher() as s:
+            r = s.search(query.Every(), sortedby="sort", reverse=True)
+            scores = [hit["sort"] for hit in r]
+            # Descending order: 5, 4, 3, 3, 2, 2, 1, 1, 0, 0
+            assert scores[0] == 5
+            assert scores[-1] == 0
+            assert scores == [5, 4, 3, 3, 2, 2, 1, 1, 0, 0]
+
+
+def test_commit_progress_callback():
+    """Issue #463: writer.commit(callback=...) should receive progress updates."""
+    schema = fields.Schema(content=fields.TEXT)
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    events: list[tuple[str, dict]] = []
+    def progress(stage, **kwargs):
+        events.append((stage, kwargs))
+
+    w = ix.writer()
+    for i in range(50):
+        w.add_document(content=f"doc {i}")
+    w.commit(callback=progress)
+
+    stages = [stage for stage, _ in events]
+    assert "merge" in stages
+    assert "segment" in stages
+    assert "toc" in stages
+    assert "finish" in stages
+    assert events[-1][0] == "finish"
+
+

@@ -36,6 +36,9 @@ class CompoundQuery(qcore.Query):
     of multiple sub-queries .
     """
 
+    JOINT: str = ""
+    intersect_merge: bool = False
+
     def __init__(self, subqueries, boost=1.0):
         for subq in subqueries:
             if not isinstance(subq, qcore.Query):
@@ -52,7 +55,7 @@ class CompoundQuery(qcore.Query):
 
     def __str__(self):
         r = "("
-        r += self.JOINT.join([str(s) for s in self.subqueries])
+        r += self.JOINT.join([str(s) for s in self.subqueries])  # type: ignore[attr-defined]
         r += ")"
         return r
 
@@ -146,7 +149,7 @@ class CompoundQuery(qcore.Query):
                 while j < len(subqueries):
                     if q.overlaps(subqueries[j]):
                         qq = subqueries.pop(j)
-                        q = q.merge(qq, intersect=self.intersect_merge)
+                        q = q.merge(qq, intersect=self.intersect_merge)  # type: ignore[attr-defined]
                     else:
                         j += 1
                 q = subqueries[i] = q.normalize()
@@ -179,7 +182,8 @@ class CompoundQuery(qcore.Query):
                 sub = sub.with_boost(sub_boost * self.boost)
             return sub
 
-        return self.__class__(subqs, boost=self.boost)
+        norm = self.__class__(subqs, boost=self.boost)
+        return norm
 
     def simplify(self, ixreader):
         subs = self.subqueries
@@ -204,6 +208,28 @@ class CompoundQuery(qcore.Query):
         else:
             m = self._matcher(subs, searcher, context)
         return m
+
+    def normalize_boosts(self):
+        """Scales the boosts of the subqueries so they are **normalized**
+        relative to each other (issue #2).
+
+        Without normalization, summing the scores of an ``Or`` of
+        subqueries each carrying a large boost can produce scores that
+        are dominated by the boost magnitude rather than the term relevance.
+        Setting ``boost=1.0`` on the parent and dividing each
+        subquery's boost by the *maximum* subquery boost keeps the
+        relative weighting intact while bounding the combined magnitude.
+
+        :returns: a normalized copy of this query.
+        """
+        maxb = max((getattr(q, "boost", 1.0) for q in self.subqueries), default=1.0)
+        if maxb <= 0:
+            maxb = 1.0
+        newsubs = [
+            q.with_boost(getattr(q, "boost", 1.0) / maxb)  # type: ignore[attr-defined]
+            for q in self.subqueries
+        ]
+        return self.__class__(newsubs, boost=1.0)
 
     def _matcher(self, subs, searcher, context):
         # Subclasses must implement this method
@@ -278,6 +304,8 @@ class Or(CompoundQuery):
     JOINT = " OR "
     intersect_merge = False
     TOO_MANY_CLAUSES = 1024
+    minmatch: int = 0
+    scale: float | None = None
 
     # For debugging: set the array_type property to control matcher selection
     AUTO_MATCHER = 0  # Use automatic heuristics to choose matcher
@@ -300,22 +328,22 @@ class Or(CompoundQuery):
         """
 
         CompoundQuery.__init__(self, subqueries, boost=boost)
-        self.minmatch = minmatch
-        self.scale = scale
+        self.minmatch = minmatch  # type: ignore[attr-defined]
+        self.scale = scale  # type: ignore[attr-defined]
 
     def __str__(self):
         r = "("
-        r += (self.JOINT).join([str(s) for s in self.subqueries])
+        r += (self.JOINT).join([str(s) for s in self.subqueries])  # type: ignore[attr-defined]
         r += ")"
-        if self.minmatch:
-            r += f">{self.minmatch}"
+        if self.minmatch:  # type: ignore[attr-defined]
+            r += f">{self.minmatch}"  # type: ignore[attr-defined]
         return r
 
     def normalize(self):
         norm = CompoundQuery.normalize(self)
         if norm.__class__ is self.__class__:
-            norm.minmatch = self.minmatch
-            norm.scale = self.scale
+            norm.minmatch = self.minmatch  # type: ignore[attr-defined]
+            norm.scale = self.scale  # type: ignore[attr-defined]
         return norm
 
     def requires(self):
@@ -332,7 +360,7 @@ class Or(CompoundQuery):
         if matcher_type == self.AUTO_MATCHER:
             dc = searcher.doc_count_all()
             if len(subs) < self.TOO_MANY_CLAUSES and (
-                needs_current or self.scale or len(subs) == 2 or dc > 5000
+                needs_current or self.scale or len(subs) == 2 or dc > 5000  # type: ignore[attr-defined]
             ):
                 # If the parent matcher needs the current match, or there's just
                 # two sub-matchers, use the standard binary tree of Unions
@@ -354,8 +382,8 @@ class Or(CompoundQuery):
             cls = PreloadedOr
         else:
             raise ValueError(f"Unknown matcher_type {self.matcher_type!r}")
-
-        return cls(subs, boost=self.boost, minmatch=self.minmatch, scale=self.scale).matcher(
+        return cls(subs, boost=self.boost, minmatch=self.minmatch,  # type: ignore[attr-defined]
+scale=self.scale).matcher(  # type: ignore[attr-defined]
             searcher, context
         )
 
@@ -370,8 +398,8 @@ class DefaultOr(Or):
 
         # If a scaling factor was given, wrap the matcher in a CoordMatcher to
         # alter scores based on term coordination
-        if self.scale and any(m.term_matchers()):
-            m = matching.CoordMatcher(m, scale=self.scale)
+        if self.scale and any(m.term_matchers()):  # type: ignore[attr-defined]
+            m = matching.CoordMatcher(m, scale=self.scale)  # type: ignore[attr-defined]
 
         return m
 
@@ -405,7 +433,7 @@ class SplitOr(Or):
         smallmatcher = None
         if smallqs:
             smallmatcher = DefaultOr(smallqs).matcher(searcher, context)
-            smallmatcher = matching.ArrayMatcher(smallmatcher, context.limit)
+            smallmatcher = matching.ArrayMatcher(smallmatcher, context.limit)  # type: ignore[attr-defined,optional-member-access]
             minscore = smallmatcher.limit_quality()
         if bigqs:
             # Get a matcher for the big queries
@@ -414,7 +442,7 @@ class SplitOr(Or):
             if smallmatcher:
                 m = matching.UnionMatcher(m, smallmatcher)
                 # Set the minimum score based on the prescored matcher
-                m.set_min_quality(minscore)
+                m.set_min_quality(minscore)  # type: ignore[attr-defined]
         elif smallmatcher:
             # If there are no big queries, just return the prescored matcher
             m = smallmatcher
@@ -444,9 +472,11 @@ class DisjunctionMax(CompoundQuery):
     document using the maximum score from the subqueries.
     """
 
+    tiebreak: float = 0.0
+
     def __init__(self, subqueries, boost=1.0, tiebreak=0.0):
         CompoundQuery.__init__(self, subqueries, boost=boost)
-        self.tiebreak = tiebreak
+        self.tiebreak = tiebreak  # type: ignore[attr-defined]
 
     def __str__(self):
         r = "DisMax("
@@ -459,7 +489,7 @@ class DisjunctionMax(CompoundQuery):
     def normalize(self):
         norm = CompoundQuery.normalize(self)
         if norm.__class__ is self.__class__:
-            norm.tiebreak = self.tiebreak
+            norm.tiebreak = self.tiebreak  # type: ignore[attr-defined]
         return norm
 
     def requires(self):
@@ -491,6 +521,7 @@ class BinaryQuery(CompoundQuery):
     ``estimate_size()``, and/or ``estimate_min_size()``.
     """
 
+    matcherclass: type = matching.Matcher
     boost = 1.0
 
     def __init__(self, a, b):

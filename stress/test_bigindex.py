@@ -56,7 +56,7 @@ def test_20000_buffered():
         ]
 
         t = now()
-        w = BufferedWriter(ix, limit=100, period=None)
+        w = BufferedWriter(ix, limit=100, period=0)
         for i in range(20000):
             w.add_document(id=str(i), text=" ".join(random.sample(domain, 5)))
         w.close()
