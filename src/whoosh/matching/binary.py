@@ -73,7 +73,7 @@ class AdditiveBiMatcher(BiMatcher):
     added together.
     """
 
-    def max_quality(self):
+    def max_quality(self) -> float:
         q = 0.0
         if self.a.is_active():
             q += self.a.max_quality()
@@ -81,7 +81,7 @@ class AdditiveBiMatcher(BiMatcher):
             q += self.b.max_quality()
         return q
 
-    def block_quality(self):
+    def block_quality(self) -> float:
         bq = 0.0
         if self.a.is_active():
             bq += self.a.block_quality()
@@ -292,13 +292,13 @@ class UnionMatcher(AdditiveBiMatcher):
                     # The matcher couldn't skip ahead for some reason, so just
                     # advance and try again (issue #446)
                     a.next()
-                aq = a.block_quality()
+                aq = a.block_quality() if a.is_active() else 0.0
             else:
                 sk = b.skip_to_quality(minquality - aq)
                 skipped += sk
                 if not sk and b.is_active():
                     b.next()
-                bq = b.block_quality()
+                bq = b.block_quality() if b.is_active() else 0.0
         return skipped
 
 
@@ -379,10 +379,10 @@ class DisjunctionMaxMatcher(UnionMatcher):
         else:
             return max(self.a.score(), self.b.score())
 
-    def max_quality(self):
+    def max_quality(self) -> float:
         return max(self.a.max_quality(), self.b.max_quality())
 
-    def block_quality(self):
+    def block_quality(self) -> float:
         return max(self.a.block_quality(), self.b.block_quality())
 
     def skip_to_quality(self, minquality):
@@ -504,7 +504,8 @@ class IntersectionMatcher(AdditiveBiMatcher):
     # Using sets is faster in some cases, but could potentially use a lot of
     # memory
     def all_ids(self):
-        return iter(sorted(set(self.a.all_ids()) & set(self.b.all_ids())))
+        for docid in sorted(set(self.a.all_ids()) & set(self.b.all_ids())):
+            yield docid
 
     def skip_to(self, id):
         if not self.is_active():
@@ -552,8 +553,8 @@ class IntersectionMatcher(AdditiveBiMatcher):
                 self._find_next()
 
             # Get the block qualities at the new matcher positions
-            aq = a.block_quality()
-            bq = b.block_quality()
+            aq = a.block_quality() if a.is_active() else 0.0
+            bq = b.block_quality() if b.is_active() else 0.0
         return skipped
 
     def next(self):
@@ -639,10 +640,10 @@ class AndNotMatcher(BiMatcher):
         else:
             return self
 
-    def max_quality(self):
+    def max_quality(self) -> float:
         return self.a.max_quality()
 
-    def block_quality(self):
+    def block_quality(self) -> float:
         return self.a.block_quality()
 
     def skip_to_quality(self, minquality):
@@ -784,13 +785,13 @@ class AndMaybeMatcher(AdditiveBiMatcher):
                     # The matcher couldn't skip ahead for some reason, so just
                     # advance and try again
                     a.next()
-                aq = a.block_quality()
+                aq = a.block_quality() if a.is_active() else 0.0
             else:
                 sk = b.skip_to_quality(minquality - aq)
                 skipped += sk
                 if not sk and b.is_active():
                     b.next()
-                bq = b.block_quality()
+                bq = b.block_quality() if b.is_active() else 0.0
 
         return skipped
 

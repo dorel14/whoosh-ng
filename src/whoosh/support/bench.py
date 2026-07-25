@@ -159,13 +159,20 @@ class Spec:
 
             print("%d. %s" % (i + 1, hit.get(self.headline_field)))
             if snippets:
-                print(self.show_snippet(hit))  # type: ignore[attr-defined]
+                print(self.show_snippet(hit))  # type: ignore[union-attr]
             if showbody:
                 print(hit.get(self.main_field))
 
+    def results(self, r):
+        for hit in r:
+            yield self._process_result(hit)
+
+    def _process_result(self, d):
+        return d
+
 
 class WhooshModule(Module):
-    def indexer(self, create=True):
+    def indexer(self, create=True, **kwargs):
         schema = self.bench.spec.whoosh_schema()
         path = os.path.join(self.options.dir, f"{self.options.indexname}_whoosh")
 
@@ -198,7 +205,7 @@ class WhooshModule(Module):
             _procdoc(d)
         self.writer.add_document(**d)
 
-    def finish(self, merge=True, optimize=False):
+    def finish(self, merge=True, optimize=False, **kwargs):
         self.writer.commit(merge=merge, optimize=optimize)
 
     def searcher(self):
@@ -229,7 +236,7 @@ class XappyModule(Module):
         conn = self.bench.spec.xappy_connection(path)
         return conn
 
-    def index_document(self, conn=None, d=None):
+    def index_document(self, d, conn=None):
         if hasattr(self.bench, "process_document_xappy"):
             self.bench.process_document_xappy(d)
         doc = xappy.UnprocessedDocument()  # type: ignore[union-attr]
@@ -240,7 +247,7 @@ class XappyModule(Module):
                 doc.fields.append(xappy.Field(key, value))  # type: ignore[union-attr]
         conn.add(doc)  # type: ignore[union-attr]
 
-    def finish(self, conn):
+    def finish(self, conn=None, **kwargs):
         conn.flush()  # type: ignore[union-attr]
 
     def searcher(self):
@@ -250,10 +257,10 @@ class XappyModule(Module):
     def query(self, conn=None):
         return conn.query_parse(" ".join(self.args))  # type: ignore[union-attr]
 
-    def find(self, conn=None, q=None):
+    def find(self, q, conn=None):
         return conn.search(q, 0, int(self.options.limit))  # type: ignore[union-attr]
 
-    def findterms(self, conn=None, terms=None):
+    def findterms(self, terms, conn=None):
         limit = int(self.options.limit)
         for term in terms: # pyright: ignore[reportOptionalIterable]
             q = conn.query_field(self.bench.spec.main_field, term)  # type: ignore[union-attr]
@@ -306,10 +313,10 @@ class XapianModule(Module):
             self.enq.set_query(q)  # type: ignore[union-attr]
             yield self.enq.get_mset(0, limit)  # type: ignore[union-attr]
 
-    def results(self, matches):
+    def results(self, r):
         hf = self.bench.spec.headline_field
         mf = self.bench.spec.main_field
-        for m in matches:
+        for m in r:
             yield self._process_result({hf: m.document.get_value(0), mf: m.document.get_data()})
 
 
@@ -418,7 +425,7 @@ class ZcatalogModule(Module):
 
 
 class NucularModule(Module):
-    def indexer(self, create=True):
+    def indexer(self, create=True, **kwargs):
         import shutil
 
         from nucular import Nucular  # type: ignore
@@ -486,9 +493,9 @@ class Bench:
         self._last_search_time: float = 0.0
         self._last_index_peak_rss: float = 0.0
         self._last_search_peak_rss: float = 0.0
-        self.options: Any | None = None
+        self.options: Any = None
 
-    def index(self, lib):
+    def index(self, lib: Any):
         print(f"Indexing with {lib}...")
 
         options = self.options
@@ -522,7 +529,7 @@ class Bench:
                         % (count, t - chunkstarttime, chunk, sofar, count / sofar)
                     )
                     chunkstarttime = t
-                if count > upto:
+                if upto and count >= upto:
                     break
                 if every and not count % every:
                     print("----Commit")
@@ -545,7 +552,28 @@ class Bench:
         self._last_index_time = totaltime
         self._last_index_peak_rss = self._stop_mem_tracing(mem_start)
 
-    def search(self, lib):
+    def rank(self, lib: Any):
+        if inspect.isclass(lib):
+            lib = lib()
+        self.spec = lib
+        lib.searcher()
+
+        t = now()
+        mem_start = self._start_mem_tracing()
+        q = lib.query()
+        print("Query:", q)
+        r = lib.find(q)
+        rank_time = now() - t
+        print("Rank time:", rank_time)
+
+        t = now()
+        self.spec.print_results(lib.results(r))
+        print("Print time:", now() - t)
+
+        self._last_search_time = rank_time
+        self._last_search_peak_rss = self._stop_mem_tracing(mem_start)
+
+    def search(self, lib: Any):
         if inspect.isclass(lib):
             lib = lib()
         self.spec = lib

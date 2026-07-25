@@ -32,7 +32,7 @@ unchanged: importing from ``whoosh.writing`` continues to work exactly as
 before.
 """
 
-from whoosh.writing._base import IndexingError, groupmanager
+from whoosh.writing._base import IndexingError, PostingWriter, groupmanager
 from whoosh.writing.async_writer import AsyncWriter
 from whoosh.writing.buffered_writer import BufferedWriter, BatchWriter
 from whoosh.writing.merge_policies import CLEAR, MERGE_SMALL, NO_MERGE, OPTIMIZE
@@ -42,6 +42,7 @@ from whoosh.writing.writer import IndexWriter, add_spelling
 
 __all__ = (
     "IndexingError",
+    "PostingWriter",
     "groupmanager",
     "NO_MERGE",
     "MERGE_SMALL",

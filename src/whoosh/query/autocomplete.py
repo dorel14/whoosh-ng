@@ -62,14 +62,14 @@ def suggestions(
         for alphabetical order.
     :returns: ordered sequence of suggestion strings.
     """
-    q = AutocompleteQuery(fieldname, prefix)
-    results = searcher.search(q, limit=limit, sortedby=fieldname if scorer == "alpha" else None)
-    terms: Iterable[str] = (
-        hit[fieldname] for hit in results if fieldname in hit
-    )
+    reader = searcher.reader()
+    field = reader.schema[fieldname]
+    candidates = []
+    for fname, btext in reader.terms_from(fieldname, prefix):
+        if not btext.startswith(field.to_bytes(prefix)):
+            break
+        candidates.append(field.from_bytes(btext))
+
     if scorer == "frequency":
-        freq: dict[str, int] = {}
-        for term in terms:
-            freq[term] = freq.get(term, 0) + 1
-        return sorted(freq.keys(), key=lambda t: (-freq[t], t))[:limit]
-    return sorted(set(terms))[:limit]
+        return sorted(candidates, key=lambda t: (-reader.doc_frequency(fieldname, t), t))[:limit]
+    return sorted(candidates)[:limit]

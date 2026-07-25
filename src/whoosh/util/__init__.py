@@ -49,7 +49,7 @@ now = time.perf_counter
 
 def random_name(size=28):
     with _random_name_lock:
-        return "".join(random.choice(IDCHARS) for _ in range(size))
+        return "".join(random.choices(IDCHARS, k=size))
 
 
 def random_bytes(size=28):
@@ -143,3 +143,17 @@ def unclosed(method):
         return method(self, *args, **kwargs)
 
     return unclosed_wrapper
+
+
+def protected(method):
+    """
+    Decorator to allow operations only if the object is not closed.
+    """
+
+    @wraps(method)
+    def protected_wrapper(self, *args, **kwargs):
+        if getattr(self, "is_closed", False):
+            raise ValueError("Operation on a closed object")
+        return method(self, *args, **kwargs)
+
+    return protected_wrapper

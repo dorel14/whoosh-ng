@@ -14,11 +14,14 @@ if TYPE_CHECKING:
 class LmdbBackend(Backend):
     """LMDB-backed storage backend.
 
-    This backend stores index data in an LMDB environment. It is intentionally
-    minimal: it reuses the existing Whoosh ``FileStorage``/``FileIndex`` stack
-    by keeping a filesystem directory inside the LMDB-managed location, so it
-    remains compatible with the rest of the codec/reading pipeline without
-    reimplementing segment management here.
+    .. warning::
+
+        This is a **placeholder** implementation. It opens an LMDB environment
+        but does not actually read or write index data to it. Instead, it
+        delegates all storage operations to :class:`FileStorage`, which writes
+        standard files to the filesystem. This defeats the purpose of having an
+        LMDB backend and exists only for API compatibility. A proper LMDB
+        backend should be implemented in the future.
 
     Usage::
 

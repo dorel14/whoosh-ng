@@ -60,13 +60,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--dir", default=".", help="Working directory for index/data")
     parser.add_argument("--report", choices=["csv", "json", "none"], default="none", help="Report format")
     parser.add_argument("--report-path", default="benchmark_report", help="Report file path (without extension)")
-    parser.add_argument("--limit", default=10, help="Max search results to retrieve")
-    parser.add_argument("--procs", default=0, help="Number of processors for indexing")
-    parser.add_argument("--limitmb", default=128, help="Max memory usage per writer in MB")
+    parser.add_argument("--limit", type=int, default=10, help="Max search results to retrieve")
+    parser.add_argument("--procs", type=int, default=0, help="Number of processors for indexing")
+    parser.add_argument("--limitmb", type=int, default=128, help="Max memory usage per writer in MB")
     parser.add_argument("--every", default=None, help="Report progress every N docs")
     parser.add_argument("--merge", default=1, help="Merge policy (1=SMALL, 0=none)")
     parser.add_argument("--chunk", default=0, help="Chunk size for indexing progress")
-    parser.add_argument("--skip", default=0, help="Initial docs to skip")
+    parser.add_argument("--skip", default="1", help="Initial docs to skip (default: 1)")
     parser.add_argument("--upto", default=0, help="Maximum docs to index (0=unlimited)")
 
     args = parser.parse_args(list(argv) if argv is not None else None)
@@ -94,33 +94,52 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     bench = Bench()
-    # Wire simple options onto the bench so existing Spec/Bench code can use them.
+    # add flavor name / git version to the namespace so marvin/spec wiring stays compatible
     bench.options = argparse.Namespace(
         dir=args.dir,
         limit=args.limit,
         procs=args.procs,
         limitmb=args.limitmb,
         indexname=f"{args.spec}_index",
+        every=args.every,
+        merge=args.merge,
+        chunk=args.chunk,
+        skip=args.skip,
+        upto=args.upto,
+        termfile=None,
     )
 
     from benchmark.reporting import BenchmarkReport, BenchmarkResult
 
     report = BenchmarkReport(title=f"whoosh-{args.spec}")
+    spec = spec_cls(bench.options, [])
 
     if args.index:
-        bench.index(spec_cls)
+        bench.index(spec)
+        idx_count = float(bench._last_index_count)
+        idx_time = bench._last_index_time
         report.add(
             BenchmarkResult(
                 name=args.spec,
                 category="indexing",
                 metric="indexed_docs",
-                value=float(bench._last_index_count),
+                value=idx_count,
                 unit="docs",
             )
         )
+        if idx_time > 0:
+            report.add(
+                BenchmarkResult(
+                    name=args.spec,
+                    category="indexing",
+                    metric="docs_per_sec",
+                    value=idx_count / idx_time,
+                    unit="docs/s",
+                )
+            )
 
     if args.search:
-        bench.search(spec_cls)
+        bench.search(spec)
         report.add(
             BenchmarkResult(
                 name=args.spec,
@@ -130,6 +149,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 unit="s",
             )
         )
+
+    if args.ranking:
+        bench.rank(spec)
 
     if args.report != "none":
         ext = args.report

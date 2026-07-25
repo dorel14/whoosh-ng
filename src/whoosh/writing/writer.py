@@ -353,17 +353,24 @@ class IndexWriter:
             return
 
         unique_fields = set()
-        batch = []
         for fields in docs:
             uf = self._unique_fields(fields)
             if uf:
                 unique_fields.update(uf)
-            batch.append(fields)
 
-        if not unique_fields:
-            for fields in batch:
-                self.add_document(**fields)
-            return
+        if unique_fields:
+            seen = {}
+            deduped = []
+            for fields in docs:
+                key = tuple((name, fields[name]) for name in unique_fields if name in fields)
+                if key:
+                    seen[key] = fields
+                else:
+                    deduped.append(fields)
+            deduped.extend(seen.values())
+            batch = deduped
+        else:
+            batch = list(docs)
 
         with self.searcher() as s:
             for fields in batch:

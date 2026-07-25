@@ -23,12 +23,12 @@ eggs/
 /htmlcov/
 /.codiumai.local.toml
 /.kilo
-/benchmark/dictionary_index_whoosh/
-/benchmark/reuters_index_whoosh/
+/benchmark/indexes/
 /.vscode
 
 # Cruft / local scratch
 *.tmp
+*.zip
 /testindex/
 /testindex/**
 fix_*.py

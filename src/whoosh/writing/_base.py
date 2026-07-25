@@ -28,8 +28,25 @@
 
 from contextlib import contextmanager
 
+
 class IndexingError(Exception):
     pass
+
+
+class PostingWriter:
+    """Base class for posting writers."""
+
+    def start(self, fieldnum):
+        raise NotImplementedError
+
+    def write(self, id, valuestring):
+        raise NotImplementedError
+
+    def finish(self):
+        raise NotImplementedError
+
+    def close(self):
+        raise NotImplementedError
 
 
 @contextmanager

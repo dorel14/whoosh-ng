@@ -62,6 +62,8 @@ from whoosh.fields.text import NGRAM, NGRAMWORDS, SpellField, TEXT
 from whoosh.fields.wrappers import FieldWrapper, ReverseField
 
 class MetaSchema(type):
+    _clsfields: dict = {}
+
     def __new__(cls, name, bases, attrs):
         super_new = super().__new__
         if not any(b for b in bases if isinstance(b, MetaSchema)):
@@ -113,9 +115,12 @@ class Schema:
         self._fields = {}
         self._subfields = {}
         self._dyn_fields = {}
+        self._name_to_number = {}
 
         for name in sorted(fields.keys()):
             self.add(name, fields[name])
+
+        self.name_to_number = self._name_to_number
 
     def copy(self):
         """
@@ -143,8 +148,16 @@ class Schema:
 
     def __getitem__(self, name):
         """
-        Returns the field associated with the given field name.
+        Returns the field associated with the given field name or number.
         """
+
+        # Allow field numbers
+        if isinstance(name, int):
+            if name < 0 or name >= len(self._name_to_number):
+                raise IndexError(f"No field number {name!r}")
+            # Invert _name_to_number to get name from number
+            num_to_name = {num: n for n, num in self._name_to_number.items()}
+            name = num_to_name[name]
 
         # If the name is in the dictionary, just return it
         if name in self._fields:
@@ -261,6 +274,7 @@ class Schema:
             else:
                 fieldtype.on_add(self, fname)
                 self._fields[fname] = subfield
+                self._name_to_number[fname] = len(self._name_to_number)
 
     def remove(self, fieldname):
         if fieldname in self._fields:
@@ -342,7 +356,7 @@ class SchemaClass(Schema, metaclass=MetaSchema):
     """
 
     def __new__(cls, *args, **kwargs):
-        obj = super(Schema, cls).__new__(Schema)
+        obj = super().__new__(cls)
         kw = getattr(cls, "_clsfields", {})
         kw.update(kwargs)
         obj.__init__(*args, **kw)

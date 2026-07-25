@@ -236,6 +236,7 @@ addopts = [
   "--cov-report=xml:coverage.xml",
 ]
 testpaths = ["tests"]
+pythonpath = ["src"]
 norecursedirs = [
   ".git",
   ".hg",

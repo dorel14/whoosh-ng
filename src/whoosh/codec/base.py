@@ -432,7 +432,7 @@ class PerDocumentReader:
     def supports_columns(self):
         return False
 
-    def has_column(self, fieldname):
+    def has_column(self, fieldname) -> bool:
         _ = fieldname  # Unused argument
         return False
 
@@ -538,7 +538,7 @@ class Segment:
     def segment_id(self):
         if hasattr(self, "name"):
             # Old segment class
-            return self.name
+            return getattr(self, "name")
         else:
             return f"{self.index_name()}_{self.segid}"
 
@@ -670,14 +670,16 @@ class Segment:
             name = self.make_filename(self.COMPOUND_EXT)
             if not storage.file_exists(name):
                 raise IndexCorruptedError(f"Segment file {name!r} is missing")
+            dbfile = storage.open_file(name)
             try:
-                dbfile = storage.open_file(name)
                 cs = CompoundStorage(dbfile)
                 cs.list()
                 cs.close()
             except IndexCorruptedError:
+                dbfile.close()
                 raise
             except Exception as e:
+                dbfile.close()
                 raise IndexCorruptedError(
                     f"Corrupted compound segment file {name!r}: {e}"
                 ) from e
@@ -870,11 +872,11 @@ class MultiPerDocumentReader(PerDocumentReader):
             total += r.field_length(fieldname)
         return total
 
-    def min_field_length(self):
-        return min(r.min_field_length() for r in self._readers)
+    def min_field_length(self, fieldname):
+        return min(r.min_field_length(fieldname) for r in self._readers)
 
-    def max_field_length(self):
-        return max(r.max_field_length() for r in self._readers)
+    def max_field_length(self, fieldname):
+        return max(r.max_field_length(fieldname) for r in self._readers)
 
 
 # Extended base classes
@@ -900,9 +902,9 @@ class PerDocWriterWithColumns(PerDocumentWriter):
     def _get_column(self, fieldname):
         raise NotImplementedError
 
-    def add_column_value(self, fieldname, column, value):
+    def add_column_value(self, fieldname, columnobj, value):
         if not self._has_column(fieldname):
-            self._create_column(fieldname, column)
+            self._create_column(fieldname, columnobj)
         self._get_column(fieldname).add(self._docnum, value)
 
 
@@ -913,7 +915,7 @@ class EmptyCursor(FieldCursor):
     def first(self):
         return None
 
-    def find(self, term):
+    def find(self, string):
         return None
 
     def next(self):

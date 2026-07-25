@@ -1,57 +1,147 @@
-name: Performance Benchmark
+name: Benchmark
 
 on:
   push:
-    branches: [ master, dev ]
-
-permissions:
-  contents: write # Required for the action to push results to gh-pages
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
 
 jobs:
   benchmark:
-    name: Run Python Benchmark
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    timeout-minutes: 180
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Create gh-pages branch if missing
-        if: success()
-        run: |
-          if ! git ls-remote --heads origin gh-pages | grep -q gh-pages; then
-            git checkout -b gh-pages
-            git push -u origin gh-pages
-          fi
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-
-      - name: Set up UV
-        uses: astral-sh/setup-uv@v5
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
-          uv sync --extra dev --extra vector
-          uv pip install pytest-benchmark psutil
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Download previous benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-results
+          path: previous_artifacts
+        continue-on-error: true
+
+      - name: Prepare benchmark data
+        shell: bash
+        run: |
+          python benchmark/prepare_data.py \
+            --customers-url "${CUSTOMERS_URL}" \
+            --stock-url "${STOCK_URL}" \
+            --customers-max-rows 100000
+        env:
+          CUSTOMERS_URL: ${{ vars.CUSTOMERS_URL }}
+          STOCK_URL: ${{ vars.STOCK_URL }}
 
       - name: Run benchmarks
+        shell: bash
         run: |
-          # The benchmark fixture comes from pytest-benchmark (installed above).
-          # whoosh-ng keeps its benchmarks in tests/benchmark_async.py.
-          # Use a warmup round and a longer minimum time to reduce noise on CI.
-          uv run pytest --benchmark-json output.json --benchmark-warmup=on --benchmark-min-time=0.5 tests/benchmark_async.py
+          mkdir -p benchmark_artifacts
+          for spec in reuters dictionary customers; do
+            echo "Running $spec..."
+            python -m benchmark \
+              --spec $spec \
+              --index --search \
+              --dir benchmark \
+              --limit 10 \
+              --limitmb 128 \
+              --report json \
+              --report-path benchmark_artifacts/$spec
+          done
+          if [ -f benchmark/stock_etab/StockEtablissement_utf8.csv ]; then
+            echo "Running stock_etab..."
+            python -m benchmark \
+              --spec stock_etab \
+              --index --search \
+              --dir benchmark \
+              --limit 10 \
+              --limitmb 256 \
+              --upto 100000 \
+              --report json \
+              --report-path benchmark_artifacts/stock_etab
+          else
+            echo "Skipping stock_etab (data not available)"
+          fi
 
-      - name: Store and compare benchmark result
-        uses: benchmark-action/github-action-benchmark@v1
+      - name: Compare results
+        shell: bash
+        run: |
+          python -c "
+          import json, os, sys
+          THRESHOLD = 0.20
+          regressions = []
+
+          for spec in ['reuters', 'dictionary', 'customers', 'stock_etab']:
+            curr = f'benchmark_artifacts/{spec}.json'
+            prev_dir = 'previous_artifacts'
+            if not os.path.exists(curr):
+              continue
+            with open(curr) as f:
+              current = json.load(f)
+
+            if not os.path.isdir(prev_dir):
+              print(f'No previous results for {spec}, skipping comparison')
+              continue
+
+            for root, dirs, files in os.walk(prev_dir):
+              for prev_file in files:
+                if prev_file == f'{spec}.json':
+                  prev_path = os.path.join(root, prev_file)
+                  with open(prev_path) as f:
+                    previous = json.load(f)
+                  curr_results = {r['metric']: r['value'] for r in current['results']}
+                  prev_results = {r['metric']: r['value'] for r in previous['results']}
+                  for metric, curr_val in curr_results.items():
+                    prev_val = prev_results.get(metric)
+                    if prev_val is None or prev_val == 0:
+                      continue
+                    ratio = curr_val / prev_val
+                    if ratio > (1 + THRESHOLD):
+                      regressions.append(
+                        f'{spec}: {metric} regressed '
+                        f'{prev_val:.4f} -> {curr_val:.4f} ({ratio:.2f}x)'
+                      )
+
+          if regressions:
+            print('PERFORMANCE REGRESSIONS DETECTED:')
+            for r in regressions:
+              print(f'  - {r}')
+            sys.exit(1)
+          else:
+            print('No regressions detected.')
+          "
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
         with:
-          tool: 'pytest'
-          output-file-path: output.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
-          fail-on-alert: false
-          alert-threshold: '200%'
-          comment-on-alert: true
+          name: benchmark-results
+          path: benchmark_artifacts/*.json
+          retention-days: 90
+
+      - name: Generate summary
+        shell: bash
+        run: |
+          python -c "
+          import json, os
+          lines = ['### Benchmark Results', '']
+          for spec in ['reuters', 'dictionary', 'customers', 'stock_etab']:
+            path = f'benchmark_artifacts/{spec}.json'
+            if not os.path.exists(path):
+              continue
+            with open(path) as f:
+              data = json.load(f)
+            lines.append(f'**{spec}**')
+            for r in data['results']:
+              lines.append(f\"- {r['category']}/{r['metric']}: {r['value']:.4f} {r['unit']}\")
+            lines.append('')
+          print('\\n'.join(lines))
+          " >> "$GITHUB_STEP_SUMMARY"

@@ -1,4 +1,4 @@
-# Copyright 2008 Matt Chaput. All rights reserved.
+﻿# Copyright 2008 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -93,7 +93,7 @@ class BaseScorer:
     a scorer instance.
     """
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         """Returns True if this class supports quality optimizations."""
 
         return False
@@ -802,7 +802,7 @@ class PositionBoostScorer(WeightLengthScorer):
             return None
         # The matcher yields one span per query term; the minimum gap
         # between consecutive term positions is the proximity signal.
-        positions = sorted(pos for span in spans for pos in span)
+        positions = sorted(span.start for span in spans)
         if len(positions) < 2:
             return 1.0
         gaps = [positions[i + 1] - positions[i] for i in range(len(positions) - 1)]
