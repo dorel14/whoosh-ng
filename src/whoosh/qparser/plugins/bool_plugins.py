@@ -36,6 +36,7 @@ from whoosh.util.text import rcompile
 
 from whoosh.qparser.plugins._base import Plugin, TaggingPlugin
 
+
 class GroupPlugin(Plugin):
     """Adds the ability to group clauses using parentheses."""
 
@@ -98,6 +99,7 @@ class GroupPlugin(Plugin):
             top.boost = boost
 
         return top
+
 
 class PhrasePlugin(Plugin):
     """Adds the ability to specify phrase queries inside double quotes."""
@@ -183,6 +185,7 @@ class PhrasePlugin(Plugin):
     def taggers(self, parser):
         return [(self.PhraseTagger(self.expr), 0)]
 
+
 class SequencePlugin(Plugin):
     """Adds the ability to group arbitrary queries inside double quotes to
     produce a query matching the individual sub-queries in sequence.
@@ -258,6 +261,7 @@ class SequencePlugin(Plugin):
             newgroup.extend(seq)
 
         return newgroup
+
 
 class OperatorsPlugin(Plugin):
     """By default, adds the AND, OR, ANDNOT, ANDMAYBE, and NOT operators to
@@ -372,6 +376,7 @@ class OperatorsPlugin(Plugin):
 
         return group
 
+
 class PlusMinusPlugin(Plugin):
     """Adds the ability to use + and - in a flat OR query to specify required
     and prohibited terms.
@@ -435,6 +440,7 @@ class PlusMinusPlugin(Plugin):
         if banned:
             group = syntax.AndNotGroup([group, banned])
         return group
+
 
 class GtLtPlugin(TaggingPlugin):
     """Allows the user to use greater than/less than symbols to create range
@@ -510,4 +516,3 @@ class GtLtPlugin(TaggingPlugin):
         elif rel == ">=" or rel == "=>":
             n = syntax.RangeNode(text, None, False, False)
         return n.set_range(node.startchar, node.endchar)
-

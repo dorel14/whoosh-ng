@@ -27,6 +27,7 @@
 
 """Shared base types for :mod:`whoosh.searching`."""
 
+
 class NoTermsException(Exception):
     """Exception raised you try to access matched terms on a :class:`Results`
     object was created without them. To record which terms matched in which
@@ -35,6 +36,7 @@ class NoTermsException(Exception):
     """
 
     message = "Results were created without recording terms"
+
 
 class TimeLimit(Exception):
     """Raised by :class:`TimeLimitedCollector` if the time limit is reached

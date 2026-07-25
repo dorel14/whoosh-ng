@@ -111,7 +111,9 @@ class AsyncWriter(IndexWriter):
 
     # -- background work ----------------------------------------------------
 
-    def _run(self, commit_args: Tuple[Any, ...], commit_kwargs: dict, timeout: Optional[float]) -> None:
+    def _run(
+        self, commit_args: Tuple[Any, ...], commit_kwargs: dict, timeout: Optional[float]
+    ) -> None:
         """Synchronous work executed on a worker thread via ``run_in_executor``."""
 
         try:
@@ -128,9 +130,7 @@ class AsyncWriter(IndexWriter):
                     writer = self.index.writer(**self.writerargs)
                 except LockError:
                     if deadline is not None and time.monotonic() >= deadline:
-                        raise LockError(
-                            "Could not acquire the index writer within the timeout"
-                        )
+                        raise LockError("Could not acquire the index writer within the timeout")
                     time.sleep(self.delay)
 
             for method, args, kwargs in self.events:
@@ -171,9 +171,7 @@ class AsyncWriter(IndexWriter):
                 return
 
             if self._started:
-                raise RuntimeError(
-                    "AsyncWriter.commit() is already running; call it only once"
-                )
+                raise RuntimeError("AsyncWriter.commit() is already running; call it only once")
             self._started = True
             loop = asyncio.get_running_loop()
             self._done = loop.run_in_executor(None, self._run, args, kwargs, timeout)

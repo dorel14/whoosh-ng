@@ -29,6 +29,7 @@
 import copy
 from dataclasses import dataclass
 
+
 @dataclass
 class SearchContext:
     """A container for information about the current search that may be used

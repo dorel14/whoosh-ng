@@ -29,6 +29,7 @@
 from array import array
 from collections import defaultdict
 
+
 class FacetType:
     """Base class for "facets", aspects that can be sorted/faceted."""
 
@@ -57,6 +58,7 @@ class FacetType:
 
     def default_name(self):
         return "facet"
+
 
 class Categorizer:
     """Base class for categorizer objects which compute a key value for a
@@ -148,6 +150,7 @@ class Categorizer:
 
         return key
 
+
 class FieldFacet(FacetType):
     """Sorts/facets by the contents of a field.
 
@@ -200,6 +203,7 @@ class FieldFacet(FacetType):
             c = PostingCategorizer(global_searcher, fieldname, self.reverse)
         return c
 
+
 class ColumnCategorizer(Categorizer):
     def __init__(self, global_searcher, fieldname, reverse=False):
         self._fieldname = fieldname
@@ -229,6 +233,7 @@ class ColumnCategorizer(Categorizer):
     def key_to_name(self, key):
         return self._fieldobj.from_column_value(key)
 
+
 class ReversedColumnCategorizer(ColumnCategorizer):
     """Categorizer that reverses column values for columns that aren't
     naturally reversible.
@@ -253,6 +258,7 @@ class ReversedColumnCategorizer(ColumnCategorizer):
         # Re-reverse the key to get the index into _values
         key = self._values[0 - key]
         return ColumnCategorizer.key_to_name(self, key)
+
 
 class OverlappingCategorizer(Categorizer):
     allow_overlap = True
@@ -322,6 +328,7 @@ class OverlappingCategorizer(Categorizer):
             else:
                 return None
 
+
 class PostingCategorizer(Categorizer):
     """
     Categorizer for fields that don't store column values. This is very
@@ -380,6 +387,7 @@ class PostingCategorizer(Categorizer):
             i = len(self.values) - i
         return self.values[i]
 
+
 class QueryFacet(FacetType):
     """Sorts/facets based on the results of a series of queries."""
 
@@ -427,6 +435,7 @@ class QueryFacet(FacetType):
                     found = True
             if not found:
                 yield None
+
 
 class RangeFacet(QueryFacet):
     """Sorts/facets based on numeric ranges. For textual ranges, use
@@ -508,6 +517,7 @@ class RangeFacet(QueryFacet):
     def categorizer(self, global_searcher):
         return QueryFacet(self.querydict).categorizer(global_searcher)
 
+
 class DateRangeFacet(RangeFacet):
     """Sorts/facets based on date ranges. This is the same as RangeFacet
     except you are expected to use ``daterange`` objects as the start and end
@@ -534,6 +544,7 @@ class DateRangeFacet(RangeFacet):
         from whoosh import query
 
         return query.DateRange
+
 
 class ScoreFacet(FacetType):
     """Uses a document's score as a sorting criterion.
@@ -566,6 +577,7 @@ class ScoreFacet(FacetType):
                 score = self.final(self.segment_searcher, docid, score)
             # Negate the score so higher values sort first
             return 0 - score
+
 
 class FunctionFacet(FacetType):
     """This facet type is low-level. In most cases you should use
@@ -603,6 +615,7 @@ class FunctionFacet(FacetType):
 
         def key_for(self, matcher, docid):
             return self.fn(self.global_searcher, docid + self.offset)
+
 
 class TranslateFacet(FacetType):
     """Lets you specify a function to compute the key based on a key generated
@@ -660,6 +673,7 @@ class TranslateFacet(FacetType):
             keys = [catter.key_for(matcher, segment_docnum) for catter in self.catters]
             return self.fn(*keys)
 
+
 class StoredFieldFacet(FacetType):
     """Lets you sort/group using the value in an unindexed, stored field (e.g.
     :class:`whoosh.fields.STORED`). This is usually slower than using an indexed
@@ -716,6 +730,7 @@ class StoredFieldFacet(FacetType):
         def key_for(self, matcher, docid):
             d = self.segment_searcher.stored_fields(docid)
             return d.get(self.fieldname)
+
 
 class MultiFacet(FacetType):
     """Sorts/facets by the combination of multiple "sub-facets".
@@ -817,6 +832,7 @@ class MultiFacet(FacetType):
         def key_to_name(self, key):
             return tuple(catter.key_to_name(keypart) for catter, keypart in zip(self.catters, key))
 
+
 class Facets:
     """Maps facet names to :class:`FacetType` objects, for creating multiple
     groupings of documents.
@@ -907,6 +923,7 @@ class Facets:
                 self.facets[name] = facet
         return self
 
+
 class FacetMap:
     """Base class for objects holding the results of grouping search results by
     a Facet. Use an object's ``as_dict()`` method to access the results.
@@ -942,6 +959,7 @@ class FacetMap:
 
         raise NotImplementedError
 
+
 class OrderedList(FacetMap):
     """Stores a list of document numbers for each group, in the same order as
     they appear in the search results.
@@ -965,6 +983,7 @@ class OrderedList(FacetMap):
             d[key] = [docnum for _, docnum in sorted(items)]
         return d
 
+
 class UnorderedList(FacetMap):
     """Stores a list of document numbers for each group, in arbitrary order.
     This is slightly faster and uses less memory than
@@ -987,6 +1006,7 @@ class UnorderedList(FacetMap):
     def as_dict(self):
         return dict(self.dict)
 
+
 class Count(FacetMap):
     """Stores the number of documents in each group.
 
@@ -1005,6 +1025,7 @@ class Count(FacetMap):
 
     def as_dict(self):
         return dict(self.dict)
+
 
 class Best(FacetMap):
     """Stores the "best" document in each group (that is, the one with the
@@ -1028,4 +1049,3 @@ class Best(FacetMap):
 
     def as_dict(self):
         return self.bestids
-

@@ -1596,9 +1596,7 @@ class W2Segment(base.Segment):
                 if magic and magic != W2Block.magic:
                     from whoosh.index import IndexCorruptedError
 
-                    raise IndexCorruptedError(
-                        f"Postings file {pst!r} has invalid magic {magic!r}"
-                    )
+                    raise IndexCorruptedError(f"Postings file {pst!r} has invalid magic {magic!r}")
             finally:
                 f.close()
 

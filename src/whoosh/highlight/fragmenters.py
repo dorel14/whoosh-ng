@@ -32,7 +32,8 @@ from html import escape as htmlescape
 from itertools import groupby
 from whoosh.analysis import Token
 
-DEFAULT_CHARLIMIT = 2 ** 15
+DEFAULT_CHARLIMIT = 2**15
+
 
 def mkfrag(text, tokens, startchar=None, endchar=None, charsbefore=0, charsafter=0):
     """Returns a :class:`Fragment` object based on the :class:`analysis.Token`
@@ -48,6 +49,7 @@ def mkfrag(text, tokens, startchar=None, endchar=None, charsbefore=0, charsafter
     endchar = min(len(text), endchar + charsafter)
 
     return Fragment(text, tokens, startchar, endchar)
+
 
 class Fragment:
     """Represents a fragment (extract) from a hit document. This object is
@@ -126,6 +128,7 @@ class Fragment:
     def __lt__(self, other):
         return self.startchar < other.startchar
 
+
 def set_matched_filter(tokens, termset):
     """
     Mark tokens to be highlighted as matched.
@@ -140,6 +143,7 @@ def set_matched_filter(tokens, termset):
     for t in tokens:
         t.matched = t.text in termset
         yield t
+
 
 def set_matched_filter_phrases(tokens, text, terms, phrases):
     """
@@ -234,6 +238,7 @@ def set_matched_filter_phrases(tokens, text, terms, phrases):
         t.matched = i in matches
         yield t
 
+
 class Fragmenter:
     def must_retokenize(self):
         """Returns True if this fragmenter requires retokenized text.
@@ -269,6 +274,7 @@ class Fragmenter:
         """
 
         raise NotImplementedError
+
 
 class WholeFragmenter(Fragmenter):
     """Doesn't fragment the token stream. This object just returns the entire
@@ -307,7 +313,9 @@ class WholeFragmenter(Fragmenter):
                 matches.append(t.copy())
         return [Fragment(text, matches)]
 
+
 NullFragmeter = WholeFragmenter
+
 
 class SentenceFragmenter(Fragmenter):
     """Breaks the text up on sentence end punctuation characters
@@ -381,6 +389,7 @@ class SentenceFragmenter(Fragmenter):
         # in the buffer, yield it
         if tks:
             yield mkfrag(text, tks, startchar=first, endchar=endchar)
+
 
 class ContextFragmenter(Fragmenter):
     """Looks for matched terms and aggregates them with their surrounding
@@ -469,6 +478,7 @@ class ContextFragmenter(Fragmenter):
         if tks:
             yield mkfrag(text, tks, startchar=first, endchar=endchar)
 
+
 class PinpointFragmenter(Fragmenter):
     """This is a NON-RETOKENIZING fragmenter. It builds fragments from the
     positions of the matched terms.
@@ -553,8 +563,10 @@ class PinpointFragmenter(Fragmenter):
                 self._autotrim(fragment)
             yield fragment
 
+
 class FragmentScorer:
     pass
+
 
 class BasicFragmentScorer(FragmentScorer):
     def __call__(self, f):
@@ -567,21 +579,26 @@ class BasicFragmentScorer(FragmentScorer):
 
         return score
 
+
 def SCORE(fragment):
     "Sorts higher scored passages first."
     return 1
+
 
 def FIRST(fragment):
     "Sorts passages from earlier in the document first."
     return fragment.startchar
 
+
 def LONGER(fragment):
     "Sorts longer passages first."
     return 0 - len(fragment)
 
+
 def SHORTER(fragment):
     "Sort shorter passages first."
     return len(fragment)
+
 
 def get_text(original, token, replace):
     """Convenience function for getting the text to use for a match when
@@ -596,4 +613,3 @@ def get_text(original, token, replace):
         return token.text
     else:
         return original[token.startchar : token.endchar]
-

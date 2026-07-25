@@ -109,7 +109,7 @@ def test_proximity_boost():
         r = s.search(query.Or([query.Term("text", "apple"), query.Term("text", "banana")]))
         scores = {hit.docnum: hit.score for hit in r}
         # doc 0 must score higher than doc 1 because terms are adjacent
-        assert scores[0] > scores[1], (scores[0], scores[1]) # pyright: ignore[reportOptionalOperand]
+        assert scores[0] > scores[1], (scores[0], scores[1])  # pyright: ignore[reportOptionalOperand]
 
 
 def test_phrase_position_boost():
@@ -131,7 +131,7 @@ def test_phrase_position_boost():
         # the scattered one distance > 5)
         scores = {hit.docnum: hit.score for hit in r}
         if 0 in scores and 1 in scores:
-            assert scores[0] > scores[1], (scores[0], scores[1]) # pyright: ignore[reportOptionalOperand]
+            assert scores[0] > scores[1], (scores[0], scores[1])  # pyright: ignore[reportOptionalOperand]
 
 
 def test_weighting_by_name():

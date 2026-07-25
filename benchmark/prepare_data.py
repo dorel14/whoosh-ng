@@ -7,6 +7,7 @@ This script downloads and prepares the required benchmark data files into
 benchmark/customers-2000000/ and benchmark/stock_etab/. It is intended
 to be run before benchmarks in CI or on a fresh checkout.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -71,7 +72,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--stock-url",
-        default=os.environ.get("STOCK_URL", "https://www.data.gouv.fr/api/1/datasets/r/0651fb76-bcf3-4f6a-a38d-bc04fa708576"),
+        default=os.environ.get(
+            "STOCK_URL",
+            "https://www.data.gouv.fr/api/1/datasets/r/0651fb76-bcf3-4f6a-a38d-bc04fa708576",
+        ),
         help="URL to download StockEtablissement_utf8.csv zip from (env: STOCK_URL)",
     )
     parser.add_argument(
@@ -114,9 +118,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.customers_max_rows > 0 and os.path.exists(CUSTOMERS_DST):
         print(f"Truncating customers CSV to {args.customers_max_rows} rows")
         tmp = CUSTOMERS_DST + ".tmp"
-        with open(CUSTOMERS_DST, newline="", encoding="utf-8") as fin, open(
-            tmp, "w", newline="", encoding="utf-8"
-        ) as fout:
+        with (
+            open(CUSTOMERS_DST, newline="", encoding="utf-8") as fin,
+            open(tmp, "w", newline="", encoding="utf-8") as fout,
+        ):
             reader = csv.DictReader(fin)
             writer = csv.DictWriter(fout, fieldnames=reader.fieldnames)
             writer.writeheader()

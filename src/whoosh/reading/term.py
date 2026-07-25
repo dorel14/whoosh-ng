@@ -38,6 +38,7 @@ from whoosh.matching import MultiMatcher
 from whoosh.support.levenshtein import distance
 from whoosh.system import emptybytes
 
+
 class TermInfo:
     """Represents a set of statistics about a term. This object is returned by
     :meth:`IndexReader.term_info`. These statistics may be useful for
@@ -118,6 +119,7 @@ class TermInfo:
 
         return self._maxid
 
+
 def combine_terminfos(tis):
     if len(tis) == 1:
         ti, offset = tis[0]
@@ -137,6 +139,7 @@ def combine_terminfos(tis):
     xid = max(ti.max_id() + offset for ti, offset in tis)
 
     return TermInfo(w, df, ml, xl, xw, mid, xid)
+
 
 class MultiCursor:
     def __init__(self, cursors):

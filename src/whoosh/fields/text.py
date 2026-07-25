@@ -41,6 +41,7 @@ from whoosh.util.times import datetime_to_long, long_to_datetime
 
 from whoosh.fields.base import FieldType
 
+
 class TEXT(FieldType):
     """
     Configured field type for text fields (for example, the body text of an
@@ -146,6 +147,7 @@ class TEXT(FieldType):
         else:
             return fieldname
 
+
 class SpellField(FieldType):
     """
     This is a utility field type meant to be returned by ``TEXT.subfields()``
@@ -176,6 +178,7 @@ class SpellField(FieldType):
     def process_text(self, qstring, mode="", **kwargs):
         kwargs["nomorph"] = True
         return FieldType.process_text(self, qstring, mode=mode, **kwargs)
+
 
 class NGRAM(FieldType):
     """
@@ -239,6 +242,7 @@ class NGRAM(FieldType):
 
         return cls(terms, boost=boost)
 
+
 class NGRAMWORDS(NGRAM):
     """
     Configured field that chops text into words using a tokenizer,
@@ -279,4 +283,3 @@ class NGRAMWORDS(NGRAM):
         self.stored = stored
         self.queryor = queryor
         self.set_sortable(sortable)
-

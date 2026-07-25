@@ -53,6 +53,7 @@ from whoosh.highlight.fragmenters import (
     set_matched_filter_phrases,
 )
 
+
 def highlight(
     text,
     terms,
@@ -84,6 +85,7 @@ def highlight(
     fragments = fragmenter.fragment_tokens(text, tokens)
     fragments = top_fragments(fragments, top, scorer, order, minscore)
     return formatter(text, fragments)
+
 
 class Highlighter:
     def __init__(
@@ -234,4 +236,3 @@ class Highlighter:
         fragments = top_fragments(fragments, top, self.scorer, self.order, minscore=minscore)
         output = self.formatter.format(fragments)
         return output
-

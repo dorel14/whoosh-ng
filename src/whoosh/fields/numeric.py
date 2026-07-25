@@ -41,6 +41,7 @@ from whoosh.util.times import datetime_to_long, long_to_datetime
 
 from whoosh.fields.base import FieldType
 
+
 class ID(FieldType):
     """
     Configured field type that indexes the entire value of the field as one
@@ -60,6 +61,7 @@ class ID(FieldType):
         self.stored = stored
         self.unique = unique
         self.set_sortable(sortable)
+
 
 class IDLIST(FieldType):
     """
@@ -83,6 +85,7 @@ class IDLIST(FieldType):
         self.format = formats.Existence(field_boost=field_boost)
         self.stored = stored
         self.unique = unique
+
 
 class NUMERIC(FieldType):
     """
@@ -365,6 +368,7 @@ class NUMERIC(FieldType):
                 break
             yield token
 
+
 class DATETIME(NUMERIC):
     """
     Special field type that lets you index datetime objects. The field
@@ -487,6 +491,7 @@ class DATETIME(NUMERIC):
 
         return query.NumericRange(fieldname, start, end, boost=boost)
 
+
 class BOOLEAN(FieldType):
     """
     Special field type that lets you index boolean values (True and False).
@@ -555,6 +560,7 @@ class BOOLEAN(FieldType):
 
         return query.Term(fieldname, self._obj_to_bool(qstring), boost=boost)
 
+
 class STORED(FieldType):
     """
     Configured field type for fields you want to store but not index.
@@ -565,6 +571,7 @@ class STORED(FieldType):
 
     def __init__(self):
         pass
+
 
 class COLUMN(FieldType):
     """
@@ -587,6 +594,7 @@ class COLUMN(FieldType):
 
     def from_bytes(self, b):
         return b
+
 
 class KEYWORD(FieldType):
     """
@@ -635,4 +643,3 @@ class KEYWORD(FieldType):
 
         if sortable:
             self.column_type = self.default_column()
-

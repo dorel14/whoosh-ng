@@ -37,11 +37,13 @@ from whoosh import sorting
 from whoosh.searching import Results, TimeLimit
 from whoosh.util import now
 
+
 def ilen(iterator):
     total = 0
     for _ in iterator:
         total += 1
     return total
+
 
 class Collector:
     """Base class for collectors."""

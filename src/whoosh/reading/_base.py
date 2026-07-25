@@ -26,12 +26,14 @@
 # policies, either expressed or implied, of Matt Chaput.
 """Shared base types for :mod:`whoosh.reading`."""
 
+
 class ReaderClosed(Exception):
     """Exception raised when you try to do some operation on a closed searcher
     (or a Results object derived from a searcher that has since been closed).
     """
 
     message = "Operation on a closed reader"
+
 
 class TermNotFound(Exception):
     pass

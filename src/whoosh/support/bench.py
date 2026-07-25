@@ -240,7 +240,7 @@ class XappyModule(Module):
         if hasattr(self.bench, "process_document_xappy"):
             self.bench.process_document_xappy(d)
         doc = xappy.UnprocessedDocument()  # type: ignore[union-attr]
-        for key, values in d: # pyright: ignore[reportOptionalIterable]
+        for key, values in d:  # pyright: ignore[reportOptionalIterable]
             if not isinstance(values, list):
                 values = [values]
             for value in values:
@@ -262,7 +262,7 @@ class XappyModule(Module):
 
     def findterms(self, terms, conn=None):
         limit = int(self.options.limit)
-        for term in terms: # pyright: ignore[reportOptionalIterable]
+        for term in terms:  # pyright: ignore[reportOptionalIterable]
             q = conn.query_field(self.bench.spec.main_field, term)  # type: ignore[union-attr]
             yield conn.search(q, 0, limit)  # type: ignore[union-attr]
 

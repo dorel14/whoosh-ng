@@ -298,9 +298,7 @@ def test_timelimit_preserves_filter():
     with ix.searcher() as s:
         q = query.Term("text", "charlie")
         filter_q = query.Term("status", "public")
-        col = collectors.TimeLimitCollector(
-            s.collector(filter=filter_q, limit=None), timelimit=5.0
-        )
+        col = collectors.TimeLimitCollector(s.collector(filter=filter_q, limit=None), timelimit=5.0)
         s.search_with_collector(q, col)
         r = col.results()
         result_ids = {hit["id"] for hit in r}
@@ -352,7 +350,9 @@ def test_or_groups():
 
 def test_collapse_with_order_length():
     """Issue #453: collapse + collapse_order should report correct result length."""
-    schema = fields.Schema(content=fields.TEXT(stored=True), category=fields.KEYWORD, sort=fields.NUMERIC)
+    schema = fields.Schema(
+        content=fields.TEXT(stored=True), category=fields.KEYWORD, sort=fields.NUMERIC
+    )
     st = RamStorage()
     ix = st.create_index(schema)
 

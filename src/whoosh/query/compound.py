@@ -382,8 +382,12 @@ class Or(CompoundQuery):
             cls = PreloadedOr
         else:
             raise ValueError(f"Unknown matcher_type {self.matcher_type!r}")
-        return cls(subs, boost=self.boost, minmatch=self.minmatch,  # type: ignore[attr-defined]
-scale=self.scale).matcher(  # type: ignore[attr-defined]
+        return cls(
+            subs,
+            boost=self.boost,
+            minmatch=self.minmatch,  # type: ignore[attr-defined]
+            scale=self.scale,
+        ).matcher(  # type: ignore[attr-defined]
             searcher, context
         )
 

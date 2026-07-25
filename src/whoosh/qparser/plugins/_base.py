@@ -34,6 +34,7 @@ from whoosh.qparser.common import attach
 from whoosh.qparser.taggers import FnTagger, RegexTagger
 from whoosh.util.text import rcompile
 
+
 class Plugin:
     """Base class for parser plugins."""
 
@@ -53,6 +54,7 @@ class Plugin:
         """
 
         return ()
+
 
 class TaggingPlugin(RegexTagger):
     """A plugin that also acts as a Tagger, to avoid having an extra Tagger
@@ -79,6 +81,7 @@ class TaggingPlugin(RegexTagger):
         kwargs = {str(k): v for k, v in match.groupdict().items()}
         return self.nodetype(**kwargs)
 
+
 class WhitespacePlugin(TaggingPlugin):
     """Tags whitespace and removes it at priority 500. Depending on whether
     your plugin's filter wants to see where whitespace was in the original
@@ -104,6 +107,7 @@ class WhitespacePlugin(TaggingPlugin):
                 newgroup.append(node)
         return newgroup
 
+
 class SingleQuotePlugin(TaggingPlugin):
     """Adds the ability to specify single "terms" containing spaces by
     enclosing them in single quotes.
@@ -111,6 +115,7 @@ class SingleQuotePlugin(TaggingPlugin):
 
     expr = r"(^|(?<=\W))'(?P<text>.*?)'(?=\s|\]|[)}]|$)"
     nodetype = syntax.WordNode
+
 
 class FunctionPlugin(TaggingPlugin):
     """Adds an abitrary "function call" syntax to the query parser to allow
@@ -225,4 +230,3 @@ class FunctionPlugin(TaggingPlugin):
             newgroup.append(node)
             i += 1
         return newgroup
-

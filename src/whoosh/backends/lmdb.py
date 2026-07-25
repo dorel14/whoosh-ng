@@ -48,8 +48,7 @@ class LmdbBackend(Backend):
             import lmdb  # type: ignore[import-untyped]
         except ImportError as exc:
             raise RuntimeError(
-                "lmdb backend requires the 'lmdb' package. "
-                "Install it with: pip install lmdb"
+                "lmdb backend requires the 'lmdb' package. Install it with: pip install lmdb"
             ) from exc
 
         self._env = lmdb.open(

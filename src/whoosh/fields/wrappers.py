@@ -41,6 +41,7 @@ from whoosh.util.times import datetime_to_long, long_to_datetime
 
 from whoosh.fields.base import FieldType
 
+
 class FieldWrapper(FieldType):
     def __init__(self, subfield, prefix):
         if isinstance(subfield, type):
@@ -133,6 +134,7 @@ class FieldWrapper(FieldType):
     def on_remove(self, schema, fieldname):
         self.subfield.on_remove(schema, fieldname)
 
+
 class ReverseField(FieldWrapper):
     def __init__(self, subfield, prefix="rev_"):
         FieldWrapper.__init__(self, subfield, prefix)
@@ -147,4 +149,3 @@ class ReverseField(FieldWrapper):
     def subfields(self):
         yield "", self.subfield
         yield self.name_prefix, self
-

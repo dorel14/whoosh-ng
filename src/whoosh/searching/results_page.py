@@ -28,6 +28,7 @@
 
 from math import ceil
 
+
 class ResultsPage:
     """Represents a single page out of a longer list of results, as returned
     by :func:`whoosh.searching.Searcher.search_page`. Supports a subset of the

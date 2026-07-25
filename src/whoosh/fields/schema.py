@@ -61,6 +61,7 @@ from whoosh.fields.numeric import (
 from whoosh.fields.text import NGRAM, NGRAMWORDS, SpellField, TEXT
 from whoosh.fields.wrappers import FieldWrapper, ReverseField
 
+
 class MetaSchema(type):
     _clsfields: dict = {}
 
@@ -87,6 +88,7 @@ class MetaSchema(type):
 
     def schema(self):
         return Schema(**self._clsfields)
+
 
 class Schema:
     """
@@ -320,6 +322,7 @@ class Schema:
 
         return [name for name, field in self.items() if field.scorable]
 
+
 class SchemaClass(Schema, metaclass=MetaSchema):
     """
     Allows you to define a schema using declarative syntax, similar to
@@ -361,4 +364,3 @@ class SchemaClass(Schema, metaclass=MetaSchema):
         kw.update(kwargs)
         obj.__init__(*args, **kw)
         return obj
-

@@ -39,11 +39,14 @@ from whoosh.util.numeric import NaN, from_sortable, to_sortable, typecode_max
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.util.times import datetime_to_long, long_to_datetime
 
+
 class FieldConfigurationError(Exception):
     pass
 
+
 class UnknownFieldError(Exception):
     pass
+
 
 class FieldType:
     """
@@ -359,6 +362,7 @@ class FieldType:
     def on_remove(self, schema, fieldname):
         pass
 
+
 def ensure_schema(schema):
     from whoosh.fields.schema import Schema
 
@@ -367,6 +371,7 @@ def ensure_schema(schema):
     if not isinstance(schema, Schema):
         raise FieldConfigurationError(f"{schema!r} is not a Schema")
     return schema
+
 
 def merge_fielddict(d1, d2):
     keyset = set(d1.keys()) | set(d2.keys())
@@ -379,6 +384,7 @@ def merge_fielddict(d1, d2):
         out[name] = field1 or field2
     return out
 
+
 def merge_schema(s1, s2):
     from whoosh.fields.schema import Schema
 
@@ -386,6 +392,7 @@ def merge_schema(s1, s2):
     schema._fields = merge_fielddict(s1._fields, s2._fields)
     schema._dyn_fields = merge_fielddict(s1._dyn_fields, s2._dyn_fields)
     return schema
+
 
 def merge_schemas(schemas):
     from whoosh.fields.schema import Schema

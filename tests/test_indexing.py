@@ -867,7 +867,9 @@ def test_scalable_merge():
 
     # After MERGE_SMALL the number of segments should drop significantly.
     final_segments = len(ix._segments())
-    assert final_segments < num_segments, f"Expected fewer segments after merge, got {final_segments}"
+    assert final_segments < num_segments, (
+        f"Expected fewer segments after merge, got {final_segments}"
+    )
 
     # Memory growth should be bounded (heuristic: < 50 MB for this scale).
     assert peak_mem_mb < 50.0, f"Merge used too much memory: {peak_mem_mb:.1f} MB"
@@ -881,7 +883,9 @@ def test_update_document_batch_performance():
     """Issue #531: batch_update_documents should produce correct results."""
     import time
 
-    schema = fields.Schema(path=fields.ID(unique=True, stored=True), content=fields.TEXT(stored=True))
+    schema = fields.Schema(
+        path=fields.ID(unique=True, stored=True), content=fields.TEXT(stored=True)
+    )
     st = RamStorage()
     ix = st.create_index(schema)
 
@@ -956,6 +960,7 @@ def test_commit_progress_callback():
     ix = st.create_index(schema)
 
     events: list[tuple[str, dict]] = []
+
     def progress(stage, **kwargs):
         events.append((stage, kwargs))
 
@@ -970,5 +975,3 @@ def test_commit_progress_callback():
     assert "toc" in stages
     assert "finish" in stages
     assert events[-1][0] == "finish"
-
-

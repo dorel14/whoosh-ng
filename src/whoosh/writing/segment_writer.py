@@ -40,6 +40,7 @@ from whoosh.writing.merge_policies import CLEAR, MERGE_SMALL, NO_MERGE, OPTIMIZE
 from whoosh.writing.posting_pool import PostingPool
 from whoosh.writing.writer import IndexWriter
 
+
 class SegmentWriter(IndexWriter):
     def __init__(
         self,

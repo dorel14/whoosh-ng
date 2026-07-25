@@ -36,6 +36,7 @@ from whoosh.util.text import rcompile
 
 from whoosh.qparser.plugins._base import Plugin, TaggingPlugin
 
+
 class PrefixPlugin(TaggingPlugin):
     """Adds the ability to specify prefix queries by ending a term with an
     asterisk.
@@ -58,6 +59,7 @@ class PrefixPlugin(TaggingPlugin):
 
     expr = "(?P<text>[^ \t\r\n*]+)[*](?= |$|\\))"
     nodetype = PrefixNode
+
 
 class WildcardPlugin(TaggingPlugin):
     # \u055E = Armenian question mark
@@ -112,6 +114,7 @@ class WildcardPlugin(TaggingPlugin):
 
     nodetype = WildcardNode
 
+
 class RegexPlugin(TaggingPlugin):
     """Adds the ability to specify regular expression term queries.
 
@@ -130,6 +133,7 @@ class RegexPlugin(TaggingPlugin):
 
     expr = 'r"(?P<text>[^"]*)"'
     nodetype = RegexNode
+
 
 class FuzzyTermPlugin(TaggingPlugin):
     """Adds syntax to the query parser to create "fuzzy" term queries, which
@@ -243,6 +247,7 @@ class FuzzyTermPlugin(TaggingPlugin):
             i += 1
         return newgroup
 
+
 class EveryPlugin(TaggingPlugin):
     expr = "[*]:[*]"
     priority = -1
@@ -256,6 +261,7 @@ class EveryPlugin(TaggingPlugin):
 
         def query(self, parser):
             return query.Every()
+
 
 class FieldsPlugin(TaggingPlugin):
     """Adds the ability to specify the field of a clause."""
@@ -334,4 +340,3 @@ class FieldsPlugin(TaggingPlugin):
             newgroup.append(node)
         newgroup.reverse()
         return newgroup
-

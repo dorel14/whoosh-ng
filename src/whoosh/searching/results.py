@@ -32,6 +32,7 @@ from whoosh import classify, highlight
 from whoosh.searching._base import NoTermsException
 from whoosh.searching.hit import Hit
 
+
 class Results:
     """This object is returned by a Searcher. This object represents the
     results of a search query. You can mostly use it as if it was a list of

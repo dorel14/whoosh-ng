@@ -33,6 +33,7 @@ from itertools import groupby
 from whoosh.analysis import Token
 from whoosh.highlight.fragmenters import Fragment, get_text, mkfrag
 
+
 class Formatter:
     """Base class for formatters.
 
@@ -116,11 +117,13 @@ class Formatter:
         # For backwards compatibility
         return self.format(fragments)
 
+
 class NullFormatter(Formatter):
     """Formatter that does not modify the string."""
 
     def format_token(self, text, token, replace=False):
         return get_text(text, token, replace)
+
 
 class UppercaseFormatter(Formatter):
     """Returns a string in which the matched terms are in UPPERCASE."""
@@ -135,6 +138,7 @@ class UppercaseFormatter(Formatter):
     def format_token(self, text, token, replace=False):
         ttxt = get_text(text, token, replace)
         return ttxt.upper()
+
 
 class HtmlFormatter(Formatter):
     """Returns a string containing HTML formatting around the matched terms.
@@ -215,6 +219,7 @@ class HtmlFormatter(Formatter):
         """Clears the dictionary mapping terms to HTML classnames."""
         self.seen = {}
 
+
 class GenshiFormatter(Formatter):
     """Returns a Genshi event stream containing HTML formatting around the
     matched terms.
@@ -281,10 +286,10 @@ class GenshiFormatter(Formatter):
             first = False
         return self.Stream(output)
 
+
 def top_fragments(fragments, count, scorer, order, minscore=1):
     scored_fragments = ((scorer(f), f) for f in fragments)
     scored_fragments = nlargest(count, scored_fragments)
     best_fragments = [sf for score, sf in scored_fragments if score >= minscore]
     best_fragments.sort(key=order)
     return best_fragments
-

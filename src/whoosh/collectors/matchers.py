@@ -39,6 +39,7 @@ from whoosh.util import now
 
 from whoosh.collectors.base import Collector, ilen
 
+
 class ScoredCollector(Collector):
     """Base class for collectors that sort the results based on document score."""
 
@@ -142,6 +143,7 @@ class ScoredCollector(Collector):
             # again.
             checkquality = matcher.next()
 
+
 class TopCollector(ScoredCollector):
     """A collector that only returns the top "N" scored results."""
 
@@ -229,6 +231,7 @@ class TopCollector(ScoredCollector):
         items = [(score, 0 - docnum) for score, docnum in items]
         return self._results(items)
 
+
 class UnlimitedCollector(ScoredCollector):
     """A collector that returns **all** scored results."""
 
@@ -250,6 +253,7 @@ class UnlimitedCollector(ScoredCollector):
         self.items.sort(key=lambda x: (0 - x[0], x[1]), reverse=self.reverse)
         return self._results(self.items, docset=self.docset)
 
+
 class UnsortedCollector(Collector):
     def prepare(self, top_searcher, q, context):
         Collector.prepare(self, top_searcher, q, context.set(weighting=None))
@@ -263,6 +267,7 @@ class UnsortedCollector(Collector):
     def results(self):
         items = self.items
         return self._results(items, docset=self.docset)
+
 
 class WrappingCollector(Collector):
     """Base class for collectors that wrap other collectors."""
@@ -314,4 +319,3 @@ class WrappingCollector(Collector):
 
     def results(self):
         return self.child.results()
-
