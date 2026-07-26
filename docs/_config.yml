@@ -25,7 +25,13 @@ just_the_docs:
   search_preview: true
   heading_break: 360
   nav_sort: case_insensitive
-  nav_fold: true
+  collections:
+    en:
+      name: English
+      nav_fold: true
+    fr:
+      name: Français
+      nav_fold: true
   footer_content: "Whoosh-NG Documentation | Last updated: 2026-07-26"
 
 # Collections for organized content
@@ -66,6 +72,7 @@ defaults:
 
 # Include additional files
 include:
+  - _pages
   - README.md
 
 # Exclude from build
