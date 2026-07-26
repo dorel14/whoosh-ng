@@ -140,5 +140,6 @@ from whoosh.middleware.exceptions import MiddlewareError, StopOperation
 ## Getting Help
 
 - [GitHub Issues](https://github.com/your-org/whoosh-NG/issues)
-- [Documentation](/en/)
-- [Migration Examples](/en/examples/migration)
+- [Documentation]({{ '/en/' | relative_url }})
+- [Migration Examples]({{ '/en/examples/migration/' | relative_url }})
+

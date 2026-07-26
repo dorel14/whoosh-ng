@@ -40,3 +40,4 @@ provider = AutocompleteProvider(ix, "query")
 suggestions = provider.suggest("de", limit=5)
 print(suggestions)  # ["demarrage python", ...]
 ```
+

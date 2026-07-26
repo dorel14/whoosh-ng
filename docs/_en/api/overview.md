@@ -80,3 +80,4 @@ schema = Schema(
     count=NUMERIC(int, stored=True)
 )
 ```
+

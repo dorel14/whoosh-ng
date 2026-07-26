@@ -82,3 +82,4 @@ schema = (
 writer.add_field("summary", TEXT(stored=True))
 writer.remove_field("legacy_field")
 ```
+

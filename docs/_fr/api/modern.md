@@ -114,3 +114,4 @@ metrics = chain.get_metrics()
 print(metrics)
 # {"documents_indexed": 10, "searches_executed": 5}
 ```
+

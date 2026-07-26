@@ -125,3 +125,4 @@ async def index_docs(docs: list[dict]):
 - `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, and `/autocomplete` endpoints.
 - All blocking calls run off the event loop via `run_sync`.
 - Use `BufferedWriter` for high-throughput indexing via POST.
+

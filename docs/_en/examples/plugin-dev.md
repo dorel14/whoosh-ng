@@ -209,3 +209,4 @@ manager = PluginManager()
 manager.register(VectorPlugin())
 manager.register(AutocompletePlugin())
 ```
+

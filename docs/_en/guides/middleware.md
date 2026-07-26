@@ -211,3 +211,4 @@ class ResilientMiddleware(Middleware):
 3. **Order matters**: Place caching before metrics, auth before routing
 4. **Performance**: Keep hooks lightweight; use async for I/O
 5. **Testing**: Mock the context object to test middleware in isolation
+

@@ -77,3 +77,4 @@ with ix.writer() as writer:
     writer.delete_by_term("path", "/2")
     writer.commit()
 ```
+

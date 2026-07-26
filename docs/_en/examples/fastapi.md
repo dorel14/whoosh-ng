@@ -71,3 +71,4 @@ def search(q: str):
         results = searcher.search(parsed)
         return [hit.fields() for hit in results]
 ```
+

@@ -120,3 +120,4 @@ q = qp.parse("python recherche")
 titre\:python              # Deux-points littéral
 chemin\:\/\/exemple        # Échapper les caractères spéciaux
 ```
+

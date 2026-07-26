@@ -40,3 +40,4 @@ provider = AutocompleteProvider(ix, "query")
 suggestions = provider.suggest("py", limit=5)
 print(suggestions)  # ["python", "pyramid", ...]
 ```
+

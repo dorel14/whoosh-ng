@@ -105,3 +105,4 @@ provider = VectorRegistry.get("numpy", "mon_app")
 ```python
 class PluginNotFoundError(Exception)
 ```
+

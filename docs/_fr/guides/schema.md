@@ -129,3 +129,4 @@ writer.commit()
 3. **Champs uniques**: Utilisez `unique=True` pour les identifiants
 4. **Boost de champ**: Boostez les champs importants au niveau schéma
 5. **TEXT options**: Désactivez `phrase` si vous n'avez pas besoin de recherche de phrase
+

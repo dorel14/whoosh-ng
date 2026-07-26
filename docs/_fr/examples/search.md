@@ -119,3 +119,4 @@ with ix.searcher() as s:
 - `search_page()` pour la pagination.
 - `filter` pour les filtres (ne pas inclure dans le score).
 - `sortedby` pour trier par champ ou score.
+

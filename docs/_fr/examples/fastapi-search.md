@@ -98,3 +98,4 @@ curl -X POST http://localhost:8000/api/v1/search \
 
 - `create_app()` de `whoosh_fastapi` fournit les endpoints `/health`, `/search` et `/autocomplete`.
 - Tous les appels bloquants s’exécutent hors boucle d’événements via `run_sync`.
+

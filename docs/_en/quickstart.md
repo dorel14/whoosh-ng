@@ -44,3 +44,4 @@ from whoosh_modern.vector.plugin import VectorPlugin
 
 PluginManager.load_plugins()
 ```
+

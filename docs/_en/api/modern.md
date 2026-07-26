@@ -167,3 +167,4 @@ from whoosh_modern.autocomplete.plugin import AutocompletePlugin
 ```
 
 Registers autocomplete providers.
+

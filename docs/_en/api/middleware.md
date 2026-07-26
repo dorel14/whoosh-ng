@@ -310,3 +310,4 @@ def apply_middleware_to_searcher(
     middleware: list[Middleware] = None
 ) -> MiddlewareSearcher
 ```
+

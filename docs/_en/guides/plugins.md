@@ -155,3 +155,4 @@ class FastAPIPlugin(BasePlugin):
 3. **Handle conflicts**: Check for existing registrations before adding
 4. **Clean up**: Implement `teardown()` to remove registries and middleware
 5. **Version your plugin**: Semver for compatibility checking
+

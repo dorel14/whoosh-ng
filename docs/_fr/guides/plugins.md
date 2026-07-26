@@ -105,3 +105,4 @@ Le `PluginManager` résout l'ordre de chargement et détecte les conflits.
 1. **Un plugin, une responsabilité**: Gardez les plugins petits et focalisés
 2. **Déclarez les dépendances**: Aidez PluginManager à résoudre l'ordre
 3. **Nettoyez bien**: Implémentez `teardown()` pour supprimer les registres
+

@@ -136,3 +136,4 @@ from whoosh_modern.autocomplete.plugin import AutocompletePlugin
 
 PluginManager.load_plugins()
 ```
+

@@ -93,3 +93,4 @@ async def index_docs(docs: list[dict]):
 - `create_app()` de `whoosh_fastapi` expose `/health`, `/search` et `/autocomplete`.
 - Les appels bloquants s’exécutent hors boucle d’événements.
 - Utilisez `BufferedWriter` pour l’indexation en masse.
+

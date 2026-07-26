@@ -99,3 +99,4 @@ def on_error(event: SearchExecuted):
     if event.result_count == 0:
         logger.warning(f"Recherche vide: {event.query}")
 ```
+

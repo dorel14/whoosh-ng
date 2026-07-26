@@ -86,3 +86,4 @@ with ix.searcher() as searcher:
 3. **Recherche hybride**: Combinez vecteur et mots-clés pour de meilleurs résultats
 4. **Cachez les embeddings**: Pré-calculez et stockez pour éviter de recalculer
 5. **Indexation par lots**: Indexez les vecteurs en lots pour l'efficacité
+

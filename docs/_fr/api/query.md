@@ -127,3 +127,4 @@ q = And([
     Phrase("content", ["tutoriel", "whoosh"])
 ])
 ```
+
