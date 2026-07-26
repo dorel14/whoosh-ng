@@ -18,6 +18,8 @@ permalink: pretty
 
 # Use remote theme for Just the Docs (GitHub Pages compatible)
 remote_theme: just-the-docs/just-the-docs
+# Global dark theme (applies to all pages)
+color_scheme: dark
 
 # Just the Docs theme configuration
 just_the_docs:
