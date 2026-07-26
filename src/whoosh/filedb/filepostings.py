@@ -38,7 +38,7 @@ class BlockInfo:
     )
 
     # nextblockoffset, unused, postcount, maxweight, maxwol, unused, minlength
-    _struct = Struct("!IiiBfffB")
+    _struct = Struct("!Qii fffB")
 
     def __init__(
         self,
@@ -90,7 +90,7 @@ class BlockInfo:
 
         maxid = self.maxid
         if isinstance(maxid, unicode):
-            file.write_string(utf8encode(maxid)[0])  # type: ignore[arg-type]
+            file.write_string(utf8encode(maxid)[0])  # type: ignore[arg-type]  # type: ignore[arg-type]
         else:
             file.write_uint(maxid)
 
@@ -237,7 +237,7 @@ class FilePostingWriter(PostingWriter):
         # Write the IDs
         if stringids:
             for id in ids:
-                pf.write_string(utf8encode(id)[0])  # type: ignore[arg-type]
+                pf.write_string(utf8encode(id)[0])  # type: ignore[arg-type]  # type: ignore[arg-type]
         else:
             pf.write_array(ids)
 
@@ -261,7 +261,7 @@ class FilePostingWriter(PostingWriter):
         pf.flush()
         nextoffset = pf.tell()
         pf.seek(blockinfo_start)
-        pf.write_uint(nextoffset)
+        pf.write_ulong(nextoffset)
         pf.seek(nextoffset)
 
         self.posttotal += postcount
@@ -389,7 +389,7 @@ class FilePostingReader(Matcher):
                 lengths = pf.get_array(startoffset, "I", postcount)
                 valueoffset += _INT_SIZE * postcount
 
-            allvalues = pf.map[valueoffset:endoffset]
+            allvalues = pf.get(valueoffset, endoffset - valueoffset)
 
             # Chop up the block string into individual valuestrings
             if posting_size > 0:
@@ -404,7 +404,7 @@ class FilePostingReader(Matcher):
                 # to chop up the values.
                 pos = 0
                 values = []
-                for length in lengths:  # type: ignore[name-defined]
+                for length in lengths:  # type: ignore[name-defined]  # type: ignore[name-defined]
                     values.append(allvalues[pos : pos + length])
                     pos += length
         else:

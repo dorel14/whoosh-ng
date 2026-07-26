@@ -8,15 +8,14 @@ from whoosh.util import now
 def test_bigfacet():
     tagcount = 100
     doccount = 500000
-    dirname = "testindex"
+    dirname = "testindex_facet"
 
     schema = fields.Schema(tags=fields.KEYWORD(stored=True, vector=formats.Existence()))
 
     if not os.path.exists(dirname):
         os.mkdir(dirname)
 
-    reindex = False
-    if reindex or not index.exists_in(dirname):
+    if not index.exists_in(dirname):
         tags = []
         for _ in range(tagcount):
             tag = "".join(random.choice(string.ascii_lowercase) for _ in range(5))
@@ -31,6 +30,10 @@ def test_bigfacet():
                 if not i % 10000:
                     print(i)
         print(now() - t)
+
+    # Ensure segments are written before opening searcher
+    import time
+    time.sleep(1)
 
     ix = index.open_dir(dirname)
     with ix.searcher() as s:

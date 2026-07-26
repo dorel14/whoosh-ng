@@ -22,9 +22,9 @@ def test_bigtable():
         keys = list(samp.keys())
         shuffle(keys)
         for key in keys:
-            assert samp[key] == fhr[key]
+            assert samp[key] == fhr[key].decode("utf-8")
 
-        set1 = set(samp.items())
+        set1 = set((k.encode("utf-8"), v.encode("utf-8")) for k, v in samp.items())
         set2 = set(fhr.items())
         assert set1 == set2
 

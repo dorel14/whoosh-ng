@@ -236,7 +236,7 @@ class XappyModule(Module):
         conn = self.bench.spec.xappy_connection(path)
         return conn
 
-    def index_document(self, d, conn=None):
+    def index_document(self, d, conn=None):  # type: ignore[override]
         if hasattr(self.bench, "process_document_xappy"):
             self.bench.process_document_xappy(d)
         doc = xappy.UnprocessedDocument()  # type: ignore[union-attr]
@@ -257,10 +257,10 @@ class XappyModule(Module):
     def query(self, conn=None):
         return conn.query_parse(" ".join(self.args))  # type: ignore[union-attr]
 
-    def find(self, q, conn=None):
+    def find(self, q, conn=None):  # type: ignore[override]
         return conn.search(q, 0, int(self.options.limit))  # type: ignore[union-attr]
 
-    def findterms(self, terms, conn=None):
+    def findterms(self, terms, conn=None):  # type: ignore[override]
         limit = int(self.options.limit)
         for term in terms: # pyright: ignore[reportOptionalIterable]
             q = conn.query_field(self.bench.spec.main_field, term)  # type: ignore[union-attr]

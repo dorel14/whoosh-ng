@@ -340,7 +340,7 @@ class ConstantScoreMatcher(Matcher):
         self._score = score
         self._active = True
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         return True
 
     def is_active(self):
@@ -375,7 +375,7 @@ class NullMatcherClass(Matcher):
     def __repr__(self):
         return "<NullMatcher>"
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         return True
 
     def max_quality(self) -> float:
@@ -483,7 +483,7 @@ class ListMatcher(Matcher):
         else:
             return self
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         return self._scorer is not None and self._scorer.supports_block_quality()
 
     def max_quality(self) -> float:
@@ -591,6 +591,9 @@ class LeafMatcher(Matcher):
     scorer: Any = None
     format: Any = None
     _term: Any = None
+    scorer: Any = None
+    format: Any = None
+    _term: Any = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.term()!r}, {self.is_active()})"
@@ -623,7 +626,7 @@ class LeafMatcher(Matcher):
         else:
             raise Exception(f"Field does not support positions ({self.term()!r})")
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         return self.scorer and self.scorer.supports_block_quality()
 
     def max_quality(self) -> float:

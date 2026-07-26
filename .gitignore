@@ -30,6 +30,7 @@ eggs/
 *.tmp
 *.zip
 /testindex/
+/testindex_facet/
 /testindex/**
 fix_*.py
 src/**/*.tmp

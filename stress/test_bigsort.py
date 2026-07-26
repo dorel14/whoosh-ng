@@ -1,6 +1,7 @@
 import os.path
 import random
 import shutil
+import time
 from datetime import datetime, timezone
 
 from whoosh import fields, index, query
@@ -15,6 +16,7 @@ def test_bigsort():
     schema = fields.Schema(id=fields.ID(stored=True), date=df)
 
     if os.path.exists(dirname):
+        time.sleep(1)
         shutil.rmtree(dirname)
     os.mkdir(dirname)
     ix = index.create_in(dirname, schema)
@@ -30,34 +32,42 @@ def test_bigsort():
 
     ix = index.open_dir(dirname)
     s = ix.searcher()
-    q = query.Wildcard("id", "1?2*")
+    try:
+        q = query.Wildcard("id", "1?2*")
 
-    t = now()
-    x = list(df.sortable_terms(s.reader(), "date"))
-    print(now() - t, len(x))
+        t = now()
+        x = list(df.sortable_terms(s.reader(), "date"))
+        print(now() - t, len(x))
 
-    t = now()
-    for y in x:
-        p = list(s.postings("date", y).all_ids())
-    print(now() - t)
+        t = now()
+        for y in x:
+            p = list(s.postings("date", y).all_ids())
+        print(now() - t)
 
-    t = now()
-    r = s.search(q, limit=25, sortedby="date", reverse=True)
-    print("Search 1 took", now() - t)
-    print("len=", r.scored_length())
+        t = now()
+        r = s.search(q, limit=25, sortedby="date", reverse=True)
+        print("Search 1 took", now() - t)
+        print("len=", r.scored_length())
 
-    t = now()
-    r = s.search(q, limit=25, sortedby="date")
-    print("Search 2 took", now() - t)
+        t = now()
+        r = s.search(q, limit=25, sortedby="date")
+        print("Search 2 took", now() - t)
 
-    t = now()
-    r = s.search(q, limit=25, sortedby="date")
-    print("Search 2 took", now() - t)
+        t = now()
+        r = s.search(q, limit=25, sortedby="date")
+        print("Search 2 took", now() - t)
 
-    from heapq import nlargest
+        from heapq import nlargest
 
-    t = now()
-    sf = s.stored_fields
-    gen = ((sf(n)["date"], n) for n in q.docs(s))
-    r = nlargest(25, gen)
-    print(now() - t)
+        t = now()
+        sf = s.stored_fields
+        gen = ((sf(n)["date"], n) for n in q.docs(s))
+        r = nlargest(25, gen)
+        print(now() - t)
+    finally:
+        s.close()
+        ix.close()
+
+
+if __name__ == "__main__":
+    test_bigsort()
