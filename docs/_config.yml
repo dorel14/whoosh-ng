@@ -1,11 +1,15 @@
-title: Whoosh-ng Documentation
+---
+# Jekyll configuration for GitHub Pages with Just the Docs theme
+
+# Site settings
+title: Whoosh-NG Documentation
 description: Pure-Python full-text indexing and search library, modernized for 2025+
 lang: en
 timezone: UTC
 
-# GitHub Pages: base URL for project pages
+# GitHub Pages: base URL (repo name for project pages)
 baseurl: "/whoosh-ng"
-# url: "https://dorel14.github.io/whoosh-ng"
+#url: "https://dorel14.github.io"
 
 # Build settings
 markdown: kramdown
@@ -22,7 +26,7 @@ just_the_docs:
   heading_break: 360
   nav_sort: case_insensitive
   nav_fold: true
-  footer_content: "Whoosh-NG Documentation | Last updated: 2026-07-12"
+  footer_content: "Whoosh-NG Documentation | Last updated: 2026-07-26"
 
 # Collections for organized content
 collections:
@@ -33,16 +37,28 @@ collections:
     output: true
     sort_by: nav_order
 
-# Default front matter for collection pages
+# Site favicon and logo (served from docs/assets/)
+favicon_ico: "/assets/favico.ico"
+logo: "/assets/logo.png"
+
+# Default front matter for markdown files
 defaults:
+  # Root pages (README.md, etc.)
   - scope:
-      path: "en"
+      path: ""
+      type: pages
+    values:
+      layout: default
+  # Collection: English
+  - scope:
+      path: "_en"
       type: en
     values:
       layout: default
       lang: en
+  # Collection: French
   - scope:
-      path: "fr"
+      path: "_fr"
       type: fr
     values:
       layout: default
@@ -50,8 +66,6 @@ defaults:
 
 # Include additional files
 include:
-  - favicon.ico
-  - logo.png
   - README.md
 
 # Exclude from build
