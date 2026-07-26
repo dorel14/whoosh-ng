@@ -11,6 +11,9 @@ timezone: UTC
 baseurl: "/whoosh-ng"
 #url: "https://dorel14.github.io"
 
+# Global dark theme (applies to all pages)
+color_scheme: dark
+
 # Build settings
 markdown: kramdown
 highlighter: rouge
@@ -18,11 +21,10 @@ permalink: pretty
 
 # Use remote theme for Just the Docs (GitHub Pages compatible)
 remote_theme: just-the-docs/just-the-docs
-# Global dark theme (applies to all pages)
-color_scheme: dark
 
 # Just the Docs theme configuration
 just_the_docs:
+  # Search
   search_enabled: true
   search_preview: true
   heading_break: 360
@@ -51,30 +53,24 @@ logo: "/assets/logo.png"
 
 # Default front matter for markdown files
 defaults:
-  # Root pages (README.md, etc.)
   - scope:
       path: ""
       type: pages
     values:
       layout: default
-  # Collection: English
   - scope:
       path: "_en"
       type: en
     values:
       layout: default
-      lang: en
-  # Collection: French
   - scope:
       path: "_fr"
       type: fr
     values:
       layout: default
-      lang: fr
 
 # Include additional files
 include:
-  - _pages
   - README.md
 
 # Exclude from build
@@ -97,7 +93,7 @@ exclude:
   - Gemfile
   - Gemfile.lock
 
-# Plugins (GitHub Pages supported)
+# Plugins
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
@@ -107,3 +103,11 @@ plugins:
 # SEO and social
 github_username: dorel14
 repository: whoosh-ng
+
+# Kramdown settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false

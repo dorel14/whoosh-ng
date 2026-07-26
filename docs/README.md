@@ -1,4 +1,3 @@
-<!-- docs/README.md -->
 ---
 title: "Whoosh-NG Documentation"
 nav_order: 1
