@@ -359,8 +359,8 @@ class SchemaClass(Schema, metaclass=MetaSchema):
     """
 
     def __new__(cls, *args, **kwargs):
-        obj = super().__new__(cls)
-        kw = getattr(cls, "_clsfields", {})
+        obj = super().__new__(Schema)
+        kw = getattr(cls, "_clsfields", {}).copy()
         kw.update(kwargs)
         obj.__init__(*args, **kw)
         return obj
