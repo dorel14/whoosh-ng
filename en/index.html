@@ -13,16 +13,30 @@
 
   <style id="jtd-nav-activation">
   
-    .site-nav ul li a {
+
+    
+    .site-nav > ul:nth-of-type(2) > li > ul > li:not(:nth-child(1)) > a,
+    .site-nav > ul:nth-of-type(2) > li > ul > li > ul > li a {
       background-image: none;
     }
-    .site-nav > ul.nav-category-list > li > button svg {
-      transform: rotate(-90deg);
-    }
-    .site-nav > ul.nav-category-list > li.nav-list-item > ul.nav-list {
-      display: block;
+
+    .site-nav > ul:not(:nth-of-type(2)) a,
+    .site-nav li.external a {
+      background-image: none;
     }
 
+    .site-nav > ul:nth-of-type(2) > li > ul > li:nth-child(1) > a {
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .site-nav > ul.nav-category-list > li > button svg,
+    .site-nav > ul:nth-of-type(2) > li > ul > li:nth-child(1) > button svg {
+      transform: rotate(-90deg);
+    }
+    .site-nav > ul.nav-category-list > li.nav-list-item > ul.nav-list,
+    .site-nav > ul:nth-of-type(2) > li > ul > li.nav-list-item:nth-child(1) > ul.nav-list {
+      display: block;
+    }
   </style>
 
   
@@ -42,20 +56,20 @@
 
 
   <!-- Begin Jekyll SEO tag v2.9.0 -->
-<title>API Backends | Whoosh-NG Documentation</title>
+<title>Whoosh-NG Documentation | Pure-Python full-text indexing and search library, modernized for 2025+</title>
 <meta name="generator" content="Jekyll v4.4.1" />
-<meta property="og:title" content="API Backends" />
-<meta property="og:locale" content="fr" />
-<meta name="description" content="API Backends" />
-<meta name="twitter:description" property="og:description" content="API Backends" />
+<meta property="og:title" content="Whoosh-NG Documentation" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Whoosh-NG Documentation" />
+<meta name="twitter:description" property="og:description" content="Whoosh-NG Documentation" />
 <meta property="og:site_name" content="Whoosh-NG Documentation" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2026-07-26T15:49:28+00:00" />
 <meta property="article:modified_time" content="2026-07-26T15:49:28+00:00" />
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="API Backends" />
+<meta name="twitter:title" content="Whoosh-NG Documentation" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-26T15:49:28+00:00","datePublished":"2026-07-26T15:49:28+00:00","description":"API Backends","headline":"API Backends","mainEntityOfPage":{"@type":"WebPage","@id":"/whoosh-ng/fr/api/backends/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/whoosh-ng/assets/logo.png"}},"url":"/whoosh-ng/fr/api/backends/"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-26T15:49:28+00:00","datePublished":"2026-07-26T15:49:28+00:00","description":"Whoosh-NG Documentation","headline":"Whoosh-NG Documentation","mainEntityOfPage":{"@type":"WebPage","@id":"/whoosh-ng/en/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/whoosh-ng/assets/logo.png"}},"url":"/whoosh-ng/en/"}</script>
 <!-- End Jekyll SEO tag -->
 
 
@@ -217,187 +231,183 @@
 </div>
 
     <div class="main-content-wrap">
-      <nav aria-label="Breadcrumb" class="breadcrumb-nav">
-  <ol class="breadcrumb-nav-list">
-    <li class="breadcrumb-nav-list-item"><span>API Backends</span></li>
-  </ol>
-</nav>
-
-
+      
       <div id="main-content" class="main-content">
         <main>
           
-            <h1 id="api-backends">
+            <h1 id="whoosh-ng-documentation">
   
   
-    <a href="#api-backends" class="anchor-heading" aria-labelledby="api-backends"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> API Backends
+    <a href="#whoosh-ng-documentation" class="anchor-heading" aria-labelledby="whoosh-ng-documentation"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Whoosh-NG Documentation
   
   
 </h1>
     
 
-<p>Architecture de stockage pliable via backends.</p>
-<h2 id="filebackend-défaut">
+<blockquote>
+  <div class="table-wrapper"><table>
+    <tbody>
+      <tr>
+        <td><strong>Version</strong>: Latest</td>
+        <td>Last updated: 2026-07-12</td>
+      </tr>
+    </tbody>
+  </table></div>
+</blockquote>
+
+<p>Welcome to the official documentation for <strong>Whoosh-NG</strong>, a pure-Python full-text indexing and search library modernized for 2025+.</p>
+<h2 id="language-selection">
   
   
-    <a href="#filebackend-défaut" class="anchor-heading" aria-labelledby="filebackend-défaut"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> FileBackend (défaut)
+    <a href="#language-selection" class="anchor-heading" aria-labelledby="language-selection"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Language Selection
   
   
 </h2>
     
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">backends</span><span class="p">.</span><span class="nb">file</span><span class="p">.</span><span class="n">FileBackend</span>
-</code></pre></div></div>
+<p>This documentation is available in two languages:</p>
 
-<p>Backend par défaut stockant les segments comme fichiers sur disque.</p>
-<h3 id="options">
+<ul>
+  <li><strong><a href="/en/quickstart/">English Documentation</a></strong> — Complete technical documentation in English (source language)</li>
+  <li><strong><a href="/fr/quickstart/">Documentation Française</a></strong> — Traduction française complète</li>
+</ul>
+
+<p>Both versions are kept synchronized, with code examples remaining in English for consistency.</p>
+<h2 id="documentation-structure">
   
   
-    <a href="#options" class="anchor-heading" aria-labelledby="options"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Options
+    <a href="#documentation-structure" class="anchor-heading" aria-labelledby="documentation-structure"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Documentation Structure
+  
+  
+</h2>
+    
+<h3 id="getting-started">
+  
+  
+    <a href="#getting-started" class="anchor-heading" aria-labelledby="getting-started"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Getting Started
   
   
 </h3>
     
 
-<div class="table-wrapper"><table>
-  <thead>
-    <tr>
-      <th>Paramètre</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">storage</code></td>
-      <td>Instance de storage (FileStorage par défaut)</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">limitmb</code></td>
-      <td>Taille maximum des segments (MiB)</td>
-    </tr>
-  </tbody>
-</table></div>
-
-<p><strong>Exemple:</strong></p>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh</span> <span class="kn">import</span> <span class="n">index</span>
-
-<span class="n">ix</span> <span class="o">=</span> <span class="n">index</span><span class="p">.</span><span class="nf">create_in</span><span class="p">(</span><span class="sh">"</span><span class="s">indexdir</span><span class="sh">"</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-<span class="c1"># Utilise FileBackend implicitement
-</span></code></pre></div></div>
-<h2 id="sqlitebackend">
+<ul>
+  <li><strong><a href="/en/guides/installation/">Installation</a></strong> — Setup instructions and configuration</li>
+  <li><strong><a href="/en/quickstart/">Quick Start</a></strong> — 5-minute tutorial to create your first index</li>
+  <li><strong><a href="/en/guides/core-concepts/">Core Concepts</a></strong> — Understanding schemas, fields, and search</li>
+</ul>
+<h3 id="user-guides">
   
   
-    <a href="#sqlitebackend" class="anchor-heading" aria-labelledby="sqlitebackend"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> SQLiteBackend
-  
-  
-</h2>
-    
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">backends</span><span class="p">.</span><span class="n">sqlite</span><span class="p">.</span><span class="n">SQLiteBackend</span>
-</code></pre></div></div>
-
-<p>Stocke l’index entier dans une base de données SQLite.</p>
-<h3 id="options-1">
-  
-  
-    <a href="#options-1" class="anchor-heading" aria-labelledby="options-1"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Options
+    <a href="#user-guides" class="anchor-heading" aria-labelledby="user-guides"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> User Guides
   
   
 </h3>
     
 
-<div class="table-wrapper"><table>
-  <thead>
-    <tr>
-      <th>Paramètre</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">storage</code></td>
-      <td><code class="language-plaintext highlighter-rouge">SQLiteStorage(path)</code></td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">writethrough</code></td>
-      <td>Écriture synchrone</td>
-    </tr>
-  </tbody>
-</table></div>
-
-<p><strong>Exemple:</strong></p>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.backends.sqlite</span> <span class="kn">import</span> <span class="n">SQLiteStorage</span><span class="p">,</span> <span class="n">SQLiteBackend</span>
-
-<span class="n">storage</span> <span class="o">=</span> <span class="nc">SQLiteStorage</span><span class="p">(</span><span class="sh">"</span><span class="s">mon_index.db</span><span class="sh">"</span><span class="p">)</span>
-<span class="n">backend</span> <span class="o">=</span> <span class="nc">SQLiteBackend</span><span class="p">(</span><span class="n">storage</span><span class="o">=</span><span class="n">storage</span><span class="p">)</span>
-
-<span class="n">ix</span> <span class="o">=</span> <span class="n">backend</span><span class="p">.</span><span class="nf">create_index</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-</code></pre></div></div>
-<h2 id="memorybackend">
+<ul>
+  <li><strong><a href="/en/guides/indexing/">Indexing</a></strong> — Adding, updating, and deleting documents</li>
+  <li><strong><a href="/en/guides/searching/">Searching</a></strong> — Query parsing, highlighting, and facets</li>
+  <li><strong><a href="/en/guides/schema/">Schema Design</a></strong> — Field types, storage, and indexing options</li>
+  <li><strong><a href="/en/guides/query/">Query Language</a></strong> — Lucene-like query syntax</li>
+  <li><strong><a href="/en/guides/middleware/">Middleware</a></strong> — Pipeline hooks and custom middleware</li>
+  <li><strong><a href="/en/guides/backends/">Backends</a></strong> — File, SQLite, and memory storage</li>
+  <li><strong><a href="/en/guides/plugins/">Plugins</a></strong> — Extending Whoosh-NG with plugins</li>
+  <li><strong><a href="/en/guides/autocomplete/">Autocomplete</a></strong> — Autocomplete providers</li>
+  <li><strong><a href="/en/guides/vector/">Vector Search</a></strong> — NumPy, HNSW, and Faiss integration</li>
+  <li><strong><a href="/en/guides/monitoring/">Monitoring</a></strong> — Metrics and observability</li>
+  <li><strong><a href="/en/guides/migration/">Migration</a></strong> — Migrating from classic Whoosh</li>
+</ul>
+<h3 id="api-reference">
   
   
-    <a href="#memorybackend" class="anchor-heading" aria-labelledby="memorybackend"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> MemoryBackend
-  
-  
-</h2>
-    
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">backends</span><span class="p">.</span><span class="n">memory</span><span class="p">.</span><span class="n">MemoryBackend</span>
-</code></pre></div></div>
-
-<p>Backend en mémoire (tests uniquement, données perdues au redémarrage).</p>
-<h2 id="classes-storage">
-  
-  
-    <a href="#classes-storage" class="anchor-heading" aria-labelledby="classes-storage"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Classes Storage
-  
-  
-</h2>
-    
-<h3 id="filestorage">
-  
-  
-    <a href="#filestorage" class="anchor-heading" aria-labelledby="filestorage"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> FileStorage
+    <a href="#api-reference" class="anchor-heading" aria-labelledby="api-reference"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> API Reference
   
   
 </h3>
     
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">store</span><span class="p">.</span><span class="n">FileStorage</span>
-</code></pre></div></div>
-
-<p>Gère les fichiers sur disque.</p>
-<h3 id="sqlitestorage">
+<ul>
+  <li><strong><a href="/en/api/overview/">API Overview</a></strong> — Complete module reference</li>
+  <li><strong><a href="/en/api/core/">Core API</a></strong> — Index creation and management</li>
+  <li><strong><a href="/en/api/fields/">Fields</a></strong> — Schema and field type definitions</li>
+  <li><strong><a href="/en/api/writing/">Writing API</a></strong> — IndexWriter interface</li>
+  <li><strong><a href="/en/api/searching/">Searching API</a></strong> — Searcher and Results</li>
+  <li><strong><a href="/en/api/query/">Query API</a></strong> — Query classes and parsers</li>
+  <li><strong><a href="/en/api/events/">Events</a></strong> — Event bus system</li>
+  <li><strong><a href="/en/api/middleware/">Middleware API</a></strong> — Middleware pipeline</li>
+  <li><strong><a href="/en/api/plugins/">Plugins API</a></strong> — Plugin system and registry</li>
+  <li><strong><a href="/en/api/backends/">Backends API</a></strong> — Storage backend abstractions</li>
+  <li><strong><a href="/en/api/modern/">Modern API</a></strong> — Modern extensions</li>
+</ul>
+<h3 id="examples">
   
   
-    <a href="#sqlitestorage" class="anchor-heading" aria-labelledby="sqlitestorage"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> SQLiteStorage
+    <a href="#examples" class="anchor-heading" aria-labelledby="examples"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Examples
   
   
 </h3>
     
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">store</span><span class="p">.</span><span class="nc">SQLiteStorage</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>Gère le stockage SQLite.</p>
-<h2 id="providerregistry">
+<ul>
+  <li><strong><a href="/en/examples/basic-indexing/">Basic Indexing</a></strong> — Document indexing examples</li>
+  <li><strong><a href="/en/examples/search/">Search Examples</a></strong> — Querying and retrieving results</li>
+  <li><strong><a href="/en/examples/fastapi/">FastAPI Integration</a></strong> — REST API with FastAPI</li>
+  <li><strong><a href="/en/examples/middleware/">Middleware Examples</a></strong> — Custom middleware patterns</li>
+  <li><strong><a href="/en/examples/plugin-dev/">Plugin Development</a></strong> — Building plugins</li>
+</ul>
+<h2 id="quick-overview">
   
   
-    <a href="#providerregistry" class="anchor-heading" aria-labelledby="providerregistry"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> ProviderRegistry
+    <a href="#quick-overview" class="anchor-heading" aria-labelledby="quick-overview"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Quick Overview
   
   
 </h2>
     
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">registry</span><span class="p">.</span><span class="n">ProviderRegistry</span>
-</code></pre></div></div>
+<p>Whoosh-NG combines classic Whoosh’s pure-Python full-text search with modern features:</p>
 
-<p>Registre pour les providers de stockage:</p>
+<ul>
+  <li><strong>Pure Python</strong> — No native dependencies, works anywhere Python runs</li>
+  <li><strong>Embedded search engine</strong> — No separate server required</li>
+  <li><strong>Plugin architecture</strong> — Extensible with vector search, autocomplete, and more</li>
+  <li><strong>Middleware pipeline</strong> — Cross-cutting concerns like metrics, caching, encryption</li>
+  <li><strong>Vector search support</strong> — NumPy, HNSW, and Faiss integrations</li>
+  <li><strong>Async support</strong> — Optional async/await support via extras</li>
+</ul>
+<h2 id="quick-links">
+  
+  
+    <a href="#quick-links" class="anchor-heading" aria-labelledby="quick-links"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Quick Links
+  
+  
+</h2>
+    
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.registry</span> <span class="kn">import</span> <span class="n">ProviderRegistry</span>
+<ul>
+  <li><strong>Project Repository</strong>: <a href="https://github.com/dorel14/whoosh-ng">GitHub - whoosh-ng</a></li>
+  <li><strong>PyPI Package</strong>: <a href="https://pypi.org/project/whoosh-ng/">whoosh-ng</a></li>
+  <li><strong>Issue Tracker</strong>: <a href="https://github.com/dorel14/whoosh-ng/issues">GitHub Issues</a></li>
+</ul>
+<h2 id="contributing">
+  
+  
+    <a href="#contributing" class="anchor-heading" aria-labelledby="contributing"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Contributing
+  
+  
+</h2>
+    
 
-<span class="n">ProviderRegistry</span><span class="p">.</span><span class="nf">register</span><span class="p">(</span><span class="sh">"</span><span class="s">sqlite</span><span class="sh">"</span><span class="p">,</span> <span class="nc">SQLiteBackend</span><span class="p">(),</span> <span class="sh">"</span><span class="s">mon_app</span><span class="sh">"</span><span class="p">)</span>
-</code></pre></div></div>
+<p>Contributions are welcome! Please read our contributing guide for details on how to submit pull requests, add features, or report bugs.</p>
+<h2 id="license">
+  
+  
+    <a href="#license" class="anchor-heading" aria-labelledby="license"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> License
+  
+  
+</h2>
+    
+
+<p>This project is licensed under the MIT License.</p>
 
           
 

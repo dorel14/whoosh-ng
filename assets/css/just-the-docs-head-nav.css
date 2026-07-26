@@ -16,6 +16,12 @@
     .site-nav ul li a {
       background-image: none;
     }
+    .site-nav > ul.nav-category-list > li > button svg {
+      transform: rotate(-90deg);
+    }
+    .site-nav > ul.nav-category-list > li.nav-list-item > ul.nav-list {
+      display: block;
+    }
 
   </style>
 
@@ -137,6 +143,43 @@
   
   
     <ul class="nav-list"><li class="nav-list-item"><a href="/whoosh-ng/" class="nav-list-link">Whoosh-NG Documentation</a></li></ul>
+  
+    
+    
+      
+      
+      
+      
+        
+          
+            <ul class="nav-list nav-category-list">
+              <li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="English collection" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg>
+                </button><div class="nav-category">English</div>
+                <ul class="nav-list"><li class="nav-list-item"><a href="/whoosh-ng/en/" class="nav-list-link">Whoosh-NG Documentation</a></li><li class="nav-list-item"><a href="/whoosh-ng/en/quickstart/" class="nav-list-link">Quickstart</a></li><li class="nav-list-item"><a href="/whoosh-ng/en/middleware/" class="nav-list-link">Middleware Architecture</a></li><li class="nav-list-item"><a href="/whoosh-ng/en/guides/translation-status/" class="nav-list-link">Translation Status</a></li></ul>
+              </li>
+            </ul>
+          
+        
+      
+    
+      
+      
+      
+      
+        
+          
+            <ul class="nav-list nav-category-list">
+              <li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="Français collection" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg>
+                </button><div class="nav-category">Français</div>
+                <ul class="nav-list"><li class="nav-list-item"><a href="/whoosh-ng/fr/index/" class="nav-list-link">Documentation Whoosh-NG</a></li><li class="nav-list-item"><a href="/whoosh-ng/fr/quickstart/" class="nav-list-link">Démarrage rapide</a></li></ul>
+              </li>
+            </ul>
+          
+        
+      
+    
   
 </nav>
 
