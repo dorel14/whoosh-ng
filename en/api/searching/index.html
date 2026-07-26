@@ -1,0 +1,622 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+  <link rel="stylesheet" href="/whoosh-ng/assets/css/just-the-docs-default.css">
+
+  <link rel="stylesheet" href="/whoosh-ng/assets/css/just-the-docs-head-nav.css" id="jtd-head-nav-stylesheet">
+
+  <style id="jtd-nav-activation">
+  
+    .site-nav ul li a {
+      background-image: none;
+    }
+
+  </style>
+
+  
+
+  
+    <script src="/whoosh-ng/assets/js/vendor/lunr.min.js"></script>
+  
+
+  <script src="/whoosh-ng/assets/js/just-the-docs.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="icon" href="/whoosh-ng/assets/favico.ico" type="image/x-icon">
+
+
+
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Searching API | Whoosh-NG Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Searching API" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Searching API" />
+<meta name="twitter:description" property="og:description" content="Searching API" />
+<meta property="og:site_name" content="Whoosh-NG Documentation" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-26T15:39:15+00:00" />
+<meta property="article:modified_time" content="2026-07-26T15:39:15+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Searching API" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-26T15:39:15+00:00","datePublished":"2026-07-26T15:39:15+00:00","description":"Searching API","headline":"Searching API","mainEntityOfPage":{"@type":"WebPage","@id":"/whoosh-ng/en/api/searching/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/whoosh-ng/assets/logo.png"}},"url":"/whoosh-ng/en/api/searching/"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+  
+
+</head>
+
+<body>
+  <a class="skip-to-main" href="#main-content">Skip to main content</a>
+  <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+  <symbol id="svg-link" viewBox="0 0 24 24">
+  <title>Link</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+  </svg>
+</symbol>
+
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+  <title>Menu</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu">
+    <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+  </svg>
+</symbol>
+
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+  <title>Expand</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+</symbol>
+
+  <!-- Feather. MIT License: https://github.com/feathericons/feather/blob/master/LICENSE -->
+<symbol id="svg-external-link" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link">
+  <title id="svg-external-link-title">(external link)</title>
+  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
+</symbol>
+
+  
+    <symbol id="svg-doc" viewBox="0 0 24 24">
+  <title>Document</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file">
+    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline>
+  </svg>
+</symbol>
+
+    <symbol id="svg-search" viewBox="0 0 24 24">
+  <title>Search</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+</symbol>
+
+  
+  
+    <!-- Bootstrap Icons. MIT License: https://github.com/twbs/icons/blob/main/LICENSE.md -->
+<symbol id="svg-copy" viewBox="0 0 16 16">
+  <title>Copy</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+  </svg>
+</symbol>
+<symbol id="svg-copied" viewBox="0 0 16 16">
+  <title>Copied</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-check-fill" viewBox="0 0 16 16">
+    <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3Zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3Z"/>
+    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5v-1Zm6.854 7.354-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708Z"/>
+  </svg>
+</symbol>
+
+  
+</svg>
+
+  
+    <header class="side-bar">
+  <div class="site-header">
+    <a href="/whoosh-ng/" class="site-title lh-tight">
+  <div class="site-logo" role="img" aria-label="Whoosh-NG Documentation"></div>
+
+</a>
+    <button id="menu-button" class="site-button btn-reset" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><use xlink:href="#svg-menu"></use></svg>
+    </button>
+  </div>
+
+  <nav aria-label="Main" id="site-nav" class="site-nav">
+  
+  
+    <ul class="nav-list"><li class="nav-list-item"><a href="/whoosh-ng/" class="nav-list-link">Whoosh-NG Documentation</a></li></ul>
+  
+</nav>
+
+
+<div class="d-md-block d-none site-footer">
+  
+  
+    This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
+  
+  </div>
+</header>
+
+  
+  <div class="main" id="top">
+    <div id="main-header" class="main-header">
+  
+    
+
+<div class="search" role="search">
+  <div class="search-input-wrap">
+    <input type="text" id="search-input" class="search-input" tabindex="0" placeholder="Search Whoosh-NG Documentation" autocomplete="off">
+    <label for="search-input" class="search-label">
+      <span class="sr-only">Search Whoosh-NG Documentation</span>
+      <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><use xlink:href="#svg-search"></use></svg>
+    </label>
+  </div>
+  <div id="search-results" class="search-results"></div>
+</div>
+
+  
+  
+  
+</div>
+
+    <div class="main-content-wrap">
+      <nav aria-label="Breadcrumb" class="breadcrumb-nav">
+  <ol class="breadcrumb-nav-list">
+    <li class="breadcrumb-nav-list-item"><span>Searching API</span></li>
+  </ol>
+</nav>
+
+
+      <div id="main-content" class="main-content">
+        <main>
+          
+            <h1 id="searching-api">
+  
+  
+    <a href="#searching-api" class="anchor-heading" aria-labelledby="searching-api"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Searching API
+  
+  
+</h1>
+    
+
+<p>Execute queries and retrieve results.</p>
+<h2 id="searcher">
+  
+  
+    <a href="#searcher" class="anchor-heading" aria-labelledby="searcher"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Searcher
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">searching</span><span class="p">.</span><span class="n">Searcher</span>
+</code></pre></div></div>
+
+<p>The Searcher is the primary interface for reading from the index.</p>
+<h3 id="methods">
+  
+  
+    <a href="#methods" class="anchor-heading" aria-labelledby="methods"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Methods
+  
+  
+</h3>
+    
+<h4 id="search">
+  
+  
+    <a href="#search" class="anchor-heading" aria-labelledby="search"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">search()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">results</span> <span class="o">=</span> <span class="n">searcher</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Execute a query and return Results.</p>
+
+<p><strong>Args:</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">query</code>: The query to run.</li>
+  <li><code class="language-plaintext highlighter-rouge">limit (int)</code>: Maximum number of results. Use <code class="language-plaintext highlighter-rouge">None</code> for all results.</li>
+</ul>
+
+<p><strong>Returns:</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Results</code>: A Results object.</li>
+</ul><hr />
+<h4 id="search_page">
+  
+  
+    <a href="#search_page" class="anchor-heading" aria-labelledby="search_page"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">search_page()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">results</span> <span class="o">=</span> <span class="n">searcher</span><span class="p">.</span><span class="nf">search_page</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">pagenum</span><span class="p">,</span> <span class="n">pagelen</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Get a page of results.</p><hr />
+<h4 id="search_with_collector">
+  
+  
+    <a href="#search_with_collector" class="anchor-heading" aria-labelledby="search_with_collector"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">search_with_collector()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">searcher</span><span class="p">.</span><span class="nf">search_with_collector</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">collector</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Advanced search with custom collector.</p><hr />
+<h4 id="find">
+  
+  
+    <a href="#find" class="anchor-heading" aria-labelledby="find"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">find()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">results</span> <span class="o">=</span> <span class="n">searcher</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="sh">"</span><span class="s">field</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">text</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Convenience method to search a single field.</p><hr />
+<h4 id="documents">
+  
+  
+    <a href="#documents" class="anchor-heading" aria-labelledby="documents"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">documents()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">docs</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="n">searcher</span><span class="p">.</span><span class="nf">documents</span><span class="p">(</span><span class="n">fieldname</span><span class="o">=</span><span class="n">value</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>Get stored documents matching a term.</p><hr />
+<h4 id="document">
+  
+  
+    <a href="#document" class="anchor-heading" aria-labelledby="document"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">document()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">doc</span> <span class="o">=</span> <span class="n">searcher</span><span class="p">.</span><span class="nf">document</span><span class="p">(</span><span class="n">fieldname</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Get a single stored document.</p><hr />
+<h4 id="lexicon">
+  
+  
+    <a href="#lexicon" class="anchor-heading" aria-labelledby="lexicon"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">lexicon()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">terms</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="n">searcher</span><span class="p">.</span><span class="nf">lexicon</span><span class="p">(</span><span class="sh">"</span><span class="s">fieldname</span><span class="sh">"</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>List all terms in a field.</p><hr />
+<h4 id="all_stored_fields">
+  
+  
+    <a href="#all_stored_fields" class="anchor-heading" aria-labelledby="all_stored_fields"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">all_stored_fields()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">fields</span> <span class="ow">in</span> <span class="n">searcher</span><span class="p">.</span><span class="nf">all_stored_fields</span><span class="p">():</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Iterate over all stored fields.</p><hr />
+<h4 id="all_features">
+  
+  
+    <a href="#all_features" class="anchor-heading" aria-labelledby="all_features"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">all_features()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">searcher</span><span class="p">.</span><span class="nf">all_features</span><span class="p">()</span> <span class="k">as</span> <span class="n">features</span><span class="p">:</span>
+    <span class="n">facets</span> <span class="o">=</span> <span class="n">features</span><span class="p">.</span><span class="nf">facet</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Get facet counts across all documents.</p>
+<h2 id="results">
+  
+  
+    <a href="#results" class="anchor-heading" aria-labelledby="results"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Results
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">searching</span><span class="p">.</span><span class="n">Results</span>
+</code></pre></div></div>
+
+<p>List-like container for matched documents.</p>
+<h3 id="methods-1">
+  
+  
+    <a href="#methods-1" class="anchor-heading" aria-labelledby="methods-1"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Methods
+  
+  
+</h3>
+    
+<h4 id="__len__">
+  
+  
+    <a href="#__len__" class="anchor-heading" aria-labelledby="__len__"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">__len__()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">total</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Total matching documents (may recount).</p>
+<h4 id="scored_length">
+  
+  
+    <a href="#scored_length" class="anchor-heading" aria-labelledby="scored_length"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">scored_length()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">scored</span> <span class="o">=</span> <span class="n">results</span><span class="p">.</span><span class="nf">scored_length</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Number of scored/sorted documents in this results object.</p>
+<h4 id="__getitem__">
+  
+  
+    <a href="#__getitem__" class="anchor-heading" aria-labelledby="__getitem__"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">__getitem__()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">hit</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">hits</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Get a hit by index or slice.</p>
+<h4 id="has_matched_terms">
+  
+  
+    <a href="#has_matched_terms" class="anchor-heading" aria-labelledby="has_matched_terms"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">has_matched_terms()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">results</span><span class="p">.</span><span class="nf">has_matched_terms</span><span class="p">():</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">results</span><span class="p">.</span><span class="nf">matched_terms</span><span class="p">())</span>
+</code></pre></div></div>
+
+<p>Check if matched terms were collected.</p>
+<h4 id="iter_matched_terms">
+  
+  
+    <a href="#iter_matched_terms" class="anchor-heading" aria-labelledby="iter_matched_terms"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">iter_matched_terms()</code>
+  
+  
+</h4>
+    
+
+<p>Iterate over (docnum, term) pairs.</p>
+<h4 id="upgrade">
+  
+  
+    <a href="#upgrade" class="anchor-heading" aria-labelledby="upgrade"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">upgrade()</code>
+  
+  
+</h4>
+    
+
+<p>Move docs from another Results to top.</p>
+<h4 id="extend">
+  
+  
+    <a href="#extend" class="anchor-heading" aria-labelledby="extend"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">extend()</code>
+  
+  
+</h4>
+    
+
+<p>Append docs from another Results.</p>
+<h4 id="upgrade_and_extend">
+  
+  
+    <a href="#upgrade_and_extend" class="anchor-heading" aria-labelledby="upgrade_and_extend"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">upgrade_and_extend()</code>
+  
+  
+</h4>
+    
+
+<p>Upgrade docs and append rest.</p>
+<h4 id="filtered_count">
+  
+  
+    <a href="#filtered_count" class="anchor-heading" aria-labelledby="filtered_count"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">filtered_count</code>
+  
+  
+</h4>
+    
+
+<p>Number of documents filtered out.</p>
+<h4 id="collapsed_counts">
+  
+  
+    <a href="#collapsed_counts" class="anchor-heading" aria-labelledby="collapsed_counts"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">collapsed_counts</code>
+  
+  
+</h4>
+    
+
+<p>Dict of collapse keys to filtered counts.</p>
+<h2 id="hit">
+  
+  
+    <a href="#hit" class="anchor-heading" aria-labelledby="hit"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Hit
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">whoosh</span><span class="p">.</span><span class="n">searching</span><span class="p">.</span><span class="n">Hit</span>
+</code></pre></div></div>
+
+<p>A single matched document.</p>
+<h3 id="attributes">
+  
+  
+    <a href="#attributes" class="anchor-heading" aria-labelledby="attributes"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Attributes
+  
+  
+</h3>
+    
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">hit["fieldname"]</code>: Stored field value</li>
+  <li><code class="language-plaintext highlighter-rouge">hit.score</code>: Relevance score</li>
+  <li><code class="language-plaintext highlighter-rouge">hit.docnum</code>: Internal document number</li>
+</ul>
+<h3 id="methods-2">
+  
+  
+    <a href="#methods-2" class="anchor-heading" aria-labelledby="methods-2"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Methods
+  
+  
+</h3>
+    
+<h4 id="highlights">
+  
+  
+    <a href="#highlights" class="anchor-heading" aria-labelledby="highlights"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">highlights()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">snippets</span> <span class="o">=</span> <span class="n">hit</span><span class="p">.</span><span class="nf">highlights</span><span class="p">(</span><span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Get highlighted snippets.</p>
+<h4 id="matched_terms">
+  
+  
+    <a href="#matched_terms" class="anchor-heading" aria-labelledby="matched_terms"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> <code class="language-plaintext highlighter-rouge">matched_terms()</code>
+  
+  
+</h4>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">terms</span> <span class="o">=</span> <span class="n">hit</span><span class="p">.</span><span class="nf">matched_terms</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Get terms that matched (if <code class="language-plaintext highlighter-rouge">terms=True</code>).</p>
+<h2 id="highlight">
+  
+  
+    <a href="#highlight" class="anchor-heading" aria-labelledby="highlight"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Highlight
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.highlight</span> <span class="kn">import</span> <span class="n">highlight</span><span class="p">,</span> <span class="n">Fragment</span>
+
+<span class="n">snippets</span> <span class="o">=</span> <span class="n">hit</span><span class="p">.</span><span class="nf">highlights</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">top</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">fragmenter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">formatter</span><span class="o">=</span><span class="bp">None</span>
+<span class="p">)</span>
+</code></pre></div></div>
+<h2 id="collectors">
+  
+  
+    <a href="#collectors" class="anchor-heading" aria-labelledby="collectors"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Collectors
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.collectors</span> <span class="kn">import</span> <span class="n">Collector</span><span class="p">,</span> <span class="n">FacetCollector</span><span class="p">,</span> <span class="n">TimeLimitCollector</span>
+</code></pre></div></div>
+<h2 id="sorting-and-facets">
+  
+  
+    <a href="#sorting-and-facets" class="anchor-heading" aria-labelledby="sorting-and-facets"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Sorting and Facets
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh</span> <span class="kn">import</span> <span class="n">sorting</span>
+
+<span class="n">facet</span> <span class="o">=</span> <span class="n">sorting</span><span class="p">.</span><span class="nc">FieldFacet</span><span class="p">(</span><span class="sh">"</span><span class="s">category</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">searcher</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">sortedby</span><span class="o">=</span><span class="sh">"</span><span class="s">date</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+          
+
+          
+            
+          
+        </main>
+        
+<hr>
+<footer>
+  
+
+  
+
+  <div class="d-md-none mt-4 fs-2">
+    
+    
+      This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
+    
+  </div>
+</footer>
+
+      </div>
+    </div>
+    
+      
+
+<div class="search-overlay"></div>
+
+    
+  </div>
+
+  
+</body>
+</html>
+

@@ -1,0 +1,519 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+  <link rel="stylesheet" href="/whoosh-ng/assets/css/just-the-docs-default.css">
+
+  <link rel="stylesheet" href="/whoosh-ng/assets/css/just-the-docs-head-nav.css" id="jtd-head-nav-stylesheet">
+
+  <style id="jtd-nav-activation">
+  
+    .site-nav ul li a {
+      background-image: none;
+    }
+
+  </style>
+
+  
+
+  
+    <script src="/whoosh-ng/assets/js/vendor/lunr.min.js"></script>
+  
+
+  <script src="/whoosh-ng/assets/js/just-the-docs.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="icon" href="/whoosh-ng/assets/favico.ico" type="image/x-icon">
+
+
+
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Indexing | Whoosh-NG Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Indexing" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Indexing" />
+<meta name="twitter:description" property="og:description" content="Indexing" />
+<meta property="og:site_name" content="Whoosh-NG Documentation" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-26T15:39:15+00:00" />
+<meta property="article:modified_time" content="2026-07-26T15:39:15+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Indexing" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-26T15:39:15+00:00","datePublished":"2026-07-26T15:39:15+00:00","description":"Indexing","headline":"Indexing","mainEntityOfPage":{"@type":"WebPage","@id":"/whoosh-ng/en/guides/indexing/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/whoosh-ng/assets/logo.png"}},"url":"/whoosh-ng/en/guides/indexing/"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+  
+
+</head>
+
+<body>
+  <a class="skip-to-main" href="#main-content">Skip to main content</a>
+  <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+  <symbol id="svg-link" viewBox="0 0 24 24">
+  <title>Link</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+  </svg>
+</symbol>
+
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+  <title>Menu</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu">
+    <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+  </svg>
+</symbol>
+
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+  <title>Expand</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+</symbol>
+
+  <!-- Feather. MIT License: https://github.com/feathericons/feather/blob/master/LICENSE -->
+<symbol id="svg-external-link" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link">
+  <title id="svg-external-link-title">(external link)</title>
+  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
+</symbol>
+
+  
+    <symbol id="svg-doc" viewBox="0 0 24 24">
+  <title>Document</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file">
+    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline>
+  </svg>
+</symbol>
+
+    <symbol id="svg-search" viewBox="0 0 24 24">
+  <title>Search</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+</symbol>
+
+  
+  
+    <!-- Bootstrap Icons. MIT License: https://github.com/twbs/icons/blob/main/LICENSE.md -->
+<symbol id="svg-copy" viewBox="0 0 16 16">
+  <title>Copy</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+  </svg>
+</symbol>
+<symbol id="svg-copied" viewBox="0 0 16 16">
+  <title>Copied</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-check-fill" viewBox="0 0 16 16">
+    <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3Zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3Z"/>
+    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5v-1Zm6.854 7.354-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708Z"/>
+  </svg>
+</symbol>
+
+  
+</svg>
+
+  
+    <header class="side-bar">
+  <div class="site-header">
+    <a href="/whoosh-ng/" class="site-title lh-tight">
+  <div class="site-logo" role="img" aria-label="Whoosh-NG Documentation"></div>
+
+</a>
+    <button id="menu-button" class="site-button btn-reset" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><use xlink:href="#svg-menu"></use></svg>
+    </button>
+  </div>
+
+  <nav aria-label="Main" id="site-nav" class="site-nav">
+  
+  
+    <ul class="nav-list"><li class="nav-list-item"><a href="/whoosh-ng/" class="nav-list-link">Whoosh-NG Documentation</a></li></ul>
+  
+</nav>
+
+
+<div class="d-md-block d-none site-footer">
+  
+  
+    This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
+  
+  </div>
+</header>
+
+  
+  <div class="main" id="top">
+    <div id="main-header" class="main-header">
+  
+    
+
+<div class="search" role="search">
+  <div class="search-input-wrap">
+    <input type="text" id="search-input" class="search-input" tabindex="0" placeholder="Search Whoosh-NG Documentation" autocomplete="off">
+    <label for="search-input" class="search-label">
+      <span class="sr-only">Search Whoosh-NG Documentation</span>
+      <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><use xlink:href="#svg-search"></use></svg>
+    </label>
+  </div>
+  <div id="search-results" class="search-results"></div>
+</div>
+
+  
+  
+  
+</div>
+
+    <div class="main-content-wrap">
+      <nav aria-label="Breadcrumb" class="breadcrumb-nav">
+  <ol class="breadcrumb-nav-list">
+    <li class="breadcrumb-nav-list-item"><span>Indexing</span></li>
+  </ol>
+</nav>
+
+
+      <div id="main-content" class="main-content">
+        <main>
+          
+            <h1 id="indexing">
+  
+  
+    <a href="#indexing" class="anchor-heading" aria-labelledby="indexing"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Indexing
+  
+  
+</h1>
+    
+
+<p>This guide covers adding, updating, and deleting documents in your Whoosh-NG index.</p>
+<h2 id="opening-a-writer">
+  
+  
+    <a href="#opening-a-writer" class="anchor-heading" aria-labelledby="opening-a-writer"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Opening a Writer
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh</span> <span class="kn">import</span> <span class="n">index</span>
+
+<span class="n">ix</span> <span class="o">=</span> <span class="n">index</span><span class="p">.</span><span class="nf">open_dir</span><span class="p">(</span><span class="sh">"</span><span class="s">indexdir</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Basic writer
+</span><span class="n">writer</span> <span class="o">=</span> <span class="n">ix</span><span class="p">.</span><span class="nf">writer</span><span class="p">()</span>
+
+<span class="c1"># Writer with custom options
+</span><span class="n">writer</span> <span class="o">=</span> <span class="n">ix</span><span class="p">.</span><span class="nf">writer</span><span class="p">(</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>      <span class="c1"># Lock acquisition timeout (seconds)
+</span>    <span class="n">delay</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>         <span class="c1"># Delay between lock retries (seconds)
+</span>    <span class="n">limitmb</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>       <span class="c1"># Posting pool run size (MiB)
+</span>    <span class="n">compound</span><span class="o">=</span><span class="bp">True</span>      <span class="c1"># Use compound files
+</span><span class="p">)</span>
+</code></pre></div></div>
+<h2 id="adding-documents">
+  
+  
+    <a href="#adding-documents" class="anchor-heading" aria-labelledby="adding-documents"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Adding Documents
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">ix</span><span class="p">.</span><span class="nf">writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+    <span class="n">writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">First document</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Hello world</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/doc1</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">python</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">search</span><span class="sh">"</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Second document</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Goodbye world</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/doc2</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">python</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">tutorial</span><span class="sh">"</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="c1"># commit() is called automatically on exit
+</span></code></pre></div></div>
+<h3 id="multi-value-fields">
+  
+  
+    <a href="#multi-value-fields" class="anchor-heading" aria-labelledby="multi-value-fields"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Multi-value Fields
+  
+  
+</h3>
+    
+
+<p>Pass lists to add multiple values for multi-valued fields:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Document with multiple tags</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Content here</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">python</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">whoosh</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">search</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">tutorial</span><span class="sh">"</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+<h3 id="stored-vs-indexed-values">
+  
+  
+    <a href="#stored-vs-indexed-values" class="anchor-heading" aria-labelledby="stored-vs-indexed-values"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Stored vs Indexed Values
+  
+  
+</h3>
+    
+
+<p>For fields that are both indexed and stored, you can store a different value:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Title to be indexed</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">_stored_title</span><span class="o">=</span><span class="sh">"</span><span class="s">Display title to show in results</span><span class="sh">"</span>
+<span class="p">)</span>
+</code></pre></div></div>
+<h3 id="field-boosts">
+  
+  
+    <a href="#field-boosts" class="anchor-heading" aria-labelledby="field-boosts"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Field Boosts
+  
+  
+</h3>
+    
+
+<p>Boost individual fields at document level:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Important title</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">_title_boost</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>   <span class="c1"># Double weight for title terms
+</span>    <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Body content</span><span class="sh">"</span>
+<span class="p">)</span>
+</code></pre></div></div>
+<h2 id="updating-documents">
+  
+  
+    <a href="#updating-documents" class="anchor-heading" aria-labelledby="updating-documents"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Updating Documents
+  
+  
+</h2>
+    
+
+<p>Use <code class="language-plaintext highlighter-rouge">update_document</code> to replace documents with matching unique fields:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">schema</span> <span class="o">=</span> <span class="nc">Schema</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="nc">ID</span><span class="p">(</span><span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stored</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="n">content</span><span class="o">=</span><span class="n">TEXT</span><span class="p">)</span>
+<span class="n">ix</span> <span class="o">=</span> <span class="n">index</span><span class="p">.</span><span class="nf">create_in</span><span class="p">(</span><span class="sh">"</span><span class="s">indexdir</span><span class="sh">"</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">ix</span><span class="p">.</span><span class="nf">writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+    <span class="n">writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/doc1</span><span class="sh">"</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Original content</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">ix</span><span class="p">.</span><span class="nf">writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+    <span class="c1"># Replaces any document with path="/doc1"
+</span>    <span class="n">writer</span><span class="p">.</span><span class="nf">update_document</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/doc1</span><span class="sh">"</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Updated content</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+</code></pre></div></div>
+<h2 id="deleting-documents">
+  
+  
+    <a href="#deleting-documents" class="anchor-heading" aria-labelledby="deleting-documents"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Deleting Documents
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Delete by document number
+</span><span class="n">writer</span><span class="p">.</span><span class="nf">delete_document</span><span class="p">(</span><span class="n">docnum</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Delete by term in a field
+</span><span class="n">writer</span><span class="p">.</span><span class="nf">delete_by_term</span><span class="p">(</span><span class="sh">"</span><span class="s">path</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">/doc1</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Delete by query
+</span><span class="kn">from</span> <span class="n">whoosh.query</span> <span class="kn">import</span> <span class="n">Term</span>
+<span class="n">q</span> <span class="o">=</span> <span class="nc">Term</span><span class="p">(</span><span class="sh">"</span><span class="s">tags</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">deprecated</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">writer</span><span class="p">.</span><span class="nf">delete_by_query</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+<span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+</code></pre></div></div>
+<h2 id="commit-and-merge-policies">
+  
+  
+    <a href="#commit-and-merge-policies" class="anchor-heading" aria-labelledby="commit-and-merge-policies"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Commit and Merge Policies
+  
+  
+</h2>
+    
+<h3 id="basic-commit">
+  
+  
+    <a href="#basic-commit" class="anchor-heading" aria-labelledby="basic-commit"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Basic Commit
+  
+  
+</h3>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+</code></pre></div></div>
+<h3 id="optimize-merge-all">
+  
+  
+    <a href="#optimize-merge-all" class="anchor-heading" aria-labelledby="optimize-merge-all"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Optimize (Merge All)
+  
+  
+</h3>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">(</span><span class="n">optimize</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+<h3 id="no-merge">
+  
+  
+    <a href="#no-merge" class="anchor-heading" aria-labelledby="no-merge"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> No Merge
+  
+  
+</h3>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">(</span><span class="n">merge</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+<h3 id="custom-merge-policy">
+  
+  
+    <a href="#custom-merge-policy" class="anchor-heading" aria-labelledby="custom-merge-policy"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Custom Merge Policy
+  
+  
+</h3>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.writing</span> <span class="kn">import</span> <span class="n">NO_MERGE</span><span class="p">,</span> <span class="n">MERGE_SMALL</span><span class="p">,</span> <span class="n">OPTIMIZE</span>
+
+<span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">(</span><span class="n">mergetype</span><span class="o">=</span><span class="n">NO_MERGE</span><span class="p">)</span>
+<span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">(</span><span class="n">mergetype</span><span class="o">=</span><span class="n">MERGE_SMALL</span><span class="p">)</span>
+<span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">(</span><span class="n">mergetype</span><span class="o">=</span><span class="n">OPTIMIZE</span><span class="p">)</span>
+
+<span class="c1"># Custom function
+</span><span class="k">def</span> <span class="nf">my_merge</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">segments</span><span class="p">):</span>
+    <span class="c1"># Custom merge logic
+</span>    <span class="k">return</span> <span class="n">segments</span>
+
+<span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">(</span><span class="n">mergetype</span><span class="o">=</span><span class="n">my_merge</span><span class="p">)</span>
+</code></pre></div></div>
+<h2 id="bufferedwriter">
+  
+  
+    <a href="#bufferedwriter" class="anchor-heading" aria-labelledby="bufferedwriter"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> BufferedWriter
+  
+  
+</h2>
+    
+
+<p>For high-throughput scenarios where documents arrive one at a time:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.writing</span> <span class="kn">import</span> <span class="n">BufferedWriter</span>
+
+<span class="c1"># Buffers documents and commits periodically
+</span><span class="n">buffered</span> <span class="o">=</span> <span class="nc">BufferedWriter</span><span class="p">(</span>
+    <span class="n">ix</span><span class="p">,</span>
+    <span class="n">period</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>    <span class="c1"># Max seconds between commits
+</span>    <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>    <span class="c1"># Max documents per commit
+</span>    <span class="n">writerargs</span><span class="o">=</span><span class="p">{}</span> <span class="c1"># Extra args for underlying writer
+</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">buffered</span><span class="p">:</span>
+    <span class="n">buffered</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Doc 1</span><span class="sh">"</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Content</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">buffered</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Doc 2</span><span class="sh">"</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">More</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># commit() called automatically on close
+</span></code></pre></div></div>
+<h2 id="asyncwriter">
+  
+  
+    <a href="#asyncwriter" class="anchor-heading" aria-labelledby="asyncwriter"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> AsyncWriter
+  
+  
+</h2>
+    
+
+<p>For web applications where multiple processes may write:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.writing</span> <span class="kn">import</span> <span class="n">AsyncWriter</span>
+
+<span class="c1"># Automatically retries on lock contention
+</span><span class="n">async_writer</span> <span class="o">=</span> <span class="nc">AsyncWriter</span><span class="p">(</span><span class="n">ix</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+
+<span class="n">async_writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Async doc</span><span class="sh">"</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Content</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">async_writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+</code></pre></div></div>
+<h2 id="middleware-integration">
+  
+  
+    <a href="#middleware-integration" class="anchor-heading" aria-labelledby="middleware-integration"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Middleware Integration
+  
+  
+</h2>
+    
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.middleware</span> <span class="kn">import</span> <span class="n">MiddlewareChain</span><span class="p">,</span> <span class="n">MetricsMiddleware</span><span class="p">,</span> <span class="n">CacheMiddleware</span>
+<span class="kn">from</span> <span class="n">whoosh.middleware.integration</span> <span class="kn">import</span> <span class="n">apply_middleware_to_writer</span>
+
+<span class="n">chain</span> <span class="o">=</span> <span class="nc">MiddlewareChain</span><span class="p">([</span>
+    <span class="nc">MetricsMiddleware</span><span class="p">(),</span>
+    <span class="nc">CacheMiddleware</span><span class="p">()</span>
+<span class="p">])</span>
+
+<span class="k">with</span> <span class="nf">apply_middleware_to_writer</span><span class="p">(</span><span class="n">ix</span><span class="p">.</span><span class="nf">writer</span><span class="p">(),</span> <span class="n">chain</span><span class="p">.</span><span class="n">middlewares</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+    <span class="n">writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Tracked</span><span class="sh">"</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">Content</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+<h2 id="best-practices">
+  
+  
+    <a href="#best-practices" class="anchor-heading" aria-labelledby="best-practices"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Best Practices
+  
+  
+</h2>
+    
+
+<ol>
+  <li><strong>Use context managers</strong>: <code class="language-plaintext highlighter-rouge">with ix.writer() as w:</code> ensures proper cleanup</li>
+  <li><strong>Batch commits</strong>: Group many documents per commit for better performance</li>
+  <li><strong>Choose merge policy wisely</strong>: <code class="language-plaintext highlighter-rouge">MERGE_SMALL</code> is usually fine; use <code class="language-plaintext highlighter-rouge">NO_MERGE</code> for bulk loads followed by <code class="language-plaintext highlighter-rouge">OPTIMIZE</code></li>
+  <li><strong>Handle locks</strong>: Use <code class="language-plaintext highlighter-rouge">BufferedWriter</code> or <code class="language-plaintext highlighter-rouge">AsyncWriter</code> in multi-process environments</li>
+  <li><strong>Don’t forget to close</strong>: Always call <code class="language-plaintext highlighter-rouge">commit()</code> or <code class="language-plaintext highlighter-rouge">cancel()</code> to release the write lock</li>
+</ol>
+
+          
+
+          
+            
+          
+        </main>
+        
+<hr>
+<footer>
+  
+
+  
+
+  <div class="d-md-none mt-4 fs-2">
+    
+    
+      This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
+    
+  </div>
+</footer>
+
+      </div>
+    </div>
+    
+      
+
+<div class="search-overlay"></div>
+
+    
+  </div>
+
+  
+</body>
+</html>
+

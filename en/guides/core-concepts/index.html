@@ -1,0 +1,503 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+  <link rel="stylesheet" href="/whoosh-ng/assets/css/just-the-docs-default.css">
+
+  <link rel="stylesheet" href="/whoosh-ng/assets/css/just-the-docs-head-nav.css" id="jtd-head-nav-stylesheet">
+
+  <style id="jtd-nav-activation">
+  
+    .site-nav ul li a {
+      background-image: none;
+    }
+
+  </style>
+
+  
+
+  
+    <script src="/whoosh-ng/assets/js/vendor/lunr.min.js"></script>
+  
+
+  <script src="/whoosh-ng/assets/js/just-the-docs.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+
+  <link rel="icon" href="/whoosh-ng/assets/favico.ico" type="image/x-icon">
+
+
+
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Core Concepts | Whoosh-NG Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Core Concepts" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Core Concepts" />
+<meta name="twitter:description" property="og:description" content="Core Concepts" />
+<meta property="og:site_name" content="Whoosh-NG Documentation" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-26T15:39:15+00:00" />
+<meta property="article:modified_time" content="2026-07-26T15:39:15+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Core Concepts" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-26T15:39:15+00:00","datePublished":"2026-07-26T15:39:15+00:00","description":"Core Concepts","headline":"Core Concepts","mainEntityOfPage":{"@type":"WebPage","@id":"/whoosh-ng/en/guides/core-concepts/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/whoosh-ng/assets/logo.png"}},"url":"/whoosh-ng/en/guides/core-concepts/"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+  
+
+</head>
+
+<body>
+  <a class="skip-to-main" href="#main-content">Skip to main content</a>
+  <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+  <symbol id="svg-link" viewBox="0 0 24 24">
+  <title>Link</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+  </svg>
+</symbol>
+
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+  <title>Menu</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu">
+    <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+  </svg>
+</symbol>
+
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+  <title>Expand</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+</symbol>
+
+  <!-- Feather. MIT License: https://github.com/feathericons/feather/blob/master/LICENSE -->
+<symbol id="svg-external-link" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link">
+  <title id="svg-external-link-title">(external link)</title>
+  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
+</symbol>
+
+  
+    <symbol id="svg-doc" viewBox="0 0 24 24">
+  <title>Document</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file">
+    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline>
+  </svg>
+</symbol>
+
+    <symbol id="svg-search" viewBox="0 0 24 24">
+  <title>Search</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+</symbol>
+
+  
+  
+    <!-- Bootstrap Icons. MIT License: https://github.com/twbs/icons/blob/main/LICENSE.md -->
+<symbol id="svg-copy" viewBox="0 0 16 16">
+  <title>Copy</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+  </svg>
+</symbol>
+<symbol id="svg-copied" viewBox="0 0 16 16">
+  <title>Copied</title>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-check-fill" viewBox="0 0 16 16">
+    <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3Zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3Z"/>
+    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5v-1Zm6.854 7.354-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708Z"/>
+  </svg>
+</symbol>
+
+  
+</svg>
+
+  
+    <header class="side-bar">
+  <div class="site-header">
+    <a href="/whoosh-ng/" class="site-title lh-tight">
+  <div class="site-logo" role="img" aria-label="Whoosh-NG Documentation"></div>
+
+</a>
+    <button id="menu-button" class="site-button btn-reset" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><use xlink:href="#svg-menu"></use></svg>
+    </button>
+  </div>
+
+  <nav aria-label="Main" id="site-nav" class="site-nav">
+  
+  
+    <ul class="nav-list"><li class="nav-list-item"><a href="/whoosh-ng/" class="nav-list-link">Whoosh-NG Documentation</a></li></ul>
+  
+</nav>
+
+
+<div class="d-md-block d-none site-footer">
+  
+  
+    This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
+  
+  </div>
+</header>
+
+  
+  <div class="main" id="top">
+    <div id="main-header" class="main-header">
+  
+    
+
+<div class="search" role="search">
+  <div class="search-input-wrap">
+    <input type="text" id="search-input" class="search-input" tabindex="0" placeholder="Search Whoosh-NG Documentation" autocomplete="off">
+    <label for="search-input" class="search-label">
+      <span class="sr-only">Search Whoosh-NG Documentation</span>
+      <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><use xlink:href="#svg-search"></use></svg>
+    </label>
+  </div>
+  <div id="search-results" class="search-results"></div>
+</div>
+
+  
+  
+  
+</div>
+
+    <div class="main-content-wrap">
+      <nav aria-label="Breadcrumb" class="breadcrumb-nav">
+  <ol class="breadcrumb-nav-list">
+    <li class="breadcrumb-nav-list-item"><span>Core Concepts</span></li>
+  </ol>
+</nav>
+
+
+      <div id="main-content" class="main-content">
+        <main>
+          
+            <h1 id="core-concepts">
+  
+  
+    <a href="#core-concepts" class="anchor-heading" aria-labelledby="core-concepts"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Core Concepts
+  
+  
+</h1>
+    
+
+<p>Whoosh-NG is a pure-Python search engine library. This guide explains the main concepts you need to understand to use it effectively.</p>
+<h2 id="architecture">
+  
+  
+    <a href="#architecture" class="anchor-heading" aria-labelledby="architecture"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Architecture
+  
+  
+</h2>
+    
+
+<p>Whoosh-NG follows a layered architecture:</p>
+
+<pre><code class="language-mermaid">graph TD
+    A["Application"] --&gt; B["Whoosh Core"]
+    B --&gt; C["Plugin Manager"]
+    B --&gt; D["Registry System"]
+    B --&gt; E["Middleware Pipeline"]
+    B --&gt; F["Event Bus"]
+    B --&gt; G["Hook System"]
+    C --&gt; H["Plugins"]
+    H --&gt; I["FastAPI"]
+    H --&gt; J["Vector Search"]
+    H --&gt; K["Autocomplete"]
+    H --&gt; L["Observability"]
+    H --&gt; M["Admin UI"]
+</code></pre>
+<h2 id="key-components">
+  
+  
+    <a href="#key-components" class="anchor-heading" aria-labelledby="key-components"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Key Components
+  
+  
+</h2>
+    
+<h3 id="index">
+  
+  
+    <a href="#index" class="anchor-heading" aria-labelledby="index"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Index
+  
+  
+</h3>
+    
+
+<p>An <code class="language-plaintext highlighter-rouge">Index</code> is the top-level container for your searchable documents. It manages one or more segments on disk.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.index</span> <span class="kn">import</span> <span class="n">create_in</span><span class="p">,</span> <span class="n">open_dir</span>
+
+<span class="c1"># Create a new index
+</span><span class="n">ix</span> <span class="o">=</span> <span class="nf">create_in</span><span class="p">(</span><span class="sh">"</span><span class="s">indexdir</span><span class="sh">"</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+<span class="c1"># Open an existing index
+</span><span class="n">ix</span> <span class="o">=</span> <span class="nf">open_dir</span><span class="p">(</span><span class="sh">"</span><span class="s">indexdir</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+<h3 id="schema">
+  
+  
+    <a href="#schema" class="anchor-heading" aria-labelledby="schema"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Schema
+  
+  
+</h3>
+    
+
+<p>The <code class="language-plaintext highlighter-rouge">Schema</code> defines the fields that documents in your index can have. Each field has a type that determines how it is indexed and stored.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.fields</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">NUMERIC</span>
+
+<span class="n">schema</span> <span class="o">=</span> <span class="nc">Schema</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="nc">TEXT</span><span class="p">(</span><span class="n">stored</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">path</span><span class="o">=</span><span class="nc">ID</span><span class="p">(</span><span class="n">stored</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">content</span><span class="o">=</span><span class="n">TEXT</span><span class="p">,</span>
+    <span class="n">rating</span><span class="o">=</span><span class="nc">NUMERIC</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">stored</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div></div>
+<h3 id="writer">
+  
+  
+    <a href="#writer" class="anchor-heading" aria-labelledby="writer"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Writer
+  
+  
+</h3>
+    
+
+<p>An <code class="language-plaintext highlighter-rouge">IndexWriter</code> lets you add, update, and delete documents in the index.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">writer</span> <span class="o">=</span> <span class="n">ix</span><span class="p">.</span><span class="nf">writer</span><span class="p">()</span>
+<span class="n">writer</span><span class="p">.</span><span class="nf">add_document</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Hello</span><span class="sh">"</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="sh">"</span><span class="s">World</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">writer</span><span class="p">.</span><span class="nf">commit</span><span class="p">()</span>
+</code></pre></div></div>
+<h3 id="searcher">
+  
+  
+    <a href="#searcher" class="anchor-heading" aria-labelledby="searcher"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Searcher
+  
+  
+</h3>
+    
+
+<p>A <code class="language-plaintext highlighter-rouge">Searcher</code> lets you query the index and retrieve results.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">ix</span><span class="p">.</span><span class="nf">searcher</span><span class="p">()</span> <span class="k">as</span> <span class="n">s</span><span class="p">:</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="sh">"</span><span class="s">hello</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+<h3 id="query-parser">
+  
+  
+    <a href="#query-parser" class="anchor-heading" aria-labelledby="query-parser"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Query Parser
+  
+  
+</h3>
+    
+
+<p>The <code class="language-plaintext highlighter-rouge">QueryParser</code> converts a query string into a query object that the searcher can execute.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.qparser</span> <span class="kn">import</span> <span class="n">QueryParser</span>
+
+<span class="n">qp</span> <span class="o">=</span> <span class="nc">QueryParser</span><span class="p">(</span><span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">qp</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="sh">"</span><span class="s">hello world</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+<h2 id="modern-features">
+  
+  
+    <a href="#modern-features" class="anchor-heading" aria-labelledby="modern-features"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Modern Features
+  
+  
+</h2>
+    
+<h3 id="plugin-system">
+  
+  
+    <a href="#plugin-system" class="anchor-heading" aria-labelledby="plugin-system"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Plugin System
+  
+  
+</h3>
+    
+
+<p>Plugins extend Whoosh-NG without modifying the core. Plugins can:</p>
+
+<ul>
+  <li>Register new vector providers</li>
+  <li>Add FastAPI endpoints</li>
+  <li>Provide custom analyzers</li>
+  <li>Hook into the middleware pipeline</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.plugins.manager</span> <span class="kn">import</span> <span class="n">PluginManager</span>
+
+<span class="c1"># Load plugins from entry points
+</span><span class="n">PluginManager</span><span class="p">.</span><span class="nf">load_plugins</span><span class="p">()</span>
+
+<span class="c1"># Or register manually
+</span><span class="n">PluginManager</span><span class="p">.</span><span class="nf">register</span><span class="p">(</span><span class="sh">"</span><span class="s">my_plugin</span><span class="sh">"</span><span class="p">,</span> <span class="nc">MyPlugin</span><span class="p">())</span>
+</code></pre></div></div>
+<h3 id="middleware-pipeline">
+  
+  
+    <a href="#middleware-pipeline" class="anchor-heading" aria-labelledby="middleware-pipeline"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Middleware Pipeline
+  
+  
+</h3>
+    
+
+<p>Middleware intercepts indexing and search operations:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.middleware</span> <span class="kn">import</span> <span class="n">Middleware</span><span class="p">,</span> <span class="n">MiddlewareContext</span>
+
+<span class="k">class</span> <span class="nc">LoggingMiddleware</span><span class="p">(</span><span class="n">Middleware</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">before_search</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">MiddlewareContext</span><span class="p">):</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Searching: </span><span class="si">{</span><span class="n">context</span><span class="p">.</span><span class="n">query</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+    <span class="k">def</span> <span class="nf">after_search</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">MiddlewareContext</span><span class="p">):</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Found: </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="n">results</span><span class="p">)</span> <span class="k">if</span> <span class="n">context</span><span class="p">.</span><span class="n">results</span> <span class="k">else</span> <span class="mi">0</span><span class="si">}</span><span class="s"> results</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">context</span>
+</code></pre></div></div>
+<h3 id="vector-search">
+  
+  
+    <a href="#vector-search" class="anchor-heading" aria-labelledby="vector-search"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Vector Search
+  
+  
+</h3>
+    
+
+<p>Vector fields enable semantic search using embeddings:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.fields</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">,</span> <span class="n">VectorField</span>
+
+<span class="n">schema</span> <span class="o">=</span> <span class="nc">Schema</span><span class="p">(</span>
+    <span class="n">content</span><span class="o">=</span><span class="n">TEXT</span><span class="p">,</span>
+    <span class="n">embedding</span><span class="o">=</span><span class="nc">VectorField</span><span class="p">(</span><span class="n">dimensions</span><span class="o">=</span><span class="mi">384</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div></div>
+<h3 id="event-bus">
+  
+  
+    <a href="#event-bus" class="anchor-heading" aria-labelledby="event-bus"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Event Bus
+  
+  
+</h3>
+    
+
+<p>The event system allows loose coupling between components:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">whoosh.event_bus</span> <span class="kn">import</span> <span class="n">EventBus</span><span class="p">,</span> <span class="n">DocumentIndexed</span>
+
+<span class="n">bus</span> <span class="o">=</span> <span class="nc">EventBus</span><span class="p">()</span>
+
+<span class="nd">@bus.subscribe</span>
+<span class="k">def</span> <span class="nf">on_document_indexed</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">DocumentIndexed</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Document indexed: </span><span class="si">{</span><span class="n">event</span><span class="p">.</span><span class="n">docnum</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+<h2 id="data-flow">
+  
+  
+    <a href="#data-flow" class="anchor-heading" aria-labelledby="data-flow"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Data Flow
+  
+  
+</h2>
+    
+<h3 id="indexing-flow">
+  
+  
+    <a href="#indexing-flow" class="anchor-heading" aria-labelledby="indexing-flow"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Indexing Flow
+  
+  
+</h3>
+    
+
+<ol>
+  <li>Application calls <code class="language-plaintext highlighter-rouge">writer.add_document()</code></li>
+  <li>Schema validates and analyzes fields</li>
+  <li>Middleware <code class="language-plaintext highlighter-rouge">before_index</code> hooks run</li>
+  <li>Document is written to segment</li>
+  <li>Middleware <code class="language-plaintext highlighter-rouge">after_index</code> hooks run</li>
+  <li><code class="language-plaintext highlighter-rouge">DocumentIndexed</code> event is published</li>
+  <li><code class="language-plaintext highlighter-rouge">commit()</code> merges segments and writes TOC</li>
+</ol>
+<h3 id="search-flow">
+  
+  
+    <a href="#search-flow" class="anchor-heading" aria-labelledby="search-flow"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Search Flow
+  
+  
+</h3>
+    
+
+<ol>
+  <li>Application calls <code class="language-plaintext highlighter-rouge">searcher.search(query)</code></li>
+  <li>Query is parsed into query tree</li>
+  <li>Middleware <code class="language-plaintext highlighter-rouge">before_search</code> hooks run</li>
+  <li>Searcher executes query against segments</li>
+  <li>Results are scored and sorted</li>
+  <li>Middleware <code class="language-plaintext highlighter-rouge">after_search</code> hooks run</li>
+  <li><code class="language-plaintext highlighter-rouge">SearchExecuted</code> event is published</li>
+  <li>Results are returned to application</li>
+</ol>
+<h2 id="design-principles">
+  
+  
+    <a href="#design-principles" class="anchor-heading" aria-labelledby="design-principles"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Design Principles
+  
+  
+</h2>
+    
+
+<ol>
+  <li><strong>Composability</strong>: Components combine via <code class="language-plaintext highlighter-rouge">|</code> and <code class="language-plaintext highlighter-rouge">+</code> operators</li>
+  <li><strong>Zero-cost abstractions</strong>: No middleware = no overhead</li>
+  <li><strong>Sync-first</strong>: Core is synchronous; async is opt-in</li>
+  <li><strong>Plugin isolation</strong>: Plugins cannot break the core</li>
+  <li><strong>Type safety</strong>: Comprehensive type hints throughout</li>
+</ol>
+
+          
+
+          
+            
+          
+        </main>
+        
+<hr>
+<footer>
+  
+
+  
+
+  <div class="d-md-none mt-4 fs-2">
+    
+    
+      This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll.
+    
+  </div>
+</footer>
+
+      </div>
+    </div>
+    
+      
+
+<div class="search-overlay"></div>
+
+    
+  </div>
+
+  
+</body>
+</html>
+
