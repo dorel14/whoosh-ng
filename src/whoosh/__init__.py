@@ -30,7 +30,7 @@ from __future__ import annotations
 import re
 
 __version__ = (1, 0, 1)
-__version_string__ = "1.3.0"
+__version_string__ = "1.3.1"
 
 
 def versionstring(build=True, extra=True):
