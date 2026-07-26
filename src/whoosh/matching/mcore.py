@@ -51,7 +51,7 @@ method will return ``True``.
 
 from abc import abstractmethod
 from itertools import repeat
-
+from typing import Any
 # Exceptions
 
 
@@ -161,14 +161,14 @@ class Matcher:
 
         return 0
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         """Returns True if this matcher supports the use of ``quality`` and
         ``block_quality``.
         """
 
         return False
 
-    def max_quality(self):
+    def max_quality(self) -> float:
         """Returns the maximum possible quality measurement for this matcher,
         according to the current weighting algorithm. Raises
         ``NoQualityAvailable`` if the matcher or weighting do not support
@@ -177,7 +177,7 @@ class Matcher:
 
         raise NoQualityAvailable(self.__class__)
 
-    def block_quality(self):
+    def block_quality(self) -> float:
         """Returns a quality measurement of the current block of postings,
         according to the current weighting algorithm. Raises
         ``NoQualityAvailable`` if the matcher or weighting do not support
@@ -338,14 +338,21 @@ class Matcher:
 class ConstantScoreMatcher(Matcher):
     def __init__(self, score=1.0):
         self._score = score
+        self._active = True
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         return True
 
-    def max_quality(self):
+    def is_active(self):
+        return self._active
+
+    def go_inactive(self):
+        self._active = False
+
+    def max_quality(self) -> float:
         return self._score
 
-    def block_quality(self):
+    def block_quality(self) -> float:
         return self._score
 
     def skip_to_quality(self, minquality):
@@ -368,13 +375,13 @@ class NullMatcherClass(Matcher):
     def __repr__(self):
         return "<NullMatcher>"
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         return True
 
-    def max_quality(self):
+    def max_quality(self) -> float:
         return 0
 
-    def block_quality(self):
+    def block_quality(self) -> float:
         return 0
 
     def skip_to_quality(self, minquality):
@@ -387,7 +394,7 @@ class NullMatcherClass(Matcher):
         pass
 
     def all_ids(self):
-        return []
+        yield from ()
 
     def copy(self):
         return self
@@ -476,19 +483,19 @@ class ListMatcher(Matcher):
         else:
             return self
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         return self._scorer is not None and self._scorer.supports_block_quality()
 
-    def max_quality(self):
+    def max_quality(self) -> float:
         # This matcher treats all postings in the list as one "block", so the
         # block quality is the same as the quality of the entire list
         if self._scorer:
-            return self._scorer.block_quality(self)
+            return self._scorer.block_quality(self)  # type: ignore[union-attr]
         else:
             return self.block_max_weight()
 
-    def block_quality(self):
-        return self._scorer.block_quality(self)
+    def block_quality(self) -> float:
+        return self._scorer.block_quality(self)  # type: ignore[union-attr]
 
     def skip_to_quality(self, minquality):
         while self._i < len(self._ids) and self.block_quality() <= minquality:
@@ -499,14 +506,15 @@ class ListMatcher(Matcher):
         return self._ids[self._i]
 
     def all_ids(self):
-        return iter(self._ids)
+        yield from self._ids
 
     def all_items(self):
         values = self._values
         if values is None:
             values = repeat("")
 
-        return zip(self._ids, values)
+        for item in zip(self._ids, values):
+            yield item
 
     def value(self):
         if self._values:
@@ -524,7 +532,7 @@ class ListMatcher(Matcher):
                 if len(v) == 1:
                     v = v[0]
                 else:
-                    v = self._format.combine(v)
+                    v = self._format.combine(v)  # type: ignore[union-attr]
                 # Replace the list with the computed value string
                 self._values[self._i] = v
 
@@ -533,11 +541,11 @@ class ListMatcher(Matcher):
             return ""
 
     def value_as(self, astype):
-        decoder = self._format.decoder(astype)
+        decoder = self._format.decoder(astype)  # type: ignore[union-attr]
         return decoder(self.value())
 
     def supports(self, astype):
-        return self._format.supports(astype)
+        return self._format.supports(astype)  # type: ignore[union-attr]
 
     def next(self):
         self._i += 1
@@ -551,10 +559,10 @@ class ListMatcher(Matcher):
             return 1.0
 
     def block_min_length(self):
-        return self._terminfo.min_length()
+        return self._terminfo.min_length()  # type: ignore[union-attr]
 
     def block_max_length(self):
-        return self._terminfo.max_length()
+        return self._terminfo.max_length()  # type: ignore[union-attr]
 
     def block_max_weight(self):
         if self._all_weights:
@@ -580,6 +588,12 @@ class LeafMatcher(Matcher):
     # Subclasses need to set
     #   self.scorer -- a Scorer object or None
     #   self.format -- Format object for the posting values
+    scorer: Any = None
+    format: Any = None
+    _term: Any = None
+    scorer: Any = None
+    format: Any = None
+    _term: Any = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.term()!r}, {self.is_active()})"
@@ -612,13 +626,13 @@ class LeafMatcher(Matcher):
         else:
             raise Exception(f"Field does not support positions ({self.term()!r})")
 
-    def supports_block_quality(self):
+    def supports_block_quality(self) -> bool:
         return self.scorer and self.scorer.supports_block_quality()
 
-    def max_quality(self):
+    def max_quality(self) -> float:
         return self.scorer.max_quality()
 
-    def block_quality(self):
+    def block_quality(self) -> float:
         return self.scorer.block_quality(self)
 
     def score(self):

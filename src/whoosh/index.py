@@ -78,6 +78,11 @@ class EmptyIndexError(IndexError):
     """Raised when you try to work with an index that has no indexed terms."""
 
 
+class IndexCorruptedError(IndexError):
+    """Raised when an index is detected to be corrupted, for example when a
+    segment file is missing, empty, or unreadable."""
+
+
 # Convenience functions
 
 
@@ -546,6 +551,10 @@ class FileIndex(Index):
             # Read the information from the TOC file
             try:
                 info = self._read_toc()
+                # Validate segment integrity before opening readers so that
+                # corrupted indexes fail fast with a clear error (issue #481).
+                for segment in info.segments:
+                    segment.validate(self.storage)
                 return self._reader(
                     self.storage,
                     info.schema,
@@ -553,6 +562,9 @@ class FileIndex(Index):
                     info.generation,
                     reuse=reuse,
                 )
+            except IndexCorruptedError:
+                # Genuine corruption is persistent, so don't retry it.
+                raise
             except OSError:
                 # Presume that we got a "file not found error" because a writer
                 # deleted one of the files just as we were trying to open it,
@@ -563,6 +575,24 @@ class FileIndex(Index):
                 if retries <= 0:
                     raise e
                 sleep(0.05)
+
+    def is_corrupted(self):
+        """Non-destructively checks whether any segment in the latest index
+        generation fails integrity validation.
+
+        :returns: ``True`` if the index is corrupted (a segment is missing,
+            empty, or has an invalid block magic), ``False`` otherwise.
+        :raises whoosh.index.IndexCorruptedError: if validation itself fails
+            in an unexpected way (the index is still considered corrupted).
+        """
+
+        try:
+            info = self._read_toc()
+            for segment in info.segments:
+                segment.validate(self.storage)
+        except IndexCorruptedError:
+            return True
+        return False
 
 
 # TOC class

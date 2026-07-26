@@ -28,6 +28,7 @@
 
 import random
 import sys
+import threading
 import time
 from bisect import insort
 from functools import wraps
@@ -35,17 +36,20 @@ from functools import wraps
 # These must be valid separate characters in CASE-INSENSTIVE filenames
 IDCHARS = "0123456789abcdefghijklmnopqrstuvwxyz"
 
+# The random module's global generator is not thread-safe; concurrent callers
+# (e.g. multiple writers creating temp storages or segment IDs at once) can
+# produce duplicate names or corrupt the generator. Serialize name generation
+# (issue #391).
+_random_name_lock = threading.Lock()
 
-if hasattr(time, "perf_counter"):
-    now = time.perf_counter
-elif sys.platform == "win32":
-    now = time.clock
-else:
-    now = time.time
+
+# The project requires Python >= 3.11, where perf_counter is always present.
+now = time.perf_counter
 
 
 def random_name(size=28):
-    return "".join(random.choice(IDCHARS) for _ in range(size))
+    with _random_name_lock:
+        return "".join(random.choices(IDCHARS, k=size))
 
 
 def random_bytes(size=28):
@@ -139,3 +143,17 @@ def unclosed(method):
         return method(self, *args, **kwargs)
 
     return unclosed_wrapper
+
+
+def protected(method):
+    """
+    Decorator to allow operations only if the object is not closed.
+    """
+
+    @wraps(method)
+    def protected_wrapper(self, *args, **kwargs):
+        if getattr(self, "is_closed", False):
+            raise ValueError("Operation on a closed object")
+        return method(self, *args, **kwargs)
+
+    return protected_wrapper

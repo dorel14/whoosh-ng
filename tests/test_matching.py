@@ -586,3 +586,112 @@ def test_every_matcher():
                     # Something here
                     pass
             return 0
+
+
+# --- Issue #446 / #124: skip_to_quality must never loop forever ----------
+#
+# A real matcher can have a skip_to_quality() that reports no progress (returns
+# 0) while still being active and below the quality threshold. Without a
+# progress guard inside the binary skip_to_quality loops (UnionMatcher /
+# DisjunctionMaxMatcher / AndMaybeMatcher), this would hang the search. The
+# guard advances the stuck matcher by one document so the loop always
+# terminates.
+
+
+class _StubbornMatcher(matching.Matcher):
+    """Simulates a matcher whose skip_to_quality cannot make progress: it
+    returns 0 without advancing, yet stays active and reports a fixed block
+    quality below the requested threshold."""
+
+    def __init__(self, docnum, quality, maxnext=5):
+        self._docnum = docnum
+        self._quality = quality
+        self._maxnext = maxnext
+        self._nexts = 0
+
+    def is_active(self):
+        return self._nexts < self._maxnext
+
+    def reset(self):
+        self._nexts = 0
+
+    def copy(self):
+        return self.__class__(self._docnum, self._quality, self._maxnext)
+
+    def id(self):
+        return self._docnum
+
+    def next(self):
+        self._nexts += 1
+
+    def supports_block_quality(self):
+        return True
+
+    def max_quality(self):
+        return self._quality
+
+    def block_quality(self):
+        return self._quality
+
+    def skip_to_quality(self, minquality):
+        # Cannot skip ahead: report no progress and do NOT advance.
+        return 0
+
+    def score(self):
+        return self._quality
+
+
+def _exercise_skip_to_quality(matcher_cls, queue):
+    """Run the pathological skip_to_quality in a worker process so that a
+    regression (which would hang) is contained by a join timeout rather than
+    freezing the whole test run. Always reports back to the queue, even on
+    error, so the parent never blocks on get()."""
+    import time
+    import traceback
+
+    try:
+        # Two "stubborn" matchers: each reports no skip progress (returns 0)
+        # while staying active with a fixed quality below the threshold. The
+        # binary skip_to_quality must advance them via next() to terminate.
+        stubborn_a = _StubbornMatcher(0, 1.0, maxnext=20)
+        stubborn_b = _StubbornMatcher(0, 10.0, maxnext=20)
+        if matcher_cls is matching.AndMaybeMatcher:
+            # AndMaybe requires the "a" matcher to drive; use stubborn as "a".
+            m = matching.AndMaybeMatcher(stubborn_a, stubborn_b)
+        else:
+            m = matcher_cls(stubborn_a, stubborn_b)
+        start = time.time()
+        skipped = m.skip_to_quality(100.0)
+        queue.put((True, skipped, time.time() - start, None))
+    except Exception:
+        queue.put((False, None, None, traceback.format_exc()))
+
+
+def _assert_no_hang(matcher_cls):
+    import multiprocessing
+
+    ctx = multiprocessing.get_context("spawn")
+    queue = ctx.Queue()
+    proc = ctx.Process(target=_exercise_skip_to_quality, args=(matcher_cls, queue))
+    proc.start()
+    proc.join(timeout=15)
+    if proc.is_alive():
+        proc.terminate()
+        proc.join()
+        raise AssertionError(
+            f"{matcher_cls.__name__}.skip_to_quality hung (regression of #446/#124)"
+        )
+    ok, skipped, dt, tb = queue.get(timeout=5)
+    assert ok, f"{matcher_cls.__name__} worker failed:\n{tb}"
+
+
+def test_union_skip_to_quality_no_infinite_loop():
+    _assert_no_hang(matching.UnionMatcher)
+
+
+def test_disjunctionmax_skip_to_quality_no_infinite_loop():
+    _assert_no_hang(matching.DisjunctionMaxMatcher)
+
+
+def test_andmaybe_skip_to_quality_no_infinite_loop():
+    _assert_no_hang(matching.AndMaybeMatcher)

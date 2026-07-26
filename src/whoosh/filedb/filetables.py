@@ -134,6 +134,10 @@ class HashWriter:
         them using :meth:`HashReader.all`.
         """
 
+        if isinstance(key, str):
+            key = key.encode("utf-8")
+        if isinstance(value, str):
+            value = value.encode("utf-8")
         assert isinstance(key, bytes)
         assert isinstance(value, bytes)
 
@@ -388,6 +392,8 @@ class HashReader:
         with the given key.
         """
 
+        if isinstance(key, str):
+            key = key.encode("utf-8")
         if not isinstance(key, bytes):
             raise TypeError(f"Key {key!r} should be bytes")
         dbfile = self.dbfile
@@ -543,6 +549,8 @@ class OrderedHashReader(HashReader):
     def closest_key_pos(self, key):
         # Given a key, return the position of that key OR the next highest key
         # if the given key does not exist
+        if isinstance(key, str):
+            key = key.encode("utf-8")
         if not isinstance(key, bytes):
             raise TypeError(f"Key {key!r} should be bytes")
 
@@ -673,6 +681,8 @@ class FieldedOrderedHashReader(HashReader):
     def closest_term_pos(self, fieldname, key):
         # Given a key, return the position of that key OR the next highest key
         # if the given key does not exist
+        if isinstance(key, str):
+            key = key.encode("utf-8")
         if not isinstance(key, bytes):
             raise TypeError(f"Key {key!r} should be bytes")
 

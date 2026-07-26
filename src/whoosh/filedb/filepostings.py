@@ -21,7 +21,8 @@ from struct import Struct
 from whoosh.matching import Matcher, ReadTooFar
 from whoosh.support import unicode
 from whoosh.system import _FLOAT_SIZE, _INT_SIZE
-from whoosh.util import byte_to_length, length_to_byte, utf8decode, utf8encode
+from whoosh.util.numeric import byte_to_length, length_to_byte
+from whoosh.util.text import utf8decode, utf8encode
 from whoosh.writing import PostingWriter
 
 
@@ -37,7 +38,7 @@ class BlockInfo:
     )
 
     # nextblockoffset, unused, postcount, maxweight, maxwol, unused, minlength
-    _struct = Struct("!IiiBfffB")
+    _struct = Struct("!Qii fffB")
 
     def __init__(
         self,
@@ -89,7 +90,7 @@ class BlockInfo:
 
         maxid = self.maxid
         if isinstance(maxid, unicode):
-            file.write_string(utf8encode(maxid)[0])
+            file.write_string(utf8encode(maxid)[0])  # type: ignore[arg-type]  # type: ignore[arg-type]
         else:
             file.write_uint(maxid)
 
@@ -139,6 +140,7 @@ class FilePostingWriter(PostingWriter):
             raise ValueError("blocklimit argument must be > 0")
         self.blocklimit = blocklimit
         self.inblock = False
+        self.dfl_fn = None
 
     def _reset_block(self):
         if self.stringids:
@@ -191,6 +193,7 @@ class FilePostingWriter(PostingWriter):
         pf.seek(offset)
 
         self.inblock = False
+        self.dfl_fn = None
         return self.posttotal
 
     def close(self):
@@ -234,7 +237,7 @@ class FilePostingWriter(PostingWriter):
         # Write the IDs
         if stringids:
             for id in ids:
-                pf.write_string(utf8encode(id)[0])
+                pf.write_string(utf8encode(id)[0])  # type: ignore[arg-type]  # type: ignore[arg-type]
         else:
             pf.write_array(ids)
 
@@ -252,13 +255,13 @@ class FilePostingWriter(PostingWriter):
 
         # Write the values
         if posting_size != 0:
-            pf.write("".join(values))
+            pf.write(b"".join(values))
 
         # Seek back and write the pointer to the next block
         pf.flush()
         nextoffset = pf.tell()
         pf.seek(blockinfo_start)
-        pf.write_uint(nextoffset)
+        pf.write_ulong(nextoffset)
         pf.seek(nextoffset)
 
         self.posttotal += postcount
@@ -277,11 +280,11 @@ class FilePostingReader(Matcher):
         if scorefns:
             sfn, qfn, bqfn = scorefns
             if sfn:
-                self.score = types.MethodType(sfn, self, self.__class__)
+                self.score = types.MethodType(sfn, self)
             if qfn:
-                self.quality = types.MethodType(qfn, self, self.__class__)
+                self.quality = types.MethodType(qfn, self)
             if bqfn:
-                self.block_quality = types.MethodType(bqfn, self, self.__class__)
+                self.block_quality = types.MethodType(bqfn, self)
 
         self.stringids = stringids
 
@@ -321,7 +324,7 @@ class FilePostingReader(Matcher):
             yield from ids
 
     def next(self):
-        if self.i == self.blockinfo.postcount - 1:
+        if self.blockinfo is None or self.i == self.blockinfo.postcount - 1:
             self._next_block()
             return True
         else:
@@ -386,7 +389,7 @@ class FilePostingReader(Matcher):
                 lengths = pf.get_array(startoffset, "I", postcount)
                 valueoffset += _INT_SIZE * postcount
 
-            allvalues = pf.map[valueoffset:endoffset]
+            allvalues = pf.get(valueoffset, endoffset - valueoffset)
 
             # Chop up the block string into individual valuestrings
             if posting_size > 0:
@@ -401,7 +404,7 @@ class FilePostingReader(Matcher):
                 # to chop up the values.
                 pos = 0
                 values = []
-                for length in lengths:
+                for length in lengths:  # type: ignore[name-defined]  # type: ignore[name-defined]
                     values.append(allvalues[pos : pos + length])
                     pos += length
         else:

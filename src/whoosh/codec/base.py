@@ -432,7 +432,7 @@ class PerDocumentReader:
     def supports_columns(self):
         return False
 
-    def has_column(self, fieldname):
+    def has_column(self, fieldname) -> bool:
         _ = fieldname  # Unused argument
         return False
 
@@ -538,7 +538,7 @@ class Segment:
     def segment_id(self):
         if hasattr(self, "name"):
             # Old segment class
-            return self.name
+            return getattr(self, "name")
         else:
             return f"{self.index_name()}_{self.segid}"
 
@@ -650,8 +650,66 @@ class Segment:
     def should_assemble(self):
         return True
 
+    def validate(self, storage):
+        """Checks the on-disk integrity of this segment. Subclasses should
+        override this to verify format-specific files (magic numbers, required
+        extensions). The base implementation detects the most common
+        corruptions: missing, empty, or unreadable segment files (issue #481).
 
-# Wrapping Segment
+        :raises whoosh.index.IndexCorruptedError: if the segment is missing,
+            empty, or otherwise unreadable.
+        """
+
+        if self.is_compound():
+            # Compound segments store everything in a single ".seg" file. Open
+            # it as a compound storage and read its directory; this detects
+            # truncated/garbage files that a plain non-empty check would miss.
+            from whoosh.filedb.compound import CompoundStorage
+            from whoosh.index import IndexCorruptedError
+
+            name = self.make_filename(self.COMPOUND_EXT)
+            if not storage.file_exists(name):
+                raise IndexCorruptedError(f"Segment file {name!r} is missing")
+            dbfile = storage.open_file(name)
+            try:
+                cs = CompoundStorage(dbfile)
+                cs.list()
+                cs.close()
+            except IndexCorruptedError:
+                dbfile.close()
+                raise
+            except Exception as e:
+                dbfile.close()
+                raise IndexCorruptedError(f"Corrupted compound segment file {name!r}: {e}") from e
+            return
+
+        files = self.list_files(storage)
+        if not files:
+            from whoosh.index import IndexCorruptedError
+
+            raise IndexCorruptedError(f"Segment {self.segment_id()} has no data files")
+        for name in files:
+            self._validate_named(storage, name)
+
+    def _validate_named(self, storage, fname):
+        """Open and sanity-check a single segment file. Raises
+        IndexCorruptedError if it is missing, empty, or cannot be opened."""
+
+        from whoosh.index import IndexCorruptedError
+
+        try:
+            if not storage.file_exists(fname):
+                raise IndexCorruptedError(f"Segment file {fname!r} is missing")
+            f = storage.open_file(fname)
+        except IndexCorruptedError:
+            raise
+        except Exception as e:  # pragma: no cover - defensive
+            raise IndexCorruptedError(f"Segment file {fname!r} could not be opened: {e}") from e
+        try:
+            if f.read(1) == b"":
+                raise IndexCorruptedError(f"Segment file {fname!r} is empty")
+        finally:
+            f.close()
 
 
 class WrappingSegment(Segment):
@@ -807,11 +865,11 @@ class MultiPerDocumentReader(PerDocumentReader):
             total += r.field_length(fieldname)
         return total
 
-    def min_field_length(self):
-        return min(r.min_field_length() for r in self._readers)
+    def min_field_length(self, fieldname):
+        return min(r.min_field_length(fieldname) for r in self._readers)
 
-    def max_field_length(self):
-        return max(r.max_field_length() for r in self._readers)
+    def max_field_length(self, fieldname):
+        return max(r.max_field_length(fieldname) for r in self._readers)
 
 
 # Extended base classes
@@ -837,9 +895,9 @@ class PerDocWriterWithColumns(PerDocumentWriter):
     def _get_column(self, fieldname):
         raise NotImplementedError
 
-    def add_column_value(self, fieldname, column, value):
+    def add_column_value(self, fieldname, columnobj, value):
         if not self._has_column(fieldname):
-            self._create_column(fieldname, column)
+            self._create_column(fieldname, columnobj)
         self._get_column(fieldname).add(self._docnum, value)
 
 
@@ -850,7 +908,7 @@ class EmptyCursor(FieldCursor):
     def first(self):
         return None
 
-    def find(self, term):
+    def find(self, string):
         return None
 
     def next(self):
