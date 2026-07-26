@@ -22,12 +22,15 @@ eggs/
 /lcov.info
 /htmlcov/
 /.codiumai.local.toml
-./kilo
-./kilo/*
+/.kilo
+/benchmark/indexes/
+/.vscode
 
 # Cruft / local scratch
 *.tmp
+*.zip
 /testindex/
+/testindex_facet/
 /testindex/**
 fix_*.py
 src/**/*.tmp

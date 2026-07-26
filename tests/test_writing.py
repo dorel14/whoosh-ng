@@ -1,10 +1,12 @@
+import asyncio
+import os
 import random
 import threading
 import time
 
 import pytest
 
-from whoosh import analysis, fields, query, writing
+from whoosh import analysis, async_writer, fields, query, writing
 from whoosh.filedb.filestore import RamStorage
 from whoosh.util.testing import TempIndex
 
@@ -529,3 +531,239 @@ def test_add_fail_with_absorbed_exception():
         # Assert that correct exception is raised, not the cryptic one
         assert "already" not in ex.value.args[0]
         assert "unicode" in ex.value.args[0]
+
+
+def test_delete_add_churn_no_leak():
+    # Issue #492: repeatedly deleting and re-adding documents must not leak
+    # the deleted documents' accounting/memory. The deleted set must stay
+    # bounded and doc counts must remain correct across many churn cycles.
+    import gc
+    import tracemalloc
+
+    schema = fields.Schema(content=fields.TEXT(stored=True))
+    st = RamStorage()
+    ix = st.create_index(schema)
+
+    N = 50
+    tracemalloc.start()
+    for rnd in range(10):
+        w = ix.writer()
+        # "number" survives the default analyzer (single-char tokens like "x"
+        # are stopped), so this deletes every previously added document.
+        w.delete_by_query(query.Term("content", "number"))
+        w.commit()
+        w = ix.writer()
+        for i in range(N):
+            w.add_document(content=f"doc number {i} x round{rnd}")
+        # optimize merges segments and reclaims deleted documents, so the
+        # deleted docs must not accumulate (issue #492).
+        w.commit(optimize=True)
+        with ix.searcher() as s:
+            # Only the live documents remain.
+            assert s.doc_count() == N
+            # Deleted documents were reclaimed, not leaked.
+            assert s.doc_count_all() == N
+    gc.collect()
+    _current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    # Soft guard: a gross leak would push traced peak far beyond a single
+    # round's worth of small documents.
+    assert peak < 50 * 1024 * 1024
+
+
+# --- Sprint 2: AsyncWriter reliability (issues #578 / #437 / #369) -----------
+
+
+def test_asyncwriter_double_commit_raises():
+    # issue #437: a second commit() must not raise "threads can only be started
+    # once"; it should fail loudly instead of corrupting state.
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "asyncwriterdouble") as ix:
+        w = writing.AsyncWriter(ix)
+        w.add_document(id="1", text="hello world")
+        # Eager writer acquisition commits synchronously here.
+        w.commit()
+        with pytest.raises(RuntimeError):
+            w.commit()
+
+
+def test_asyncwriter_lockerror_recovery():
+    # issue #369: if the index is locked when the writer is created, the
+    # buffered calls must be replayed once the lock is released (no crash).
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "asyncwriterlock") as ix:
+        # Hold a real writer so the AsyncWriter's writer acquisition raises
+        # LockError and the calls are buffered instead.
+        holder = ix.writer()
+        try:
+            w = writing.AsyncWriter(ix)
+            assert w.writer is None  # buffered because the index was locked
+            w.add_document(id="1", text="hello world")
+            w.add_document(id="2", text="foo bar")
+            w.commit()  # starts the background retry thread
+            # Let the thread attempt (and fail) at least once before releasing.
+            time.sleep(0.1)
+        finally:
+            holder.cancel()  # release the lock; background thread can proceed
+
+        # The buffered documents are eventually committed without crashing.
+        assert w.wait(timeout=10)
+        with ix.reader() as r:
+            assert sorted(r.lexicon("id")) == [b"1", b"2"]
+
+
+@pytest.mark.asyncio
+async def test_async_writer_await_api():
+    # asyncio-native AsyncWriter: buffered writes are committed via await.
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "asyncnative") as ix:
+        w = async_writer.AsyncWriter(ix)
+        w.add_document(id="1", text="hello world")
+        w.add_document(id="2", text="foo bar")
+        await w.commit(timeout=30)
+        assert w._committed
+
+        with ix.reader() as r:
+            assert sorted(r.lexicon("id")) == [b"1", b"2"]
+
+        # A second commit must be refused.
+        with pytest.raises(RuntimeError):
+            await w.commit()
+
+        # A cancel on a spent writer must also be refused.
+        with pytest.raises(RuntimeError):
+            await w.acancel()
+
+
+@pytest.mark.asyncio
+async def test_async_writer_locked_then_commit_recovers():
+    # The asyncio writer must also recover from a LockError and still commit.
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "asyncnativelock") as ix:
+        holder = ix.writer()
+        try:
+            w = async_writer.AsyncWriter(ix)
+            assert w._writer is None
+            w.add_document(id="1", text="hello world")
+            task = asyncio.ensure_future(w.commit(timeout=10))
+            await asyncio.sleep(0.1)
+        finally:
+            holder.cancel()
+
+        await task
+        assert w._committed
+        with ix.reader() as r:
+            assert b"1" in list(r.lexicon("id"))
+
+
+# --- Sprint 2: BufferedWriter thread-safety (issue #449) ---------------------
+
+
+def test_bufferedwriter_concurrent_search():
+    # issue #449: searching (and committing) from multiple threads on a shared
+    # BufferedWriter must not crash or return inconsistent results.
+    schema = fields.Schema(id=fields.ID(stored=True), content=fields.TEXT)
+    with TempIndex(schema, "bufferedconcurrent") as ix:
+        w = writing.BufferedWriter(ix, period=None, limit=100)
+
+        errors = []
+        stop = threading.Event()
+        seen = set()
+
+        def searcher():
+            try:
+                while not stop.is_set():
+                    with w.searcher() as s:
+                        r = s.search(query.Every(), limit=None)
+                        # The buffered docs are always visible to the searcher.
+                        for doc in r:
+                            seen.add(doc["id"])
+            except Exception as e:  # surface any race-induced failure
+                errors.append(e)
+
+        threads = [threading.Thread(target=searcher) for _ in range(4)]
+        for t in threads:
+            t.start()
+
+        # Add documents from the main thread while searches run concurrently.
+        for i in range(100):
+            w.add_document(id=str(i), content=f"doc number {i}")
+
+        # Force a flush to disk so the on-disk/ram composite reader is rebuilt.
+        w.commit()
+        stop.set()
+        for t in threads:
+            t.join(timeout=10)
+
+        w.close()
+
+        assert not errors, f"concurrent search failed: {errors}"
+        # All 100 documents must have been visible to at least one search.
+        assert seen == set(str(i) for i in range(100))
+
+
+# --- Sprint 2: temp storage isolation (issue #391) ---------------------------
+
+
+def test_temp_storage_concurrent():
+    # issue #391: concurrent temp-storage creation must yield ISOLATED,
+    # non-colliding scratch storages (no shared files, no destroyed-data
+    # races between writers).
+    from whoosh.filedb.filestore import FileStorage
+
+    import shutil
+    import tempfile
+
+    d = tempfile.mkdtemp()
+    try:
+        st = FileStorage(d)
+
+        folders = []
+        errors = []
+        lock = threading.Lock()
+
+        def make():
+            try:
+                ts = st.temp_storage()  # no name -> unique, isolated directory
+                marker = f"marker-{random.randint(0, 1_000_000)}"
+                with ts.create_file(marker) as f:
+                    f.write(marker.encode("ascii"))
+                with lock:
+                    folders.append(ts.folder)
+                # The marker must only be visible in THIS temp storage.
+                assert ts.file_exists(marker)
+            except Exception as e:  # surface any race-induced failure
+                errors.append(e)
+
+        threads = [threading.Thread(target=make) for _ in range(30)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=10)
+
+        assert not errors, f"concurrent temp_storage failed: {errors}"
+        # Every concurrent call produced a distinct directory.
+        assert len(set(folders)) == len(folders), "temp storages collided"
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def test_writer_temp_storage_isolated():
+    # issue #391: two independent writers on the same index get isolated temp
+    # storages, so one writer destroying its scratch never affects the other.
+    # We use ``_lk=False`` to bypass the index write lock (which serializes
+    # real writers) and focus purely on temp-storage isolation.
+    schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT)
+    with TempIndex(schema, "tempisolated") as ix:
+        w1 = writing.SegmentWriter(ix, _lk=False)
+        w2 = writing.SegmentWriter(ix, _lk=False)
+        try:
+            # The two writers must not share a temporary storage directory.
+            assert w1._tempstorage.folder != w2._tempstorage.folder
+            # Each temp storage is a distinct subdirectory of the index dir.
+            assert os.path.dirname(w1._tempstorage.folder) == ix.storage.folder
+            assert os.path.dirname(w2._tempstorage.folder) == ix.storage.folder
+        finally:
+            w1.cancel()
+            w2.cancel()
