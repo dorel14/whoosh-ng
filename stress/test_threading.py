@@ -40,7 +40,7 @@ def test_readwrite():
 
         class WriterThread(threading.Thread):
             def run(self):
-                ix = st.create_index(dir, schema)
+                ix = st.create_index(schema)
                 num = 0
 
                 for i in range(50):

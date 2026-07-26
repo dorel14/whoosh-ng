@@ -9,7 +9,7 @@ timezone: UTC
 
 # GitHub Pages: base URL (repo name for project pages)
 baseurl: "/whoosh-ng"
-url: "https://dorel14.github.io"
+#url: "https://dorel14.github.io"
 
 # Build settings
 markdown: kramdown
