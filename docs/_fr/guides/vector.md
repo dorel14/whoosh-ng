@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Recherche vectorielle"
 nav_order: 29
 lang: fr

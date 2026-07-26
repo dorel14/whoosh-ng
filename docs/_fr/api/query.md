@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "API Requêtes"
 nav_order: 5
 lang: fr

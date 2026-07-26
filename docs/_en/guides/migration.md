@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Migration Guide"
 nav_order: 32
 ---

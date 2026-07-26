@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "API Events"
 nav_order: 8
 lang: fr

@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Vector Search"
 nav_order: 5
 ---

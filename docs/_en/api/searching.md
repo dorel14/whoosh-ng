@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Searching API"
 nav_order: 4
 ---

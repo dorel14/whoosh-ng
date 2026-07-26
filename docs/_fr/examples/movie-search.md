@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Recherche de Films"
 nav_order: 6
 lang: fr

@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Développement de Plugins"
 nav_order: 3
 lang: fr

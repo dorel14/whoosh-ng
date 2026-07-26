@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Autocomplete"
 nav_order: 3
 ---

@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Query Language"
 nav_order: 25
 ---

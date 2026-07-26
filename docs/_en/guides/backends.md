@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Backends"
 nav_order: 28
 ---

@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "API Middleware"
 nav_order: 7
 lang: fr

@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Schema Design"
 nav_order: 22
 ---

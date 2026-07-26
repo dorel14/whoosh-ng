@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Middleware API"
 nav_order: 7
 ---

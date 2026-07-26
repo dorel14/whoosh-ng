@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Autocomplétion"
 nav_order: 30
 lang: fr

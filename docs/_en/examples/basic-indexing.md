@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Basic Indexing"
 nav_order: 1
 ---

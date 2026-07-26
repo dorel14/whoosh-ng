@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Concepts fondamentaux"
 nav_order: 21
 lang: fr

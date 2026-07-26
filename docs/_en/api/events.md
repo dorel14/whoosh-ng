@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Event Bus & Hooks API"
 nav_order: 8
 ---

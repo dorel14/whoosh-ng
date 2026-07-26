@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Plugins"
 nav_order: 26
 lang: fr

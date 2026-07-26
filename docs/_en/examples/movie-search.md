@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Movie Search App"
 nav_order: 6
 ---

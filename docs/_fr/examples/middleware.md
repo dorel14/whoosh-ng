@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Exemples Middleware"
 nav_order: 5
 lang: fr

@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Intégration FastAPI"
 nav_order: 4
 lang: fr

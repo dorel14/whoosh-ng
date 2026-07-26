@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Middleware Architecture"
 nav_order: 40
 ---

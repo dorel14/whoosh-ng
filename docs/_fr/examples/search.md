@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Recherche"
 nav_order: 2
 lang: fr

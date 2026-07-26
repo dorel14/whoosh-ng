@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Vue d'ensemble API"
 nav_order: 0
 lang: fr

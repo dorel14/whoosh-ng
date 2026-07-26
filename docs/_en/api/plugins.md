@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Plugins & Registry"
 nav_order: 6
 ---

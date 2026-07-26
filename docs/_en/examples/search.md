@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Search Examples"
 nav_order: 2
 ---

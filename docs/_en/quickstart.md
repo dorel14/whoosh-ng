@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Quickstart"
 nav_order: 10
 ---

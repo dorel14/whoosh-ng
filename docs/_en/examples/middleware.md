@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Middleware Examples"
 nav_order: 5
 ---

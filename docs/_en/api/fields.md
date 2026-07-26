@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Fields"
 nav_order: 2
 ---

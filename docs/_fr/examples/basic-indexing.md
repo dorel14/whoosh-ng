@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Indexation de base"
 lang: fr
 nav_order: 1

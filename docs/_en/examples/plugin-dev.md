@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Plugin Development"
 nav_order: 3
 ---

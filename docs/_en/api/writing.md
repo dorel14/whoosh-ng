@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Writing API"
 nav_order: 3
 ---

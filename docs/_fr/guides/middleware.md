@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Middleware"
 nav_order: 27
 lang: fr

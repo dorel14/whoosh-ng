@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Indexing"
 nav_order: 23
 ---

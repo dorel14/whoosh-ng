@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Démarrage rapide"
 nav_order: 10
 lang: fr
