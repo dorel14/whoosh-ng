@@ -1,6 +1,6 @@
 ---
 title: "Vector Search"
-nav_order: 29
+nav_order: 60
 ---
 
 # Vector Search

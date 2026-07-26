@@ -1,6 +1,6 @@
 ---
 title: "Autocomplete"
-nav_order: 3
+nav_order: 260
 ---
 
 # Autocomplete with Whoosh‑NG

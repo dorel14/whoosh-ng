@@ -1,6 +1,6 @@
 ---
 title: "Plugins"
-nav_order: 26
+nav_order: 50
 ---
 
 # Plugins

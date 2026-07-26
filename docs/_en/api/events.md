@@ -1,6 +1,6 @@
 ---
 title: "Event Bus & Hooks API"
-nav_order: 8
+nav_order: 160
 ---
 
 # Event Bus & Hooks API

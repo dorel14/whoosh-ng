@@ -1,6 +1,6 @@
 ---
 title: "Documentation Whoosh-NG"
-nav_order: 0
+nav_order: 1
 lang: fr
 ---
 

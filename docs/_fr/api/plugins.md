@@ -1,6 +1,6 @@
 ---
 title: "API Plugins"
-nav_order: 6
+nav_order: 180
 lang: fr
 ---
 

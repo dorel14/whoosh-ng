@@ -1,6 +1,6 @@
 ---
 title: "Plugins & Registry"
-nav_order: 6
+nav_order: 180
 ---
 
 # Plugins & Registry

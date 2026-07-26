@@ -1,6 +1,6 @@
 ---
 title: "Vector Search"
-nav_order: 5
+nav_order: 270
 ---
 
 # Vector Search with Whoosh‑NG

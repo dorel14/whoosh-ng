@@ -1,6 +1,6 @@
 ---
 title: "Migration Guide"
-nav_order: 32
+nav_order: 70
 ---
 
 # Migration Guide

@@ -1,6 +1,6 @@
 ---
 title: "Schema Design"
-nav_order: 22
+nav_order: 30
 ---
 
 # Schema Design

@@ -1,7 +1,7 @@
 ---
 title: "Indexation de base"
 lang: fr
-nav_order: 1
+nav_order: 200
 ---
 
 # Indexation de base

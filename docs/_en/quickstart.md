@@ -1,6 +1,6 @@
 ---
 title: "Quickstart"
-nav_order: 10
+nav_order: 2
 ---
 
 # Quick Start
