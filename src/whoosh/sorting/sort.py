@@ -29,6 +29,7 @@
 from array import array
 from collections import defaultdict
 
+
 def add_sortable(writer, fieldname, facet, column=None):
     """Adds a per-document value column to an existing field which was created
     without the ``sortable`` keyword argument.

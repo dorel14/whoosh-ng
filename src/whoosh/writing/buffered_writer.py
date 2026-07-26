@@ -31,6 +31,7 @@ import threading
 from whoosh.writing._base import IndexingError, groupmanager
 from whoosh.writing.writer import IndexWriter
 
+
 class BufferedWriter(IndexWriter):
     """Convenience class that acts like a writer but buffers added documents
     before dumping the buffered documents as a batch into the actual index.
@@ -219,6 +220,7 @@ class BufferedWriter(IndexWriter):
             return self.writer.is_deleted(docnum)
         else:
             return self._get_ram_reader().is_deleted(docnum - base)
+
 
 # Backwards compatibility with old name
 BatchWriter = BufferedWriter

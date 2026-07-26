@@ -156,4 +156,3 @@ def test_lmdb_backend_requires_lmdb_package() -> None:
 
     backend = LmdbBackend(":memory:")
     assert backend.name == "lmdb"
-

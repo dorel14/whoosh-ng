@@ -36,6 +36,7 @@ from whoosh.util.text import rcompile
 
 from whoosh.qparser.plugins._base import Plugin, TaggingPlugin
 
+
 class BoostPlugin(TaggingPlugin):
     """Adds the ability to boost clauses of the query using the circumflex.
 
@@ -103,6 +104,7 @@ class BoostPlugin(TaggingPlugin):
             newgroup.append(node)
         return newgroup
 
+
 class MultifieldPlugin(Plugin):
     """Converts any unfielded terms into OR clauses that search for the
     term in a specified list of fields.
@@ -150,6 +152,7 @@ class MultifieldPlugin(Plugin):
                 group[i] = self.group(newnodes)
         return group
 
+
 class FieldAliasPlugin(Plugin):
     """Adds the ability to use "aliases" of fields in the query string.
 
@@ -184,6 +187,7 @@ class FieldAliasPlugin(Plugin):
                 if fname in self.reverse:
                     node.set_fieldname(self.reverse[fname], override=True)
         return group
+
 
 class CopyFieldPlugin(Plugin):
     """Looks for basic syntax nodes (terms, prefixes, wildcards, phrases, etc.)
@@ -251,6 +255,7 @@ class CopyFieldPlugin(Plugin):
                     continue
             newgroup.append(node)
         return newgroup
+
 
 class PseudoFieldPlugin(Plugin):
     """This is an advanced plugin that lets you define "pseudo-fields" the user
@@ -374,4 +379,3 @@ class PseudoFieldPlugin(Plugin):
             newgroup.append(node)
 
         return newgroup
-

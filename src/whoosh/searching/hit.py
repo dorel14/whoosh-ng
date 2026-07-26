@@ -29,6 +29,7 @@
 from whoosh import classify
 from whoosh.searching._base import NoTermsException
 
+
 class Hit:
     """Represents a single search result ("hit") in a Results object.
 

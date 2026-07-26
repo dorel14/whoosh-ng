@@ -30,6 +30,7 @@ from abc import abstractmethod
 
 from whoosh.writing._base import IndexingError, groupmanager
 
+
 class IndexWriter:
     """High-level object for writing to an index.
 
@@ -268,7 +269,7 @@ class IndexWriter:
         # Check which of the supplied fields are unique
         unique_fields = [
             name
-            for name, field in self.schema.items()   # type: ignore[attr-defined]
+            for name, field in self.schema.items()  # type: ignore[attr-defined]
             if name in fields and field.unique  # type: ignore[attr-defined]
         ]
         return unique_fields
@@ -333,7 +334,7 @@ class IndexWriter:
                 uniqueterms = [(name, fields[name]) for name in unique_fields]
                 docs = s._find_unique(uniqueterms)
                 for docnum in docs:
-                     self.delete_document(docnum)
+                    self.delete_document(docnum)
 
         # Add the given fields
         self.add_document(**fields)
@@ -390,6 +391,7 @@ class IndexWriter:
         and unlocks the index.
         """
         pass
+
 
 def add_spelling(ix, fieldnames, commit=True):
     """Adds spelling files to an existing index that was created without

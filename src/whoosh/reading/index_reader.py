@@ -40,6 +40,7 @@ from whoosh.system import emptybytes
 from whoosh.reading._base import ReaderClosed, TermNotFound
 from whoosh.reading.term import MultiCursor, combine_terminfos
 
+
 class IndexReader:
     """Do not instantiate this object directly. Instead use Index.reader()."""
 
@@ -486,6 +487,7 @@ class IndexReader:
         """
 
         raise NotImplementedError
+
 
 class MultiReader(IndexReader):
     """Do not instantiate this object directly. Instead use Index.reader()."""

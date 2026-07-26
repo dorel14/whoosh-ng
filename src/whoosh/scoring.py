@@ -1,4 +1,4 @@
-﻿# Copyright 2008 Matt Chaput. All rights reserved.
+# Copyright 2008 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -657,10 +657,7 @@ def weighting_from_name(name, **kwargs):
         key = name.lower()
         if key in _WEIGHTINGS:
             return _WEIGHTINGS[key](**kwargs)
-        raise ValueError(
-            f"Unknown weighting {name!r}; available: "
-            f"{sorted(set(_WEIGHTINGS))!r}"
-        )
+        raise ValueError(f"Unknown weighting {name!r}; available: {sorted(set(_WEIGHTINGS))!r}")
 
     raise ValueError(f"Cannot interpret weighting {name!r}")
 
@@ -730,7 +727,12 @@ class PositionBoostWeighting(WeightingModel):
             return self.bm25f.scorer(searcher, fieldname, text, qf=qf)
 
         return PositionBoostScorer(
-            searcher, fieldname, text, self.bm25f, self.phrase_boost, self.k,
+            searcher,
+            fieldname,
+            text,
+            self.bm25f,
+            self.phrase_boost,
+            self.k,
         )
 
     def final(self, searcher, docnum, score):

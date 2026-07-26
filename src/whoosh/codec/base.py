@@ -680,18 +680,14 @@ class Segment:
                 raise
             except Exception as e:
                 dbfile.close()
-                raise IndexCorruptedError(
-                    f"Corrupted compound segment file {name!r}: {e}"
-                ) from e
+                raise IndexCorruptedError(f"Corrupted compound segment file {name!r}: {e}") from e
             return
 
         files = self.list_files(storage)
         if not files:
             from whoosh.index import IndexCorruptedError
 
-            raise IndexCorruptedError(
-                f"Segment {self.segment_id()} has no data files"
-            )
+            raise IndexCorruptedError(f"Segment {self.segment_id()} has no data files")
         for name in files:
             self._validate_named(storage, name)
 
@@ -708,15 +704,12 @@ class Segment:
         except IndexCorruptedError:
             raise
         except Exception as e:  # pragma: no cover - defensive
-            raise IndexCorruptedError(
-                f"Segment file {fname!r} could not be opened: {e}"
-            ) from e
+            raise IndexCorruptedError(f"Segment file {fname!r} could not be opened: {e}") from e
         try:
             if f.read(1) == b"":
                 raise IndexCorruptedError(f"Segment file {fname!r} is empty")
         finally:
             f.close()
-
 
 
 class WrappingSegment(Segment):

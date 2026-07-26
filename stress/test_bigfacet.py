@@ -5,6 +5,7 @@ import string
 from whoosh import fields, formats, index, query, sorting
 from whoosh.util import now
 
+
 def test_bigfacet():
     tagcount = 100
     doccount = 500000

@@ -40,6 +40,7 @@ from whoosh.util import now
 from whoosh.collectors.base import Collector, ilen
 from whoosh.collectors.matchers import WrappingCollector
 
+
 class FilterCollector(WrappingCollector):
     """A collector that lets you allow and/or restrict certain document numbers
     in the results::
@@ -161,6 +162,7 @@ class FilterCollector(WrappingCollector):
         r.restricted = self.restrict
         return r
 
+
 class FacetCollector(WrappingCollector):
     """A collector that creates groups of documents based on
     :class:` whoosh.sorting.Facet` objects. See :doc:`/facets` for more
@@ -246,6 +248,7 @@ class FacetCollector(WrappingCollector):
         r = self.child.results()
         r._facetmaps = self.facetmaps
         return r
+
 
 class CollapseCollector(WrappingCollector):
     """A collector that collapses results based on a facet. That is, it
@@ -401,6 +404,7 @@ class CollapseCollector(WrappingCollector):
         r.collapsed_counts = self.collapsed_counts
         return r
 
+
 class TimeLimitCollector(WrappingCollector):
     """A collector that raises a :class:`TimeLimit` exception if the search
     does not complete within a certain number of seconds::
@@ -498,6 +502,7 @@ class TimeLimitCollector(WrappingCollector):
         self.timer = None
         self.child.finish()
 
+
 class TermsCollector(WrappingCollector):
     """A collector that remembers which terms appeared in which terms appeared
     in each matched document.
@@ -561,4 +566,3 @@ class TermsCollector(WrappingCollector):
         r.termdocs = dict(self.termdocs)
         r.docterms = dict(self.docterms)
         return r
-

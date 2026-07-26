@@ -9,6 +9,7 @@ from whoosh.support.bench import Bench, Spec
 
 class WhooshLikeSpec(Spec):
     """Mixin giving Spec subclasses a complete Whoosh index/search lifecycle."""
+
     default_query = ""
 
     def whoosh_schema(self):
@@ -65,7 +66,9 @@ class WhooshLikeSpec(Spec):
                 try:
                     headline = hit[self.headline_field]
                 except KeyError:
-                    headline = hit.get(self.main_field, str(hit)) if hasattr(hit, "get") else str(hit)
+                    headline = (
+                        hit.get(self.main_field, str(hit)) if hasattr(hit, "get") else str(hit)
+                    )
                 print(f"  {i + 1}. {headline}")
                 if getattr(self.options, "showbody", False):
                     try:

@@ -37,4 +37,3 @@ src/**/*.tmp
 
 # Pre-commit log artifact
 precommit.log
-

@@ -33,10 +33,12 @@ from whoosh.util import fib
 # written), and returns an updated segment list (not including the segment
 # being written).
 
+
 def NO_MERGE(writer, segments):
     """This policy does not merge any existing segments."""
     _ = writer
     return segments
+
 
 def MERGE_SMALL(writer, segments):
     """This policy merges small segments, where "small" is defined using a
@@ -73,6 +75,7 @@ def MERGE_SMALL(writer, segments):
     else:
         return segments
 
+
 def OPTIMIZE(writer, segments):
     """This policy merges all existing segments."""
 
@@ -84,6 +87,7 @@ def OPTIMIZE(writer, segments):
         reader.close()
     return []
 
+
 def CLEAR(writer, segments):
     """This policy DELETES all existing segments and only writes the new
     segment.
@@ -91,4 +95,3 @@ def CLEAR(writer, segments):
     _ = writer
 
     return []
-

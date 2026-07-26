@@ -36,6 +36,7 @@ from whoosh.util.text import rcompile
 
 from whoosh.qparser.plugins._base import Plugin, TaggingPlugin
 
+
 class RangePlugin(Plugin):
     """Adds the ability to specify term ranges."""
 

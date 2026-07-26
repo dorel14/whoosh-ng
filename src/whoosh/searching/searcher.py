@@ -36,6 +36,7 @@ from whoosh.searching.context import SearchContext
 from whoosh.searching.results import Results
 from whoosh.searching.results_page import ResultsPage
 
+
 class Searcher:
     """Wraps an :class:`~whoosh.reading.IndexReader` object and provides
     methods for searching the index.

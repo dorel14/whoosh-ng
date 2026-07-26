@@ -25,8 +25,13 @@ class PrefixRewritePlugin(QueryRewritePlugin):
         manager.register_query_rewriter(self)
 
     def rewrite(self, query, searcher):
-        if query.__class__.__name__ == "Term" and query.text and not query.text.startswith("prefix:"):
+        if (
+            query.__class__.__name__ == "Term"
+            and query.text
+            and not query.text.startswith("prefix:")
+        ):
             from whoosh.query import Term
+
             return Term(query.fieldname, f"prefix:{query.text}")
         return query
 

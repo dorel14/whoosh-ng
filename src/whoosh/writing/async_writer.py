@@ -33,6 +33,7 @@ from whoosh.index import LockError
 from whoosh.writing._base import IndexingError, groupmanager
 from whoosh.writing.writer import IndexWriter
 
+
 class AsyncWriter(threading.Thread, IndexWriter):
     """Convenience wrapper for a writer object that might fail due to locking
     (i.e. the ``filedb`` writer). This object will attempt once to obtain the
@@ -161,9 +162,7 @@ class AsyncWriter(threading.Thread, IndexWriter):
 
     def commit(self, *args, **kwargs):
         if self.committed:
-            raise RuntimeError(
-                "AsyncWriter.commit() has already been called; this writer is spent"
-            )
+            raise RuntimeError("AsyncWriter.commit() has already been called; this writer is spent")
         if self.writer:
             self.writer.commit(*args, **kwargs)
             self.committed = True

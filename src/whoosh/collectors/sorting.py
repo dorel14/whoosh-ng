@@ -39,6 +39,7 @@ from whoosh.util import now
 
 from whoosh.collectors.base import Collector
 
+
 class SortingCollector(Collector):
     """A collector that returns results sorted by a given
     :class:` whoosh.sorting.Facet` object. See :doc:`/facets` for more

@@ -47,7 +47,9 @@ def _available_specs() -> list[str]:
 
 def main(argv: Sequence[str] | None = None) -> int:
     available = _available_specs()
-    parser = argparse.ArgumentParser(prog="python -m benchmark", description="Whoosh-NG benchmark runner")
+    parser = argparse.ArgumentParser(
+        prog="python -m benchmark", description="Whoosh-NG benchmark runner"
+    )
     parser.add_argument(
         "--spec",
         choices=available,
@@ -58,11 +60,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--search", action="store_true", help="Run querying benchmark")
     parser.add_argument("--ranking", action="store_true", help="Run ranking benchmark")
     parser.add_argument("--dir", default=".", help="Working directory for index/data")
-    parser.add_argument("--report", choices=["csv", "json", "none"], default="none", help="Report format")
-    parser.add_argument("--report-path", default="benchmark_report", help="Report file path (without extension)")
+    parser.add_argument(
+        "--report", choices=["csv", "json", "none"], default="none", help="Report format"
+    )
+    parser.add_argument(
+        "--report-path", default="benchmark_report", help="Report file path (without extension)"
+    )
     parser.add_argument("--limit", type=int, default=10, help="Max search results to retrieve")
     parser.add_argument("--procs", type=int, default=0, help="Number of processors for indexing")
-    parser.add_argument("--limitmb", type=int, default=128, help="Max memory usage per writer in MB")
+    parser.add_argument(
+        "--limitmb", type=int, default=128, help="Max memory usage per writer in MB"
+    )
     parser.add_argument("--every", default=None, help="Report progress every N docs")
     parser.add_argument("--merge", default=1, help="Merge policy (1=SMALL, 0=none)")
     parser.add_argument("--chunk", default=0, help="Chunk size for indexing progress")

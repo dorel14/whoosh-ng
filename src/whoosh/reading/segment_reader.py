@@ -41,6 +41,7 @@ from whoosh.system import emptybytes
 from whoosh.reading.index_reader import IndexReader
 from whoosh.reading._base import ReaderClosed, TermNotFound
 
+
 class SegmentReader(IndexReader):
     def __init__(self, storage, schema, segment, generation=None, codec=None):
         self.schema = schema
@@ -335,6 +336,7 @@ class SegmentReader(IndexReader):
             creader = columns.TranslatingColumnReader(creader, fcv)
 
         return creader
+
 
 class EmptyReader(IndexReader):
     def __init__(self, schema):
