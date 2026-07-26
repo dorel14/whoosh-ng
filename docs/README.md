@@ -1,4 +1,3 @@
-<!-- docs/README.md -->
 ---
 color_scheme: dark
 title: "Whoosh-NG Documentation"

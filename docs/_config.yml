@@ -32,6 +32,38 @@ just_the_docs:
     fr:
       name: Français
       nav_fold: true
+  nav:
+    - Home: /
+    - English:
+        - Quick Start: /en/quickstart/
+        - Installation: /en/guides/installation/
+        - Core Concepts: /en/guides/core-concepts/
+        - Indexing: /en/guides/indexing/
+        - Searching: /en/guides/searching/
+        - Schema Design: /en/guides/schema/
+        - Query Language: /en/guides/query/
+        - Middleware: /en/guides/middleware/
+        - Backends: /en/guides/backends/
+        - Plugins: /en/guides/plugins/
+        - Autocomplete: /en/guides/autocomplete/
+        - Vector Search: /en/guides/vector/
+        - Monitoring: /en/guides/monitoring/
+        - Migration: /en/guides/migration/
+        - API Overview: /en/api/overview/
+        - Core API: /en/api/core/
+        - Fields: /en/api/fields/
+        - Writing API: /en/api/writing/
+        - Searching API: /en/api/searching/
+        - Query API: /en/api/query/
+        - Events: /en/api/events/
+        - Middleware API: /en/api/middleware/
+        - Plugins API: /en/api/plugins/
+        - Backends API: /en/api/backends/
+        - Modern API: /en/api/modern/
+        - Examples: /en/examples/
+    - Français:
+        - Démarrage rapide: /fr/quickstart/
+        - Installation: /fr/guides/installation/
   footer_content: "Whoosh-NG Documentation | Last updated: 2026-07-26"
 
 # Collections for organized content
