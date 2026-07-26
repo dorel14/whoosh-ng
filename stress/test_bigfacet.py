@@ -34,6 +34,7 @@ def test_bigfacet():
 
     # Ensure segments are written before opening searcher
     import time
+
     time.sleep(1)
 
     ix = index.open_dir(dirname)
