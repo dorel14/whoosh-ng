@@ -7,6 +7,9 @@ description: Pure-Python full-text indexing and search library, modernized for 2
 lang: en
 timezone: UTC
 
+# Global dark theme (applies to all pages)
+color_scheme: dark
+
 # GitHub Pages: base URL (repo name for project pages)
 baseurl: "/whoosh-ng"
 #url: "https://dorel14.github.io"
@@ -19,11 +22,18 @@ permalink: pretty
 # Use remote theme for Just the Docs (GitHub Pages compatible)
 remote_theme: just-the-docs/just-the-docs
 
+# Site favicon and logo (served from docs/assets/)
+favicon_ico: "/assets/favico.ico"
+logo: "/assets/logo.png"
+
 # Just the Docs theme configuration
 just_the_docs:
+  # Search
   search_enabled: true
   search_preview: true
-  heading_break: 360
+  heading_break: 360  # include headings up to h3 in search preview
+
+  # Collections navigation
   nav_sort: case_insensitive
   collections:
     en:
@@ -33,6 +43,7 @@ just_the_docs:
       name: Français
       nav_fold: true
 
+  # Footer
   footer_content: "Whoosh-NG Documentation | Last updated: 2026-07-26"
 
 # Collections for organized content
@@ -43,10 +54,6 @@ collections:
   fr:
     output: true
     sort_by: nav_order
-
-# Site favicon and logo (served from docs/assets/)
-favicon_ico: "/assets/favico.ico"
-logo: "/assets/logo.png"
 
 # Default front matter for markdown files
 defaults:
@@ -106,3 +113,14 @@ plugins:
 # SEO and social
 github_username: dorel14
 repository: whoosh-ng
+
+# Permalink style (clean URLs)
+permalink: pretty
+
+# Kramdown settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
