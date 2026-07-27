@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Modern API"
-nav_order: 10
-parent: "API Reference"
+nav_order: 190
 ---
 
 # Modern API
@@ -167,3 +165,4 @@ from whoosh_modern.autocomplete.plugin import AutocompletePlugin
 ```
 
 Registers autocomplete providers.
+

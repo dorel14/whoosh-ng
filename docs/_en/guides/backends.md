@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Backends"
-nav_order: 28
-parent: "Guides"
+nav_order: 45
 ---
 
 # Backends
@@ -120,3 +118,4 @@ Choose a backend based on your use case:
 3. **Memory for tests**: Fast, no cleanup needed
 4. **Compound files**: Enable for reduced file count
 5. **Backup strategy**: File backend = copy directory; SQLite = copy file
+

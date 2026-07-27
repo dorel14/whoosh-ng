@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Recherche Vectorielle"
-parent: "Exemples"
-nav_order: 5
+nav_order: 270
 lang: fr
 ---
 
@@ -99,3 +97,4 @@ print(restored == tuple(values))  # True
 - `NumpyProvider` implémente la similarité cosinus.
 - Enregistrez le plugin via `VectorPlugin().register(manager)`.
 - Utilisez `filter_ids` dans `provider.search()` pour restreindre les documents.
+

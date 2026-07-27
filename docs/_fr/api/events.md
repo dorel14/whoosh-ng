@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Events"
-nav_order: 8
-parent: "Référence API"
+nav_order: 160
 lang: fr
 ---
 
@@ -99,3 +97,4 @@ def on_error(event: SearchExecuted):
     if event.result_count == 0:
         logger.warning(f"Recherche vide: {event.query}")
 ```
+

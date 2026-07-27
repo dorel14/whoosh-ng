@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Core"
-nav_order: 1
-parent: "Référence API"
+nav_order: 110
 lang: fr
 ---
 
@@ -94,3 +92,4 @@ except LockError:
 ### IndexMissingError
 
 Levée quand l'index n'existe pas.
+

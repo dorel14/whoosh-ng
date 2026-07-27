@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Middleware"
-nav_order: 27
-parent: "Guides"
+nav_order: 40
 lang: fr
 ---
 
@@ -154,3 +152,4 @@ class ResilientMiddleware(Middleware):
 3. **L'ordre compte**: Placez le cache avant les métriques, l'auth avant le routage
 4. **Performance**: Gardez les hooks légers; utilisez async pour les I/O
 5. **Testabilité**: Mockez le contexte pour tester le middleware isolément
+

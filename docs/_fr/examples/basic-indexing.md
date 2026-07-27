@@ -1,9 +1,7 @@
 ---
-color_scheme: dark
 title: "Indexation de base"
-parent: "Exemples"
 lang: fr
-nav_order: 1
+nav_order: 200
 ---
 
 # Indexation de base
@@ -77,3 +75,4 @@ with ix.writer() as writer:
     writer.delete_by_term("path", "/2")
     writer.commit()
 ```
+

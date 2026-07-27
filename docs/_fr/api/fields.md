@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Champs"
-nav_order: 2
-parent: "Référence API"
+nav_order: 120
 lang: fr
 ---
 
@@ -176,3 +174,4 @@ schema = (
 | `scorable` | `bool` | Stocke la longueur pour BM25F |
 | `stored` | `bool` | Stocke la valeur |
 | `unique` | `bool` | Identifie les documents de façon unique |
+

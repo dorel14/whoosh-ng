@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Autocomplete"
-parent: "Examples"
-nav_order: 3
+nav_order: 260
 ---
 
 # Autocomplete with Whoosh‑NG
@@ -89,3 +87,4 @@ async def suggest(q: str, limit: int = 5):
 - Use `KEYWORD` fields to store multi-value tags/terms.
 - Register `AutocompletePlugin` to enable suggestions.
 - The inverted index provider supports fuzzy matching (`maxdist`).
+

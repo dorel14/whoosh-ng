@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Searching API"
-nav_order: 4
-parent: "API Reference"
+nav_order: 140
 ---
 
 # Searching API
@@ -243,3 +241,4 @@ from whoosh import sorting
 facet = sorting.FieldFacet("category")
 results = searcher.search(query, sortedby="date")
 ```
+

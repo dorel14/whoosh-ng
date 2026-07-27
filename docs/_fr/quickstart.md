@@ -1,7 +1,6 @@
 ---
-color_scheme: dark
 title: "Démarrage rapide"
-nav_order: 10
+nav_order: 2
 lang: fr
 ---
 
@@ -45,3 +44,4 @@ from whoosh_modern.vector.plugin import VectorPlugin
 
 PluginManager.load_plugins()
 ```
+

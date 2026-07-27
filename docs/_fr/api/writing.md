@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Écriture"
-nav_order: 3
-parent: "Référence API"
+nav_order: 130
 lang: fr
 ---
 
@@ -159,3 +157,4 @@ class whoosh.writing.IndexingError(Exception)
 ```
 
 Levée quand une opération d'indexation échoue.
+

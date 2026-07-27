@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Translation Status"
 ---
 
@@ -13,3 +12,4 @@ title: "Translation Status"
 - [x] FR guides
 - [x] FR API pages
 - [x] FR examples
+

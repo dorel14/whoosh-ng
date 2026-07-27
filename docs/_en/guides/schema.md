@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Schema Design"
-parent: "Guides"
-nav_order: 22
+nav_order: 30
 ---
 
 # Schema Design
@@ -82,3 +80,4 @@ schema = (
 writer.add_field("summary", TEXT(stored=True))
 writer.remove_field("legacy_field")
 ```
+

@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Core Concepts"
-nav_order: 21
-parent: "Getting Started"
+nav_order: 15
 ---
 
 # Core Concepts
@@ -185,3 +183,4 @@ def on_document_indexed(event: DocumentIndexed):
 3. **Sync-first**: Core is synchronous; async is opt-in
 4. **Plugin isolation**: Plugins cannot break the core
 5. **Type safety**: Comprehensive type hints throughout
+

@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Exemples Middleware"
-parent: "Exemples"
-nav_order: 5
+nav_order: 230
 lang: fr
 ---
 
@@ -100,3 +98,4 @@ with ix.searcher() as base_searcher:
 | `after_search` | Recherche | Après le retour des résultats |
 | `on_error` | Erreur | En cas d'exception |
 | `on_commit` | Commit | Après writer.commit() |
+

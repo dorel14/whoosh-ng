@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Event Bus & Hooks API"
-nav_order: 8
-parent: "API Reference"
+nav_order: 160
 ---
 
 # Event Bus & Hooks API
@@ -192,3 +190,4 @@ registry = register_hook("before_search", before_search, registry)
 # Call all hooks
 results = call_hook("before_search", context, registry=registry)
 ```
+

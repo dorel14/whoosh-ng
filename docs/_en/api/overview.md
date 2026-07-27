@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Overview"
-nav_order: 0
-parent: "API Reference"
+nav_order: 100
 ---
 
 # API Overview
@@ -80,3 +78,4 @@ schema = Schema(
     count=NUMERIC(int, stored=True)
 )
 ```
+

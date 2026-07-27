@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Recherche"
-nav_order: 24
-parent: "Guides"
+nav_order: 25
 lang: fr
 ---
 
@@ -204,3 +202,4 @@ with ix.searcher() as s:
         print("Recherche annulée: trop lente")
     results = tlc.results()
 ```
+

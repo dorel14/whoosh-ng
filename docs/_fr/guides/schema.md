@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Conception de schéma"
-nav_order: 22
-parent: "Guides"
+nav_order: 30
 lang: fr
 ---
 
@@ -129,3 +127,4 @@ writer.commit()
 3. **Champs uniques**: Utilisez `unique=True` pour les identifiants
 4. **Boost de champ**: Boostez les champs importants au niveau schéma
 5. **TEXT options**: Désactivez `phrase` si vous n'avez pas besoin de recherche de phrase
+

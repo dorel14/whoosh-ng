@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Searching"
-nav_order: 24
-parent: "Guides"
+nav_order: 25
 ---
 
 # Searching
@@ -282,3 +280,4 @@ main_results = s.search(main_query, limit=10)
 # Merge: duplicates go to top, then append rest
 best_bet_results.upgrade_and_extend(main_results)
 ```
+

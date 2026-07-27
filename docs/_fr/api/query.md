@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Requêtes"
-nav_order: 5
-parent: "Référence API"
+nav_order: 150
 lang: fr
 ---
 
@@ -127,3 +125,4 @@ q = And([
     Phrase("content", ["tutoriel", "whoosh"])
 ])
 ```
+

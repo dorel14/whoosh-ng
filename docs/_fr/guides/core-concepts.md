@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Concepts fondamentaux"
-nav_order: 21
-parent: "Prise en main"
+nav_order: 15
 lang: fr
 ---
 
@@ -169,3 +167,4 @@ def on_document_indexed(event: DocumentIndexed):
 3. **Sync-first**: Le core est synchrone; async est optionnel
 4. **Isolation des plugins**: Les plugins ne peuvent pas casser le core
 5. **Sécurité des types**: Typage complet avec annotations
+

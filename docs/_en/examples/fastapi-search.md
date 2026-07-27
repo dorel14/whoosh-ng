@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "FastAPI Integration"
-parent: "Examples"
-nav_order: 4
+nav_order: 225
 ---
 
 # FastAPI Integration
@@ -120,8 +118,31 @@ async def index_docs(docs: list[dict]):
     return {"indexed": len(docs)}
 ```
 
+## 7. Alternative: WhooshFastAPI Class
+
+For more control, use the `WhooshFastAPI` class directly:
+
+```python
+from fastapi import FastAPI
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID
+from whoosh.qparser import QueryParser
+from whoosh_fastapi import WhooshFastAPI
+
+app = FastAPI()
+
+schema = Schema(title=TEXT(stored=True), content=TEXT)
+ix = index.create_in("indexdir", schema)
+
+api = WhooshFastAPI(ix)
+api.register_search_endpoint("/search", "content")
+api.register_index_endpoint("/documents", schema)
+```
+
 ## Key points
 
 - `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, and `/autocomplete` endpoints.
 - All blocking calls run off the event loop via `run_sync`.
 - Use `BufferedWriter` for high-throughput indexing via POST.
+- `WhooshFastAPI` class offers per-endpoint registration for custom integrations.
+

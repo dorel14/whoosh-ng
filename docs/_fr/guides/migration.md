@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Guide de migration"
-nav_order: 32
-parent: "Prise en main"
+nav_order: 70
 lang: fr
 ---
 
@@ -100,3 +98,4 @@ writer = apply_middleware_to_writer(ix.writer(), [LoggingMiddleware()])
 ## Compatibilité
 
 Whoosh-NG 4.0 maintient la compatibilité ascendante. Si vous trouvez un changement cassant, signalez-le comme une issue.
+

@@ -1,5 +1,4 @@
 ---
-color_scheme: dark
 title: "Middleware Architecture"
 nav_order: 40
 ---
@@ -54,3 +53,4 @@ Middlewares execute in order for before hooks, in reverse order for after hooks:
 before: M1 -> M2 -> M3 -> core
 after:  core -> M3 -> M2 -> M1
 ```
+

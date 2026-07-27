@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Indexing"
-nav_order: 23
-parent: "Guides"
+nav_order: 20
 ---
 
 # Indexing
@@ -211,3 +209,4 @@ with apply_middleware_to_writer(ix.writer(), chain.middlewares) as writer:
 3. **Choose merge policy wisely**: `MERGE_SMALL` is usually fine; use `NO_MERGE` for bulk loads followed by `OPTIMIZE`
 4. **Handle locks**: Use `BufferedWriter` or `AsyncWriter` in multi-process environments
 5. **Don't forget to close**: Always call `commit()` or `cancel()` to release the write lock
+

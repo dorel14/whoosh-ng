@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Vue d'ensemble API"
-nav_order: 0
-parent: "Référence API"
+nav_order: 100
 lang: fr
 ---
 
@@ -74,3 +72,4 @@ schema = Schema(
     compte=NUMERIC(int, stored=True)
 )
 ```
+

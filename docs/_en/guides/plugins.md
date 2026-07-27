@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Plugins"
-nav_order: 26
-parent: "Guides"
+nav_order: 50
 ---
 
 # Plugins
@@ -155,3 +153,4 @@ class FastAPIPlugin(BasePlugin):
 3. **Handle conflicts**: Check for existing registrations before adding
 4. **Clean up**: Implement `teardown()` to remove registries and middleware
 5. **Version your plugin**: Semver for compatibility checking
+

@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Développement de Plugins"
-parent: "Exemples"
-nav_order: 3
+nav_order: 240
 lang: fr
 ---
 
@@ -136,3 +134,4 @@ from whoosh_modern.autocomplete.plugin import AutocompletePlugin
 
 PluginManager.load_plugins()
 ```
+

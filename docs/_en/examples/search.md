@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Search Examples"
-parent: "Examples"
-nav_order: 2
+nav_order: 210
 ---
 
 # Search Examples
@@ -119,3 +117,4 @@ with ix.searcher() as s:
 - `search_page()` handles pagination.
 - `filter` restricts results without affecting scores.
 - `sortedby` sorts by field value or relevance score.
+

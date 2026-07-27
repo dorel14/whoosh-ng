@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Middleware API"
-nav_order: 7
-parent: "API Reference"
+nav_order: 170
 ---
 
 # Middleware API
@@ -310,3 +308,4 @@ def apply_middleware_to_searcher(
     middleware: list[Middleware] = None
 ) -> MiddlewareSearcher
 ```
+

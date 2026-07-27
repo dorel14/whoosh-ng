@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Query Language"
-nav_order: 25
-parent: "Guides"
+nav_order: 35
 ---
 
 # Query Language
@@ -205,3 +203,4 @@ class CustomQuery(Query):
         # Return a custom matcher
         return CustomMatcher(searcher, self)
 ```
+

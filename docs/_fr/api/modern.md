@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Moderne"
-nav_order: 10
-parent: "Référence API"
+nav_order: 190
 lang: fr
 ---
 
@@ -114,3 +112,4 @@ metrics = chain.get_metrics()
 print(metrics)
 # {"documents_indexed": 10, "searches_executed": 5}
 ```
+

@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Core API"
-nav_order: 1
-parent: "API Reference"
+nav_order: 110
 ---
 
 # Core API
@@ -340,3 +338,4 @@ Raised when an indexing operation fails.
 class whoosh.index.LockError(Exception)
 class whoosh.index.IndexMissingError(Exception)
 ```
+

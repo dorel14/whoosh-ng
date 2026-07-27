@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Plugins"
-nav_order: 6
-parent: "Référence API"
+nav_order: 180
 lang: fr
 ---
 
@@ -105,3 +103,4 @@ provider = VectorRegistry.get("numpy", "mon_app")
 ```python
 class PluginNotFoundError(Exception)
 ```
+

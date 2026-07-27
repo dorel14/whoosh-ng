@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Middleware"
-nav_order: 7
-parent: "Référence API"
+nav_order: 170
 lang: fr
 ---
 
@@ -123,3 +121,4 @@ class MiddlewareError(Exception)
 class StopOperation(Exception)
 class SkipOperation(Skip)
 ```
+

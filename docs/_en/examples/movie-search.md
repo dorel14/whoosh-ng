@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Movie Search App"
-parent: "Examples"
-nav_order: 6
+nav_order: 250
 ---
 
 # Movie Search Application
@@ -142,3 +140,4 @@ with ix.searcher() as s:
 - `MultifieldParser` searches multiple fields with optional boosts.
 - `FieldFacet` enables faceted grouping and sorting.
 - `hit.highlights()` returns highlighted snippets ready for display.
+

@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Middleware Examples"
-parent: "Examples"
-nav_order: 5
+nav_order: 230
 ---
 
 # Middleware Examples
@@ -116,3 +114,4 @@ class LifecycleMiddleware(Middleware):
 | `after_search` | Search | After results returned |
 | `on_error` | Error | When exception occurs |
 | `on_commit` | Commit | After writer.commit() |
+

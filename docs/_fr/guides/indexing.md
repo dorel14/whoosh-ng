@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Indexation"
-nav_order: 23
-parent: "Guides"
+nav_order: 20
 lang: fr
 ---
 
@@ -75,3 +73,4 @@ writer.commit()
 - Commutez par lots pour de meilleures performances
 - Utilisez `BufferedWriter` en environnement multi-processus
 - Libérez toujours le verrou avec `commit()` ou `cancel()`
+

@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Installation"
-nav_order: 20
-parent: "Getting Started"
+nav_order: 10
 ---
 
 # Installation
@@ -52,5 +50,6 @@ uv run mypy src/whoosh
 
 ## Next Steps
 
-- [Quick Start](/en/quickstart)
-- [Core Concepts](/en/guides/core-concepts)
+- [Quick Start]({{ '/en/quickstart/' | relative_url }})
+- [Core Concepts]({{ '/en/guides/core-concepts/' | relative_url }})
+

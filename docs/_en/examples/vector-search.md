@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Vector Search"
-parent: "Examples"
-nav_order: 5
+nav_order: 270
 ---
 
 # Vector Search with Whoosh‑NG
@@ -107,3 +105,4 @@ print(restored == tuple(values))  # True
 - `NumpyProvider` implements cosine similarity via dot product.
 - Register the plugin via `VectorPlugin().register(manager)` or use `PluginManager.load_plugins()`.
 - Use `filter_ids` in `provider.search()` to restrict to a subset of documents.
+

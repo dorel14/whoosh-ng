@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Plugin Development"
-parent: "Examples"
-nav_order: 3
+nav_order: 240
 ---
 
 # Plugin Development
@@ -209,3 +207,4 @@ manager = PluginManager()
 manager.register(VectorPlugin())
 manager.register(AutocompletePlugin())
 ```
+

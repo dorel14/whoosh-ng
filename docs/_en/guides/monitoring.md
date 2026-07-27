@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Monitoring"
-nav_order: 31
-parent: "Guides"
+nav_order: 65
 ---
 
 # Monitoring
@@ -43,3 +41,4 @@ pip install whoosh-ng[metrics]
 2. Expose `/metrics` in production.
 3. Use `/health` for load balancer health checks.
 4. Emit `DocumentIndexed` and `SearchExecuted` events.
+

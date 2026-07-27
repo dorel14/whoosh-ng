@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Recherche"
-parent: "Exemples"
-nav_order: 2
+nav_order: 210
 lang: fr
 ---
 
@@ -119,3 +117,4 @@ with ix.searcher() as s:
 - `search_page()` pour la pagination.
 - `filter` pour les filtres (ne pas inclure dans le score).
 - `sortedby` pour trier par champ ou score.
+

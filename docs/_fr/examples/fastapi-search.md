@@ -1,14 +1,12 @@
 ---
-color_scheme: dark
 title: "Intégration FastAPI"
-parent: "Exemples"
-nav_order: 4
+nav_order: 225
 lang: fr
 ---
 
 # Intégration FastAPI
 
-Un service FastAPI complet exposant la recherche Whoosh‑NG via HTTP.
+Un service FastAPI complet exposant la recherche Whoosh-NG via HTTP.
 
 ## 1. Installation
 
@@ -16,7 +14,7 @@ Un service FastAPI complet exposant la recherche Whoosh‑NG via HTTP.
 pip install "whoosh-ng[api]" fastapi uvicorn
 ```
 
-## 2. Créer l’index
+## 2. Créer l'index
 
 ```python
 # setup_index.py
@@ -54,7 +52,7 @@ from whoosh_fastapi import create_app
 
 ix = index.open_dir("docs_index")
 
-# Utiliser l’aide
+# Option A: Utiliser l'aide
 app = create_app(ix, prefix="/api/v1")
 
 # Option B: endpoints manuels
@@ -82,7 +80,7 @@ if __name__ == "__main__":
 uvicorn main:app --reload --port 8000
 ```
 
-## 5. Tester l’API
+## 5. Tester l'API
 
 ```bash
 # Vérification de santé
@@ -92,9 +90,32 @@ curl http://localhost:8000/api/v1/health
 curl -X POST http://localhost:8000/api/v1/search \
   -H "Content-Type: application/json" \
   -d '{"q": "python recherche"}'
+
+# Get document by ID
+curl http://localhost:8000/api/v1/documents/doc1
+
+# Autocomplétion
+curl "http://localhost:8000/api/v1/autocomplete?q=py"
+```
+
+## 6. Indexation en lot
+
+```python
+# Ajouter à main.py pour l'indexation dynamique
+from fastapi import FastAPI
+from whoosh.writing import BufferedWriter
+
+@app.post("/api/v1/index")
+async def index_docs(docs: list[dict]):
+    with BufferedWriter(ix, period=30, limit=50) as w:
+        for doc in docs:
+            w.add_document(**doc)
+    return {"indexed": len(docs)}
 ```
 
 ## Points clés
 
 - `create_app()` de `whoosh_fastapi` fournit les endpoints `/health`, `/search` et `/autocomplete`.
-- Tous les appels bloquants s’exécutent hors boucle d’événements via `run_sync`.
+- Tous les appels bloquants s'exécutent hors boucle d'événements via `run_sync`.
+- Utilisez `BufferedWriter` pour l'indexation en masse.
+- `WhooshFastAPI` classe offre une enregistrement par endpoint pour les intégrations personnalisées.

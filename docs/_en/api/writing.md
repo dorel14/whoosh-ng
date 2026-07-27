@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Writing API"
-nav_order: 3
-parent: "API Reference"
+nav_order: 130
 ---
 
 # Writing API
@@ -244,3 +242,4 @@ class whoosh.writing.IndexingError(Exception)
 ```
 
 Raised when an indexing operation fails.
+

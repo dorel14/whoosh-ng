@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Fields"
-nav_order: 2
-parent: "API Reference"
+nav_order: 120
 ---
 
 # Fields API
@@ -342,3 +340,4 @@ schema = (
 - `whoosh.fields.NUMERIC`: Numeric field
 - `whoosh.fields.DATETIME`: Date/time field
 - `whoosh.fields.BOOLEAN`: Boolean field
+

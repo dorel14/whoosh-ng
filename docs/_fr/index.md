@@ -1,7 +1,6 @@
 ---
-color_scheme: dark
 title: "Documentation Whoosh-NG"
-nav_order: 0
+nav_order: 1
 lang: fr
 ---
 
@@ -38,3 +37,4 @@ with ix.searcher() as s:
 - Pipeline de middleware pour les préoccupations transversales
 - Support de recherche vectorielle (NumPy, HNSW, Faiss)
 - Support asynchrone via extra optionnel
+

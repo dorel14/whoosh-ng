@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Plugins & Registry"
-nav_order: 6
-parent: "API Reference"
+nav_order: 180
 ---
 
 # Plugins & Registry
@@ -159,3 +157,4 @@ Register a value.
 ---
 
 ##### `un
+

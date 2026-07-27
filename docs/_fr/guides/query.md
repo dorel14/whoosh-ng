@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Langage de requête"
-nav_order: 25
-parent: "Guides"
+nav_order: 35
 lang: fr
 ---
 
@@ -120,3 +118,4 @@ q = qp.parse("python recherche")
 titre\:python              # Deux-points littéral
 chemin\:\/\/exemple        # Échapper les caractères spéciaux
 ```
+

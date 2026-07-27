@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Autocomplétion"
-nav_order: 30
-parent: "Guides"
+nav_order: 55
 lang: fr
 ---
 
@@ -40,3 +38,4 @@ provider = AutocompleteProvider(ix, "query")
 suggestions = provider.suggest("de", limit=5)
 print(suggestions)  # ["demarrage python", ...]
 ```
+

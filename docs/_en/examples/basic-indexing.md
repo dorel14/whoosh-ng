@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Basic Indexing"
-parent: "Exemples"
-nav_order: 1
+nav_order: 200
 ---
 
 # Basic Indexing
@@ -115,3 +113,4 @@ try:
 finally:
     buffered.close()
 ```
+

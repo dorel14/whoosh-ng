@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "API Backends"
-nav_order: 9
-parent: "Référence API"
+nav_order: 185
 lang: fr
 ---
 
@@ -97,3 +95,4 @@ from whoosh.registry import ProviderRegistry
 
 ProviderRegistry.register("sqlite", SQLiteBackend(), "mon_app")
 ```
+

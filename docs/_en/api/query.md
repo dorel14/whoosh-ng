@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Query API"
-nav_order: 5
-parent: "API Reference"
+nav_order: 150
 ---
 
 # Query API
@@ -301,3 +299,4 @@ class whoosh.qparser.QueryParserError(Exception)
 ```
 
 Raised on parse errors.
+

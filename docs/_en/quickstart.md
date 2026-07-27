@@ -1,7 +1,6 @@
 ---
-color_scheme: dark
 title: "Quickstart"
-nav_order: 10
+nav_order: 2
 ---
 
 # Quick Start
@@ -44,3 +43,4 @@ from whoosh_modern.vector.plugin import VectorPlugin
 
 PluginManager.load_plugins()
 ```
+

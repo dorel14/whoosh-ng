@@ -1,8 +1,6 @@
 ---
-color_scheme: dark
 title: "Backends API"
-nav_order: 9
-parent: "API Reference"
+nav_order: 185
 ---
 
 # Backends API
@@ -109,3 +107,4 @@ Register backends:
 BackendRegistry.register("my_backend", MyBackendClass, "my_package")
 backend = BackendRegistry.get("my_backend")
 ```
+
