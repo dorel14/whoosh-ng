@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2012 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -167,3 +168,4 @@ class SimpleVersion(BaseVersion):
         exnum = n & 1023
 
         return cls(major, minor, release, ex, exnum)
+

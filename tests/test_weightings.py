@@ -78,7 +78,7 @@ def test_compatibility():
     schema = fields.Schema(text=fields.TEXT)
     ix = RamStorage().create_index(schema)
     w = ix.writer()
-    domain = "alfa bravo charlie delta".split()
+    domain = ["alfa", "bravo", "charlie", "delta"]
     for ls in permutations(domain, 3):
         w.add_document(text=u(" ").join(ls))
     w.commit()

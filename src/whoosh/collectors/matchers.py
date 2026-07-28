@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,11 +34,11 @@ from array import array
 from bisect import insort
 from collections import defaultdict
 from heapq import heapify, heappush, heapreplace
+
 from whoosh import sorting
+from whoosh.collectors.base import Collector, ilen
 from whoosh.searching import Results, TimeLimit
 from whoosh.util import now
-
-from whoosh.collectors.base import Collector, ilen
 
 
 class ScoredCollector(Collector):
@@ -319,3 +320,4 @@ class WrappingCollector(Collector):
 
     def results(self):
         return self.child.results()
+

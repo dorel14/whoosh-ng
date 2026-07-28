@@ -13,11 +13,7 @@ if len(sys.argv) < 2:
 indexdir = sys.argv[1]
 print("Reading checkpoint index in", indexdir)
 
-words = (
-    "alfa bravo charlie delta echo foxtrot golf hotel india"
-    "juliet kilo lima mike november oskar papa quebec romeo"
-    "sierra tango"
-).split()
+words = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel", "indiajuliet", "kilo", "lima", "mike", "november", "oskar", "papa", "quebec", "romeosierra", "tango"]
 
 deleted = ("0/42", "1/6", "2/80")
 
@@ -31,12 +27,12 @@ with ix.searcher() as s:
         num = sf["num"]
         r = s.search(query.Term("num", num), limit=None)
         assert len(r) == 1
-        assert r[0]["num"] == num
+        assert r[0]["num"] == num  # type: ignore[call-arg]
 
         frac = sf["frac"]
         r = s.search(query.Term("frac", frac), limit=None)
         assert len(r) == 1
-        assert r[0]["frac"] == frac
+        assert r[0]["frac"] == frac  # type: ignore[call-arg]
 
         dt = sf["dt"]
         q = query.Term("dt", dt)
@@ -45,6 +41,6 @@ with ix.searcher() as s:
             for hit in r:
                 print(hit.fields())
         assert len(r) == 1, len(r)
-        assert r[0]["dt"] == dt
+        assert r[0]["dt"] == dt  # type: ignore[call-arg]
 
 print("Done")

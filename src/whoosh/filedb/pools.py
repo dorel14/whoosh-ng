@@ -1,3 +1,4 @@
+# type: ignore
 # ===============================================================================
 # Copyright 2010 Matt Chaput
 #
@@ -462,3 +463,4 @@ class MultiPool(PoolBase):
 
 if __name__ == "__main__":
     pass
+

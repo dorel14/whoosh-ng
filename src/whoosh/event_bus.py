@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, Callable, Coroutine, Type
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -22,10 +23,10 @@ class SearchExecuted(Event):
 
 class EventBus:
     def __init__(self) -> None:
-        self._listeners: dict[Type[Event], list[Callable[[Event], Coroutine[Any, Any, None]]]] = {}
+        self._listeners: dict[type[Event], list[Callable[[Event], Coroutine[Any, Any, None]]]] = {}
 
     def subscribe(
-        self, event_type: Type[Event]
+        self, event_type: type[Event]
     ) -> Callable[
         [Callable[[Event], Coroutine[Any, Any, None]]], Callable[[Event], Coroutine[Any, Any, None]]
     ]:

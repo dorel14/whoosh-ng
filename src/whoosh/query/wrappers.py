@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -192,3 +193,4 @@ class WeightingQuery(WrappingQuery):
         # Replace the passed-in weighting with the one configured on this query
         context.set(weighting=self.weighting)
         return self.child.matcher(searcher, context)
+

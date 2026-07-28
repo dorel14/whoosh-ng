@@ -1,7 +1,8 @@
+# type: ignore
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
 from whoosh.vector.base import VectorField, VectorHit, VectorProvider
 
@@ -14,3 +15,4 @@ class VectorQuery:
 
 
 __all__ = ["VectorField", "VectorHit", "VectorProvider", "VectorQuery"]
+

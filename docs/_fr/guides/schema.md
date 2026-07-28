@@ -120,6 +120,69 @@ writer.commit()
 
 > Note: Supprimer un champ ne fait que le retirer du schéma. Les données ne sont libérées qu'à l'optimisation.
 
+## Modèles de recherche
+
+Whoosh-NG peut mapper automatiquement des modèles Python (dataclasses, Pydantic, SQLAlchemy, SQLModel, msgspec) vers un `Schema` Whoosh via `ModelIndex`.
+
+### Niveau 1 : Auto-mapping
+
+```python
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
+
+@dataclass
+class Book:
+    title: str
+    count: int
+    tag: str | None = None
+
+idx = ModelIndex(Book)
+schema = idx.schema
+```
+
+### Niveau 2 : Options explicites
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True)
+    count: int = SearchField(sortable=True)
+    tag: str = SearchField(multi=True)
+```
+
+### Intégrations
+
+```python
+# Pydantic
+from whoosh_modern.models import register_model
+from pydantic import BaseModel
+
+class BookModel(BaseModel):
+    title: str
+    year: int
+
+idx = register_model(BookModel)
+
+# SQLAlchemy
+from sqlalchemy import Column, Integer, String
+from whoosh_modern.models import register_model
+
+class BookSQL:
+    __tablename__ = "book"
+    title = Column(String, info={"search": {"fulltext": True}})
+    year = Column(Integer, info={"search": {"sortable": True}})
+
+idx = register_model(BookSQL)
+```
+
+### Conversion d'instances
+
+```python
+doc = idx.to_whoosh_document(book_instance)
+writer.add_document(**doc)
+```
+
 ## Bonnes pratiques
 
 1. **Minimal**: N'indexez que ce que vous cherchez

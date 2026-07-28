@@ -33,26 +33,17 @@ before.
 """
 
 from whoosh.fields.base import (
-    FieldConfigurationError,
-    FieldType,
-    UnknownFieldError,
-    ensure_schema,
-    merge_fielddict,
-    merge_schema,
-    merge_schemas,
+                                FieldConfigurationError,
+                                FieldType,
+                                UnknownFieldError,
+                                ensure_schema,
+                                merge_fielddict,
+                                merge_schema,
+                                merge_schemas,
 )
-from whoosh.fields.numeric import (
-    BOOLEAN,
-    COLUMN,
-    DATETIME,
-    ID,
-    IDLIST,
-    KEYWORD,
-    NUMERIC,
-    STORED,
-)
+from whoosh.fields.numeric import BOOLEAN, COLUMN, DATETIME, ID, IDLIST, KEYWORD, NUMERIC, STORED
 from whoosh.fields.schema import MetaSchema, Schema, SchemaClass
-from whoosh.fields.text import NGRAM, NGRAMWORDS, SpellField, TEXT
+from whoosh.fields.text import NGRAM, NGRAMWORDS, TEXT, SpellField
 from whoosh.fields.wrappers import FieldWrapper, ReverseField
 from whoosh.util.times import datetime_to_long, long_to_datetime
 

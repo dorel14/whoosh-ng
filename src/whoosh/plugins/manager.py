@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import logging
 from abc import ABC
+from collections.abc import Awaitable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Awaitable, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 if TYPE_CHECKING:
     from whoosh.middleware.chain import MiddlewareChain  # type: ignore[import]
     from whoosh.query import Query  # type: ignore[import]
 
-from whoosh.hooks import register_hook, HookImpl  # type: ignore[import]
+from whoosh.hooks import HookImpl, register_hook  # type: ignore[import]
 from whoosh.utils.async_utils import is_async_callable, run_async_from_sync  # type: ignore[import]
-
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class Plugin(ABC):
     priority: int = 0
     middleware: list[str] = []
 
-    def register(self, manager: "PluginManager") -> None:
+    def register(self, manager: PluginManager) -> None:
         pass
 
     def register_hooks(self) -> None:
@@ -50,7 +50,7 @@ class AnalyzerPlugin(Plugin):
     ``register()`` to register one or more analyzers with the manager.
     """
 
-    def register(self, manager: "PluginManager") -> None:
+    def register(self, manager: PluginManager) -> None:
         raise NotImplementedError
 
 
@@ -61,7 +61,7 @@ class QueryRewritePlugin(Plugin):
     modified or replacement query.
     """
 
-    def rewrite(self, query: "Query", searcher: Any) -> "Query":
+    def rewrite(self, query: Query, searcher: Any) -> Query:
         return query
 
 
@@ -87,8 +87,6 @@ class PluginManager:
         eps = entry_points()
         if hasattr(eps, "select"):
             group_eps = eps.select(group=group)
-        elif hasattr(eps, "get"):
-            group_eps = eps.get(group, [])
         else:
             group_eps = [ep for ep in eps if getattr(ep, "group", None) == group]
         for ep in group_eps:
@@ -143,7 +141,7 @@ class PluginManager:
             return False
         return name2 in getattr(plugin, "conflicts_with", [])
 
-    def get_middleware_chain(self) -> "MiddlewareChain":
+    def get_middleware_chain(self) -> MiddlewareChain:
         """Return a MiddlewareChain containing all plugin middleware, sorted by priority."""
         from whoosh.middleware.chain import MiddlewareChain
 

@@ -1,3 +1,4 @@
+# type: ignore
 """This module contains tools for working with Sphinx charset table files. These files
 are useful for doing case and accent folding.
 See :class:`whoosh.analysis.CharsetTokenizer` and :class:`whoosh.analysis.CharsetFilter`.
@@ -1372,3 +1373,4 @@ def charset_table_to_dict(tablestring):
 
             raise Exception(f"Don't know what to do with {item!r}")
     return dict(map)
+

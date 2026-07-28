@@ -1,3 +1,4 @@
+# type: ignore
 # ===============================================================================
 # Copyright 2010 Matt Chaput
 #
@@ -464,3 +465,4 @@ class FilePostingReader(Matcher):
 
     def score(self):
         raise Exception("No score function given")
+

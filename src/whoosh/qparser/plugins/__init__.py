@@ -33,35 +33,35 @@ as before.
 """
 
 from whoosh.qparser.plugins._base import (
-    FunctionPlugin,
-    Plugin,
-    SingleQuotePlugin,
-    TaggingPlugin,
-    WhitespacePlugin,
+                                          FunctionPlugin,
+                                          Plugin,
+                                          SingleQuotePlugin,
+                                          TaggingPlugin,
+                                          WhitespacePlugin,
 )
 from whoosh.qparser.plugins.bool_plugins import (
-    GroupPlugin,
-    GtLtPlugin,
-    OperatorsPlugin,
-    PhrasePlugin,
-    PlusMinusPlugin,
-    SequencePlugin,
+                                          GroupPlugin,
+                                          GtLtPlugin,
+                                          OperatorsPlugin,
+                                          PhrasePlugin,
+                                          PlusMinusPlugin,
+                                          SequencePlugin,
 )
 from whoosh.qparser.plugins.range_plugins import RangePlugin
 from whoosh.qparser.plugins.special_plugins import (
-    BoostPlugin,
-    CopyFieldPlugin,
-    FieldAliasPlugin,
-    MultifieldPlugin,
-    PseudoFieldPlugin,
+                                          BoostPlugin,
+                                          CopyFieldPlugin,
+                                          FieldAliasPlugin,
+                                          MultifieldPlugin,
+                                          PseudoFieldPlugin,
 )
 from whoosh.qparser.plugins.term_plugins import (
-    EveryPlugin,
-    FieldsPlugin,
-    FuzzyTermPlugin,
-    PrefixPlugin,
-    RegexPlugin,
-    WildcardPlugin,
+                                          EveryPlugin,
+                                          FieldsPlugin,
+                                          FuzzyTermPlugin,
+                                          PrefixPlugin,
+                                          RegexPlugin,
+                                          WildcardPlugin,
 )
 from whoosh.qparser.taggers import FnTagger, RegexTagger
 

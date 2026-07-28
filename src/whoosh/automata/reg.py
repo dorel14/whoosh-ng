@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2014 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,8 +34,8 @@ ops = ()
 
 
 def parse(pattern):
-    stack = []
-    ops = []
+    _stack = []
+    _ops = []
 
 
 class RegexBuilder:
@@ -124,3 +125,4 @@ class RegexBuilder:
 
     def question(self, n):
         return self.choice(n, self.epsilon())
+

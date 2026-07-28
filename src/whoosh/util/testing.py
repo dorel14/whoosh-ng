@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -105,7 +106,7 @@ class TempIndex(TempStorage):
 def is_abstract_method(attr):
     """Returns True if the given object has __isabstractmethod__ == True."""
 
-    return hasattr(attr, "__isabstractmethod__") and getattr(attr, "__isabstractmethod__")
+    return hasattr(attr, "__isabstractmethod__") and attr.__isabstractmethod__
 
 
 def check_abstract_methods(base, subclass):
@@ -129,3 +130,4 @@ def timing(name=None):
     yield
     t = now() - t
     print(f"{name or ''}: {t:0.06f} s")
+

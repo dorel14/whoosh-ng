@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any, Optional, Tuple
+from typing import Any
 
 from whoosh.index import Index, LockError
 from whoosh.locking import AsyncLock
@@ -37,7 +37,7 @@ class AsyncWriter(IndexWriter):
     :meth:`acancel` to discard the buffered calls instead of committing.
     """
 
-    def __init__(self, index: Index, delay: float = 0.25, writerargs: Optional[dict] = None):
+    def __init__(self, index: Index, delay: float = 0.25, writerargs: dict | None = None):
         """
         :param index: the :class:`whoosh.index.Index` to write to.
         :param delay: the delay (in seconds) between attempts to instantiate the
@@ -49,15 +49,15 @@ class AsyncWriter(IndexWriter):
         self.index = index
         self.writerargs = writerargs or {}
         self.delay = delay
-        self.events: list[Tuple[str, Tuple[Any, ...], dict]] = []
+        self.events: list[tuple[str, tuple[Any, ...], dict]] = []
 
         self._lock = AsyncLock()
         self._started = False
         self._committed = False
         self._cancelled = False
-        self._error: Optional[BaseException] = None
-        self._writer: Optional[IndexWriter] = None
-        self._done: Optional["asyncio.Future[Any]"] = None
+        self._error: BaseException | None = None
+        self._writer: IndexWriter | None = None
+        self._done: asyncio.Future[Any] | None = None
 
         try:
             self._writer = self.index.writer(**self.writerargs)
@@ -76,7 +76,7 @@ class AsyncWriter(IndexWriter):
 
     # -- buffering ----------------------------------------------------------
 
-    def _record(self, method: str, args: Tuple[Any, ...], kwargs: dict) -> None:
+    def _record(self, method: str, args: tuple[Any, ...], kwargs: dict) -> None:
         if self._writer is not None:
             # We already hold the underlying writer, so apply immediately.
             getattr(self._writer, method)(*args, **kwargs)
@@ -86,10 +86,10 @@ class AsyncWriter(IndexWriter):
     def delete_document(self, *args, **kwargs):
         self._record("delete_document", args, kwargs)
 
-    def add_document(self, **fields):  # type: ignore[override]
+    def add_document(self, **fields):
         self._record("add_document", (), fields)
 
-    def update_document(self, **fields):  # type: ignore[override]
+    def update_document(self, **fields):
         self._record("update_document", (), fields)
 
     def add_field(self, *args, **kwargs):
@@ -98,10 +98,10 @@ class AsyncWriter(IndexWriter):
     def remove_field(self, *args, **kwargs):
         self._record("remove_field", args, kwargs)
 
-    def delete_by_term(self, *args, **kwargs):
+    def delete_by_term(self, *args, **kwargs):  # pyright: ignore[reportIncompatibleMethodOverride]
         self._record("delete_by_term", args, kwargs)
 
-    def add_reader(self, reader):  # type: ignore[override]
+    def add_reader(self, reader):
         # Passed straight through; replaying a reader is not buffered.
         if self._writer is not None:
             self._writer.add_reader(reader)
@@ -112,7 +112,7 @@ class AsyncWriter(IndexWriter):
     # -- background work ----------------------------------------------------
 
     def _run(
-        self, commit_args: Tuple[Any, ...], commit_kwargs: dict, timeout: Optional[float]
+        self, commit_args: tuple[Any, ...], commit_kwargs: dict, timeout: float | None
     ) -> None:
         """Synchronous work executed on a worker thread via ``run_in_executor``."""
 
@@ -143,7 +143,7 @@ class AsyncWriter(IndexWriter):
 
     # -- public async API ---------------------------------------------------
 
-    async def commit(self, *args: Any, timeout: Optional[float] = None, **kwargs: Any) -> None:
+    async def commit(self, *args: Any, timeout: float | None = None, **kwargs: Any) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Replay the buffered calls and commit the index asynchronously.
 
         :param timeout: maximum time (seconds) to wait for the commit to
@@ -178,7 +178,7 @@ class AsyncWriter(IndexWriter):
             assert self._done is not None
             try:
                 await asyncio.wait_for(asyncio.shield(self._done), timeout)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # The commit is still running in the worker thread; surface the
                 # timeout but do not leave the object in an inconsistent state.
                 raise TimeoutError(
@@ -189,7 +189,7 @@ class AsyncWriter(IndexWriter):
         if self._error is not None:
             raise self._error
 
-    async def wait(self, timeout: Optional[float] = None) -> bool:
+    async def wait(self, timeout: float | None = None) -> bool:
         """Wait for a background commit to finish; re-raise any failure.
 
         :returns: ``True`` if the commit completed successfully.
@@ -217,3 +217,4 @@ class AsyncWriter(IndexWriter):
                 self._committed = True
             else:
                 self._cancelled = True
+

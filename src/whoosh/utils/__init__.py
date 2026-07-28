@@ -1,9 +1,9 @@
 from whoosh.utils.async_utils import (
-    call_maybe_async,
-    is_async_callable,
-    maybe_await,
-    run_async_from_sync,
-    run_sync,
+                                      call_maybe_async,
+                                      is_async_callable,
+                                      maybe_await,
+                                      run_async_from_sync,
+                                      run_sync,
 )
 
 __all__ = [

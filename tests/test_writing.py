@@ -181,7 +181,7 @@ def test_buffered_update():
 
 
 def test_buffered_threads():
-    domain = "alfa bravo charlie delta".split()
+    domain = ["alfa", "bravo", "charlie", "delta"]
     schema = fields.Schema(name=fields.ID(unique=True, stored=True))
     with TempIndex(schema, "buffthreads") as ix:
         w = writing.BufferedWriter(ix, limit=10)
@@ -710,10 +710,10 @@ def test_temp_storage_concurrent():
     # issue #391: concurrent temp-storage creation must yield ISOLATED,
     # non-colliding scratch storages (no shared files, no destroyed-data
     # races between writers).
-    from whoosh.filedb.filestore import FileStorage
-
     import shutil
     import tempfile
+
+    from whoosh.filedb.filestore import FileStorage
 
     d = tempfile.mkdtemp()
     try:

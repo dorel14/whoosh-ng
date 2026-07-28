@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2011 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -259,7 +260,7 @@ class MpWriter(SegmentWriter):
                 for fname, text, docnum, weight, value in gen
             )
 
-    def commit(self, mergetype=None, optimize=None, merge=None):
+    def commit(self, mergetype=None, optimize=None, merge=None, callback=None):
         if self._added_sub:
             # If documents have been added to sub-writers, use the parallel
             # merge commit code
@@ -397,3 +398,4 @@ class MultiSegmentWriter(MpWriter):
     def __init__(self, *args, **kwargs):
         MpWriter.__init__(self, *args, **kwargs)
         self.multisegment = True
+

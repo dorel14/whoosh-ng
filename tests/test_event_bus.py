@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from whoosh.event_bus import DocumentIndexed, Event, EventBus, event_bus, SearchExecuted
+from whoosh.event_bus import DocumentIndexed, Event, EventBus, SearchExecuted, event_bus
 
 
 @pytest.fixture(autouse=True)

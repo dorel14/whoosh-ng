@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,32 +34,32 @@ before.
 """
 
 from whoosh.highlight.formatters import (
-    Formatter,
-    GenshiFormatter,
-    HtmlFormatter,
-    NullFormatter,
-    UppercaseFormatter,
-    top_fragments,
+                                         Formatter,
+                                         GenshiFormatter,
+                                         HtmlFormatter,
+                                         NullFormatter,
+                                         UppercaseFormatter,
+                                         top_fragments,
 )
 from whoosh.highlight.fragmenters import (
-    BasicFragmentScorer,
-    ContextFragmenter,
-    FIRST,
-    Fragment,
-    Fragmenter,
-    FragmentScorer,
-    LONGER,
-    PinpointFragmenter,
-    SCORE,
-    SHORTER,
-    SentenceFragmenter,
-    WholeFragmenter,
-    DEFAULT_CHARLIMIT,
-    get_text,
-    mkfrag,
-    set_matched_filter,
-    set_matched_filter_phrases,
-    NullFragmeter,
+                                         DEFAULT_CHARLIMIT,
+                                         FIRST,
+                                         LONGER,
+                                         SCORE,
+                                         SHORTER,
+                                         BasicFragmentScorer,
+                                         ContextFragmenter,
+                                         Fragment,
+                                         Fragmenter,
+                                         FragmentScorer,
+                                         NullFragmeter,
+                                         PinpointFragmenter,
+                                         SentenceFragmenter,
+                                         WholeFragmenter,
+                                         get_text,
+                                         mkfrag,
+                                         set_matched_filter,
+                                         set_matched_filter_phrases,
 )
 from whoosh.highlight.highlighters import Highlighter, highlight
 
@@ -89,3 +90,4 @@ __all__ = (
     "NullFragmeter",
     "DEFAULT_CHARLIMIT",
 )
+

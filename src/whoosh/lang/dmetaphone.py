@@ -1,3 +1,4 @@
+# type: ignore
 # This script implements the Double Metaphone algorythm (c) 1998, 1999 by
 # Lawrence Philips. It was translated to Python from the C source written by
 # Kevin Atkinson (http://aspell.net/metaphone/) By Andrew Collins - January 12,
@@ -202,10 +203,7 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
                 text[pos + 1] == "Y"
                 or text[pos + 1 : pos + 3]
                 in ["ES", "EP", "EB", "EL", "EY", "IB", "IL", "IN", "IE", "EI", "ER"]
-            ):
-                next = ("K", "J", 2)
-            # -ger-,  -gy-
-            elif (
+            ) or (
                 (text[pos + 1 : pos + 2] == "ER" or text[pos + 1] == "Y")
                 and text[first : first + 6] not in ["DANGER", "RANGER", "MANGER"]
                 and text[pos - 1] not in ["E", "I"]
@@ -397,9 +395,7 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
                 else:
                     next = next + (1,)
         elif ch == "T":
-            if text[pos : pos + 4] == "TION":
-                next = ("X", 3)
-            elif text[pos : pos + 3] in ["TIA", "TCH"]:
+            if text[pos : pos + 4] == "TION" or text[pos : pos + 3] in ["TIA", "TCH"]:
                 next = ("X", 3)
             elif text[pos : pos + 2] == "TH" or text[pos : pos + 3] == "TTH":
                 # special case 'thomas', 'thames' or germanic
@@ -487,3 +483,5 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
         return (primary, None)
     else:
         return (primary, secondary)
+
+

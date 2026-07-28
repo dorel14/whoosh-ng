@@ -1,3 +1,4 @@
+from datetime import UTC
 from itertools import permutations
 from random import choice, randint, sample
 
@@ -455,7 +456,7 @@ def test_random_andnot():
 
 
 def test_current_terms():
-    domain = "alfa bravo charlie delta".split()
+    domain = ["alfa", "bravo", "charlie", "delta"]
     schema = fields.Schema(text=fields.TEXT(stored=True))
     ix = RamStorage().create_index(schema)
     w = ix.writer()
@@ -502,8 +503,8 @@ def test_exclusion():
 
     schema = fields.Schema(id=fields.ID(stored=True), date=fields.DATETIME)
     ix = RamStorage().create_index(schema)
-    dt1 = datetime(1950, 1, 1, tzinfo=timezone.utc)
-    dt2 = datetime(1960, 1, 1, tzinfo=timezone.utc)
+    dt1 = datetime(1950, 1, 1, tzinfo=UTC)
+    dt2 = datetime(1960, 1, 1, tzinfo=UTC)
     with ix.writer() as w:
         # Make 39 documents with dates != dt1 and then make a last document
         # with feed == dt1.

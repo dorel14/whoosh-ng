@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import struct
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Generic, Iterable, Sequence, TypeVar
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 

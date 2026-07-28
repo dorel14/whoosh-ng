@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2025 Whoosh-NG contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,7 +27,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
 
 from whoosh.query import qcore
 from whoosh.query.terms import Prefix
@@ -73,3 +74,4 @@ def suggestions(
     if scorer == "frequency":
         return sorted(candidates, key=lambda t: (-reader.doc_frequency(fieldname, t), t))[:limit]
     return sorted(candidates)[:limit]
+

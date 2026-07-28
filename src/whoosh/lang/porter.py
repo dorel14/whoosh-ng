@@ -98,9 +98,7 @@ def stem(w):
 
     # Step 1a
     if w.endswith("s"):
-        if w.endswith("sses"):
-            w = w[:-2]
-        elif w.endswith("ies"):
+        if w.endswith("sses") or w.endswith("ies"):
             w = w[:-2]
         elif w[-2] != "s":
             w = w[:-1]

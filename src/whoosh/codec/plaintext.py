@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2012 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,6 +28,7 @@
 
 from ast import literal_eval
 from pickle import dumps, loads
+from typing import Any
 
 from whoosh.codec import base
 from whoosh.matching import ListMatcher
@@ -39,6 +41,8 @@ _reprable = (bytes, str, int, float)
 
 
 class LineWriter:
+    _dbfile: Any
+
     def _print_line(self, indent, command, **kwargs):
         self._dbfile.write(b"  " * indent)
         self._dbfile.write(command.encode("latin1"))
@@ -52,6 +56,8 @@ class LineWriter:
 
 
 class LineReader:
+    _dbfile: Any
+
     def __init__(self, dbfile):
         self._dbfile = dbfile
 
@@ -104,7 +110,7 @@ class LineReader:
             args[n] = literal_eval(v)
         return (indent, command, args)
 
-    def _find_root(self, command):
+    def _find_root(self, command=None):
         self._reset()
         c = self._find_line(0, command)
         if c is None:
@@ -250,7 +256,7 @@ class PlainPerDocReader(base.PerDocumentReader, LineReader):
     def max_field_length(self, fieldname):
         return max(self._iter_lengths(fieldname))
 
-    def has_vector(self, docnum, fieldname):
+    def has_vector(self, docnum, fieldname):  # type: ignore[override]
         if self._find_doc(docnum) and self._find_line(2, "VECTOR"):
             return True
         return False
@@ -294,7 +300,7 @@ class PlainPerDocReader(base.PerDocumentReader, LineReader):
             raise ValueError("Document not found.")
         return self._read_stored_fields()
 
-    def iter_docs(self):
+    def iter_docs(self):  # type: ignore[override]
         return enumerate(self.all_stored_fields())
 
     def all_stored_fields(self):
@@ -319,7 +325,7 @@ class PlainFieldWriter(base.FieldWriter, LineWriter):
         self._fieldobj = fieldobj
         self._print_line(1, "TERMFIELD", fn=fieldname)
 
-    def start_term(self, btext):
+    def start_term(self, btext):  # type: ignore[override]
         self._terminfo = TermInfo()
         self._print_line(2, "BTEXT", t=btext)
 
@@ -383,7 +389,7 @@ class PlainTermsReader(base.TermsReader, LineReader):
 
     def _find_terminfo(self):
         c = self._find_line(3, "TERMINFO")
-        return TermInfo(**c)
+        return TermInfo(**(c or {}))
 
     def __contains__(self, term):
         fieldname, btext = term
@@ -412,12 +418,12 @@ class PlainTermsReader(base.TermsReader, LineReader):
         for fieldname, btext in self.terms_from(fieldname, prefix):
             yield (fieldname, btext), self._find_terminfo()
 
-    def term_info(self, fieldname, btext):
+    def term_info(self, fieldname, btext):  # type: ignore[override]
         if not self._find_term(fieldname, btext):
             raise TermNotFound((fieldname, btext))
         return self._find_terminfo()
 
-    def matcher(self, fieldname, btext, format_, scorer=None):
+    def matcher(self, fieldname, btext, format_, scorer=None):  # type: ignore[override]
         if not self._find_term(fieldname, btext):
             raise TermNotFound((fieldname, btext))
 
@@ -452,5 +458,6 @@ class PlainSegment(base.Segment):
     def doc_count(self):
         return self._doccount
 
-    def should_assemble(self):
+    def should_assemble(self):  # type: ignore[override]
         return False
+

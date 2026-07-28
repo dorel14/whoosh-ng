@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,8 +31,8 @@ from collections import deque
 from heapq import nlargest
 from html import escape as htmlescape
 from itertools import groupby
-from whoosh.analysis import Token
 
+from whoosh.analysis import Token
 from whoosh.highlight.formatters import (
     Formatter,
     HtmlFormatter,
@@ -236,3 +237,4 @@ class Highlighter:
         fragments = top_fragments(fragments, top, self.scorer, self.order, minscore=minscore)
         output = self.formatter.format(fragments)
         return output
+

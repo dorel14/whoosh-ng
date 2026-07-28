@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2011 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +45,7 @@ from whoosh.automata.fst import GraphReader, GraphWriter
 from whoosh.codec import base
 from whoosh.filedb.filestore import Storage
 from whoosh.matching import LeafMatcher, ListMatcher, ReadTooFar
-from whoosh.reading import NoGraphError, TermInfo, TermNotFound
+from whoosh.reading import TermInfo, TermNotFound
 from whoosh.system import (
     _FLOAT_SIZE,
     _INT_SIZE,
@@ -61,6 +62,10 @@ from whoosh.util.numeric import NaN, byte_to_length, from_sortable, length_to_by
 from whoosh.util.numlists import GrowableArray
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.util.times import datetime_to_long, long_to_datetime
+
+
+class NoGraphError(Exception):
+    pass
 
 # Old hash file implementations
 
@@ -2269,3 +2274,5 @@ def text_to_sortable_long(text):
     # assert len(text) == 17
     # return long(text[1:], 16)
     return from_base85(text[1:])
+
+

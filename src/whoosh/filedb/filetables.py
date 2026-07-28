@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2009 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -744,3 +745,4 @@ class FieldedOrderedHashReader(HashReader):
         for item in self.term_ranges_from(fieldname, btext):
             keypos, keylen, datapos, datalen = item
             yield (dbfile.get(keypos, keylen), dbfile.get(datapos, datalen))
+

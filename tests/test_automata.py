@@ -339,7 +339,7 @@ def test_minimize_dfa():
 
 
 def test_strings_dfa():
-    strings = "able alfa alpha apple bar bear beat boom boot".split()
+    strings = ["able", "alfa", "alpha", "apple", "bar", "bear", "beat", "boom", "boot"]
     dfa = fsa.strings_dfa(strings)
     output = list(dfa.generate_all())
     assert output == strings

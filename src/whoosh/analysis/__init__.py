@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -62,47 +63,47 @@ a filter first or a tokenizer after the first item).
 
 from whoosh.analysis.acore import Composable, CompositionError, Token, entoken, unstopped
 from whoosh.analysis.analyzers import (
-    Analyzer,
-    FancyAnalyzer,
-    IDAnalyzer,
-    KeywordAnalyzer,
-    LanguageAnalyzer,
-    RegexAnalyzer,
-    SimpleAnalyzer,
-    StandardAnalyzer,
-    StemmingAnalyzer,
+                                   Analyzer,
+                                   FancyAnalyzer,
+                                   IDAnalyzer,
+                                   KeywordAnalyzer,
+                                   LanguageAnalyzer,
+                                   RegexAnalyzer,
+                                   SimpleAnalyzer,
+                                   StandardAnalyzer,
+                                   StemmingAnalyzer,
 )
 from whoosh.analysis.filters import (
-    STOP_WORDS,
-    CharsetFilter,
-    Composable,
-    DelimitedAttributeFilter,
-    Filter,
-    LoggingFilter,
-    LowercaseFilter,
-    MultiFilter,
-    PassFilter,
-    ReverseTextFilter,
-    StopFilter,
-    StripFilter,
-    SubstitutionFilter,
-    TeeFilter,
-    url_pattern,
+                                   STOP_WORDS,
+                                   CharsetFilter,
+                                   Composable,
+                                   DelimitedAttributeFilter,
+                                   Filter,
+                                   LoggingFilter,
+                                   LowercaseFilter,
+                                   MultiFilter,
+                                   PassFilter,
+                                   ReverseTextFilter,
+                                   StopFilter,
+                                   StripFilter,
+                                   SubstitutionFilter,
+                                   TeeFilter,
+                                   url_pattern,
 )
 from whoosh.analysis.intraword import (
-    BiWordFilter,
-    CompoundWordFilter,
-    IntraWordFilter,
-    ShingleFilter,
+                                   BiWordFilter,
+                                   CompoundWordFilter,
+                                   IntraWordFilter,
+                                   ShingleFilter,
 )
 from whoosh.analysis.morph import DoubleMetaphoneFilter, PyStemmerFilter, StemFilter
 from whoosh.analysis.ngrams import NgramAnalyzer, NgramFilter, NgramTokenizer, NgramWordAnalyzer
 from whoosh.analysis.tokenizers import (
-    CharsetTokenizer,
-    CommaSeparatedTokenizer,
-    IDTokenizer,
-    PathTokenizer,
-    RegexTokenizer,
-    SpaceSeparatedTokenizer,
-    Tokenizer,
+                                   CharsetTokenizer,
+                                   CommaSeparatedTokenizer,
+                                   IDTokenizer,
+                                   PathTokenizer,
+                                   RegexTokenizer,
+                                   SpaceSeparatedTokenizer,
+                                   Tokenizer,
 )

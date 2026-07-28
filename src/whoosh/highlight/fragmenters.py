@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,6 +31,7 @@ from collections import deque
 from heapq import nlargest
 from html import escape as htmlescape
 from itertools import groupby
+
 from whoosh.analysis import Token
 
 DEFAULT_CHARLIMIT = 2**15
@@ -613,3 +615,4 @@ def get_text(original, token, replace):
         return token.text
     else:
         return original[token.startchar : token.endchar]
+

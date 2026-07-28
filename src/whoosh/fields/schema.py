@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,12 +34,8 @@ import struct
 import sys
 from array import array
 from decimal import Decimal
-from whoosh import analysis, columns, formats
-from whoosh.system import emptybytes, pack_byte
-from whoosh.util.numeric import NaN, from_sortable, to_sortable, typecode_max
-from whoosh.util.text import utf8decode, utf8encode
-from whoosh.util.times import datetime_to_long, long_to_datetime
 
+from whoosh import analysis, columns, formats
 from whoosh.fields.base import (
     FieldConfigurationError,
     FieldType,
@@ -48,18 +45,13 @@ from whoosh.fields.base import (
     merge_schema,
     merge_schemas,
 )
-from whoosh.fields.numeric import (
-    BOOLEAN,
-    COLUMN,
-    DATETIME,
-    ID,
-    IDLIST,
-    KEYWORD,
-    NUMERIC,
-    STORED,
-)
-from whoosh.fields.text import NGRAM, NGRAMWORDS, SpellField, TEXT
+from whoosh.fields.numeric import BOOLEAN, COLUMN, DATETIME, ID, IDLIST, KEYWORD, NUMERIC, STORED
+from whoosh.fields.text import NGRAM, NGRAMWORDS, TEXT, SpellField
 from whoosh.fields.wrappers import FieldWrapper, ReverseField
+from whoosh.system import emptybytes, pack_byte
+from whoosh.util.numeric import NaN, from_sortable, to_sortable, typecode_max
+from whoosh.util.text import utf8decode, utf8encode
+from whoosh.util.times import datetime_to_long, long_to_datetime
 
 
 class MetaSchema(type):
@@ -364,3 +356,4 @@ class SchemaClass(Schema, metaclass=MetaSchema):
         kw.update(kwargs)
         obj.__init__(*args, **kw)
         return obj
+

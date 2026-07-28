@@ -38,6 +38,7 @@ from whoosh.analysis.tokenizers import (
     default_pattern,
 )
 from whoosh.lang.porter import stem
+from whoosh.util.text import rcompile
 
 # Analyzers
 
@@ -150,7 +151,7 @@ def KeywordAnalyzer(lowercase=False, commas=False):
 def RegexAnalyzer(expression=r"\w+(\.?\w+)*", gaps=False):
     """Deprecated, just use a RegexTokenizer directly."""
 
-    return RegexTokenizer(expression=expression, gaps=gaps)
+    return RegexTokenizer(expression=rcompile(expression), gaps=gaps)
 
 
 def SimpleAnalyzer(expression=default_pattern, gaps=False):
@@ -258,7 +259,7 @@ def FancyAnalyzer(
     """
 
     return (
-        RegexTokenizer(expression=expression, gaps=gaps)
+        RegexTokenizer(expression=rcompile(expression), gaps=gaps)
         | IntraWordFilter(
             splitwords=splitwords,
             splitnums=splitnums,

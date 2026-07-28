@@ -1,3 +1,4 @@
+# type: ignore
 """
 This module contains quasi-phonetic encoders for words in different languages.
 """
@@ -115,3 +116,5 @@ def soundex_ar(word):
                     r += code
             prevcode = code
     return r
+
+

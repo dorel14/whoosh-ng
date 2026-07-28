@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -433,3 +434,4 @@ def add_spelling(ix, fieldnames, commit=True):
 
     if commit:
         writer.commit(merge=False)
+

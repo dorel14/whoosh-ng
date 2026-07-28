@@ -81,3 +81,74 @@ writer.add_field("summary", TEXT(stored=True))
 writer.remove_field("legacy_field")
 ```
 
+## Search Models
+
+Whoosh-NG can auto-map Python models (dataclasses, Pydantic, SQLAlchemy, SQLModel, msgspec) to a Whoosh `Schema` using `ModelIndex`.
+
+### Level 1: Auto-mapping
+
+```python
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
+
+@dataclass
+class Book:
+    title: str
+    count: int
+    tag: str | None = None
+
+idx = ModelIndex(Book)
+schema = idx.schema
+```
+
+### Level 2: Explicit options
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True)
+    count: int = SearchField(sortable=True)
+    tag: str = SearchField(multi=True)
+```
+
+### Integrations
+
+```python
+# Pydantic
+from whoosh_modern.models import register_model
+from pydantic import BaseModel
+
+class BookModel(BaseModel):
+    title: str
+    year: int
+
+idx = register_model(BookModel)
+
+# SQLAlchemy
+from sqlalchemy import Column, Integer, String
+from whoosh_modern.models import register_model
+
+class BookSQL:
+    __tablename__ = "book"
+    title = Column(String, info={"search": {"fulltext": True}})
+    year = Column(Integer, info={"search": {"sortable": True}})
+
+idx = register_model(BookSQL)
+```
+
+### Converting instances
+
+```python
+doc = idx.to_whoosh_document(book_instance)
+writer.add_document(**doc)
+```
+
+## Best practices
+
+1. **Minimal**: Only index what you search
+2. **STORED sparingly**: Increases index size
+3. **Unique fields**: Use `unique=True` for identifiers
+4. **Field boost**: Boost important fields at schema level
+5. **TEXT options**: Disable `phrase` if you don't need phrase search
+

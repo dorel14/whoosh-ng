@@ -1,4 +1,5 @@
 import copy
+from datetime import UTC
 
 import pytest
 
@@ -408,13 +409,13 @@ def test_highlight_daterange():
         id="1",
         title="Life Aquatic",
         content="A nautic film crew sets out to kill a gigantic shark.",
-        released=datetime(2004, 12, 25, tzinfo=timezone.utc),
+        released=datetime(2004, 12, 25, tzinfo=UTC),
     )
     w.update_document(
         id="2",
         title="Darjeeling Limited",
         content=("Three brothers meet in India for a life changing train " + "journey."),
-        released=datetime(2007, 10, 27, tzinfo=timezone.utc),
+        released=datetime(2007, 10, 27, tzinfo=UTC),
     )
     w.commit()
 
@@ -426,15 +427,13 @@ def test_highlight_daterange():
         r[0].highlights("content") == 'for a life changing <b class="match term0">train</b> journey'
     )
 
-    r = s.search(DateRange("released", datetime(2007, 1, 1, tzinfo=timezone.utc), None))
+    r = s.search(DateRange("released", datetime(2007, 1, 1, tzinfo=UTC), None))
     assert len(r) == 1
     assert r[0].highlights("content") == ""
 
 
 def test_patterns():
-    domain = (
-        "aaron able acre adage aether after ago ahi aim ajax akimbo alembic all amiga amount ampere"
-    ).split()
+    domain = ["aaron", "able", "acre", "adage", "aether", "after", "ago", "ahi", "aim", "ajax", "akimbo", "alembic", "all", "amiga", "amount", "ampere"]
     schema = fields.Schema(word=fields.KEYWORD(stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:

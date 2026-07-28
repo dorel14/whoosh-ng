@@ -1,3 +1,4 @@
+# type: ignore
 """
 Contains functions implementing edit distance algorithms.
 """
@@ -69,3 +70,4 @@ def relative(a, b):
 
 
 distance = damerau_levenshtein
+

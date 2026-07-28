@@ -209,8 +209,8 @@ def test_multivalue():
     schema = fields.Schema(s=fields.TEXT(sortable=True), n=fields.NUMERIC(sortable=True))
     ix = RamStorage().create_index(schema)
     with ix.writer(codec=W3Codec()) as w:
-        w.add_document(s="alfa foxtrot charlie".split(), n=[100, 200, 300])
-        w.add_document(s="juliet bravo india".split(), n=[10, 20, 30])
+        w.add_document(s=["alfa", "foxtrot", "charlie"], n=[100, 200, 300])
+        w.add_document(s=["juliet", "bravo", "india"], n=[10, 20, 30])
 
     with ix.reader() as r:
         scr = r.column_reader("s")
@@ -315,7 +315,7 @@ def test_ref_switch():
 
 
 def test_varbytes_offsets():
-    values = "alfa bravo charlie delta echo foxtrot golf hotel".split()
+    values = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel"]
     vlen = len(values)
 
     # Without offsets:

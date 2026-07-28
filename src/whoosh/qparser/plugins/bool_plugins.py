@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,10 +32,9 @@ import copy
 from whoosh import query
 from whoosh.qparser import syntax
 from whoosh.qparser.common import attach
+from whoosh.qparser.plugins._base import Plugin, TaggingPlugin
 from whoosh.qparser.taggers import FnTagger, RegexTagger
 from whoosh.util.text import rcompile
-
-from whoosh.qparser.plugins._base import Plugin, TaggingPlugin
 
 
 class GroupPlugin(Plugin):
@@ -516,3 +516,4 @@ class GtLtPlugin(TaggingPlugin):
         elif rel == ">=" or rel == "=>":
             n = syntax.RangeNode(text, None, False, False)
         return n.set_range(node.startchar, node.endchar)
+

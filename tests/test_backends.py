@@ -10,9 +10,9 @@ import pytest
 from whoosh.backends.abc import Backend
 from whoosh.backends.file import FileBackend
 from whoosh.backends.sqlite import SQLiteBackend
-from whoosh.registry import BackendRegistry
-from whoosh.fields import Schema, TEXT, ID, KEYWORD, STORED
+from whoosh.fields import ID, KEYWORD, STORED, TEXT, Schema
 from whoosh.index import EmptyIndexError
+from whoosh.registry import BackendRegistry
 
 
 @pytest.fixture

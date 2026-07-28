@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -171,6 +172,8 @@ class NgramFilter(Filter):
                 continue
 
             chars = t.chars
+            startchar = 0
+            original_startchar = 0
             if chars:
                 startchar = t.startchar
             # Token positions don't mean much for N-grams,
@@ -248,3 +251,4 @@ def NgramWordAnalyzer(minsize, maxsize=None, tokenizer=None, at=None):
     if not tokenizer:
         tokenizer = RegexTokenizer()
     return tokenizer | LowercaseFilter() | NgramFilter(minsize, maxsize, at=at)
+

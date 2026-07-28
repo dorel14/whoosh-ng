@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from whoosh.hooks import hookimpl, register_hook
 from whoosh.plugins.manager import Plugin
 from whoosh.registry import AutocompleteRegistry
-from whoosh.hooks import hookimpl, register_hook
 from whoosh_modern.autocomplete.factory import create_autocomplete
 
 
@@ -14,7 +14,6 @@ class AutocompletePlugin(Plugin):
         AutocompleteRegistry.register("inverted", create_autocomplete("inverted"), self.name)
 
     def register_hooks(self) -> None:
-        @hookimpl
         def on_search(request, response):
             pass
 

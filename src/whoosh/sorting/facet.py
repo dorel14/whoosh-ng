@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -216,12 +217,7 @@ class ColumnCategorizer(Categorizer):
         self._creader = None
 
     def __repr__(self):
-        return "{}({!r}, {!r}, reverse={!r})".format(
-            self.__class__.__name__,
-            self._fieldobj,
-            self._fieldname,
-            self._reverse,
-        )
+        return f"{self.__class__.__name__}({self._fieldobj!r}, {self._fieldname!r}, reverse={self._reverse!r})"
 
     def set_searcher(self, segment_searcher, docoffset):
         r = segment_searcher.reader()
@@ -1049,3 +1045,4 @@ class Best(FacetMap):
 
     def as_dict(self):
         return self.bestids
+

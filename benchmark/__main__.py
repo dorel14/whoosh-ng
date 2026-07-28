@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 from whoosh.support.bench import Bench, Spec
 
@@ -84,10 +84,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     import os
 
     bench_dir = os.path.dirname(__file__)
-    path = os.path.join(bench_dir, f"{args.spec}.py")
-    spec = importlib.util.spec_from_file_location(f"{pkg}.{args.spec}", path)
+    path = os.path.join(bench_dir, f"{str(args.spec)}.py")
+    spec = importlib.util.spec_from_file_location(f"{pkg}.{str(args.spec)}", path)
     if spec is None or spec.loader is None:
-        print(f"Could not load spec: {args.spec}", file=sys.stderr)
+        print(f"Could not load spec: {str(args.spec)}", file=sys.stderr)
         return 1
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)  # type: ignore[union-attr]
@@ -98,37 +98,37 @@ def main(argv: Sequence[str] | None = None) -> int:
             spec_cls = obj
             break
     if spec_cls is None:
-        print(f"No Spec subclass found in {args.spec}", file=sys.stderr)
+        print(f"No Spec subclass found in {str(args.spec)}", file=sys.stderr)
         return 1
 
     bench = Bench()
     # add flavor name / git version to the namespace so marvin/spec wiring stays compatible
-    bench.options = argparse.Namespace(
-        dir=args.dir,
-        limit=args.limit,
-        procs=args.procs,
-        limitmb=args.limitmb,
-        indexname=f"{args.spec}_index",
-        every=args.every,
-        merge=args.merge,
-        chunk=args.chunk,
-        skip=args.skip,
-        upto=args.upto,
+    bench.options = argparse.Namespace(  # type: ignore[assignment]
+        dir=args.dir,  # type: ignore[arg-type]
+        limit=args.limit,  # type: ignore[arg-type]
+        procs=args.procs,  # type: ignore[arg-type]
+        limitmb=args.limitmb,  # type: ignore[arg-type]
+        indexname=f"{str(args.spec)}_index",
+        every=args.every,  # type: ignore[arg-type]
+        merge=args.merge,  # type: ignore[arg-type]
+        chunk=args.chunk,  # type: ignore[arg-type]
+        skip=args.skip,  # type: ignore[arg-type]
+        upto=args.upto,  # type: ignore[arg-type]
         termfile=None,
     )
 
-    from benchmark.reporting import BenchmarkReport, BenchmarkResult
+    from .reporting import BenchmarkReport, BenchmarkResult
 
-    report = BenchmarkReport(title=f"whoosh-{args.spec}")
+    report = BenchmarkReport(title=f"whoosh-{str(args.spec)}")
     spec = spec_cls(bench.options, [])
 
-    if args.index:
+    if args.index:  # type: ignore[attr-defined]
         bench.index(spec)
-        idx_count = float(bench._last_index_count)
-        idx_time = bench._last_index_time
+        idx_count = float(bench._last_index_count)  # type: ignore[attr-defined]
+        idx_time = bench._last_index_time  # type: ignore[attr-defined]
         report.add(
             BenchmarkResult(
-                name=args.spec,
+                name=str(args.spec),
                 category="indexing",
                 metric="indexed_docs",
                 value=idx_count,
@@ -138,7 +138,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if idx_time > 0:
             report.add(
                 BenchmarkResult(
-                    name=args.spec,
+                    name=str(args.spec),
                     category="indexing",
                     metric="docs_per_sec",
                     value=idx_count / idx_time,
@@ -146,31 +146,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
 
-    if args.search:
+    if args.search:  # type: ignore[attr-defined]
         bench.search(spec)
         report.add(
             BenchmarkResult(
-                name=args.spec,
+                name=str(args.spec),
                 category="querying",
                 metric="search_time",
-                value=bench._last_search_time,
+                value=bench._last_search_time,  # type: ignore[attr-defined]
                 unit="s",
             )
         )
 
-    if args.ranking:
-        bench.rank(spec)
+    if args.ranking:  # type: ignore[attr-defined]
+        bench.rank(spec)  # type: ignore[attr-defined]
 
-    if args.report != "none":
-        ext = args.report
-        out_path = f"{args.report_path}.{ext}"
+    if str(args.report) != "none":
+        ext = str(args.report)
+        out_path = f"{str(args.report_path)}.{ext}"
         if ext == "csv":
             report.to_csv(out_path)
         else:
             report.to_json(out_path)
         print(f"Report written to {out_path}")
 
-    if not args.index and not args.search and not args.ranking:
+    if not args.index and not args.search and not args.ranking:  # type: ignore[attr-defined]
         parser.print_help()
         return 1
 

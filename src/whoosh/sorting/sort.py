@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -100,3 +101,4 @@ def add_sortable(writer, fieldname, facet, column=None):
             colfile.close()
 
     field.column_type = column
+

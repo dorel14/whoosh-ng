@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import Any, Awaitable, Callable, TypeVar, overload
+from collections.abc import Awaitable, Callable
+from typing import Any, TypeVar, overload
 
 T = TypeVar("T")
 R = TypeVar("R")

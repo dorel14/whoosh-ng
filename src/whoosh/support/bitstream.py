@@ -1,3 +1,4 @@
+# type: ignore
 """
 
 From a post by Patrick Maupin on the Python mailing list:
@@ -67,3 +68,4 @@ class BitStreamReader:
         # off the high-order bits we don't want.
 
         return (outval >> bitoffset) & finalmask
+

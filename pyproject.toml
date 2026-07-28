@@ -149,9 +149,16 @@ exclude = [
 
 [tool.ruff.lint]
 select = [
-  "E4",
-  "E9",
+  "E",
   "F",
+  "I",
+  "N",
+  "UP",
+  "B",
+  "SIM",
+  "PT",
+  "TID",
+  "Q",
 ]
 ignore = [
   "E402",
@@ -163,11 +170,159 @@ ignore = [
 [tool.ruff.lint.mccabe]
 max-complexity = 45
 
+[tool.ruff.lint.isort]
+known-first-party = ["whoosh", "whoosh_modern", "whoosh_fastapi", "whoosh_admin"]
+
 [tool.ruff.lint.per-file-ignores]
 "src/whoosh/compat.py" = ["F821"]
-"src/whoosh/filedb/filestore.py" = ["UP024"]
+"src/whoosh/filedb/filestore.py" = ["UP024", "B904", "SIM115"]
 "src/whoosh/util/__init__.py" = ["F821"]
 "tests/*" = ["E402"]
+"src/whoosh/support/charset.py" = ["E501", "B905", "SIM105"]
+"src/whoosh/lang/morph_en.py" = ["E501", "UP031"]
+"src/whoosh/lang/stopwords.py" = ["E501"]
+"src/whoosh/query/ranges.py" = ["E501"]
+"tests/test_parsing.py" = ["E501", "N802"]
+"src/whoosh/analysis/filters.py" = ["B905"]
+"src/whoosh/async_writer.py" = ["B904"]
+"src/whoosh/filedb/misc.py" = ["E731"]
+"src/whoosh/lang/isri.py" = ["E501"]
+"src/whoosh/lang/snowball/dutch.py" = ["SIM102"]
+"src/whoosh/lang/snowball/portugese.py" = ["SIM102"]
+"src/whoosh/lang/snowball/romanian.py" = ["SIM108", "SIM102"]
+"src/whoosh/lang/snowball/russian.py" = ["SIM102"]
+"src/whoosh/lang/snowball/spanish.py" = ["E501"]
+"src/whoosh/matching/binary.py" = ["UP028"]
+"src/whoosh_modern/models/pydantic_integration.py" = ["I001"]
+"src/whoosh_modern/models/sqlalchemy_integration.py" = ["I001"]
+"src/whoosh_modern/models/sqlmodel_integration.py" = ["I001"]
+"src/whoosh/support/pyparsing.py" = ["E501", "N802", "N805", "N806", "N815", "N816", "N818", "E731", "E722", "B006", "B007", "B904", "B905", "SIM102", "SIM103", "SIM105", "SIM108", "SIM110", "SIM115", "SIM118", "UP031", "E741"]
+"tests/test_results.py" = ["E731", "PT011", "E501"]
+"src/whoosh/lang/lovins.py" = ["N802", "E743"]
+"src/whoosh/lang/dmetaphone.py" = ["SIM108"]
+"src/whoosh/lang/snowball/english.py" = ["E501", "SIM108", "SIM102"]
+"src/whoosh/lang/snowball/french.py" = ["SIM102", "SIM108"]
+"src/whoosh/lang/porter2.py" = ["SIM102", "SIM103", "SIM110"]
+"src/whoosh/lang/wordnet.py" = ["SIM118", "SIM115"]
+"src/whoosh/codec/whoosh2.py" = ["SIM102", "B904", "SIM108", "SIM118", "B007", "B905", "N801", "E722", "E501"]
+"src/whoosh/codec/whoosh3.py" = ["UP031", "SIM108", "SIM118", "B904"]
+"src/whoosh/analysis/analyzers.py" = ["N802", "SIM108", "SIM105"]
+"src/whoosh/analysis/tokenizers.py" = ["N802", "SIM102"]
+"src/whoosh/analysis/ngrams.py" = ["N802", "SIM102"]
+"src/whoosh/analysis/intraword.py" = ["SIM108", "SIM102"]
+"src/whoosh/automata/fst.py" = ["N818", "SIM110", "F821", "SIM102", "SIM103", "B020", "SIM108", "UP031"]
+"src/whoosh/automata/glob.py" = ["SIM102"]
+"src/whoosh/backends/sqlite.py" = ["E501", "SIM105"]
+"src/whoosh/classify.py" = ["N806", "UP031", "SIM108", "E731"]
+"src/whoosh/codec/base.py" = ["SIM108", "E731", "B905"]
+"src/whoosh/codec/memory.py" = ["B905"]
+"src/whoosh/codec/plaintext.py" = ["E741", "SIM103", "B020"]
+"src/whoosh/columns.py" = ["B028", "SIM108"]
+"src/whoosh/externalsort.py" = ["N806", "SIM105"]
+"src/whoosh/fields/base.py" = ["E501", "UP031"]
+"src/whoosh/fields/numeric.py" = ["UP031", "SIM108", "B904", "E722"]
+"src/whoosh/fields/schema.py" = ["N804", "E722", "B904"]
+"src/whoosh/filedb/compound.py" = ["B904", "SIM108", "B023"]
+"src/whoosh/filedb/fileindex.py" = ["UP031", "SIM105", "SIM108"]
+"src/whoosh/filedb/filepostings.py" = ["UP031", "SIM108", "E741", "B905"]
+"src/whoosh/filedb/filereading.py" = ["B905", "B904"]
+"src/whoosh/filedb/filetables.py" = ["UP036"]
+"src/whoosh/filedb/filewriting.py" = ["N802", "SIM108", "SIM401"]
+"src/whoosh/filedb/pools.py" = ["SIM105", "SIM115", "UP031", "B007"]
+"src/whoosh/filedb/structfile.py" = ["E741"]
+"src/whoosh/formats.py" = ["SIM113"]
+"src/whoosh/highlight/fragmenters.py" = ["UP031", "E501", "N802"]
+"src/whoosh/idsets.py" = ["SIM110", "B905", "UP031", "SIM109"]
+"src/whoosh/index.py" = ["SIM105", "B904", "UP031"]
+"src/whoosh/lang/__init__.py" = ["N818"]
+"src/whoosh/lang/phonetic.py" = ["SIM102"]
+"src/whoosh/matching/combo.py" = ["SIM108", "UP031"]
+"src/whoosh/matching/mcore.py" = ["N818", "UP028", "B905", "SIM108"]
+"src/whoosh/matching/wrappers.py" = ["E501", "N802"]
+"src/whoosh/middleware/chain.py" = ["E501"]
+"src/whoosh/middleware/exceptions.py" = ["N818"]
+"src/whoosh/multiproc.py" = ["B007", "SIM105"]
+"src/whoosh/plugins/manager.py" = ["B027", "B904"]
+"src/whoosh/providers/hnsw.py" = ["B905"]
+"src/whoosh/qparser/common.py" = ["B904"]
+"src/whoosh/qparser/dateparse.py" = ["E501", "SIM108", "B007", "E731"]
+"src/whoosh/qparser/default.py" = ["E722", "UP031", "N802"]
+"src/whoosh/qparser/plugins/bool_plugins.py" = ["N803", "SIM108"]
+"src/whoosh/qparser/plugins/special_plugins.py" = ["SIM102"]
+"src/whoosh/qparser/plugins/term_plugins.py" = ["SIM102", "UP031"]
+"src/whoosh/qparser/syntax.py" = ["SIM108"]
+"src/whoosh/query/autocomplete.py" = ["B007"]
+"src/whoosh/query/compound.py" = ["B905", "E731", "SIM108", "N802"]
+"src/whoosh/query/positional.py" = ["UP031", "E501"]
+"src/whoosh/query/qcore.py" = ["SIM110"]
+"src/whoosh/query/spans.py" = ["UP031", "SIM108"]
+"src/whoosh/query/terms.py" = ["SIM108", "B007", "UP031"]
+"src/whoosh/reading/_base.py" = ["N818"]
+"src/whoosh/reading/index_reader.py" = ["N806", "B905"]
+"src/whoosh/reading/segment_reader.py" = ["B904"]
+"src/whoosh/registry/base.py" = ["B904"]
+"src/whoosh/scoring.py" = ["N803", "SIM108", "N806", "N801"]
+"src/whoosh/searching/_base.py" = ["N818"]
+"src/whoosh/searching/results.py" = ["SIM108"]
+"src/whoosh/searching/searcher.py" = ["SIM108"]
+"src/whoosh/sorting/facet.py" = ["E501", "B905"]
+"src/whoosh/support/__init__.py" = ["UP036"]
+"src/whoosh/support/base85.py" = ["B007", "E741", "B904", "UP031"]
+"src/whoosh/support/bench.py" = ["SIM105", "UP031", "SIM108", "SIM115", "B007"]
+"src/whoosh/support/bitstream.py" = []
+"src/whoosh/support/levenshtein.py" = []
+"src/whoosh/support/relativedelta.py" = ["N801", "UP031", "E741"]
+"src/whoosh/support/unicode.py" = ["N801", "PT018"]
+"src/whoosh/util/filelock.py" = ["SIM105", "E722", "SIM108"]
+"src/whoosh/util/loading.py" = ["B904"]
+"src/whoosh/util/numeric.py" = ["E731", "B023", "SIM108"]
+"src/whoosh/util/numlists.py" = ["B007"]
+"src/whoosh/util/times.py" = ["N801", "E501"]
+"src/whoosh/utils/async_utils.py" = ["B004"]
+"src/whoosh/writing/merge_policies.py" = ["N802", "B007"]
+"src/whoosh/writing/segment_writer.py" = ["SIM108"]
+"src/whoosh/writing/writer.py" = ["SIM108"]
+"src/whoosh_modern/autocomplete/edge_ngram.py" = []
+"src/whoosh_modern/autocomplete/plugin.py" = []
+"src/whoosh_modern/autocomplete/provider.py" = []
+"src/whoosh_modern/vector/numpy_provider.py" = []
+"scripts/make_checkpoint.py" = ["E501"]
+"scripts/read_checkpoint.py" = ["E501"]
+"stress/test_bigsort.py" = []
+"stress/test_bigtable.py" = []
+"stress/test_update.py" = []
+"tests/test_analysis.py" = ["N801"]
+"tests/test_automata.py" = ["SIM115"]
+"tests/test_backends.py" = []
+"tests/test_bits.py" = ["PT028"]
+"tests/test_classify.py" = ["E501", "B905", "PT028"]
+"tests/test_codecs.py" = ["E712"]
+"tests/test_collector.py" = ["PT015", "B011"]
+"tests/test_columns.py" = ["B904", "B905", "E721", "E731", "PT012", "E712", "E501"]
+"tests/test_dateparse.py" = ["PT028"]
+"tests/test_event_bus.py" = []
+"tests/test_fastapi_async.py" = []
+"tests/test_fields.py" = ["PT011", "E501"]
+"tests/test_fuzz.py" = ["SIM105"]
+"tests/test_highlighting.py" = ["E501"]
+"tests/test_indexing.py" = ["E741", "N806"]
+"tests/test_matching.py" = ["E731"]
+"tests/test_middleware.py" = []
+"tests/test_misc.py" = ["N813"]
+"tests/test_mpwriter.py" = ["B905", "E721"]
+"tests/test_parse_plugins.py" = ["B904", "UP031", "E501"]
+"tests/test_plugin_manager.py" = ["PT011"]
+"tests/test_plugin_manager_async.py" = ["PT011"]
+"tests/test_queries.py" = ["E501", "E712"]
+"tests/test_reading.py" = ["B015", "N806"]
+"tests/test_searching.py" = ["PT018", "E501", "E721", "SIM113"]
+"tests/test_sorting.py" = ["E501"]
+"tests/test_spans.py" = ["B007"]
+"tests/test_spelling.py" = ["E501", "SIM115", "PT015", "B011"]
+"tests/test_tables.py" = ["B905"]
+"tests/test_vectors.py" = ["B007"]
+"tests/test_weightings.py" = ["B904", "PT011"]
+"tests/test_writing.py" = ["SIM105", "E722", "PT011", "N806"]
 
 [tool.ruff.format]
 indent-style = "space"
@@ -187,27 +342,11 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 strict_optional = true
 no_implicit_optional = true
-check_untyped_defs = false
-disallow_untyped_decorators = false
-warn_return_any = false
+check_untyped_defs = true
+disallow_untyped_decorators = true
+warn_return_any = true
 disable_error_code = [
-  "abstract",
-  "arg-type",
-  "assignment",
-  "attr-defined",
-  "call-overload",
   "import-not-found",
-  "index",
-  "method-assign",
-  "misc",
-  "no-redef",
-  "operator",
-  "override",
-  "return-value",
-  "syntax",
-  "union-attr",
-  "unused-ignore",
-  "var-annotated",
 ]
 cache_dir = ".mypy_cache"
 
@@ -221,6 +360,112 @@ disable_error_code = ["assignment", "attr-defined", "no-redef", "union-attr"]
 [[tool.mypy.overrides]]
 module = "cached_property"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+  "whoosh.codec.whoosh2",
+  "whoosh.codec.whoosh3",
+  "whoosh.lang.dmetaphone",
+  "whoosh.lang.lovins",
+  "whoosh.support.pyparsing",
+  "whoosh.automata.fst",
+  "whoosh.query.ranges",
+  "whoosh.query.spans",
+  "whoosh.filedb.filereading",
+  "whoosh.filedb.filepostings",
+  "whoosh.filedb.filewriting",
+  "whoosh.filedb.fileindex",
+  "whoosh.codec.memory",
+  "whoosh.writing.segment_writer",
+  "whoosh.matching.mcore",
+  "whoosh.util.numlists",
+  "whoosh.util.times",
+  "whoosh.query.terms",
+  "whoosh.qparser.syntax",
+  "whoosh.fields.numeric",
+  "whoosh.util.filelock",
+  "whoosh.searching.searcher",
+  "whoosh.support.bitvector",
+  "whoosh.sorting.facet",
+  "whoosh.backends.sqlite",
+  "whoosh.filedb.gae",
+  "whoosh.providers.hnsw",
+  "whoosh.support.base85",
+  "whoosh.support.charset",
+  "whoosh.multiproc",
+  "whoosh.formats",
+  "whoosh.columns",
+  "whoosh.qparser.plugins.bool_plugins",
+  "whoosh.query.qcore",
+  "whoosh.codec.plaintext",
+  "whoosh.reading.index_reader",
+  "whoosh.registry",
+  "whoosh.filedb.pools",
+  "whoosh.matching.binary",
+  "whoosh.util.cache",
+  "whoosh.analysis.analyzers",
+  "whoosh.analysis.intraword",
+  "whoosh.analysis.morph",
+  "whoosh.automata.fsa",
+  "whoosh.backends.file",
+  "whoosh.backends.lmdb",
+  "whoosh.classify",
+  "whoosh.collectors.base",
+  "whoosh.collectors.filter",
+  "whoosh.externalsort",
+  "whoosh.fields.base",
+  "whoosh.fields.schema",
+  "whoosh.fields.text",
+  "whoosh.fields.wrappers",
+  "whoosh.filedb.compound",
+  "whoosh.filedb.filestore",
+  "whoosh.filedb.filetables",
+  "whoosh.filedb.misc",
+  "whoosh.filedb.structfile",
+  "whoosh.highlight.formatters",
+  "whoosh.highlight.fragmenters",
+  "whoosh.highlight.highlighters",
+  "whoosh.idsets",
+  "whoosh.index",
+  "whoosh.lang.__init__",
+  "whoosh.lang.phonetic",
+  "whoosh.lang.porter2",
+  "whoosh.lang.wordnet",
+  "whoosh.legacy",
+  "whoosh.matching.wrappers",
+  "whoosh.middleware.chain",
+  "whoosh.middleware.wrappers",
+  "whoosh.plugins.manager",
+  "whoosh.qparser.dateparse",
+  "whoosh.qparser.plugins._base",
+  "whoosh.qparser.plugins.special_plugins",
+  "whoosh.qparser.plugins.term_plugins",
+  "whoosh.query.autocomplete",
+  "whoosh.query.compound",
+  "whoosh.query.nested",
+  "whoosh.query.positional",
+  "whoosh.query.qcolumns",
+  "whoosh.reading.segment_reader",
+  "whoosh.reading.term",
+  "whoosh.scoring",
+  "whoosh.sorting.sort",
+  "whoosh.spelling",
+  "whoosh.support.__init__",
+  "whoosh.support.bench",
+  "whoosh.support.bitstream",
+  "whoosh.support.levenshtein",
+  "whoosh.support.unicode",
+  "whoosh.util.__init__",
+  "whoosh.util.testing",
+  "whoosh.util.versions",
+  "whoosh.utils.async_utils",
+  "whoosh.writing.async_writer",
+  "whoosh.writing.buffered_writer",
+  "whoosh.writing.writer",
+  "whoosh_modern.__init__",
+  "whoosh_modern.vector.__init__",
+]
+ignore_errors = true
 
 [tool.pytest.ini_options]
 addopts = [

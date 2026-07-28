@@ -34,7 +34,7 @@ try:
 
 except ImportError as exc:
     raise ImportError(
-        "Admin plugin requires fastapi. Install with: pip install whoosh-NG[api]"
+        "Admin plugin requires fastapi. Install with: pip install whoosh-ng[api]"
     ) from exc
 
 

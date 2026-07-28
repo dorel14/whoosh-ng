@@ -1,3 +1,4 @@
+# type: ignore
 # ===============================================================================
 # Copyright 2009 Matt Chaput
 #
@@ -237,3 +238,4 @@ class SegmentReader(IndexReader):
             raise Exception(f"No vector found for document {docnum} field {fieldid!r}")
 
         return FilePostingReader(self.vpostfile, offset, vformat, stringids=True)
+

@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2012 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -116,3 +117,4 @@ class ColumnMatcher(ConstantScoreMatcher):
         if self._score <= minquality:
             self._i = len(self.creader)
             return True
+

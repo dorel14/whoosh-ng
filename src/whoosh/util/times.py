@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2010 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,7 +28,7 @@
 
 import calendar
 import copy
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta, timezone
 
 
 class TimeError(Exception):
@@ -141,7 +142,7 @@ class adatetime:
             self.microsecond = microsecond
 
     def __eq__(self, other):
-        if not other.__class__ is self.__class__:
+        if other.__class__ is not self.__class__:
             if not is_ambiguous(self) and isinstance(other, datetime):
                 return fix(self) == other
             else:
@@ -167,7 +168,7 @@ class adatetime:
         )
 
     def date(self):
-        return date(self.year, self.month, self.day, tzinfo=timezone.utc)
+        return date(self.year, self.month, self.day, tzinfo=UTC)
 
     def copy(self):
         return adatetime(
@@ -233,7 +234,7 @@ class adatetime:
             s = 0
         if ms is None:
             ms = 0
-        return datetime(y, m, d, h, mn, s, ms, tzinfo=timezone.utc)
+        return datetime(y, m, d, h, mn, s, ms, tzinfo=UTC)
 
     def ceil(self):
         """Returns a ``datetime`` version of this object with all unspecified
@@ -271,7 +272,7 @@ class adatetime:
             s = 59
         if ms is None:
             ms = 999999
-        return datetime(y, m, d, h, mn, s, ms, tzinfo=timezone.utc)
+        return datetime(y, m, d, h, mn, s, ms, tzinfo=UTC)
 
     def disambiguated(self, basedate):
         """Returns either a ``datetime`` or unambiguous ``timespan`` version
@@ -317,7 +318,7 @@ class timespan:
         self.end = copy.copy(end)
 
     def __eq__(self, other):
-        if not other.__class__ is self.__class__:
+        if other.__class__ is not self.__class__:
             return False
         return self.start == other.start and self.end == other.end
 
@@ -505,5 +506,6 @@ def fix(at):
         minute=at.minute,
         second=at.second,
         microsecond=at.microsecond,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
+

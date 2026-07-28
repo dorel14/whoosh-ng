@@ -16,7 +16,6 @@ import os
 import zipfile
 from urllib.request import urlretrieve
 
-
 CUSTOMERS_DST = os.path.join("benchmark", "customers-2000000", "customers-2000000.csv")
 CUSTOMERS_ZIP = os.path.join("benchmark", "customers-2000000", "customers-2000000.zip")
 STOCK_DST = os.path.join("benchmark", "stock_etab", "StockEtablissement_utf8.csv")
@@ -123,7 +122,9 @@ def main(argv: list[str] | None = None) -> int:
             open(tmp, "w", newline="", encoding="utf-8") as fout,
         ):
             reader = csv.DictReader(fin)
-            writer = csv.DictWriter(fout, fieldnames=reader.fieldnames)
+            fieldnames = reader.fieldnames
+            assert fieldnames is not None
+            writer = csv.DictWriter(fout, fieldnames=fieldnames)
             writer.writeheader()
             for i, row in enumerate(reader):
                 if i >= args.customers_max_rows:

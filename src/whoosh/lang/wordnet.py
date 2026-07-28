@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2009 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -239,3 +240,5 @@ class Thesaurus:
             return self.searcher.document(word=word)["syns"]
         else:
             return synonyms(self.w2n, self.n2w, word)
+
+

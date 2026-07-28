@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2011 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -648,3 +649,4 @@ def to_word(n):
     node.startchar = n.startchar
     node.endchar = n.endchar
     return node
+

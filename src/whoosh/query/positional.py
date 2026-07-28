@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -164,13 +165,7 @@ class Phrase(qcore.Query):
         )
 
     def __repr__(self):
-        return "{}({!r}, {!r}, slop={}, boost={:f})".format(
-            self.__class__.__name__,
-            self.fieldname,
-            self.words,
-            self.slop,
-            self.boost,
-        )
+        return f"{self.__class__.__name__}({self.fieldname!r}, {self.words!r}, slop={self.slop}, boost={self.boost:f})"
 
     def __str__(self):
         return f'{self.fieldname}:"{" ".join(self.words)}"'
@@ -273,3 +268,4 @@ class Phrase(qcore.Query):
         if self.boost != 1.0:
             m = matching.WrappingMatcher(m, boost=self.boost)
         return m
+

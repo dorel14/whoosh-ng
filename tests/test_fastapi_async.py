@@ -24,7 +24,7 @@ def _build_index() -> str:
     return tmp
 
 
-@pytest.fixture()
+@pytest.fixture
 def app():
     tmp = _build_index()
     application = create_app(open_dir(tmp))

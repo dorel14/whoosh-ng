@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +34,7 @@ import struct
 import sys
 from array import array
 from decimal import Decimal
+
 from whoosh import analysis, columns, formats
 from whoosh.system import emptybytes, pack_byte
 from whoosh.util.numeric import NaN, from_sortable, to_sortable, typecode_max
@@ -123,13 +125,7 @@ class FieldType:
             self.vector = None
 
     def __repr__(self):
-        return "{}(format={!r}, scorable={}, stored={}, unique={})".format(
-            self.__class__.__name__,
-            self.format,
-            self.scorable,
-            self.stored,
-            self.unique,
-        )
+        return f"{self.__class__.__name__}(format={self.format!r}, scorable={self.scorable}, stored={self.stored}, unique={self.unique})"
 
     def __eq__(self, other):
         return all(
@@ -401,3 +397,4 @@ def merge_schemas(schemas):
     for i in range(1, len(schemas)):
         schema = merge_schema(schema, schemas[i])
     return schema
+

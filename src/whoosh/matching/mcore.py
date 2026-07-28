@@ -52,6 +52,7 @@ method will return ``True``.
 from abc import abstractmethod
 from itertools import repeat
 from typing import Any
+
 # Exceptions
 
 
@@ -476,9 +477,7 @@ class ListMatcher(Matcher):
         )
 
     def replace(self, minquality=0):
-        if not self.is_active():
-            return NullMatcher()
-        elif minquality and self.max_quality() < minquality:
+        if not self.is_active() or minquality and self.max_quality() < minquality:
             return NullMatcher()
         else:
             return self

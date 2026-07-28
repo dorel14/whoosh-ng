@@ -1,0 +1,92 @@
+name: Gemini PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install google-genai requests
+
+      - name: Run Gemini Code Review
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python - << 'EOF'
+          import os
+          import requests
+          from google import genai
+
+          # Configuration
+          api_key = os.environ["GEMINI_API_KEY"]
+          github_token = os.environ["GITHUB_TOKEN"]
+          repo = os.environ["REPOSITORY"]
+          pr_num = os.environ["PR_NUMBER"]
+
+          # Fetch PR Diff from GitHub
+          headers = {
+              "Authorization": f"token {github_token}",
+              "Accept": "application/vnd.github.v3.diff"
+          }
+          diff_url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}"
+          diff_resp = requests.get(diff_url, headers=headers)
+          diff_text = diff_resp.text
+
+          if not diff_text.strip():
+              print("Diff vide, fin du job.")
+              exit(0)
+
+          # Troncature de sécurité si le diff est massif
+          if len(diff_text) > 40000:
+              diff_text = diff_text[:40000] + "\n... [Diff tronqué]"
+
+          # Gemini Client
+          client = genai.Client(api_key=api_key)
+          
+          prompt = f"""Tu es un expert senior en revue de code. Analyse ce diff de Pull Request.
+          
+          Fournis une revue claire et bien structurée :
+          1. **Résumé des changements**
+          2. **Points d'attention / Bugs potentiels / Problèmes de performance**
+          3. **Suggestions de corrections concrètes** (s'il y en a, utilise les blocs de code Markdown pour les montrer).
+
+          Voici le diff :
+          ```diff
+          {diff_text}
+          ```
+          """
+
+          response = client.models.generate_content(
+              model="gemini-2.5-flash",
+              contents=prompt,
+          )
+
+          # Publication du commentaire sur la PR
+          comment_body = f"### 🤖 Revue automatique par Gemini\n\n{response.text}"
+          comment_url = f"https://api.github.com/repos/{repo}/issues/{pr_num}/comments"
+          post_headers = {
+              "Authorization": f"token {github_token}",
+              "Accept": "application/vnd.github.v3+json"
+          }
+          requests.post(comment_url, headers=post_headers, json={"body": comment_body})
+          print("Revue publiée avec succès !")
+          EOF

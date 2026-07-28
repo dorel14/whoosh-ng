@@ -109,9 +109,8 @@ def test_add_vectored_field():
 
 def test_write_empty_vector():
     schema = fields.Schema(text=fields.TEXT(vector=True))
-    with TempIndex(schema) as ix:
-        with ix.writer() as w:
-            w.add_document(text=". . . . . . . . . . . . . . . . . . . . . . . . 1")
+    with TempIndex(schema) as ix, ix.writer() as w:
+        w.add_document(text=". . . . . . . . . . . . . . . . . . . . . . . . 1")
 
 
 def test_vpst_block_tag():

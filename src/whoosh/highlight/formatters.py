@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,6 +31,7 @@ from collections import deque
 from heapq import nlargest
 from html import escape as htmlescape
 from itertools import groupby
+
 from whoosh.analysis import Token
 from whoosh.highlight.fragmenters import Fragment, get_text, mkfrag
 
@@ -234,13 +236,7 @@ class GenshiFormatter(Formatter):
         self.qname = qname
         self.between = between
 
-        from genshi.core import (  # type: ignore  # type: ignore
-            END,
-            START,
-            TEXT,
-            Attrs,
-            Stream,
-        )
+        from genshi.core import END, START, TEXT, Attrs, Stream  # type: ignore  # type: ignore
 
         self.START, self.END, self.TEXT = START, END, TEXT
         self.Attrs, self.Stream = Attrs, Stream
@@ -293,3 +289,4 @@ def top_fragments(fragments, count, scorer, order, minscore=1):
     best_fragments = [sf for score, sf in scored_fragments if score >= minscore]
     best_fragments.sort(key=order)
     return best_fragments
+

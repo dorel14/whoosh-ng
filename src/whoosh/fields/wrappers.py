@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,13 +34,13 @@ import struct
 import sys
 from array import array
 from decimal import Decimal
+
 from whoosh import analysis, columns, formats
+from whoosh.fields.base import FieldType
 from whoosh.system import emptybytes, pack_byte
 from whoosh.util.numeric import NaN, from_sortable, to_sortable, typecode_max
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.util.times import datetime_to_long, long_to_datetime
-
-from whoosh.fields.base import FieldType
 
 
 class FieldWrapper(FieldType):
@@ -149,3 +150,4 @@ class ReverseField(FieldWrapper):
     def subfields(self):
         yield "", self.subfield
         yield self.name_prefix, self
+

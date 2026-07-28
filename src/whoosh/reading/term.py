@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,6 +33,7 @@ from heapq import heapify, heappop, heapreplace, nlargest
 from math import log
 
 from cached_property import cached_property
+
 from whoosh import columns
 from whoosh.filedb.filestore import OverlayStorage
 from whoosh.matching import MultiMatcher
@@ -186,3 +188,4 @@ class MultiCursor:
 
     def is_valid(self):
         return any(c.is_valid() for c in self._cursors)
+

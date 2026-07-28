@@ -193,7 +193,7 @@ def test_intraword_possessive():
 
 
 def test_word_segments():
-    wordset = set("alfa bravo charlie delta".split())
+    wordset = set(["alfa", "bravo", "charlie", "delta"])
 
     cwf = analysis.CompoundWordFilter(wordset, keep_compound=True)
     ana = analysis.RegexTokenizer(r"\S+") | cwf
@@ -221,9 +221,9 @@ def test_word_segments():
 def test_biword():
     ana = analysis.RegexTokenizer(r"\w+") | analysis.BiWordFilter()
     result = [t.copy() for t in ana("the sign of four", chars=True, positions=True)]
-    assert ["the-sign", "sign-of", "of-four"] == [t.text for t in result]
-    assert [(0, 8), (4, 11), (9, 16)] == [(t.startchar, t.endchar) for t in result]
-    assert [0, 1, 2] == [t.pos for t in result]
+    assert [t.text for t in result] == ["the-sign", "sign-of", "of-four"]
+    assert [(t.startchar, t.endchar) for t in result] == [(0, 8), (4, 11), (9, 16)]
+    assert [t.pos for t in result] == [0, 1, 2]
 
     result = [t.copy() for t in ana("single")]
     assert len(result) == 1
@@ -300,7 +300,7 @@ def test_double_metaphone():
     }
 
     dmn = name = None
-    for name in names.keys():
+    for name in names:
         dmn = double_metaphone(name)
     assert dmn == names[name]
 
@@ -468,7 +468,7 @@ def test_start_pos():
     assert [t.pos for t in tks] == [0, 1, 2, 3]
 
     kw["start_pos"] = 3
-    ts = [t.copy() for t in formats.tokens("A B C D".split(), ana, kw)]
+    ts = [t.copy() for t in formats.tokens(["A", "B", "C", "D"], ana, kw)]
     assert " ".join([t.text for t in ts]) == "A B C D"
     assert [t.pos for t in ts] == [3, 4, 5, 6]
 

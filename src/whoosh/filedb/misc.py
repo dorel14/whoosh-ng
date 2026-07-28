@@ -1,3 +1,4 @@
+# type: ignore
 # ===============================================================================
 # Copyright 2010 Matt Chaput
 #
@@ -45,3 +46,5 @@ depickle = loads
 
 enmarshal = mdumps
 demarshal = mloads
+
+

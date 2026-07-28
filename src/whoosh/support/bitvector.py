@@ -1,3 +1,4 @@
+# type: ignore
 """
 An implementation of an object that acts like a collection of on/off bits.
 """
@@ -488,3 +489,4 @@ class BitSet:
         self._back.clear(num)
         if len(self._back) * 4 < self.size // 8 - 32:
             self._switch(True)
+

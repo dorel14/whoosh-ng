@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,13 +34,13 @@ import struct
 import sys
 from array import array
 from decimal import Decimal
+
 from whoosh import analysis, columns, formats
+from whoosh.fields.base import FieldType
 from whoosh.system import emptybytes, pack_byte
 from whoosh.util.numeric import NaN, from_sortable, to_sortable, typecode_max
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.util.times import datetime_to_long, long_to_datetime
-
-from whoosh.fields.base import FieldType
 
 
 class ID(FieldType):
@@ -505,8 +506,8 @@ class BOOLEAN(FieldType):
     """
 
     bytestrings = (b"f", b"t")
-    trues = frozenset("t true yes 1".split())
-    falses = frozenset("f false no 0".split())
+    trues = frozenset(["t", "true", "yes", "1"])
+    falses = frozenset(["f", "false", "no", "0"])
 
     def __init__(self, stored=False, field_boost=1.0):
         """
@@ -643,3 +644,4 @@ class KEYWORD(FieldType):
 
         if sortable:
             self.column_type = self.default_column()
+

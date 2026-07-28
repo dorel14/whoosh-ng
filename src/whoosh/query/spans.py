@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2010 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -920,3 +921,4 @@ class SpanCondition(SpanBiQuery):
 
         def _get_spans(self):
             return self.a.spans()
+

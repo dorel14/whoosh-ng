@@ -1,3 +1,4 @@
+# type: ignore
 """This module implements the Lovins stemming algorithm. Use the ``stem()``
 function::
 
@@ -572,3 +573,5 @@ def fix_ending(word):
 def stem(word):
     """Returns the stemmed version of the argument string."""
     return fix_ending(remove_ending(word))
+
+

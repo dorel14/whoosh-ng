@@ -1,3 +1,4 @@
+# type: ignore
 # module pyparsing.py
 #
 # Copyright (c) 2003-2009  Paul T. McGuire
@@ -192,7 +193,7 @@ def _xml_escape(data):
 
     # ampersand must be replaced first
     from_symbols = "&><\"'"
-    to_symbols = ["&" + s + ";" for s in "amp gt lt quot apos".split()]
+    to_symbols = ["&" + s + ";" for s in ["amp", "gt", "lt", "quot", "apos"]]
     for from_, to_ in zip(from_symbols, to_symbols):
         data = data.replace(from_, to_)
     return data
@@ -263,7 +264,7 @@ class ParseBaseException(Exception):
         return line_str.strip()
 
     def __dir__(self):
-        return "loc msg pstr parserElement lineno col line markInputLine __str__ __repr__".split()
+        return ["loc", "msg", "pstr", "parserElement", "lineno", "col", "line", "markInputLine", "__str__", "__repr__"]
 
 
 class ParseException(ParseBaseException):
@@ -1878,15 +1879,9 @@ class Word(Token):
             if self.body_charsOrig == self.init_charsOrig:
                 self.reString = f"[{_escape_regex_range_chars(self.init_charsOrig)}]+"
             elif len(self.body_charsOrig) == 1:
-                self.reString = "{}[{}]*".format(
-                    re.escape(self.init_charsOrig),
-                    _escape_regex_range_chars(self.body_charsOrig),
-                )
+                self.reString = f"{re.escape(self.init_charsOrig)}[{_escape_regex_range_chars(self.body_charsOrig)}]*"
             else:
-                self.reString = "[{}][{}]*".format(
-                    _escape_regex_range_chars(self.init_charsOrig),
-                    _escape_regex_range_chars(self.body_charsOrig),
-                )
+                self.reString = f"[{_escape_regex_range_chars(self.init_charsOrig)}][{_escape_regex_range_chars(self.body_charsOrig)}]*"
             if self.as_keyword:
                 self.reString = r"\b" + self.reString + r"\b"
             try:
@@ -4126,7 +4121,7 @@ anyOpenTag, anyCloseTag = make_html_tags(Word(alphas, alphanums + "_:"))
 commonHTMLEntity = Combine(
     _L("&") + one_of("gt lt amp nbsp quot").set_results_name("entity") + ";"
 ).streamline()
-_htmlEntityMap = dict(zip("gt lt amp nbsp quot".split(), '><& "'))
+_htmlEntityMap = dict(zip(["gt", "lt", "amp", "nbsp", "quot"], '><& "'))
 replaceHTMLEntity = lambda t: t.entity in _htmlEntityMap and _htmlEntityMap[t.entity] or None
 
 # it's easy to get these comment structures wrong - they're very common, so may as well make them available
@@ -4196,3 +4191,5 @@ if __name__ == "__main__":
     test("Select")
     test("Select ^^^ frox Sys.dual")
     test("Select A, B, C from Sys.dual, Table2   ")
+
+

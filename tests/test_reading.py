@@ -369,7 +369,7 @@ def test_delete_recovery():
 def test_nonexclusive_read():
     schema = fields.Schema(text=fields.TEXT)
     with TempIndex(schema, "readlock") as ix:
-        for num in "one two three four five".split():
+        for num in ["one", "two", "three", "four", "five"]:
             w = ix.writer()
             w.add_document(text=f"Test document {num}")
             w.commit(merge=False)

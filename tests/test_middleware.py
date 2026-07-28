@@ -3,8 +3,8 @@ import pytest
 from whoosh.middleware import (
     MiddlewareChain,
     MiddlewareContext,
-    MiddlewareWriter,
     MiddlewareSearcher,
+    MiddlewareWriter,
 )
 from whoosh.middleware.base import (
     CacheMiddleware,

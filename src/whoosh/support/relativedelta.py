@@ -1,3 +1,4 @@
+# type: ignore
 """
 Copyright (c) 2003-2010  Gustavo Niemeyer <gustavo@niemeyer.net>
 
@@ -489,3 +490,5 @@ class relativedelta:
 
 
 # vim:ts=4:sw=4:et
+
+

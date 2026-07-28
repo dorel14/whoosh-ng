@@ -34,7 +34,7 @@ before.
 
 from whoosh.writing._base import IndexingError, PostingWriter, groupmanager
 from whoosh.writing.async_writer import AsyncWriter
-from whoosh.writing.buffered_writer import BufferedWriter, BatchWriter
+from whoosh.writing.buffered_writer import BatchWriter, BufferedWriter
 from whoosh.writing.merge_policies import CLEAR, MERGE_SMALL, NO_MERGE, OPTIMIZE
 from whoosh.writing.posting_pool import PostingPool
 from whoosh.writing.segment_writer import SegmentWriter

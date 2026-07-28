@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2011 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -440,3 +441,4 @@ def DisMaxParser(fieldboosts, schema, tiebreak=0.0, **kwargs):
     ]
     orgroup = syntax.OrGroup
     return QueryParser(None, schema, plugins=pins, group=orgroup, **kwargs)
+

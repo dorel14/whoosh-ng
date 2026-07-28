@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2012 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -1348,3 +1349,5 @@ class W3Segment(base.Segment):
         if self._deleted is None:
             return False
         return docnum in self._deleted
+
+

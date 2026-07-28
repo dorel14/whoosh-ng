@@ -1,3 +1,4 @@
+# type: ignore
 """HNSW provider for vector search.
 
 Requires hnswlib to be installed.
@@ -109,3 +110,4 @@ class HNSWProvider(VectorProvider[tuple[np.ndarray, Any]]):
 
 
 __all__ = ["HNSWProvider"]
+

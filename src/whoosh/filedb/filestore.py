@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2009 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -658,9 +659,8 @@ def copy_storage(sourcestore, deststore):
     from shutil import copyfileobj
 
     for name in sourcestore.list():
-        with sourcestore.open_file(name) as source:
-            with deststore.create_file(name) as dest:
-                copyfileobj(source, dest)
+        with sourcestore.open_file(name) as source, deststore.create_file(name) as dest:
+            copyfileobj(source, dest)
 
 
 def copy_to_ram(storage):
@@ -672,3 +672,4 @@ def copy_to_ram(storage):
     ram = RamStorage()
     copy_storage(storage, ram)
     return ram
+

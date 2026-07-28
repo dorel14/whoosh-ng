@@ -1,7 +1,8 @@
+# type: ignore
 from __future__ import annotations
 
 import math
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
 
 
 class AutocompleteHit:
@@ -16,3 +17,4 @@ class AutocompleteProvider:
 
     def search(self, prefix: str, limit: int = 10) -> list[AutocompleteHit]:
         raise NotImplementedError
+

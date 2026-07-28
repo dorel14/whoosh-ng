@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2009 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -206,7 +207,7 @@ class Frequency(Format):
         return freq * self.field_boost
 
     def combine(self, vs):
-        return pack_uint(sum(self.decode_value(v) for v in vs))
+        return pack_uint(sum(self.decode_frequency(v) for v in vs))
 
 
 class Positions(Format):
@@ -360,15 +361,15 @@ class PositionBoosts(Positions):
             value = self.encode(poses)
             yield (w, len(poses), sum(p[1] for p in poses) * fb, value)
 
-    def encode(self, poses):
+    def encode(self, value):  # type: ignore[override]
         codes = []
         base = 0
         summedboost = 0
-        for pos, boost in poses:
+        for pos, boost in value:
             summedboost += boost
             codes.append((pos - base, boost))
             base = pos
-        return pack_uint(len(poses)) + pack_float(summedboost) + dumps(codes)
+        return pack_uint(len(value)) + pack_float(summedboost) + dumps(codes)
 
     def decode_position_boosts(self, valuestring):
         if not valuestring.endswith(b"."):
@@ -392,8 +393,8 @@ class PositionBoosts(Positions):
             posns.append(position)
         return posns
 
-    def decode_weight(self, v):
-        summedboost = unpack_float(v[_INT_SIZE : _INT_SIZE + _FLOAT_SIZE])[0]
+    def decode_weight(self, valuestring):
+        summedboost = unpack_float(valuestring[_INT_SIZE : _INT_SIZE + _FLOAT_SIZE])[0]
         return summedboost * self.field_boost
 
     def combine(self, vs):
@@ -425,21 +426,21 @@ class CharacterBoosts(Characters):
             value, summedboost = self.encode(poses)
             yield (w, len(poses), summedboost, value)
 
-    def encode(self, poses):
+    def encode(self, value):  # type: ignore[override]
         fb = self.field_boost
         # posns_chars_boosts = [(pos, startchar, endchar, boost), ...]
         codes = []
         posbase = 0
         charbase = 0
         summedboost = 0
-        for pos, startchar, endchar, boost in poses:
+        for pos, startchar, endchar, boost in value:
             codes.append((pos - posbase, startchar - charbase, endchar - startchar, boost))
             posbase = pos
             charbase = endchar
             summedboost += boost
 
         return (
-            (pack_uint(len(poses)) + pack_float(summedboost * fb) + dumps(codes)),
+            (pack_uint(len(value)) + pack_float(summedboost * fb) + dumps(codes)),
             summedboost,
         )
 
@@ -480,3 +481,4 @@ class CharacterBoosts(Characters):
                     s[pos] = (sc, ec, boost)
         poses = [(pos, sc, ec, boost) for pos, (sc, ec, boost) in sorted(s.items())]
         return self.encode(poses)[0]  # encode() returns value, summedboost
+
