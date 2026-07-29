@@ -27,22 +27,23 @@
 
 import codecs
 import re
-
-# Note: these functions return a tuple of (text, length), so when you call
-# them, you have to add [0] on the end, e.g. str = utf8encode(unicode)[0]
+from collections.abc import Generator, Iterable, Iterator
+from typing import Pattern, Union
 
 utf8encode = codecs.getencoder("utf-8")
 utf8decode = codecs.getdecoder("utf-8")
 
+# Note: these functions return a tuple of (text, length), so when you call
+# them, you have to add [0] on the end, e.g. str = utf8encode(unicode)[0]
 
 # Prefix encoding functions
 
 
-def byte(num):
+def byte(num: int) -> bytes:
     return bytes((num,))
 
 
-def first_diff(a, b):
+def first_diff(a: Union[bytes, str], b: Union[bytes, str]) -> int:
     """
     Returns the position of the first differing character in the sequences a
     and b. For example, first_diff('render', 'rending') == 4. This function
@@ -56,7 +57,7 @@ def first_diff(a, b):
     return i
 
 
-def prefix_encode(a, b):
+def prefix_encode(a: Union[bytes, str], b: Union[bytes, str]) -> bytes:
     """
     Compresses bytestring b as a byte representing the prefix it shares with a,
     followed by the suffix bytes.
@@ -66,7 +67,7 @@ def prefix_encode(a, b):
     return byte(i) + b[i:]
 
 
-def prefix_encode_all(ls):
+def prefix_encode_all(ls: Iterable[Union[bytes, str]]) -> Generator[bytes, None, None]:
     """Compresses the given list of (unicode) strings by storing each string
     (except the first one) as an integer (encoded in a byte) representing
     the prefix it shares with its predecessor, followed by the suffix encoded

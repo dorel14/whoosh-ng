@@ -310,7 +310,7 @@ class Results:
 
         if not self.has_matched_terms():
             raise NoTermsException
-        return set(self.termdocs.keys())  # type: ignore[attr-defined]
+        return set(self.termdocs.keys())
 
     def _get_fragmenter(self):
         return self.highlighter.fragmenter

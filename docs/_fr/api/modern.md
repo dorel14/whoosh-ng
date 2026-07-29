@@ -6,7 +6,7 @@ lang: fr
 
 # API Moderne
 
-Features introduites dans Whoosh-NG 4.0.
+Recherche vectorielle, autocomplétion, indexation de modèles et autres fonctionnalités avancées.
 
 ## VectorField
 
@@ -16,100 +16,211 @@ from whoosh.fields import VectorField
 champ = VectorField(dimensions=384, metric="cosine", stored=False)
 ```
 
-### Attributs
+Champ de vecteur d'embedding.
 
-| Attribut | Type | Description |
-|----------|------|-------------|
-| `dimensions` | int | Dimensions du vecteur |
-| `metric` | str | Métrique de similarité (`"cosine"`, `"euclidean"`, `"dot"`) |
-| `stored` | bool | Stocker le vecteur |
-| `provider` | str | Provider à utiliser |
+---
 
-**Exemple:**
-```python
-schema = Schema(
-    titre=TEXT(stored=True),
-    embedding=VectorField(dimensions=384, metric="cosine")
-)
-```
-
-## VectorSearch
+### VectorProvider
 
 ```python
-class whoosh.vector.VectorSearch(searcher)
+class whoosh.vector.base.VectorProvider
 ```
 
-Moteur de recherche vectorielle.
+Classe de base pour les providers de vecteurs.
 
-### Méthodes
+#### Méthodes
 
-| Méthode | Description |
-|---------|-------------|
-| `vs.search(fieldname, vector, limit, **kwargs)` | Recherche par similarité vectorielle |
-| `vs.index_vectors(fieldname, vectors)` | Indexer des vecteurs |
-| `vs.save()` | Sauvegarde l'index vectoriel |
-| `vs.load()` | Charge l'index vectoriel |
-
-**Exemple:**
-```python
-with ix.searcher() as s:
-    vs = s.vector_search("embedding", query_vector, limit=10)
-    for hit in vs:
-        print(hit["titre"], hit.score)
-```
-
-## AutocompleteField
+##### `add_vector()`
 
 ```python
-from whoosh_modern.autocomplete import AutocompleteField
-
-champ = AutocompleteField(
-    prefix_length=3,
-    max_prefix=50,
-    stored=False
-)
+provider.add_vector(doc_id, embedding: list[float])
 ```
 
-## FastAPI Integration
+Indexer un vecteur.
+
+##### `search()`
 
 ```python
-from whoosh_fastapi import WhooshFastAPI
-
-app = FastAPI()
-api = WhooshFastAPI(ix)
-
-api.register_search_endpoint("/search", "content")
-api.register_index_endpoint("/documents", schema)
+results = provider.search(query_embedding, limit=10)
 ```
 
-## SchemaBuilder
+Rechercher des vecteurs.
 
-API fluent pour construire des schémas:
+### Providers intégrés
+
+#### NumpyProvider
 
 ```python
-from whoosh.fields import SchemaBuilder, TEXT, ID, NUMERIC
+from whoosh.vector.numpy_provider import NumpyProvider
 
-schema = (
-    SchemaBuilder()
-    .field("titre", TEXT(stored=True))
-    .field("chemin", ID(stored=True, unique=True))
-    .field("contenu", TEXT)
-    .field("note", NUMERIC(float, stored=True))
-    .build()
-)
+provider = NumpyProvider()
 ```
 
-## Monitoring
+Similarité cosinus NumPy pure. Meilleur pour les petits index.
+
+---
+
+#### HNSWProvider
 
 ```python
-from whoosh.middleware import MetricsMiddleware, MiddlewareChain
-from whoosh.middleware.integration import apply_middleware_to_searcher
+from whoosh.vector.hnsw_provider import HNSWProvider
 
-chain = MiddlewareChain([MetricsMiddleware()])
-searcher = apply_middleware_to_searcher(ix.searcher(), chain.middlewares)
-
-metrics = chain.get_metrics()
-print(metrics)
-# {"documents_indexed": 10, "searches_executed": 5}
+provider = HNSWProvider(dimensions=384, metric="cosine")
 ```
 
+Hierarchical Navigable Small World. ANN rapide pour les grands index.
+
+---
+
+#### FaissProvider
+
+```python
+from whoosh.vector.faiss_provider import FaissProvider
+```
+
+Facebook AI Similarity Search. Très grands index.
+
+---
+
+#### QdrantProvider
+
+```python
+from whoosh.vector.qdrant_provider import QdrantProvider
+```
+
+Intégration DB vectorielle distribuée.
+
+---
+
+## API d'indexation de modèles
+
+### ModelIndex
+
+```python
+from whoosh_modern.models import ModelIndex
+
+idx = ModelIndex(Book)
+schema = idx.schema
+doc = idx.to_whoosh_document(instance)
+```
+
+Mappe automatiquement des modèles Python vers des schémas Whoosh.
+
+#### Types de modèles supportés
+
+- Dataclasses (`dataclasses.is_dataclass`)
+- Pydantic v2 (`BaseModel`)
+- SQLAlchemy (`__mapper__`)
+- SQLModel (sous-classes de `SQLModel`)
+- msgspec (`msgspec.Struct`)
+- Classes Python avec `__annotations__`
+
+#### Mappings de types
+
+| Type Python | Champ Whoosh |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (stockage hexadécimal) |
+| `list[str]` | `KEYWORD` |
+
+### SearchField et SearchOptions
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
+    count: int = SearchField(sortable=True)
+```
+
+### AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+auto.index(instance)
+auto.remove(instance)
+await auto.index_async(instance)
+await auto.remove_async(instance)
+```
+
+Indexation automatique avec hooks d'événements SQLAlchemy.
+
+---
+
+## API Autocomplétion
+
+### AutocompleteProvider
+
+```python
+class whoosh_modern.autocomplete.base.AutocompleteProvider
+```
+
+Classe de base pour les providers d'autocomplétion.
+
+#### Méthodes
+
+##### `suggest()`
+
+```python
+suggestions = provider.suggest(
+    prefix: str,
+    limit: int = 5,
+    fuzzy: int = 0
+) -> list[str]
+```
+
+Obtenir des suggestions d'autocomplétion.
+
+---
+
+### Providers intégrés
+
+#### EdgeNgramProvider
+
+```python
+from whoosh_modern.autocomplete.edge_ngram import EdgeNgramProvider
+
+provider = EdgeNgramProvider(searcher, fieldname)
+```
+
+Complétion de préfixe via edge n-grammes.
+
+---
+
+#### NgramProvider
+
+```python
+from whoosh_modern.autocomplete.ngram import NgramProvider
+
+provider = NgramProvider(searcher, fieldname)
+```
+
+Complétion infixe via n-grammes.
+
+---
+
+## Plugins
+
+### VectorPlugin
+
+```python
+from whoosh_modern.vector.plugin import VectorPlugin
+```
+
+Enregistre les providers de vecteurs et ajoute vector_search au searcher.
+
+### AutocompletePlugin
+
+```python
+from whoosh_modern.autocomplete.plugin import AutocompletePlugin
+```
+
+Enregistre les providers d'autocomplétion.

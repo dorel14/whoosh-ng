@@ -345,9 +345,7 @@ no_implicit_optional = true
 check_untyped_defs = true
 disallow_untyped_decorators = true
 warn_return_any = true
-disable_error_code = [
-  "import-not-found",
-]
+disable_error_code = ["attr-defined"]
 cache_dir = ".mypy_cache"
 
 [[tool.mypy.overrides]]
@@ -367,7 +365,6 @@ module = [
   "whoosh.codec.whoosh3",
   "whoosh.lang.dmetaphone",
   "whoosh.lang.lovins",
-  "whoosh.support.pyparsing",
   "whoosh.automata.fst",
   "whoosh.query.ranges",
   "whoosh.query.spans",
@@ -396,14 +393,11 @@ module = [
   "whoosh.formats",
   "whoosh.columns",
   "whoosh.qparser.plugins.bool_plugins",
-  "whoosh.query.qcore",
-  "whoosh.codec.plaintext",
   "whoosh.reading.index_reader",
   "whoosh.registry",
   "whoosh.filedb.pools",
   "whoosh.matching.binary",
   "whoosh.util.cache",
-  "whoosh.analysis.analyzers",
   "whoosh.analysis.intraword",
   "whoosh.analysis.morph",
   "whoosh.automata.fsa",
@@ -427,7 +421,6 @@ module = [
   "whoosh.highlight.highlighters",
   "whoosh.idsets",
   "whoosh.index",
-  "whoosh.lang.__init__",
   "whoosh.lang.phonetic",
   "whoosh.lang.porter2",
   "whoosh.lang.wordnet",
@@ -437,9 +430,6 @@ module = [
   "whoosh.middleware.wrappers",
   "whoosh.plugins.manager",
   "whoosh.qparser.dateparse",
-  "whoosh.qparser.plugins._base",
-  "whoosh.qparser.plugins.special_plugins",
-  "whoosh.qparser.plugins.term_plugins",
   "whoosh.query.autocomplete",
   "whoosh.query.compound",
   "whoosh.query.nested",
@@ -448,14 +438,9 @@ module = [
   "whoosh.reading.segment_reader",
   "whoosh.reading.term",
   "whoosh.scoring",
-  "whoosh.sorting.sort",
   "whoosh.spelling",
-  "whoosh.support.__init__",
   "whoosh.support.bench",
-  "whoosh.support.bitstream",
-  "whoosh.support.levenshtein",
   "whoosh.support.unicode",
-  "whoosh.util.__init__",
   "whoosh.util.testing",
   "whoosh.util.versions",
   "whoosh.utils.async_utils",

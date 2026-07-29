@@ -25,6 +25,8 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
+from typing import Any, Callable, Generator, Iterator, cast
+
 from whoosh.analysis.acore import Composable, CompositionError
 from whoosh.analysis.filters import STOP_WORDS, LowercaseFilter, StopFilter
 from whoosh.analysis.intraword import IntraWordFilter
@@ -62,7 +64,7 @@ class Analyzer(Composable):
 
 class CompositeAnalyzer(Analyzer):
     def __init__(self, *composables):
-        self.items = []
+        self.items: list[Composable] = []
 
         for comp in composables:
             if isinstance(comp, CompositeAnalyzer):
@@ -88,11 +90,11 @@ class CompositeAnalyzer(Analyzer):
     def __call__(self, value, no_morph=False, **kwargs):
         items = self.items
         # Start with tokenizer
-        gen = items[0](value, **kwargs)
+        gen = cast(Callable[..., Iterator[Any]], items[0])(value, **kwargs)
         # Run filters
         for item in items[1:]:
             if not (no_morph and hasattr(item, "is_morph") and item.is_morph):
-                gen = item(gen)
+                gen = cast(Callable[..., Iterator[Any]], item)(gen)
         return gen
 
     def __getitem__(self, item):

@@ -113,7 +113,7 @@ writer = ix.writer()
 writer.add_field("description", TEXT(stored=True))
 
 # Supprimer un champ
-writer.remove_field("deprecated_field")
+writer.remove_field("legacy_field")
 
 writer.commit()
 ```
@@ -140,7 +140,25 @@ idx = ModelIndex(Book)
 schema = idx.schema
 ```
 
+`ModelIndex` inspecte les annotations de type et les mappe vers des champs Whoosh :
+
+| Type Python | Champ Whoosh |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (stockage hexadécimal) |
+| `list[str]` | `KEYWORD` |
+| `Optional[T]` | type mappé ou `STORED` |
+
+Les champs ID sont auto-détectés : `SearchOptions(id=True)` explicite > nom `id`/`ID`/`_id` > premier champ `str`.
+
 ### Niveau 2 : Options explicites
+
+Utilisez `SearchField` pour remplacer les valeurs par défaut :
 
 ```python
 from whoosh_modern.models import SearchField, SearchOptions
@@ -148,32 +166,99 @@ from whoosh_modern.models import SearchField, SearchOptions
 class Book:
     title: str = SearchField(fulltext=True, stored=True)
     count: int = SearchField(sortable=True)
-    tag: str = SearchField(multi=True)
+    tags: list[str] = SearchField(multi=True)
+```
+
+### Niveau 3 : Types annotés
+
+Utilisez `Annotated` pour attacher des métadonnées directement aux annotations :
+
+```python
+from typing import Annotated
+from whoosh_modern.models import SearchField
+
+class Book:
+    title: Annotated[str, SearchField(fulltext=True, stored=True)]
 ```
 
 ### Intégrations
 
+#### Dataclass
+
 ```python
-# Pydantic
-from whoosh_modern.models import register_model
-from pydantic import BaseModel
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
 
-class BookModel(BaseModel):
+@dataclass
+class Article:
     title: str
-    year: int
+    body: str
+    published: datetime.datetime
 
-idx = register_model(BookModel)
+idx = ModelIndex(Article)
+```
 
-# SQLAlchemy
-from sqlalchemy import Column, Integer, String
+#### Pydantic v2
+
+```python
+from pydantic import BaseModel
 from whoosh_modern.models import register_model
 
-class BookSQL:
-    __tablename__ = "book"
-    title = Column(String, info={"search": {"fulltext": True}})
-    year = Column(Integer, info={"search": {"sortable": True}})
+class Article(BaseModel):
+    title: str
+    body: str
+    published: datetime.datetime
 
-idx = register_model(BookSQL)
+    # Métadonnées de recherche par champ via json_schema_extra
+    model_config = {"json_schema_extra": {"search": {"fulltext": True}}}
+
+idx = register_model(Article)
+```
+
+#### SQLAlchemy
+
+```python
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import DeclarativeBase
+from whoosh_modern.models import register_model
+
+class Base(DeclarativeBase):
+    pass
+
+class Article(Base):
+    __tablename__ = "articles"
+    id = Column(Integer, primary_key=True)
+    title = Column(String, info={"search": {"fulltext": True, "stored": True}})
+    published = Column(DateTime, info={"search": {"sortable": True}})
+
+idx = register_model(Article)
+```
+
+#### SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Article(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    published: datetime.datetime
+
+idx = register_model(Article)
+```
+
+#### msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Article(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    published: datetime.datetime
+
+idx = register_model(Article)
 ```
 
 ### Conversion d'instances
@@ -183,11 +268,18 @@ doc = idx.to_whoosh_document(book_instance)
 writer.add_document(**doc)
 ```
 
+`to_whoosh_document` gère :
+- dataclass : itération via `dataclasses.fields()`
+- Pydantic/SQLModel : itération via `model_fields`
+- SQLAlchemy : itération via `__mapper__.columns`
+- Valeurs Enum converties en `.value`
+- `bytes` convertis en chaîne hexadécimale
+
 ## Bonnes pratiques
 
-1. **Minimal**: N'indexez que ce que vous cherchez
-2. **STORED avec parcimonie**: Augmente la taille de l'index
-3. **Champs uniques**: Utilisez `unique=True` pour les identifiants
-4. **Boost de champ**: Boostez les champs importants au niveau schéma
-5. **TEXT options**: Désactivez `phrase` si vous n'avez pas besoin de recherche de phrase
-
+1. **Minimal** : N'indexez que ce que vous cherchez
+2. **STORED avec parcimonie** : Augmente la taille de l'index
+3. **Champs uniques** : Utilisez `unique=True` pour les identifiants
+4. **Boost de champ** : Boostez les champs importants au niveau schéma
+5. **TEXT options** : Désactivez `phrase` si vous n'avez pas besoin de recherche de phrase
+6. **Champ ID** : Laissez `ModelIndex` auto-détecter ou marquez explicitement avec `SearchOptions(id=True)`

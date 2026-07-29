@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Optional
 
-import pytest
-
-from whoosh.fields import NUMERIC, TEXT, Schema
+from whoosh.fields import Schema
 from whoosh_modern.models import ModelIndex, SearchField, SearchOptions, TypeMapper
 
 
@@ -24,7 +21,7 @@ def test_search_options_defaults():
 
 def test_search_field_descriptor():
     class Book:
-        title: str = SearchField(fulltext=True, stored=True)
+        title: str = SearchField(fulltext=True, stored=True)  # pyright: ignore[reportAssignmentType]
 
     assert isinstance(Book.title, SearchField)
     assert Book.title.options.fulltext is True

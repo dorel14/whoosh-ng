@@ -57,6 +57,35 @@ idx = register_model(BookSQL)
 schema = idx.schema
 ```
 
+## SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Book(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
+## msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Book(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
 ## Indexation de documents
 
 ```python
@@ -71,6 +100,28 @@ with ix.writer() as w:
     w.add_document(**doc)
     w.commit()
 ```
+
+## Auto-indexation avec AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+
+# Indexer une instance unique
+book = Book(title="Nouveau livre", year=2024, tags=["python"])
+auto.index(book)
+
+# Supprimer par ID
+auto.remove(book)
+
+# Versions asynchrones
+await auto.index_async(book)
+await auto.remove_async(book)
+```
+
+Pour les modèles SQLAlchemy, `AutoIndexer` se connecte automatiquement aux événements `after_insert`, `after_update` et `after_delete`.
 
 ## Nettoyage
 

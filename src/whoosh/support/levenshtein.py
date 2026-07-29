@@ -1,10 +1,7 @@
-# type: ignore
-"""
-Contains functions implementing edit distance algorithms.
-"""
+from typing import Optional, Sequence
 
 
-def levenshtein(seq1, seq2, limit=None):
+def levenshtein(seq1: Sequence[str], seq2: Sequence[str], limit: Optional[int] = None) -> int:
     """Returns the Levenshtein edit distance between two strings."""
 
     oneago = None
@@ -26,7 +23,7 @@ def levenshtein(seq1, seq2, limit=None):
     return thisrow[len(seq2) - 1]
 
 
-def damerau_levenshtein(seq1, seq2, limit=None):
+def damerau_levenshtein(seq1: Sequence[str], seq2: Sequence[str], limit: Optional[int] = None) -> int:
     """Returns the Damerau-Levenshtein edit distance between two strings."""
 
     oneago = None
@@ -57,7 +54,7 @@ def damerau_levenshtein(seq1, seq2, limit=None):
     return thisrow[len(seq2) - 1]
 
 
-def relative(a, b):
+def relative(a: str, b: str) -> float:
     """Returns the relative distance between two strings, in the range
     [0-1] where 1 means total equality.
     """

@@ -5,11 +5,9 @@ nav_order: 190
 
 # Modern API
 
-Vector search, autocomplete, and other advanced features.
+Vector search, autocomplete, model indexing, and other advanced features.
 
-## Vector API
-
-### VectorField
+## VectorField
 
 ```python
 class whoosh.fields.VectorField(
@@ -148,6 +146,69 @@ Infix completion using n-grams.
 
 ---
 
+## Model Indexing API
+
+### ModelIndex
+
+```python
+from whoosh_modern.models import ModelIndex
+
+idx = ModelIndex(Book)
+schema = idx.schema
+doc = idx.to_whoosh_document(instance)
+```
+
+Auto-maps Python models to Whoosh schemas.
+
+#### Supported model types
+
+- Dataclasses (`dataclasses.is_dataclass`)
+- Pydantic v2 (`BaseModel`)
+- SQLAlchemy (`__mapper__`)
+- SQLModel (`SQLModel` subclasses)
+- msgspec (`msgspec.Struct`)
+- Plain classes with `__annotations__`
+
+#### Type mappings
+
+| Python type | Whoosh field |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (hex-encoded) |
+| `list[str]` | `KEYWORD` |
+
+### SearchField and SearchOptions
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
+    count: int = SearchField(sortable=True)
+```
+
+### AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+auto.index(instance)
+auto.remove(instance)
+await auto.index_async(instance)
+await auto.remove_async(instance)
+```
+
+Automatic indexing with SQLAlchemy event hooks.
+
+---
+
 ## Plugins
 
 ### VectorPlugin
@@ -165,4 +226,3 @@ from whoosh_modern.autocomplete.plugin import AutocompletePlugin
 ```
 
 Registers autocomplete providers.
-
