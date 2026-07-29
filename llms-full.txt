@@ -1381,11 +1381,9 @@ def apply_middleware_to_searcher(
 
 # Modern API
 
-Vector search, autocomplete, and other advanced features.
+Vector search, autocomplete, model indexing, and other advanced features.
 
-## Vector API
-
-### VectorField
+## VectorField
 
 ```python
 class whoosh.fields.VectorField(
@@ -1521,6 +1519,69 @@ provider = NgramProvider(searcher, fieldname)
 ```
 
 Infix completion using n-grams.
+
+---
+
+## Model Indexing API
+
+### ModelIndex
+
+```python
+from whoosh_modern.models import ModelIndex
+
+idx = ModelIndex(Book)
+schema = idx.schema
+doc = idx.to_whoosh_document(instance)
+```
+
+Auto-maps Python models to Whoosh schemas.
+
+#### Supported model types
+
+- Dataclasses (`dataclasses.is_dataclass`)
+- Pydantic v2 (`BaseModel`)
+- SQLAlchemy (`__mapper__`)
+- SQLModel (`SQLModel` subclasses)
+- msgspec (`msgspec.Struct`)
+- Plain classes with `__annotations__`
+
+#### Type mappings
+
+| Python type | Whoosh field |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (hex-encoded) |
+| `list[str]` | `KEYWORD` |
+
+### SearchField and SearchOptions
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
+    count: int = SearchField(sortable=True)
+```
+
+### AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+auto.index(instance)
+auto.remove(instance)
+await auto.index_async(instance)
+await auto.remove_async(instance)
+```
+
+Automatic indexing with SQLAlchemy event hooks.
 
 ---
 
@@ -3432,6 +3493,35 @@ idx = register_model(BookSQL)
 schema = idx.schema
 ```
 
+## SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Book(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
+## msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Book(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
 ## Indexing documents
 
 ```python
@@ -3446,6 +3536,28 @@ with ix.writer() as w:
     w.add_document(**doc)
     w.commit()
 ```
+
+## Auto-indexing with AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+
+# Index a single instance
+book = Book(title="New Book", year=2024, tags=["python"])
+auto.index(book)
+
+# Remove by ID
+auto.remove(book)
+
+# Async versions
+await auto.index_async(book)
+await auto.remove_async(book)
+```
+
+For SQLAlchemy models, `AutoIndexer` automatically hooks into `after_insert`, `after_update`, and `after_delete` events.
 
 ## Cleanup
 
@@ -3676,6 +3788,130 @@ print(restored == tuple(values))  # True
 - `NumpyProvider` implements cosine similarity via dot product.
 - Register the plugin via `VectorPlugin().register(manager)` or use `PluginManager.load_plugins()`.
 - Use `filter_ids` in `provider.search()` to restrict to a subset of documents.
+
+
+## DOCUMENT: Auto Indexing
+
+# Auto-Indexing
+
+Whoosh-NG provides `AutoIndexer` to automatically keep a Whoosh index in sync with your data models.
+
+## Overview
+
+`AutoIndexer` maintains a registry of models and their corresponding Whoosh schemas. It can:
+
+- **Index** model instances into a Whoosh index
+- **Remove** instances by their ID field
+- **Hook** into SQLAlchemy events for automatic sync
+- **Handle errors** with configurable strategies
+
+## Basic usage
+
+```python
+from whoosh_modern.models import AutoIndexer, ModelIndex
+from whoosh.filedb.filestore import RamStorage
+
+# Create a Whoosh index
+storage = RamStorage()
+schema = ModelIndex(Book).schema
+ix = storage.create_index(schema)
+
+# Create auto-indexer
+auto = AutoIndexer(ix, on_error="raise")
+
+# Register a model
+auto.register(Book)
+
+# Index an instance
+book = Book(title="Hello", year=2024)
+auto.index(book)
+
+# Remove by ID
+auto.remove(book)
+```
+
+## Error handling
+
+The `on_error` parameter controls what happens when indexing fails:
+
+- `"raise"` (default): re-raise the exception
+- `"log"`: log the error and continue
+- `"skip"`: silently skip the error
+
+```python
+auto = AutoIndexer(ix, on_error="log")
+```
+
+## SQLAlchemy integration
+
+For SQLAlchemy models, `AutoIndexer` automatically registers event listeners:
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from whoosh_modern.models import register_sqlalchemy_model
+
+engine = create_engine("sqlite:///app.db")
+Base = DeclarativeBase()
+
+class Book(Base):
+    __tablename__ = "books"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+
+Base.metadata.create_all(engine)
+
+# Register with AutoIndexer
+auto = AutoIndexer(ix)
+auto.register(Book)
+
+# Now any SQLAlchemy session operation automatically syncs:
+# - after_insert -> index.document()
+# - after_update -> index.document()
+# - after_delete -> remove.document()
+```
+
+## Async support
+
+For async applications, use `index_async` and `remove_async`:
+
+```python
+import asyncio
+
+async def main():
+    book = Book(title="Async", year=2024)
+    await auto.index_async(book)
+    await auto.remove_async(book)
+
+asyncio.run(main())
+```
+
+These methods run the synchronous indexing in a worker thread via `asyncio.to_thread()` to avoid blocking the event loop.
+
+## API reference
+
+### `AutoIndexer(index, on_error="raise")`
+
+- `index`: a Whoosh `Index` instance
+- `on_error`: error handling strategy (`"raise"`, `"log"`, `"skip"`)
+
+### Methods
+
+- `register(model) -> ModelIndex`: register a model class and return its `ModelIndex`
+- `index(instance)`: index a model instance
+- `remove(instance)`: remove a model instance by its ID field
+- `index_async(instance)`: async version of `index`
+- `remove_async(instance)`: async version of `remove`
+
+### Helper functions
+
+```python
+from whoosh_modern.models import index_document, remove_document
+
+# One-off indexing without creating an AutoIndexer
+index_document(ix, book_instance, on_error="raise")
+remove_document(ix, book_instance, on_error="raise")
+```
 
 
 ## DOCUMENT: Autocomplete
@@ -4280,6 +4516,83 @@ uv run mypy src/whoosh
 
 - [Quick Start]({{ '/en/quickstart/' | relative_url }})
 - [Core Concepts]({{ '/en/guides/core-concepts/' | relative_url }})
+
+
+## DOCUMENT: Legacy Cleanup
+
+# Legacy Code Cleanup Strategy
+
+This guide explains how Whoosh-NG separates modern typed code from legacy code,
+and how the legacy cleanup is progressing.
+
+## Why a legacy boundary?
+
+`whoosh-modern` is the new, fully typed surface of Whoosh-NG.
+The original `whoosh` package still works at runtime, but it carries decades of
+Python 2/3 compatibility patterns, dynamic metaprogramming, and untyped internals.
+Trying to force strict types on all of it at once would block development.
+
+The cleanup strategy is **incremental and opt-in**:
+
+1. `src/whoosh_modern/` is typed and linted with `pyright` and `mypy` strict.
+2. `src/whoosh/` is the legacy surface. It is split into:
+   - **excluded modules** (documented in `pyrightconfig.json`) — code that is too
+     dynamic or vendored for an economical type pass right now;
+   - **cleanup candidates** — small, isolated files that are straightforward to
+     annotate and verify.
+3. Each sprint, a wave of candidates is typed, tested, and promoted out of the
+   high-tolerance zone.
+
+## Current pyright/mypy thresholds (Sprint 2)
+
+| Checker | Scope | Threshold |
+|---------|-------|-----------|
+| `pyright` | `src/whoosh_modern/` | **0 errors** (strict) |
+| `pyright` | legacy | **≤ 500 errors** (tolerant) |
+| `mypy` | `src/` | **0 errors** (via overrides + `ignore_errors`) |
+
+## Exclusion rationale (pyrightconfig.json)
+
+The `exclude` list in `pyrightconfig.json` groups excluded files by theme:
+
+- **Vendored / no stubs**: `pyparsing.py`, `relativedelta.py`
+- **Migration shims**: `codec/whoosh2.py`, `codec/whoosh3.py`
+- **Dynamic parsing**: `qparser/`, `query/`, `analysis/`, `automata/`
+- **Large datastores**: `filedb/`, `reading/`, `writing/`
+- **Heuristic / data-driven**: `lang/dmetaphone.py`, `lang/lovins.py`,
+  `lang/phonetic.py`, `lang/wordnet.py`
+- **Core dynamic objects**: `classify.py`, `index.py`, `locking.py`,
+  `formats.py`, `middleware/`
+- **Vendored low-level**: `support/bench.py`, `support/base85.py`,
+  `support/bitstream.py`, `support/bitvector.py`, `support/charset.py`,
+  `support/levenshtein.py`
+
+## Sprint 2 cleanup plan
+
+For Sprint 2, the focus is on small utility and support modules that have few
+external dependencies and no heavy metaprogramming.
+
+Candidate wave:
+
+- `src/whoosh/util/varints.py`
+- `src/whoosh/util/text.py`
+- `src/whoosh/util/loading.py`
+- `src/whoosh/support/bitstream.py`
+- `src/whoosh/support/levenshtein.py`
+
+For each file:
+
+1. Remove the blanket `# type: ignore` (if present).
+2. Add precise function signatures.
+3. Run `pyright` and `mypy` to confirm **0 new errors**.
+4. Move the file out of `pyrightconfig.json` excludes.
+5. Add a regression test in `tests/test_legacy_cleanup.py`.
+
+## Long-term goal
+
+Eventually every file in `src/whoosh/` should be checkable by `mypy` and
+`pyright` without blanket excludes. Until then, the exclude list is the
+explicit ledger of debt, and each sprint chips away at it.
 
 
 ## DOCUMENT: Middleware
@@ -5109,8 +5422,11 @@ schema = (
 ## Modifying fields
 
 ```python
-writer.add_field("summary", TEXT(stored=True))
-writer.remove_field("legacy_field")
+writer.add_document(
+    title="Multi-tag post",
+    tags=["whoosh", "python", "search"],
+    content="..."
+)
 ```
 
 ## Search Models
@@ -5133,40 +5449,125 @@ idx = ModelIndex(Book)
 schema = idx.schema
 ```
 
+`ModelIndex` inspects type annotations and maps them to Whoosh fields:
+
+| Python type | Whoosh field |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (hex-encoded) |
+| `list[str]` | `KEYWORD` |
+| `Optional[T]` | mapped type or `STORED` |
+
+ID fields are auto-detected: explicit `SearchOptions(id=True)` > field named `id`/`ID`/`_id` > first `str` field.
+
 ### Level 2: Explicit options
+
+Use `SearchField` to override defaults:
 
 ```python
 from whoosh_modern.models import SearchField, SearchOptions
 
 class Book:
-    title: str = SearchField(fulltext=True, stored=True)
+    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
     count: int = SearchField(sortable=True)
-    tag: str = SearchField(multi=True)
+    tags: list[str] = SearchField(multi=True)
+```
+
+### Level 3: Annotated types
+
+Use `Annotated` to attach metadata directly to annotations:
+
+```python
+from typing import Annotated
+from whoosh_modern.models import SearchField
+
+class Book:
+    title: Annotated[str, SearchField(fulltext=True, stored=True)]
 ```
 
 ### Integrations
 
+#### Dataclass
+
 ```python
-# Pydantic
-from whoosh_modern.models import register_model
-from pydantic import BaseModel
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
 
-class BookModel(BaseModel):
+@dataclass
+class Article:
     title: str
-    year: int
+    body: str
+    published: datetime.datetime
 
-idx = register_model(BookModel)
+idx = ModelIndex(Article)
+```
 
-# SQLAlchemy
-from sqlalchemy import Column, Integer, String
+#### Pydantic v2
+
+```python
+from pydantic import BaseModel
 from whoosh_modern.models import register_model
 
-class BookSQL:
-    __tablename__ = "book"
-    title = Column(String, info={"search": {"fulltext": True}})
-    year = Column(Integer, info={"search": {"sortable": True}})
+class Article(BaseModel):
+    title: str
+    body: str
+    published: datetime.datetime
 
-idx = register_model(BookSQL)
+    # Per-field search metadata via json_schema_extra
+    model_config = {"json_schema_extra": {"search": {"fulltext": True}}}
+
+idx = register_model(Article)
+```
+
+#### SQLAlchemy
+
+```python
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import DeclarativeBase
+from whoosh_modern.models import register_model
+
+class Base(DeclarativeBase):
+    pass
+
+class Article(Base):
+    __tablename__ = "articles"
+    id = Column(Integer, primary_key=True)
+    title = Column(String, info={"search": {"fulltext": True, "stored": True}})
+    published = Column(DateTime, info={"search": {"sortable": True}})
+
+idx = register_model(Article)
+```
+
+#### SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Article(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    published: datetime.datetime
+
+idx = register_model(Article)
+```
+
+#### msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Article(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    published: datetime.datetime
+
+idx = register_model(Article)
 ```
 
 ### Converting instances
@@ -5176,6 +5577,13 @@ doc = idx.to_whoosh_document(book_instance)
 writer.add_document(**doc)
 ```
 
+`to_whoosh_document` handles:
+- dataclass: `dataclasses.fields()` iteration
+- Pydantic/SQLModel: `model_fields` iteration
+- SQLAlchemy: `__mapper__.columns` iteration
+- Enum values converted to `.value`
+- `bytes` converted to hex string
+
 ## Best practices
 
 1. **Minimal**: Only index what you search
@@ -5183,6 +5591,7 @@ writer.add_document(**doc)
 3. **Unique fields**: Use `unique=True` for identifiers
 4. **Field boost**: Boost important fields at schema level
 5. **TEXT options**: Disable `phrase` if you don't need phrase search
+6. **ID field**: Let `ModelIndex` auto-detect or explicitly mark with `SearchOptions(id=True)`
 
 
 ## DOCUMENT: Searching
@@ -6403,7 +6812,7 @@ class SkipOperation(Skip)
 
 # API Moderne
 
-Features introduites dans Whoosh-NG 4.0.
+Recherche vectorielle, autocomplétion, indexation de modèles et autres fonctionnalités avancées.
 
 ## VectorField
 
@@ -6413,102 +6822,214 @@ from whoosh.fields import VectorField
 champ = VectorField(dimensions=384, metric="cosine", stored=False)
 ```
 
-### Attributs
+Champ de vecteur d'embedding.
 
-| Attribut | Type | Description |
-|----------|------|-------------|
-| `dimensions` | int | Dimensions du vecteur |
-| `metric` | str | Métrique de similarité (`"cosine"`, `"euclidean"`, `"dot"`) |
-| `stored` | bool | Stocker le vecteur |
-| `provider` | str | Provider à utiliser |
+---
 
-**Exemple:**
-```python
-schema = Schema(
-    titre=TEXT(stored=True),
-    embedding=VectorField(dimensions=384, metric="cosine")
-)
-```
-
-## VectorSearch
+### VectorProvider
 
 ```python
-class whoosh.vector.VectorSearch(searcher)
+class whoosh.vector.base.VectorProvider
 ```
 
-Moteur de recherche vectorielle.
+Classe de base pour les providers de vecteurs.
 
-### Méthodes
+#### Méthodes
 
-| Méthode | Description |
-|---------|-------------|
-| `vs.search(fieldname, vector, limit, **kwargs)` | Recherche par similarité vectorielle |
-| `vs.index_vectors(fieldname, vectors)` | Indexer des vecteurs |
-| `vs.save()` | Sauvegarde l'index vectoriel |
-| `vs.load()` | Charge l'index vectoriel |
-
-**Exemple:**
-```python
-with ix.searcher() as s:
-    vs = s.vector_search("embedding", query_vector, limit=10)
-    for hit in vs:
-        print(hit["titre"], hit.score)
-```
-
-## AutocompleteField
+##### `add_vector()`
 
 ```python
-from whoosh_modern.autocomplete import AutocompleteField
-
-champ = AutocompleteField(
-    prefix_length=3,
-    max_prefix=50,
-    stored=False
-)
+provider.add_vector(doc_id, embedding: list[float])
 ```
 
-## FastAPI Integration
+Indexer un vecteur.
+
+##### `search()`
 
 ```python
-from whoosh_fastapi import WhooshFastAPI
-
-app = FastAPI()
-api = WhooshFastAPI(ix)
-
-api.register_search_endpoint("/search", "content")
-api.register_index_endpoint("/documents", schema)
+results = provider.search(query_embedding, limit=10)
 ```
 
-## SchemaBuilder
+Rechercher des vecteurs.
 
-API fluent pour construire des schémas:
+### Providers intégrés
+
+#### NumpyProvider
 
 ```python
-from whoosh.fields import SchemaBuilder, TEXT, ID, NUMERIC
+from whoosh.vector.numpy_provider import NumpyProvider
 
-schema = (
-    SchemaBuilder()
-    .field("titre", TEXT(stored=True))
-    .field("chemin", ID(stored=True, unique=True))
-    .field("contenu", TEXT)
-    .field("note", NUMERIC(float, stored=True))
-    .build()
-)
+provider = NumpyProvider()
 ```
 
-## Monitoring
+Similarité cosinus NumPy pure. Meilleur pour les petits index.
+
+---
+
+#### HNSWProvider
 
 ```python
-from whoosh.middleware import MetricsMiddleware, MiddlewareChain
-from whoosh.middleware.integration import apply_middleware_to_searcher
+from whoosh.vector.hnsw_provider import HNSWProvider
 
-chain = MiddlewareChain([MetricsMiddleware()])
-searcher = apply_middleware_to_searcher(ix.searcher(), chain.middlewares)
-
-metrics = chain.get_metrics()
-print(metrics)
-# {"documents_indexed": 10, "searches_executed": 5}
+provider = HNSWProvider(dimensions=384, metric="cosine")
 ```
+
+Hierarchical Navigable Small World. ANN rapide pour les grands index.
+
+---
+
+#### FaissProvider
+
+```python
+from whoosh.vector.faiss_provider import FaissProvider
+```
+
+Facebook AI Similarity Search. Très grands index.
+
+---
+
+#### QdrantProvider
+
+```python
+from whoosh.vector.qdrant_provider import QdrantProvider
+```
+
+Intégration DB vectorielle distribuée.
+
+---
+
+## API d'indexation de modèles
+
+### ModelIndex
+
+```python
+from whoosh_modern.models import ModelIndex
+
+idx = ModelIndex(Book)
+schema = idx.schema
+doc = idx.to_whoosh_document(instance)
+```
+
+Mappe automatiquement des modèles Python vers des schémas Whoosh.
+
+#### Types de modèles supportés
+
+- Dataclasses (`dataclasses.is_dataclass`)
+- Pydantic v2 (`BaseModel`)
+- SQLAlchemy (`__mapper__`)
+- SQLModel (sous-classes de `SQLModel`)
+- msgspec (`msgspec.Struct`)
+- Classes Python avec `__annotations__`
+
+#### Mappings de types
+
+| Type Python | Champ Whoosh |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (stockage hexadécimal) |
+| `list[str]` | `KEYWORD` |
+
+### SearchField et SearchOptions
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
+    count: int = SearchField(sortable=True)
+```
+
+### AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+auto.index(instance)
+auto.remove(instance)
+await auto.index_async(instance)
+await auto.remove_async(instance)
+```
+
+Indexation automatique avec hooks d'événements SQLAlchemy.
+
+---
+
+## API Autocomplétion
+
+### AutocompleteProvider
+
+```python
+class whoosh_modern.autocomplete.base.AutocompleteProvider
+```
+
+Classe de base pour les providers d'autocomplétion.
+
+#### Méthodes
+
+##### `suggest()`
+
+```python
+suggestions = provider.suggest(
+    prefix: str,
+    limit: int = 5,
+    fuzzy: int = 0
+) -> list[str]
+```
+
+Obtenir des suggestions d'autocomplétion.
+
+---
+
+### Providers intégrés
+
+#### EdgeNgramProvider
+
+```python
+from whoosh_modern.autocomplete.edge_ngram import EdgeNgramProvider
+
+provider = EdgeNgramProvider(searcher, fieldname)
+```
+
+Complétion de préfixe via edge n-grammes.
+
+---
+
+#### NgramProvider
+
+```python
+from whoosh_modern.autocomplete.ngram import NgramProvider
+
+provider = NgramProvider(searcher, fieldname)
+```
+
+Complétion infixe via n-grammes.
+
+---
+
+## Plugins
+
+### VectorPlugin
+
+```python
+from whoosh_modern.vector.plugin import VectorPlugin
+```
+
+Enregistre les providers de vecteurs et ajoute vector_search au searcher.
+
+### AutocompletePlugin
+
+```python
+from whoosh_modern.autocomplete.plugin import AutocompletePlugin
+```
+
+Enregistre les providers d'autocomplétion.
 
 
 ## DOCUMENT: Overview
@@ -7729,6 +8250,35 @@ idx = register_model(BookSQL)
 schema = idx.schema
 ```
 
+## SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Book(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
+## msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Book(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
 ## Indexation de documents
 
 ```python
@@ -7743,6 +8293,28 @@ with ix.writer() as w:
     w.add_document(**doc)
     w.commit()
 ```
+
+## Auto-indexation avec AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+
+# Indexer une instance unique
+book = Book(title="Nouveau livre", year=2024, tags=["python"])
+auto.index(book)
+
+# Supprimer par ID
+auto.remove(book)
+
+# Versions asynchrones
+await auto.index_async(book)
+await auto.remove_async(book)
+```
+
+Pour les modèles SQLAlchemy, `AutoIndexer` se connecte automatiquement aux événements `after_insert`, `after_update` et `after_delete`.
 
 ## Nettoyage
 
@@ -7963,6 +8535,130 @@ print(restored == tuple(values))  # True
 - `NumpyProvider` implémente la similarité cosinus.
 - Enregistrez le plugin via `VectorPlugin().register(manager)`.
 - Utilisez `filter_ids` dans `provider.search()` pour restreindre les documents.
+
+
+## DOCUMENT: Auto Indexing
+
+# Auto-indexation
+
+Whoosh-NG fournit `AutoIndexer` pour maintenir automatiquement un index Whoosh en synchronisation avec vos modèles de données.
+
+## Vue d'ensemble
+
+`AutoIndexer` maintient un registre de modèles et de leurs schémas Whoosh correspondants. Il peut :
+
+- **Indexer** des instances de modèle dans un index Whoosh
+- **Supprimer** des instances par leur champ ID
+- **Se connecter** aux événements SQLAlchemy pour une synchronisation automatique
+- **Gérer les erreurs** avec des stratégies configurables
+
+## Utilisation basique
+
+```python
+from whoosh_modern.models import AutoIndexer, ModelIndex
+from whoosh.filedb.filestore import RamStorage
+
+# Créer un index Whoosh
+storage = RamStorage()
+schema = ModelIndex(Book).schema
+ix = storage.create_index(schema)
+
+# Créer l'auto-indexeur
+auto = AutoIndexer(ix, on_error="raise")
+
+# Enregistrer un modèle
+auto.register(Book)
+
+# Indexer une instance
+book = Book(title="Bonjour", year=2024)
+auto.index(book)
+
+# Supprimer par ID
+auto.remove(book)
+```
+
+## Gestion des erreurs
+
+Le paramètre `on_error` contrôle ce qui se passe lorsque l'indexation échoue :
+
+- `"raise"` (défaut) : relève l'exception
+- `"log"` : journalise l'erreur et continue
+- `"skip"` : ignore silencieusement l'erreur
+
+```python
+auto = AutoIndexer(ix, on_error="log")
+```
+
+## Intégration SQLAlchemy
+
+Pour les modèles SQLAlchemy, `AutoIndexer` enregistre automatiquement des écouteurs d'événements :
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from whoosh_modern.models import register_sqlalchemy_model
+
+engine = create_engine("sqlite:///app.db")
+Base = DeclarativeBase()
+
+class Book(Base):
+    __tablename__ = "books"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+
+Base.metadata.create_all(engine)
+
+# Enregistrer avec AutoIndexer
+auto = AutoIndexer(ix)
+auto.register(Book)
+
+# Toute opération de session SQLAlchemy se synchronise automatiquement :
+# - after_insert -> index.document()
+# - after_update -> index.document()
+# - after_delete -> remove.document()
+```
+
+## Support asynchrone
+
+Pour les applications asynchrones, utilisez `index_async` et `remove_async` :
+
+```python
+import asyncio
+
+async def main():
+    book = Book(title="Async", year=2024)
+    await auto.index_async(book)
+    await auto.remove_async(book)
+
+asyncio.run(main())
+```
+
+Ces méthodes exécutent l'indexation synchrone dans un thread de travail via `asyncio.to_thread()` pour ne pas bloquer la boucle d'événements.
+
+## Référence API
+
+### `AutoIndexer(index, on_error="raise")`
+
+- `index` : une instance Whoosh `Index`
+- `on_error` : stratégie de gestion d'erreur (`"raise"`, `"log"`, `"skip"`)
+
+### Méthodes
+
+- `register(model) -> ModelIndex` : enregistrer une classe modèle et retourner son `ModelIndex`
+- `index(instance)` : indexer une instance de modèle
+- `remove(instance)` : supprimer une instance de modèle par son champ ID
+- `index_async(instance)` : version async de `index`
+- `remove_async(instance)` : version async de `remove`
+
+### Fonctions utilitaires
+
+```python
+from whoosh_modern.models import index_document, remove_document
+
+# Indexation ponctuelle sans créer d'AutoIndexer
+index_document(ix, book_instance, on_error="raise")
+remove_document(ix, book_instance, on_error="raise")
+```
 
 
 ## DOCUMENT: Autocomplete
@@ -8351,6 +9047,84 @@ uv run mypy src/whoosh
 
 - [Démarrage rapide]({{ '/fr/quickstart/' | relative_url }})
 - [Concepts fondamentaux]({{ '/fr/guides/core-concepts/' | relative_url }})
+
+
+## DOCUMENT: Legacy Cleanup
+
+# Stratégie de nettoyage du code legacy
+
+Ce guide explique comment Whoosh-NG sépare le code moderne typé du code legacy,
+et comment le nettoyage progressif est organisé.
+
+## Pourquoi une frontière legacy ?
+
+`whoosh-modern` est la nouvelle surface de Whoosh-NG, entièrement typée.
+Le package `whoosh` original fonctionne toujours au runtime, mais il contient
+des décennies de motifs de compatibilité Python 2/3, de métaprogrammation
+dynamique et d'internes non typés. Forcer des types stricts sur l'ensemble
+d'un coup bloquerait le développement.
+
+La stratégie de nettoyage est **incrémentale et opt-in** :
+
+1. `src/whoosh_modern/` est typé et vérifié avec `pyright` et `mypy` en mode strict.
+2. `src/whoosh/` est la surface legacy. Elle est divisée en :
+   - **modules exclus** (documentés dans `pyrightconfig.json`) — code trop
+     dynamique ou vendu pour justifier un passage de types rentable maintenant ;
+   - **candidats au nettoyage** — petits fichiers isolés, faciles à annoter et
+     à vérifier.
+3. Chaque sprint, une vague de candidats est typée, testée, puis sortie de la
+   zone de tolérance élevée.
+
+## Seuils actuels (Sprint 2)
+
+| Vérificateur | Portée | Seuil |
+|--------------|--------|-------|
+| `pyright` | `src/whoosh_modern/` | **0 erreur** (strict) |
+| `pyright` | legacy | **≤ 500 erreurs** (tolérant) |
+| `mypy` | `src/` | **0 erreur** (via overrides + `ignore_errors`) |
+
+## Justification des exclusions (`pyrightconfig.json`)
+
+La liste `exclude` de `pyrightconfig.json` regroupe les fichiers par thème :
+
+- **Vendu / sans stubs** : `pyparsing.py`, `relativedelta.py`
+- **Shims de migration** : `codec/whoosh2.py`, `codec/whoosh3.py`
+- **Parsing dynamique** : `qparser/`, `query/`, `analysis/`, `automata/`
+- **Stockage fichiers** : `filedb/`, `reading/`, `writing/`
+- **Heuristique / data-driven** : `lang/dmetaphone.py`, `lang/lovins.py`,
+  `lang/phonetic.py`, `lang/wordnet.py`
+- **Objets dynamiques** : `classify.py`, `index.py`, `locking.py`,
+  `formats.py`, `middleware/`
+- **Bas niveau vendu** : `support/bench.py`, `support/base85.py`,
+  `support/bitstream.py`, `support/bitvector.py`, `support/charset.py`,
+  `support/levenshtein.py`
+
+## Plan Sprint 2
+
+Pour le Sprint 2, l'accent est mis sur les petits modules utilitaires et de
+support, sans dépendances externes ni métaprogrammation lourde.
+
+Vague de candidats :
+
+- `src/whoosh/util/varints.py`
+- `src/whoosh/util/text.py`
+- `src/whoosh/util/loading.py`
+- `src/whoosh/support/bitstream.py`
+- `src/whoosh/support/levenshtein.py`
+
+Pour chaque fichier :
+
+1. Supprimer le `# type: ignore` global (si présent).
+2. Ajouter des signatures de fonctions précises.
+3. Lancer `pyright` et `mypy` pour confirmer **0 nouvelle erreur**.
+4. Retirer le fichier des exclusions de `pyrightconfig.json`.
+5. Ajouter un test de régression dans `tests/test_legacy_cleanup.py`.
+
+## Objectif long terme
+
+Chaque fichier de `src/whoosh/` doit finir par être vérifiable par `mypy` et
+`pyright` sans exclusion globale. D'ici là, la liste d'exclusion est le
+registre explicite de la dette, et chaque sprint la réduit.
 
 
 ## DOCUMENT: Middleware
@@ -9003,7 +9777,7 @@ writer = ix.writer()
 writer.add_field("description", TEXT(stored=True))
 
 # Supprimer un champ
-writer.remove_field("deprecated_field")
+writer.remove_field("legacy_field")
 
 writer.commit()
 ```
@@ -9030,7 +9804,25 @@ idx = ModelIndex(Book)
 schema = idx.schema
 ```
 
+`ModelIndex` inspecte les annotations de type et les mappe vers des champs Whoosh :
+
+| Type Python | Champ Whoosh |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (stockage hexadécimal) |
+| `list[str]` | `KEYWORD` |
+| `Optional[T]` | type mappé ou `STORED` |
+
+Les champs ID sont auto-détectés : `SearchOptions(id=True)` explicite > nom `id`/`ID`/`_id` > premier champ `str`.
+
 ### Niveau 2 : Options explicites
+
+Utilisez `SearchField` pour remplacer les valeurs par défaut :
 
 ```python
 from whoosh_modern.models import SearchField, SearchOptions
@@ -9038,32 +9830,99 @@ from whoosh_modern.models import SearchField, SearchOptions
 class Book:
     title: str = SearchField(fulltext=True, stored=True)
     count: int = SearchField(sortable=True)
-    tag: str = SearchField(multi=True)
+    tags: list[str] = SearchField(multi=True)
+```
+
+### Niveau 3 : Types annotés
+
+Utilisez `Annotated` pour attacher des métadonnées directement aux annotations :
+
+```python
+from typing import Annotated
+from whoosh_modern.models import SearchField
+
+class Book:
+    title: Annotated[str, SearchField(fulltext=True, stored=True)]
 ```
 
 ### Intégrations
 
+#### Dataclass
+
 ```python
-# Pydantic
-from whoosh_modern.models import register_model
-from pydantic import BaseModel
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
 
-class BookModel(BaseModel):
+@dataclass
+class Article:
     title: str
-    year: int
+    body: str
+    published: datetime.datetime
 
-idx = register_model(BookModel)
+idx = ModelIndex(Article)
+```
 
-# SQLAlchemy
-from sqlalchemy import Column, Integer, String
+#### Pydantic v2
+
+```python
+from pydantic import BaseModel
 from whoosh_modern.models import register_model
 
-class BookSQL:
-    __tablename__ = "book"
-    title = Column(String, info={"search": {"fulltext": True}})
-    year = Column(Integer, info={"search": {"sortable": True}})
+class Article(BaseModel):
+    title: str
+    body: str
+    published: datetime.datetime
 
-idx = register_model(BookSQL)
+    # Métadonnées de recherche par champ via json_schema_extra
+    model_config = {"json_schema_extra": {"search": {"fulltext": True}}}
+
+idx = register_model(Article)
+```
+
+#### SQLAlchemy
+
+```python
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import DeclarativeBase
+from whoosh_modern.models import register_model
+
+class Base(DeclarativeBase):
+    pass
+
+class Article(Base):
+    __tablename__ = "articles"
+    id = Column(Integer, primary_key=True)
+    title = Column(String, info={"search": {"fulltext": True, "stored": True}})
+    published = Column(DateTime, info={"search": {"sortable": True}})
+
+idx = register_model(Article)
+```
+
+#### SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Article(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    published: datetime.datetime
+
+idx = register_model(Article)
+```
+
+#### msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Article(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    published: datetime.datetime
+
+idx = register_model(Article)
 ```
 
 ### Conversion d'instances
@@ -9073,13 +9932,21 @@ doc = idx.to_whoosh_document(book_instance)
 writer.add_document(**doc)
 ```
 
+`to_whoosh_document` gère :
+- dataclass : itération via `dataclasses.fields()`
+- Pydantic/SQLModel : itération via `model_fields`
+- SQLAlchemy : itération via `__mapper__.columns`
+- Valeurs Enum converties en `.value`
+- `bytes` convertis en chaîne hexadécimale
+
 ## Bonnes pratiques
 
-1. **Minimal**: N'indexez que ce que vous cherchez
-2. **STORED avec parcimonie**: Augmente la taille de l'index
-3. **Champs uniques**: Utilisez `unique=True` pour les identifiants
-4. **Boost de champ**: Boostez les champs importants au niveau schéma
-5. **TEXT options**: Désactivez `phrase` si vous n'avez pas besoin de recherche de phrase
+1. **Minimal** : N'indexez que ce que vous cherchez
+2. **STORED avec parcimonie** : Augmente la taille de l'index
+3. **Champs uniques** : Utilisez `unique=True` pour les identifiants
+4. **Boost de champ** : Boostez les champs importants au niveau schéma
+5. **TEXT options** : Désactivez `phrase` si vous n'avez pas besoin de recherche de phrase
+6. **Champ ID** : Laissez `ModelIndex` auto-détecter ou marquez explicitement avec `SearchOptions(id=True)`
 
 
 ## DOCUMENT: Searching
