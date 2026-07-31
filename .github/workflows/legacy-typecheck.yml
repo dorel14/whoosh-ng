@@ -1,5 +1,8 @@
 name: Legacy Type Validation
 on: [push, pull_request]
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   typecheck-legacy:
