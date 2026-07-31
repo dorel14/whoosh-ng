@@ -40,6 +40,8 @@ dependencies = [
 models = [
   "pydantic>=2",
   "msgspec>=0.19",
+  "sqlalchemy>=2",
+  "sqlmodel>=0.0.16",
   ]
 vector = [
   "numpy>=2",
@@ -378,6 +380,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "hnswlib"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["pydantic", "msgspec", "sqlalchemy", "sqlalchemy.orm", "sqlmodel"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]

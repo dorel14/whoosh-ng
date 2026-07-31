@@ -6,8 +6,6 @@ import decimal
 import enum
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from whoosh.fields import ID, KEYWORD, NUMERIC, STORED
 from whoosh_modern.models import (
@@ -22,6 +20,13 @@ from whoosh_modern.models import (
     register_sqlalchemy_model,
     register_sqlmodel_model,
 )
+
+try:
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+    HAS_SQLALCHEMY = True
+except ImportError:
+    HAS_SQLALCHEMY = False
 
 
 class Color(enum.Enum):
@@ -244,6 +249,7 @@ def test_msgspec_integration():
     assert "title" in mi.schema
 
 
+@pytest.mark.skipif(not HAS_SQLALCHEMY, reason="sqlalchemy not installed")
 def test_sqlalchemy_integration():
     engine = create_engine("sqlite:///:memory:")
 
