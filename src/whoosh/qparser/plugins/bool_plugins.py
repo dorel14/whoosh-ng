@@ -516,4 +516,3 @@ class GtLtPlugin(TaggingPlugin):
         elif rel == ">=" or rel == "=>":
             n = syntax.RangeNode(text, None, False, False)
         return n.set_range(node.startchar, node.endchar)
-

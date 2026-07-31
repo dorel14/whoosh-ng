@@ -44,7 +44,7 @@ def test_encrypted_storage_delegates_missing_attributes() -> None:
 
 def test_key_provider_is_abstract() -> None:
     with pytest.raises(TypeError):
-        KeyProvider()
+        KeyProvider()  # type: ignore[abstract]
 
 
 def test_default_cipher_round_trip() -> None:

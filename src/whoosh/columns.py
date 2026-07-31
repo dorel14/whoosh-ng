@@ -1413,4 +1413,3 @@ class FixedBytesListColumn(ListColumn):
 #            pos = self._refbase + offset * self._itemsize
 #            reflist = self._dbfile.get_array(pos, self._typecode, length)
 #            return [self._uniques[ref] for ref in reflist]
-

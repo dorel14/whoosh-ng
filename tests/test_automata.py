@@ -345,9 +345,9 @@ def test_strings_dfa():
     assert output == strings
 
     domain = "abcd"
-    words = set()
+    words: set[str] = set()
     for i in range(1, len(domain) + 1):
         words.update("".join(p) for p in permutations(domain[:i]))
-    words = sorted(words)
+    sorted_words = sorted(words)
     dfa = fsa.strings_dfa(words)
     assert list(dfa.generate_all()) == words

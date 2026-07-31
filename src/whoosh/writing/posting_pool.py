@@ -102,4 +102,3 @@ class PostingPool(SortingPool):
     def save(self):
         SortingPool.save(self)
         self.currentsize = 0
-

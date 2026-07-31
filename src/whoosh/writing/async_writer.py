@@ -185,4 +185,3 @@ class AsyncWriter(threading.Thread, IndexWriter):
             # The buffered events are dropped; the background thread, if
             # started, should not replay or commit anything.
             self.cancelled = True
-

@@ -234,4 +234,3 @@ def sort(items, maxsize=100000, tempdir=None, maxfiles=128):
     for item in items:
         p.add(item)
     return p.items(maxfiles=maxfiles)
-

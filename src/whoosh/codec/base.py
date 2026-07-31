@@ -215,7 +215,7 @@ class FieldWriter:
                 # spellterm = (fieldname, btext)
                 # # There can be duplicates of spelling terms, so only add a spell
                 # # term if it's greater than the last one
-# if _lastspell is None or spellterm > _lastspell:
+                # if _lastspell is None or spellterm > _lastspell:
                 #     spellword = fieldobj.from_bytes(btext)
                 #     self.add_spell_word(fieldname, spellword)
                 #     _lastspell = spellterm
@@ -923,4 +923,3 @@ class EmptyCursor(FieldCursor):
 
     def is_valid(self):
         return False
-

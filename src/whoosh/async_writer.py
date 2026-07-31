@@ -217,4 +217,3 @@ class AsyncWriter(IndexWriter):
                 self._committed = True
             else:
                 self._cancelled = True
-

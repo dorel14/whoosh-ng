@@ -160,4 +160,3 @@ def protected(method):
         return method(self, *args, **kwargs)
 
     return protected_wrapper
-

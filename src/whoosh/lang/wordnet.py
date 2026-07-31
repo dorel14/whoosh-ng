@@ -240,5 +240,3 @@ class Thesaurus:
             return self.searcher.document(word=word)["syns"]
         else:
             return synonyms(self.w2n, self.n2w, word)
-
-

@@ -199,15 +199,19 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
             elif text[pos + 1 : pos + 3] == "LI" and not slavo_germanic:
                 next = ("KL", "L", 2)
             # -ges-,-gep-,-gel-, -gie- at beginning
-            elif pos == first and (
-                text[pos + 1] == "Y"
-                or text[pos + 1 : pos + 3]
-                in ["ES", "EP", "EB", "EL", "EY", "IB", "IL", "IN", "IE", "EI", "ER"]
-            ) or (
-                (text[pos + 1 : pos + 2] == "ER" or text[pos + 1] == "Y")
-                and text[first : first + 6] not in ["DANGER", "RANGER", "MANGER"]
-                and text[pos - 1] not in ["E", "I"]
-                and text[pos - 1 : pos + 2] not in ["RGY", "OGY"]
+            elif (
+                pos == first
+                and (
+                    text[pos + 1] == "Y"
+                    or text[pos + 1 : pos + 3]
+                    in ["ES", "EP", "EB", "EL", "EY", "IB", "IL", "IN", "IE", "EI", "ER"]
+                )
+                or (
+                    (text[pos + 1 : pos + 2] == "ER" or text[pos + 1] == "Y")
+                    and text[first : first + 6] not in ["DANGER", "RANGER", "MANGER"]
+                    and text[pos - 1] not in ["E", "I"]
+                    and text[pos - 1 : pos + 2] not in ["RGY", "OGY"]
+                )
             ):
                 next = ("K", "J", 2)
             # italian e.g, 'biaggi'
@@ -483,5 +487,3 @@ def double_metaphone(text):  # noqa: C901, PLR0912, PLR0915
         return (primary, None)
     else:
         return (primary, secondary)
-
-

@@ -340,8 +340,17 @@ class RecoverReader(threading.Thread):
 
 
 class RecoverWriter(threading.Thread):
-    domain = "alfa bravo charlie deleta echo foxtrot golf hotel india"
-    domain = domain.split()
+    domain: list[str] = [
+        "alfa",
+        "bravo",
+        "charlie",
+        "deleta",
+        "echo",
+        "foxtrot",
+        "golf",
+        "hotel",
+        "india",
+    ]
 
     def __init__(self, ix):
         threading.Thread.__init__(self)

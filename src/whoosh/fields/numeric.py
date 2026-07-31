@@ -644,4 +644,3 @@ class KEYWORD(FieldType):
 
         if sortable:
             self.column_type = self.default_column()
-

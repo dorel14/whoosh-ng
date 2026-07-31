@@ -481,4 +481,3 @@ class CharacterBoosts(Characters):
                     s[pos] = (sc, ec, boost)
         poses = [(pos, sc, ec, boost) for pos, (sc, ec, boost) in sorted(s.items())]
         return self.encode(poses)[0]  # encode() returns value, summedboost
-

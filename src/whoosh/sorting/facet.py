@@ -1045,4 +1045,3 @@ class Best(FacetMap):
 
     def as_dict(self):
         return self.bestids
-

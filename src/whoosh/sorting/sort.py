@@ -101,4 +101,3 @@ def add_sortable(writer, fieldname, facet, column=None):
             colfile.close()
 
     field.column_type = column
-

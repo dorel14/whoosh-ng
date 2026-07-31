@@ -36,4 +36,3 @@ class MiddlewareRegistry:
 
 
 __all__ = ["MiddlewareRegistry"]
-

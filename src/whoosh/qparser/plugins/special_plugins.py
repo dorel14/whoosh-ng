@@ -379,4 +379,3 @@ class PseudoFieldPlugin(Plugin):
             newgroup.append(node)
 
         return newgroup
-

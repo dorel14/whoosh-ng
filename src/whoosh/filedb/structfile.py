@@ -409,4 +409,3 @@ class ChecksumFile(StructFile):
 
     def checksum(self):
         return self._check & 0xFFFFFFFF
-

@@ -284,4 +284,3 @@ class NGRAMWORDS(NGRAM):
         self.stored = stored
         self.queryor = queryor
         self.set_sortable(sortable)
-

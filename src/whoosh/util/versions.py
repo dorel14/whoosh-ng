@@ -168,4 +168,3 @@ class SimpleVersion(BaseVersion):
         exnum = n & 1023
 
         return cls(major, minor, release, ex, exnum)
-

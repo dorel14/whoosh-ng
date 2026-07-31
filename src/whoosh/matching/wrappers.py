@@ -563,4 +563,3 @@ class CoordMatcher(WrappingMatcher):
             matching += 1
 
         return self._sqr(score, matching)
-

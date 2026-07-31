@@ -100,4 +100,3 @@ def b85decode(text):
         out = out[: -(5 - cl)]
 
     return out
-

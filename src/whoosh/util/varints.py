@@ -26,7 +26,7 @@
 # policies, either expressed or implied, of Matt Chaput.
 
 from array import array
-from typing import Callable
+from collections.abc import Callable
 
 # Varint cache
 

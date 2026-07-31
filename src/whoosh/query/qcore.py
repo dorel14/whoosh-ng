@@ -737,4 +737,3 @@ class Every(Query):
             doclist = sorted(doclist)
 
         return matching.ListMatcher(doclist, all_weights=self.boost)
-

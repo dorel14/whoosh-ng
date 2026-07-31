@@ -1,4 +1,5 @@
 from itertools import permutations
+from typing import Any
 
 import pytest
 
@@ -515,7 +516,7 @@ def test_stability():
 
     with ix.searcher() as s:
         q = query.Term("text", "bravo")
-        last = []
+        last: list[Any] = []
         for i in range(s.doc_frequency("text", "bravo")):
             # Only un-optimized results are stable
             r = s.search(q, limit=i + 1, optimize=False)

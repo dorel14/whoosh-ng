@@ -17,7 +17,7 @@ class AsyncProbePlugin(Plugin):
     version = "1.0.0"
     registered: bool = False
 
-    async def register(self, manager: PluginManager) -> None:
+    async def register(self, manager: PluginManager) -> None:  # type: ignore[override]
         AsyncProbePlugin.registered = True
 
 

@@ -441,4 +441,3 @@ def DisMaxParser(fieldboosts, schema, tiebreak=0.0, **kwargs):
     ]
     orgroup = syntax.OrGroup
     return QueryParser(None, schema, plugins=pins, group=orgroup, **kwargs)
-

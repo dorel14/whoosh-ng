@@ -356,4 +356,3 @@ class SchemaClass(Schema, metaclass=MetaSchema):
         kw.update(kwargs)
         obj.__init__(*args, **kw)
         return obj
-

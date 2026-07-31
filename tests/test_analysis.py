@@ -102,8 +102,8 @@ def test_multifilter():
 
 def test_tee_filter():
     target = "Alfa Bravo Charlie"
-    f1 = analysis.LowercaseFilter()
-    f2 = analysis.ReverseTextFilter()
+    f1: analysis.Filter = analysis.LowercaseFilter()
+    f2: analysis.Filter = analysis.ReverseTextFilter()
     ana = analysis.RegexTokenizer(r"\S+") | analysis.TeeFilter(f1, f2)
     result = " ".join([t.text for t in ana(target)])
     assert result == "alfa aflA bravo ovarB charlie eilrahC"
@@ -302,6 +302,7 @@ def test_double_metaphone():
     dmn = name = None
     for name in names:
         dmn = double_metaphone(name)
+    assert name is not None
     assert dmn == names[name]
 
     mf = analysis.RegexTokenizer() | analysis.LowercaseFilter() | analysis.DoubleMetaphoneFilter()
@@ -463,7 +464,7 @@ def test_start_pos():
     from whoosh import formats
 
     ana = analysis.RegexTokenizer(r"\S+") | analysis.LowercaseFilter()
-    kw = {"positions": True}
+    kw: dict[str, int | bool] = {"positions": True}
     tks = formats.tokens("alfa bravo charlie delta", ana, kw)
     assert [t.pos for t in tks] == [0, 1, 2, 3]
 

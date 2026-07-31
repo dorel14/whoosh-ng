@@ -77,7 +77,7 @@ def test_optional_field():
 
 def test_search_options_stored_analyzer():
     class Book:
-        title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")  # pyright: ignore[reportAssignmentType]
+        title: SearchField = SearchField(fulltext=True, stored=True, analyzer="Simple")
 
     idx = ModelIndex(Book)
     assert idx.schema["title"].stored is True
@@ -86,7 +86,7 @@ def test_search_options_stored_analyzer():
 
 def test_search_field_descriptor_overrides():
     class Book:
-        title: str = SearchField(fulltext=True, stored=True)  # pyright: ignore[reportAssignmentType]
+        title: SearchField = SearchField(fulltext=True, stored=True)
 
     idx = ModelIndex(Book)
     assert idx.schema["title"].stored is True
@@ -172,9 +172,9 @@ def test_auto_indexer_error_raise():
     auto = AutoIndexer(ix, on_error="raise")
 
     class Bad:
-        x: int  # pyright: ignore[reportRedeclaration]
+        x = 0
 
-        @property
+        @property  # type: ignore[no-redef]
         def x(self):
             return 1 / 0
 

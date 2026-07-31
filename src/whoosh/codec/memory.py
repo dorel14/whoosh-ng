@@ -332,4 +332,3 @@ class MemSegment(base.Segment):
 
     def should_assemble(self):  # type: ignore[override]
         return False
-

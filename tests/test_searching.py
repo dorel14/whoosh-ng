@@ -1397,7 +1397,29 @@ def test_collapse_nocolumn():
 
 
 def test_collapse_length():
-    domain = ["alfa", "apple", "agnostic", "aplomb", "arc", "bravo", "big", "braid", "beer", "charlie", "crouch", "car", "delta", "dog", "echo", "foxtrot", "fold", "flip", "golf", "gym", "goop"]
+    domain = [
+        "alfa",
+        "apple",
+        "agnostic",
+        "aplomb",
+        "arc",
+        "bravo",
+        "big",
+        "braid",
+        "beer",
+        "charlie",
+        "crouch",
+        "car",
+        "delta",
+        "dog",
+        "echo",
+        "foxtrot",
+        "fold",
+        "flip",
+        "golf",
+        "gym",
+        "goop",
+    ]
 
     schema = fields.Schema(key=fields.ID(sortable=True), word=fields.ID(stored=True))
     ix = RamStorage().create_index(schema)
@@ -1425,7 +1447,29 @@ def test_collapse_length():
 
 
 def test_collapse_length_nocolumn():
-    domain = ["alfa", "apple", "agnostic", "aplomb", "arc", "bravo", "big", "braid", "beer", "charlie", "crouch", "car", "delta", "dog", "echo", "foxtrot", "fold", "flip", "golf", "gym", "goop"]
+    domain = [
+        "alfa",
+        "apple",
+        "agnostic",
+        "aplomb",
+        "arc",
+        "bravo",
+        "big",
+        "braid",
+        "beer",
+        "charlie",
+        "crouch",
+        "car",
+        "delta",
+        "dog",
+        "echo",
+        "foxtrot",
+        "fold",
+        "flip",
+        "golf",
+        "gym",
+        "goop",
+    ]
 
     schema = fields.Schema(key=fields.ID(), word=fields.ID(stored=True))
     ix = RamStorage().create_index(schema)

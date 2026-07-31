@@ -21,7 +21,7 @@ def test_search_options_defaults():
 
 def test_search_field_descriptor():
     class Book:
-        title: str = SearchField(fulltext=True, stored=True)  # pyright: ignore[reportAssignmentType]
+        title: SearchField = SearchField(fulltext=True, stored=True)
 
     assert isinstance(Book.title, SearchField)
     assert Book.title.options.fulltext is True

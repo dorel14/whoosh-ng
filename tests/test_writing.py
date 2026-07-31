@@ -121,8 +121,17 @@ def test_updates():
 def test_buffered():
     schema = fields.Schema(id=fields.ID, text=fields.TEXT)
     with TempIndex(schema, "buffered") as ix:
-        domain = "alfa bravo charlie delta echo foxtrot golf hotel india"
-        domain = domain.split()
+        domain: list[str] = [
+            "alfa",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot",
+            "golf",
+            "hotel",
+            "india",
+        ]
 
         w = writing.BufferedWriter(ix, period=None, limit=10, commitargs={"merge": False})
         for i in range(20):

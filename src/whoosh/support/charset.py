@@ -1373,4 +1373,3 @@ def charset_table_to_dict(tablestring):
 
             raise Exception(f"Don't know what to do with {item!r}")
     return dict(map)
-

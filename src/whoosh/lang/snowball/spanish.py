@@ -256,8 +256,10 @@ class SpanishStemmer(_StandardStemmer):
                             .replace("\xed", "i")
                         )
 
-                    elif rv[: -len(suffix)].endswith(("ando", "iendo", "ar", "er", "ir")) or rv[: -len(suffix)].endswith("yendo") and word[: -len(suffix)].endswith(
-                        "uyendo"
+                    elif (
+                        rv[: -len(suffix)].endswith(("ando", "iendo", "ar", "er", "ir"))
+                        or rv[: -len(suffix)].endswith("yendo")
+                        and word[: -len(suffix)].endswith("uyendo")
                     ):
                         word = word[: -len(suffix)]
                         r1 = r1[: -len(suffix)]

@@ -536,4 +536,3 @@ class SegmentWriter(IndexWriter):
         self._check_state()
         self._close_segment()
         self._finish()
-

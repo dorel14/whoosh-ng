@@ -434,4 +434,3 @@ def add_spelling(ix, fieldnames, commit=True):
 
     if commit:
         writer.commit(merge=False)
-

@@ -225,4 +225,3 @@ class BufferedWriter(IndexWriter):
 
 # Backwards compatibility with old name
 BatchWriter = BufferedWriter
-

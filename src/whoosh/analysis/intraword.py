@@ -500,4 +500,3 @@ class IntraWordFilter(Filter):
                 if parts:
                     # Set the new position counter based on the last part
                     newpos = parts[-1][1] + 1
-

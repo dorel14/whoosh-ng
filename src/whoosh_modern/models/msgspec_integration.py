@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 from .base import ModelIndex, TypeMapper
@@ -18,10 +19,8 @@ def register_model(model: type) -> ModelIndex:
 
     fields: dict[str, Any] = {}
     struct_fields: tuple[Any, ...] = ()
-    try:
+    with contextlib.suppress(Exception):
         struct_fields = msgspec.structs.fields(model)
-    except Exception:
-        pass
 
     for field in struct_fields:
         options = SearchOptions()

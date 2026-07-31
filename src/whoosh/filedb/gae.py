@@ -163,5 +163,3 @@ class DatastoreStorage(Storage):
     def temp_storage(self, name=None):
         tempstore = DatastoreStorage()
         return tempstore.create()
-
-

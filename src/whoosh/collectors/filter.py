@@ -567,4 +567,3 @@ class TermsCollector(WrappingCollector):
         r.termdocs = dict(self.termdocs)
         r.docterms = dict(self.docterms)
         return r
-

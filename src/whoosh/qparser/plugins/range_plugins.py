@@ -95,4 +95,3 @@ class RangePlugin(Plugin):
     def taggers(self, parser):
         tagger = self.RangeTagger(self.expr, self.excl_start, self.excl_end)
         return [(tagger, 1)]
-

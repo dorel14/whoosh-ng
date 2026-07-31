@@ -44,3 +44,25 @@ from whoosh_modern.vector.plugin import VectorPlugin
 PluginManager.load_plugins()
 ```
 
+## Data Sources
+
+```bash
+pip install whoosh-ng
+```
+
+```python
+import sqlite3
+from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.views import SearchView
+
+# Use existing benchmark data
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+)
+
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
+```
+

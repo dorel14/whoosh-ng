@@ -320,4 +320,3 @@ class WrappingCollector(Collector):
 
     def results(self):
         return self.child.results()
-

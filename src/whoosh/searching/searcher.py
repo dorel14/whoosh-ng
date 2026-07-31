@@ -917,4 +917,3 @@ class Searcher:
             correctors, terms, aliases, maxdist=maxdist, prefix=prefix
         )
         return sqc.correct_query(q, qstring)
-

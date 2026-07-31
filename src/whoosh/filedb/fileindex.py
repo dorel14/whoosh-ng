@@ -603,4 +603,3 @@ def _segment_pattern(indexname):
     """
 
     return re.compile(f"(_{indexname}_[0-9]+).({Segment.EXTENSIONS.values()})")
-

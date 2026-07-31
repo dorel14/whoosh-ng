@@ -18,6 +18,14 @@ async def run_sync(func: Callable[..., T], *args: Any, **kwargs: Any) -> T:
     return await asyncio.to_thread(func, *args, **kwargs)
 
 
+@overload
+async def maybe_await(value: Awaitable[T]) -> T: ...
+
+
+@overload
+async def maybe_await(value: T) -> T: ...
+
+
 async def maybe_await(value: Awaitable[T] | T) -> T:
     """Await ``value`` if it is awaitable, otherwise return it unchanged."""
     if inspect.isawaitable(value):

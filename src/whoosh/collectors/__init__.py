@@ -34,18 +34,18 @@ before.
 
 from whoosh.collectors.base import Collector, ilen
 from whoosh.collectors.filter import (
-                                      CollapseCollector,
-                                      FacetCollector,
-                                      FilterCollector,
-                                      TermsCollector,
-                                      TimeLimitCollector,
+    CollapseCollector,
+    FacetCollector,
+    FilterCollector,
+    TermsCollector,
+    TimeLimitCollector,
 )
 from whoosh.collectors.matchers import (
-                                      ScoredCollector,
-                                      TopCollector,
-                                      UnlimitedCollector,
-                                      UnsortedCollector,
-                                      WrappingCollector,
+    ScoredCollector,
+    TopCollector,
+    UnlimitedCollector,
+    UnsortedCollector,
+    WrappingCollector,
 )
 from whoosh.collectors.sorting import SortingCollector
 from whoosh.searching import TimeLimit

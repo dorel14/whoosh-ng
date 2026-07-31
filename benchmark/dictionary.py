@@ -16,8 +16,8 @@ class VulgarTongue(WhooshLikeSpec):
         path = os.path.join(self.options.dir, self.filename)
         f = gzip.GzipFile(path)
         head = body = ""
-        for line in f:
-            line = line.decode("latin1")
+        for bline in f:
+            line = bline.decode("latin1")
             if line[0].isalpha():
                 if head:
                     yield {"head": head, "body": head + body}

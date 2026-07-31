@@ -340,4 +340,3 @@ class FieldsPlugin(TaggingPlugin):
             newgroup.append(node)
         newgroup.reverse()
         return newgroup
-

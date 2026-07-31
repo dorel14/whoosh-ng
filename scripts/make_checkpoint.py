@@ -20,14 +20,33 @@ print("Creating checkpoint index in", indexdir)
 schema = fields.Schema(
     path=fields.ID(stored=True, unique=True),
     num=fields.NUMERIC(int, stored=True),
-    frac=fields.NUMERIC(float, stored=True),  # type: ignore[arg-type]
+    frac=fields.NUMERIC(float, stored=True),
     dt=fields.DATETIME(stored=True),
     tag=fields.KEYWORD,
     title=fields.TEXT(stored=True),
     ngrams=fields.NGRAMWORDS,
 )
 
-words = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel", "indiajuliet", "kilo", "lima", "mike", "november", "oskar", "papa", "quebec", "romeosierra", "tango"]
+words = [
+    "alfa",
+    "bravo",
+    "charlie",
+    "delta",
+    "echo",
+    "foxtrot",
+    "golf",
+    "hotel",
+    "indiajuliet",
+    "kilo",
+    "lima",
+    "mike",
+    "november",
+    "oskar",
+    "papa",
+    "quebec",
+    "romeosierra",
+    "tango",
+]
 
 if not os.path.exists(indexdir):
     os.makedirs(indexdir)

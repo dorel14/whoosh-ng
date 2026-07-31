@@ -465,4 +465,3 @@ class FilePostingReader(Matcher):
 
     def score(self):
         raise Exception("No score function given")
-

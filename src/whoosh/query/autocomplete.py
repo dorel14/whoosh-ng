@@ -74,4 +74,3 @@ def suggestions(
     if scorer == "frequency":
         return sorted(candidates, key=lambda t: (-reader.doc_frequency(fieldname, t), t))[:limit]
     return sorted(candidates)[:limit]
-

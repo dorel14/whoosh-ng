@@ -1073,8 +1073,30 @@ def test_compound_sort():
     ix = RamStorage().create_index(schema)
 
     alist = ["alfa", "bravo", "alfa", "bravo", "alfa", "bravo", "alfa", "bravo", "alfa", "bravo"]
-    blist = ["alfa", "bravo", "charlie", "alfa", "bravo", "charlie", "alfa", "bravo", "charlie", "alfa"]
-    clist = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel", "india", "juliet"]
+    blist = [
+        "alfa",
+        "bravo",
+        "charlie",
+        "alfa",
+        "bravo",
+        "charlie",
+        "alfa",
+        "bravo",
+        "charlie",
+        "alfa",
+    ]
+    clist = [
+        "alfa",
+        "bravo",
+        "charlie",
+        "delta",
+        "echo",
+        "foxtrot",
+        "golf",
+        "hotel",
+        "india",
+        "juliet",
+    ]
     assert all(len(ls) == 10 for ls in (alist, blist, clist))
 
     with ix.writer() as w:

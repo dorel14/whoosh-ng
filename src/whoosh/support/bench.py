@@ -837,4 +837,3 @@ class Bench:
             action = self.generate_search_file
 
         action(lib)
-

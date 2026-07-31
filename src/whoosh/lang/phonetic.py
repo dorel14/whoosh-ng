@@ -116,5 +116,3 @@ def soundex_ar(word):
                     r += code
             prevcode = code
     return r
-
-

@@ -433,7 +433,24 @@ def test_highlight_daterange():
 
 
 def test_patterns():
-    domain = ["aaron", "able", "acre", "adage", "aether", "after", "ago", "ahi", "aim", "ajax", "akimbo", "alembic", "all", "amiga", "amount", "ampere"]
+    domain = [
+        "aaron",
+        "able",
+        "acre",
+        "adage",
+        "aether",
+        "after",
+        "ago",
+        "ahi",
+        "aim",
+        "ajax",
+        "akimbo",
+        "alembic",
+        "all",
+        "amiga",
+        "amount",
+        "ampere",
+    ]
     schema = fields.Schema(word=fields.KEYWORD(stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
@@ -752,7 +769,7 @@ def test_valid_fieldname_start_minus_one_end_one():
 
 
 # NumericRange with valid fieldname, start=1, and end=-1
-def test_valid_fieldname_start_end():
+def test_valid_fieldname_start_end_negative():
     from whoosh.query.ranges import NumericRange
 
     nr = NumericRange("fieldname", 1, -1)
@@ -794,7 +811,7 @@ def test_valid_fieldname_start_end_excl():
 
 
 # NumericRange with valid fieldname, start=1.5, and end=2.5, boost=2.0, and constantscore=False
-def test_valid_fieldname_start_end_boost_constantscore():
+def test_valid_fieldname_start_end_boost_constantscore_negative():
     from whoosh.query.ranges import NumericRange
 
     nr = NumericRange("fieldname", 1.5, 2.5, boost=2.0, constantscore=False)

@@ -336,4 +336,3 @@ class CompoundWriter:
             length = bio.tell()
             if length:
                 self.blocks.append((bio, 0, length))
-

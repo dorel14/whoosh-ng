@@ -188,4 +188,3 @@ class MultiCursor:
 
     def is_valid(self):
         return any(c.is_valid() for c in self._cursors)
-

@@ -65,4 +65,3 @@ class Backend(ABC):
         """Remove the index and any associated resources. Default
         implementation raises :exc:`NotImplementedError`."""
         raise NotImplementedError
-

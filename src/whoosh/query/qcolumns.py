@@ -117,4 +117,3 @@ class ColumnMatcher(ConstantScoreMatcher):
         if self._score <= minquality:
             self._i = len(self.creader)
             return True
-

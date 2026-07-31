@@ -67,6 +67,7 @@ from whoosh.util.times import datetime_to_long, long_to_datetime
 class NoGraphError(Exception):
     pass
 
+
 # Old hash file implementations
 
 _4GB = 4 * 1024 * 1024 * 1024
@@ -2274,5 +2275,3 @@ def text_to_sortable_long(text):
     # assert len(text) == 17
     # return long(text[1:], 16)
     return from_base85(text[1:])
-
-

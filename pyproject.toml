@@ -99,7 +99,9 @@ dev = [
   "isort>=8.0.1",
   "pre-commit>=4.6.0",
 ]
-benchmark = []
+benchmark = [
+  "pytest-benchmark>=4",
+]
 
 [project.entry-points."whoosh_ng.plugins"]
 whoosh_autocomplete = "whoosh_modern.autocomplete.plugin:AutocompletePlugin"
@@ -360,6 +362,18 @@ module = "cached_property"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+module = "setuptools"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "sphinx_rtd_theme"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "hnswlib"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = [
   "whoosh.codec.whoosh2",
   "whoosh.codec.whoosh3",
@@ -449,6 +463,7 @@ module = [
   "whoosh.writing.writer",
   "whoosh_modern.__init__",
   "whoosh_modern.vector.__init__",
+  "whoosh_modern.vector.numpy_provider",
 ]
 ignore_errors = true
 

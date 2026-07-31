@@ -236,7 +236,13 @@ class GenshiFormatter(Formatter):
         self.qname = qname
         self.between = between
 
-        from genshi.core import END, START, TEXT, Attrs, Stream  # type: ignore  # type: ignore
+        from genshi.core import (
+            END,
+            START,  # type: ignore  # type: ignore
+            TEXT,
+            Attrs,
+            Stream,
+        )
 
         self.START, self.END, self.TEXT = START, END, TEXT
         self.Attrs, self.Stream = Attrs, Stream
@@ -289,4 +295,3 @@ def top_fragments(fragments, count, scorer, order, minscore=1):
     best_fragments = [sf for score, sf in scored_fragments if score >= minscore]
     best_fragments.sort(key=order)
     return best_fragments
-

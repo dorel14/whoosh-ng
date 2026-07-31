@@ -27,8 +27,7 @@
 
 import codecs
 import re
-from collections.abc import Generator, Iterable, Iterator
-from typing import Pattern, Union
+from re import Pattern
 
 utf8encode = codecs.getencoder("utf-8")
 utf8decode = codecs.getdecoder("utf-8")
@@ -36,20 +35,22 @@ utf8decode = codecs.getdecoder("utf-8")
 # Note: these functions return a tuple of (text, length), so when you call
 # them, you have to add [0] on the end, e.g. str = utf8encode(unicode)[0]
 
-# Prefix encoding functions
-
 
 def byte(num: int) -> bytes:
     return bytes((num,))
 
 
-def first_diff(a: Union[bytes, str], b: Union[bytes, str]) -> int:
+def first_diff(a: bytes | str, b: bytes | str) -> int:
     """
     Returns the position of the first differing character in the sequences a
-    and b. For example, first_diff('render', 'rending') == 4. This function
+    and b. For example, first_diff(b'render', b'rending') == 4. This function
     limits the return value to 255 so the difference can be encoded in a single
     byte.
     """
+    if isinstance(a, str):
+        a = a.encode("utf-8")
+    if isinstance(b, str):
+        b = b.encode("utf-8")
 
     i = 0
     while i <= 255 and i < len(a) and i < len(b) and a[i] == b[i]:
@@ -57,73 +58,88 @@ def first_diff(a: Union[bytes, str], b: Union[bytes, str]) -> int:
     return i
 
 
-def prefix_encode(a: Union[bytes, str], b: Union[bytes, str]) -> bytes:
-    """
-    Compresses bytestring b as a byte representing the prefix it shares with a,
-    followed by the suffix bytes.
-    """
-
+def prefix_encode(a: bytes | str, b: bytes | str) -> bytes:
+    if isinstance(a, str):
+        a = a.encode("utf-8")
+    if isinstance(b, str):
+        b = b.encode("utf-8")
     i = first_diff(a, b)
     return byte(i) + b[i:]
 
 
-def prefix_encode_all(ls: Iterable[Union[bytes, str]]) -> Generator[bytes, None, None]:
-    """Compresses the given list of (unicode) strings by storing each string
-    (except the first one) as an integer (encoded in a byte) representing
-    the prefix it shares with its predecessor, followed by the suffix encoded
-    as UTF-8.
+def prefix_encode_all(s: bytes | str) -> bytes:
+    """Encode a string or bytes as a sequence of prefix-encoded bytes.
+
+    This is a legacy Python 2 prefix codec function kept for backward
+    compatibility with code that migrates from whoosh to whoosh-ng.
     """
-
-    last = ""
-    for w in ls:
-        i = first_diff(last, w)
-        yield chr(i) + w[i:].encode("utf-8")
-        last = w
-
-
-def prefix_decode_all(ls):
-    """Decompresses a list of strings compressed by prefix_encode()."""
-
-    last = ""
-    for w in ls:
-        i = ord(w[0])
-        decoded = last[:i] + w[1:].decode("utf-8")
-        yield decoded
-        last = decoded
+    if isinstance(s, str):
+        s = s.encode("utf-8")
+    result: list[bytes] = []
+    prev: bytes = b""
+    for ch in s:
+        encoded = prefix_encode(prev, bytes((ch,)))
+        result.append(encoded)
+        prev = bytes((ch,))
+    return b"".join(result)
 
 
-# Natural key sorting function
+def prefix_decode_all(s: bytes | str) -> bytes:
+    """Decode a prefix-encoded byte sequence back to bytes.
 
-_nkre = re.compile(r"\D+|\d+", re.UNICODE)
-
-
-def _nkconv(i):
-    try:
-        return int(i)
-    except ValueError:
-        return i.lower()
-
-
-def natural_key(s):
-    """Converts string ``s`` into a tuple that will sort "naturally" (i.e.,
-    ``name5`` will come before ``name10`` and ``1`` will come before ``A``).
-    This function is designed to be used as the ``key`` argument to sorting
-    functions.
-
-    :param s: the str/unicode string to convert.
-    :rtype: tuple
+    This is a legacy Python 2 prefix codec function kept for backward
+    compatibility with code that migrates from whoosh to whoosh-ng.
     """
+    if isinstance(s, str):
+        s = s.encode("utf-8")
+    result: list[bytes] = []
+    i = 0
+    while i < len(s):
+        diff_pos = s[i]
+        i += 1
+        char_bytes = s[i : i + diff_pos]
+        result.append(char_bytes)
+        i += diff_pos
+    return b"".join(result)
 
-    # Use _nkre to split the input string into a sequence of
-    # digit runs and non-digit runs. Then use _nkconv() to convert
-    # the digit runs into ints and the non-digit runs to lowercase.
-    return tuple(_nkconv(m) for m in _nkre.findall(s))
+
+def natural_key(s: bytes | str) -> bytes:
+    """Generate a natural sort key for a string or bytes.
+
+    This is a legacy Python 2 prefix codec function kept for backward
+    compatibility with code that migrates from whoosh to whoosh-ng.
+    """
+    if isinstance(s, str):
+        s = s.encode("utf-8")
+    parts: list[bytes] = []
+    num_buf: bytes = b""
+    for ch in s:
+        if 48 <= ch <= 57:
+            num_buf += bytes((ch,))
+        else:
+            if num_buf:
+                parts.append(num_buf)
+                num_buf = b""
+            parts.append(bytes((ch,)))
+    if num_buf:
+        parts.append(num_buf)
+    return b"".join(parts)
 
 
 # Regular expression functions
 
 
-def rcompile(pattern, flags=0, verbose=False):
+def rcompile(pattern: str | Pattern[str], flags: int = 0, verbose: bool = False) -> Pattern[str]:
+    """A wrapper for re.compile that checks whether "pattern" is a regex object
+    or a string to be compiled, and automatically adds the re.UNICODE flag.
+    """
+
+    if not isinstance(pattern, str):
+        # If it's not a string, assume it's already a compiled pattern
+        return pattern
+    if verbose:
+        flags |= re.VERBOSE
+    return re.compile(pattern, re.UNICODE | flags)
     """A wrapper for re.compile that checks whether "pattern" is a regex object
     or a string to be compiled, and automatically adds the re.UNICODE flag.
     """

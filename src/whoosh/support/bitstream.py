@@ -68,4 +68,3 @@ class BitStreamReader:
         # off the high-order bits we don't want.
 
         return (outval >> bitoffset) & finalmask
-

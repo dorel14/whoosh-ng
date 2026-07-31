@@ -89,4 +89,3 @@ class SortingCollector(Collector):
         if self.limit:
             items = items[: self.limit]
         return self._results(items, docset=self.docset)
-

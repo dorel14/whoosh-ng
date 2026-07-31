@@ -25,10 +25,16 @@ eggs/
 /.kilo
 /benchmark/indexes/
 /.vscode
+/benchmark/*_index/
+*_index/
+!.gitignore
 
 # Cruft / local scratch
 *.tmp
 *.zip
+*.txt
+*.db
+*.csv
 /testindex/
 /testindex_facet/
 /testindex/**

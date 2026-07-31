@@ -125,4 +125,3 @@ class RegexBuilder:
 
     def question(self, n):
         return self.choice(n, self.epsilon())
-

@@ -25,7 +25,8 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
-from typing import Any, Callable, Generator, Iterator, cast
+from collections.abc import Callable, Generator, Iterator
+from typing import Any, cast
 
 from whoosh.analysis.acore import Composable, CompositionError
 from whoosh.analysis.filters import STOP_WORDS, LowercaseFilter, StopFilter

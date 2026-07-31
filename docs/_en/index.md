@@ -62,6 +62,12 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[FastAPI Integration]({{ '/en/examples/fastapi/' | relative_url }})** — REST API with FastAPI
 - **[Middleware Examples]({{ '/en/examples/middleware/' | relative_url }})** — Custom middleware patterns
 - **[Plugin Development]({{ '/en/examples/plugin-dev/' | relative_url }})** — Building plugins
+- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Schema Discovery]({{ '/en/examples/schema-discovery/' | relative_url }})** — Result-set introspection
+- **[Facet Manager]({{ '/en/examples/facets/' | relative_url }})** — Auto-discovery and manual overrides
+- **[Validation Framework]({{ '/en/examples/validation/' | relative_url }})** — 4-level validation
+- **[SearchView]({{ '/en/examples/search-view/' | relative_url }})** — Full pipeline integration
+- **[Middleware Pipeline]({{ '/en/examples/middleware-pipeline/' | relative_url }})** — Retry, cache, logging
 
 ## Quick Overview
 

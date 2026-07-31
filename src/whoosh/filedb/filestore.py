@@ -672,4 +672,3 @@ def copy_to_ram(storage):
     ram = RamStorage()
     copy_storage(storage, ram)
     return ram
-

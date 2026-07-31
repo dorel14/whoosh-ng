@@ -106,7 +106,7 @@ def test_timelimit_alarm():
 
     class SlowQuery(query.Query):
         def matcher(self, searcher, context=None):
-            return SlowMatcher()
+            return SlowMatcher()  # type: ignore[abstract]
 
     schema = fields.Schema(text=fields.TEXT)
     ix = RamStorage().create_index(schema)

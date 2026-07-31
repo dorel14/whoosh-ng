@@ -150,4 +150,3 @@ class ReverseField(FieldWrapper):
     def subfields(self):
         yield "", self.subfield
         yield self.name_prefix, self
-

@@ -297,4 +297,3 @@ class SegmentWriter(SegmentDeletionMixin, IndexWriter):
         self.pool.cancel()
         self._close_all()
         self.lock.release()
-

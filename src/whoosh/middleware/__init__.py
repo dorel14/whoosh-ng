@@ -1,9 +1,9 @@
 from whoosh.middleware.base import (
-                                    CacheMiddleware,
-                                    CompressionMiddleware,
-                                    EncryptionMiddleware,
-                                    MetricsMiddleware,
-                                    Middleware,
+    CacheMiddleware,
+    CompressionMiddleware,
+    EncryptionMiddleware,
+    MetricsMiddleware,
+    Middleware,
 )
 from whoosh.middleware.chain import MiddlewareChain
 from whoosh.middleware.context import MiddlewareContext

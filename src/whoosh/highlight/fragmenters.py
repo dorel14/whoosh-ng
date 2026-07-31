@@ -615,4 +615,3 @@ def get_text(original, token, replace):
         return token.text
     else:
         return original[token.startchar : token.endchar]
-

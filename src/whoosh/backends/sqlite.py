@@ -462,4 +462,3 @@ class SQLiteBackend(Backend):
 from whoosh.registry import BackendRegistry  # noqa: E402
 
 BackendRegistry.register("sqlite", SQLiteBackend, "whoosh")
-

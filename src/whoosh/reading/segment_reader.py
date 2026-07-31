@@ -428,4 +428,3 @@ class EmptyReader(IndexReader):
 
     def most_distinctive_terms(self, fieldname, number=5, prefix=None):
         return iter([])
-

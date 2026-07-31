@@ -3,12 +3,15 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 
 @dataclass(frozen=True)
 class Event:
     pass
+
+
+_E = TypeVar("_E", bound=Event)
 
 
 @dataclass(frozen=True)
@@ -23,16 +26,16 @@ class SearchExecuted(Event):
 
 class EventBus:
     def __init__(self) -> None:
-        self._listeners: dict[type[Event], list[Callable[[Event], Coroutine[Any, Any, None]]]] = {}
+        self._listeners: dict[type[Event], list[Callable[[Any], Coroutine[Any, Any, None]]]] = {}
 
     def subscribe(
-        self, event_type: type[Event]
+        self, event_type: type[_E]
     ) -> Callable[
-        [Callable[[Event], Coroutine[Any, Any, None]]], Callable[[Event], Coroutine[Any, Any, None]]
+        [Callable[[_E], Coroutine[Any, Any, None]]], Callable[[_E], Coroutine[Any, Any, None]]
     ]:
         def decorator(
-            func: Callable[[Event], Coroutine[Any, Any, None]],
-        ) -> Callable[[Event], Coroutine[Any, Any, None]]:
+            func: Callable[[_E], Coroutine[Any, Any, None]],
+        ) -> Callable[[_E], Coroutine[Any, Any, None]]:
             self._listeners.setdefault(event_type, []).append(func)
             return func
 

@@ -130,4 +130,3 @@ def timing(name=None):
     yield
     t = now() - t
     print(f"{name or ''}: {t:0.06f} s")
-

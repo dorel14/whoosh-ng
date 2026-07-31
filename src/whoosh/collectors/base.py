@@ -258,4 +258,3 @@ class Collector:
         """
 
         raise NotImplementedError
-

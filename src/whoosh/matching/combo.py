@@ -312,4 +312,3 @@ class ArrayUnionMatcher(CombinationMatcher):
 
     def score(self):
         return self._a[self._docnum - self._offset]
-

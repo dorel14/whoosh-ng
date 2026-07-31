@@ -268,4 +268,3 @@ class Phrase(qcore.Query):
         if self.boost != 1.0:
             m = matching.WrappingMatcher(m, boost=self.boost)
         return m
-

@@ -1,4 +1,3 @@
-# type: ignore
 # Copyright 2012 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,33 +26,33 @@
 # policies, either expressed or implied, of Matt Chaput.
 
 from whoosh.matching.binary import (
-                                    AdditiveBiMatcher,
-                                    AndMaybeMatcher,
-                                    AndNotMatcher,
-                                    BiMatcher,
-                                    DisjunctionMaxMatcher,
-                                    IntersectionMatcher,
-                                    UnionMatcher,
+    AdditiveBiMatcher,
+    AndMaybeMatcher,
+    AndNotMatcher,
+    BiMatcher,
+    DisjunctionMaxMatcher,
+    IntersectionMatcher,
+    UnionMatcher,
 )
 from whoosh.matching.combo import ArrayUnionMatcher, CombinationMatcher, PreloadedUnionMatcher
 from whoosh.matching.mcore import (
-                                    ConstantScoreMatcher,
-                                    LeafMatcher,
-                                    ListMatcher,
-                                    Matcher,
-                                    NoQualityAvailable,
-                                    NullMatcher,
-                                    NullMatcherClass,
-                                    ReadTooFar,
+    ConstantScoreMatcher,
+    LeafMatcher,
+    ListMatcher,
+    Matcher,
+    NoQualityAvailable,
+    NullMatcher,
+    NullMatcherClass,
+    ReadTooFar,
 )
 from whoosh.matching.wrappers import (
-                                    ConstantScoreWrapperMatcher,
-                                    CoordMatcher,
-                                    ExcludeMatcher,
-                                    FilterMatcher,
-                                    InverseMatcher,
-                                    MultiMatcher,
-                                    RequireMatcher,
-                                    SingleTermMatcher,
-                                    WrappingMatcher,
+    ConstantScoreWrapperMatcher,
+    CoordMatcher,
+    ExcludeMatcher,
+    FilterMatcher,
+    InverseMatcher,
+    MultiMatcher,
+    RequireMatcher,
+    SingleTermMatcher,
+    WrappingMatcher,
 )

@@ -65,7 +65,7 @@ def test_hash_contents():
         ("whiskey", "xray"),
     ]
     # Convert to bytes
-    samp = {(b(k), b(v)) for k, v in samp}
+    samp_bytes: set[tuple[bytes, bytes]] = {(b(k), b(v)) for k, v in samp}
 
     with TempStorage("hashcontents") as st:
         hw = HashWriter(st.create_file("test.hsh"))

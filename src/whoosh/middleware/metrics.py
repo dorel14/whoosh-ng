@@ -63,4 +63,3 @@ class PrometheusMiddleware:
 
 
 __all__ = ["PrometheusMiddleware"]
-

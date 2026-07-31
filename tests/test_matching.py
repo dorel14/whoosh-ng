@@ -111,7 +111,7 @@ def test_exclude():
 def test_simple_union():
     lm1 = matching.ListMatcher([1, 4, 10, 20, 90])
     lm2 = matching.ListMatcher([0, 4, 20])
-    um = matching.UnionMatcher(lm1, lm2)
+    um = matching.UnionMatcher(lm1, lm2)  # type: ignore[abstract]  # type: ignore[abstract]
     ls = []
     while um.is_active():
         ls.append((um.id(), um.score()))
@@ -120,12 +120,12 @@ def test_simple_union():
 
     lm1 = matching.ListMatcher([1, 4, 10, 20, 90])
     lm2 = matching.ListMatcher([0, 4, 20])
-    um = matching.UnionMatcher(lm1, lm2)
+    um = matching.UnionMatcher(lm1, lm2)  # type: ignore[abstract]
     assert list(um.all_ids()) == [0, 1, 4, 10, 20, 90]
 
     lm1 = matching.ListMatcher([1, 4, 10, 20, 90])
     lm2 = matching.ListMatcher([0, 4, 20])
-    um = matching.UnionMatcher(lm1, lm2)
+    um = matching.UnionMatcher(lm1, lm2)  # type: ignore[abstract]
     um.next()
     um.next()
     um = um.copy()
@@ -139,7 +139,7 @@ def test_simple_union():
 def test_simple_intersection():
     lm1 = matching.ListMatcher([1, 4, 10, 20, 90])
     lm2 = matching.ListMatcher([0, 4, 20])
-    im = matching.IntersectionMatcher(lm1, lm2)
+    im = matching.IntersectionMatcher(lm1, lm2)  # type: ignore[abstract]
     ls = []
     while im.is_active():
         ls.append((im.id(), im.score()))
@@ -148,12 +148,12 @@ def test_simple_intersection():
 
     lm1 = matching.ListMatcher([1, 4, 10, 20, 90])
     lm2 = matching.ListMatcher([0, 4, 20])
-    im = matching.IntersectionMatcher(lm1, lm2)
+    im = matching.IntersectionMatcher(lm1, lm2)  # type: ignore[abstract]
     assert list(im.all_ids()) == [4, 20]
 
     lm1 = matching.ListMatcher([1, 4, 10, 20, 90])
     lm2 = matching.ListMatcher([0, 4, 20])
-    im = matching.IntersectionMatcher(lm1, lm2)
+    im = matching.IntersectionMatcher(lm1, lm2)  # type: ignore[abstract]
     im.next()
     im.next()
     im = im.copy()
@@ -364,7 +364,7 @@ def test_union():
     s2 = matching.ListMatcher([2, 4, 8, 10, 20, 30])
     s3 = matching.ListMatcher([10, 100, 200])
     target = [1, 2, 3, 4, 5, 6, 7, 8, 10, 20, 30, 100, 200]
-    um = matching.UnionMatcher(s1, matching.UnionMatcher(s2, s3))
+    um = matching.UnionMatcher(s1, matching.UnionMatcher(s2, s3))  # type: ignore[abstract]
     assert target == list(um.all_ids())
 
 
@@ -373,7 +373,7 @@ def test_union_scores():
     s2 = matching.ListMatcher([2, 4, 8])
     s3 = matching.ListMatcher([2, 3, 8])
     target = [(1, 1.0), (2, 3.0), (3, 2.0), (4, 1.0), (8, 2.0)]
-    um = matching.UnionMatcher(s1, matching.UnionMatcher(s2, s3))
+    um = matching.UnionMatcher(s1, matching.UnionMatcher(s2, s3))  # type: ignore[abstract]
     result = []
     while um.is_active():
         result.append((um.id(), um.score()))
@@ -389,15 +389,15 @@ def test_random_union():
     vals = list(range(100))
 
     for _ in range(testcount):
-        target = set()
+        target: set[int] = set()
         matchers = []
         for _ in range(randint(*clauselimits)):
             nums = sample(vals, randint(*rangelimits))
             target = target.union(nums)
             matchers.append(matching.ListMatcher(sorted(nums)))
-        target = sorted(target)
+        target_list = sorted(target)
         um = make_binary_tree(matching.UnionMatcher, matchers)
-        assert list(um.all_ids()) == target
+        assert list(um.all_ids()) == target_list
 
 
 def test_inverse():
@@ -558,12 +558,12 @@ def test_every_matcher():
             # Pass the child matchers, the number of documents in the searcher,
             # and a reference to the searcher's is_deleted() method to the
             # matcher
-            return MyMatcher(children, searcher.doc_count_all(), searcher.is_deleted)
+            return MyMatcher(children, searcher.doc_count_all(), searcher.is_deleted)  # type: ignore[abstract]
 
     class MyMatcher(matching.UnionMatcher):
         def __init__(self, children, doccount, is_deleted):
-            self.children = children
-            self._id = 0
+            self.children = children  # type: ignore[method-assign]
+            self._id: int = 0
             self.doccount = doccount
             self.is_deleted = is_deleted
 
@@ -654,8 +654,8 @@ def _exercise_skip_to_quality(matcher_cls, queue):
         # Two "stubborn" matchers: each reports no skip progress (returns 0)
         # while staying active with a fixed quality below the threshold. The
         # binary skip_to_quality must advance them via next() to terminate.
-        stubborn_a = _StubbornMatcher(0, 1.0, maxnext=20)
-        stubborn_b = _StubbornMatcher(0, 10.0, maxnext=20)
+        stubborn_a = _StubbornMatcher(0, 1.0, maxnext=20)  # type: ignore[abstract]
+        stubborn_b = _StubbornMatcher(0, 10.0, maxnext=20)  # type: ignore[abstract]
         if matcher_cls is matching.AndMaybeMatcher:
             # AndMaybe requires the "a" matcher to drive; use stubborn as "a".
             m = matching.AndMaybeMatcher(stubborn_a, stubborn_b)

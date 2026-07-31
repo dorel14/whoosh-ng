@@ -33,13 +33,13 @@ before.
 """
 
 from whoosh.fields.base import (
-                                FieldConfigurationError,
-                                FieldType,
-                                UnknownFieldError,
-                                ensure_schema,
-                                merge_fielddict,
-                                merge_schema,
-                                merge_schemas,
+    FieldConfigurationError,
+    FieldType,
+    UnknownFieldError,
+    ensure_schema,
+    merge_fielddict,
+    merge_schema,
+    merge_schemas,
 )
 from whoosh.fields.numeric import BOOLEAN, COLUMN, DATETIME, ID, IDLIST, KEYWORD, NUMERIC, STORED
 from whoosh.fields.schema import MetaSchema, Schema, SchemaClass

@@ -740,4 +740,3 @@ class MultiReader(IndexReader):
     def vector_as(self, astype, docnum, fieldname):
         segmentnum, segmentdoc = self._segment_and_docnum(docnum)
         return self.readers[segmentnum].vector_as(astype, segmentdoc, fieldname)
-

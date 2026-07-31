@@ -264,7 +264,18 @@ class ParseBaseException(Exception):
         return line_str.strip()
 
     def __dir__(self):
-        return ["loc", "msg", "pstr", "parserElement", "lineno", "col", "line", "markInputLine", "__str__", "__repr__"]
+        return [
+            "loc",
+            "msg",
+            "pstr",
+            "parserElement",
+            "lineno",
+            "col",
+            "line",
+            "markInputLine",
+            "__str__",
+            "__repr__",
+        ]
 
 
 class ParseException(ParseBaseException):
@@ -4191,5 +4202,3 @@ if __name__ == "__main__":
     test("Select")
     test("Select ^^^ frox Sys.dual")
     test("Select A, B, C from Sys.dual, Table2   ")
-
-

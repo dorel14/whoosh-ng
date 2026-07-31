@@ -397,4 +397,3 @@ def merge_schemas(schemas):
     for i in range(1, len(schemas)):
         schema = merge_schema(schema, schemas[i])
     return schema
-

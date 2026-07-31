@@ -15,4 +15,3 @@ class VectorQuery:
 
 
 __all__ = ["VectorField", "VectorHit", "VectorProvider", "VectorQuery"]
-

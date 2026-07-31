@@ -265,4 +265,3 @@ class DoubleMetaphoneFilter(Filter):
                 t.text = secondary
                 t.boost = b * secondary_boost
                 yield t
-

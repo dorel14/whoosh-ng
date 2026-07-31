@@ -388,9 +388,9 @@ def test_update2():
             w.commit()
 
         with ix.searcher() as s:
-            results = [d["key"] for _, d in s.iter_docs()]
-            results = " ".join(sorted(results))
-            assert results == "0 1 2 3 4 5 6 7 8 9"
+            results: list[str] = [d["key"] for _, d in s.iter_docs()]
+            results_str = " ".join(sorted(results))
+            assert results_str == "0 1 2 3 4 5 6 7 8 9"
 
 
 def test_update_numeric():
@@ -405,9 +405,9 @@ def test_update_numeric():
                 w.update_document(num=num, text=str(num))
 
         with ix.searcher() as s:
-            results = [d["text"] for _, d in s.iter_docs()]
-            results = " ".join(sorted(results))
-            assert results == "0 1 2 3 4"
+            results: list[str] = [d["text"] for _, d in s.iter_docs()]
+            results_str = " ".join(sorted(results))
+            assert results_str == "0 1 2 3 4"
 
 
 def test_reindex():

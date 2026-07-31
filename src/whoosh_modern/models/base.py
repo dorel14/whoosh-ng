@@ -8,16 +8,7 @@ import inspect
 from collections.abc import Callable, Sequence
 from typing import Any, TypeVar, get_args, get_origin
 
-from whoosh.fields import (
-    BOOLEAN,
-    DATETIME,
-    ID,
-    KEYWORD,
-    NUMERIC,
-    STORED,
-    TEXT,
-    Schema,
-)
+from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, STORED, TEXT, Schema
 
 from ._protocols import HasFields
 from .types import SearchField, SearchOptions
@@ -94,12 +85,8 @@ class TypeMapper:
 
 
 def _default_mappings() -> None:
-    TypeMapper.register(
-        str, lambda opt: TEXT(stored=opt.stored, analyzer=opt.analyzer or None)
-    )
-    TypeMapper.register(
-        int, lambda opt: NUMERIC(int, stored=opt.stored, sortable=opt.sortable)
-    )
+    TypeMapper.register(str, lambda opt: TEXT(stored=opt.stored, analyzer=opt.analyzer or None))
+    TypeMapper.register(int, lambda opt: NUMERIC(int, stored=opt.stored, sortable=opt.sortable))
     TypeMapper.register(
         float,
         lambda opt: NUMERIC(float, stored=opt.stored, sortable=opt.sortable),  # pyright: ignore[reportArgumentType]
@@ -121,6 +108,7 @@ def _get_annotations(model: type) -> dict[str, Any]:
 def _get_type_hints(model: type) -> dict[str, Any]:
     try:
         import typing
+
         return typing.get_type_hints(model, include_extras=True)
     except Exception:
         return {}
@@ -196,9 +184,7 @@ class ModelIndex:
 
         return Schema(**fields)
 
-    def _detect_id_field(
-        self, fields: dict[str, Any], annotations: dict[str, Any]
-    ) -> str | None:
+    def _detect_id_field(self, fields: dict[str, Any], annotations: dict[str, Any]) -> str | None:
         for name in annotations:
             if name in ("id", "ID", "_id"):
                 return name
@@ -231,7 +217,4 @@ class ModelIndex:
                 if val is not None:
                     doc[column.name] = val
             return doc
-        return {
-            k: getattr(instance, k)
-            for k in _get_annotations(instance.__class__)
-        }
+        return {k: getattr(instance, k) for k in _get_annotations(instance.__class__)}

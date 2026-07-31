@@ -231,4 +231,3 @@ class FunctionPlugin(TaggingPlugin):
             newgroup.append(node)
             i += 1
         return newgroup
-

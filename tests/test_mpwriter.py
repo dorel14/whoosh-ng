@@ -38,7 +38,7 @@ def _do_basic(writerclass):
     # List of string values added to the index
     docs = []
     # A ring buffer for creating string values
-    buf = deque()
+    buf: deque[str] = deque()
     for ls in permutations("abcd"):
         word = "".join(ls)
         # Remember this word is in the index (to check lexicon)
