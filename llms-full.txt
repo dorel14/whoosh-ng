@@ -1381,227 +1381,102 @@ def apply_middleware_to_searcher(
 
 # Modern API
 
-Vector search, autocomplete, model indexing, and other advanced features.
+Data sources, schema discovery, facets, validation, middleware, and search view.
 
-## VectorField
+## DataSource Protocol
 
 ```python
-class whoosh.fields.VectorField(
-    dimensions: int,
-    metric: str = "cosine",
-    provider: str = "numpy",
-    stored: bool = False
+from whoosh_modern.data_sources import DataSource, SQLSource, RESTSource
+```
+
+### SQLSource
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
 )
+schema = source.discover_schema()
+docs = list(source.iter_documents())
+count = source.document_count()
+meta = source.metadata()
 ```
 
-Embedding vector field.
-
----
-
-### VectorProvider
+### RESTSource
 
 ```python
-class whoosh.vector.base.VectorProvider
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
+    headers={"Authorization": "Bearer token"},
+)
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-Base class for vector providers.
-
-#### Methods
-
-##### `add_vector()`
+## SchemaDiscovery
 
 ```python
-provider.add_vector(doc_id, embedding: list[float])
+from whoosh_modern.schema_discovery import SchemaDiscovery
+
+# From column metadata
+columns = [("id", "INTEGER"), ("title", "TEXT")]
+schema = SchemaDiscovery.from_result_set(columns)
+
+# From sample documents
+schema = SchemaDiscovery.from_sample(docs)
+
+# Detect ID field
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
 ```
 
-Index a vector.
-
-##### `search()`
+## FacetManager
 
 ```python
-results = provider.search(query_embedding, limit=10)
+from whoosh_modern.facets import FacetManager, TermsFacet, RangeFacet
+
+manager = FacetManager(schema)
+facets = manager.get_facets()
+config = manager.get_facet_config("category")
+stats = manager.get_facet_stats()
+manager.set_manual_override("price", {"type": "range", "buckets": [...]})
 ```
 
-Search vectors.
-
-### Built-in Providers
-
-#### NumpyProvider
+## ValidationFramework
 
 ```python
-from whoosh.vector.numpy_provider import NumpyProvider
+from whoosh_modern.validation import ValidationFramework, ValidationResult
 
-provider = NumpyProvider()
+validator = ValidationFramework()
+results = validator.validate(source)
 ```
 
-Pure NumPy cosine similarity. Best for small indexes.
-
----
-
-#### HNSWProvider
+## Middleware Pipeline
 
 ```python
-from whoosh.vector.hnsw_provider import HNSWProvider
+from whoosh_modern.middleware import Middleware, MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
 
-provider = HNSWProvider(dimensions=384, metric="cosine")
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
+)
+result = pipeline.execute(operation)
 ```
 
-Hierarchical Navigable Small World. Fast ANN for large indexes.
-
----
-
-#### FaissProvider
+## SearchView
 
 ```python
-from whoosh.vector.faiss_provider import FaissProvider
+from whoosh_modern.views import SearchView
+
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
+count = view.reindex()
+count = view.refresh()
+results = view.validate()
 ```
-
-Facebook AI Similarity Search. Very large indexes.
-
----
-
-#### QdrantProvider
-
-```python
-from whoosh.vector.qdrant_provider import QdrantProvider
-```
-
-Distributed vector DB integration.
-
----
-
-## Autocomplete API
-
-### AutocompleteProvider
-
-```python
-class whoosh_modern.autocomplete.base.AutocompleteProvider
-```
-
-Base class for autocomplete providers.
-
-#### Methods
-
-##### `suggest()`
-
-```python
-suggestions = provider.suggest(
-    prefix: str,
-    limit: int = 5,
-    fuzzy: int = 0
-) -> list[str]
-```
-
-Get autocomplete suggestions.
-
----
-
-### Built-in Providers
-
-#### EdgeNgramProvider
-
-```python
-from whoosh_modern.autocomplete.edge_ngram import EdgeNgramProvider
-
-provider = EdgeNgramProvider(searcher, fieldname)
-```
-
-Prefix completion using edge n-grams.
-
----
-
-#### NgramProvider
-
-```python
-from whoosh_modern.autocomplete.ngram import NgramProvider
-
-provider = NgramProvider(searcher, fieldname)
-```
-
-Infix completion using n-grams.
-
----
-
-## Model Indexing API
-
-### ModelIndex
-
-```python
-from whoosh_modern.models import ModelIndex
-
-idx = ModelIndex(Book)
-schema = idx.schema
-doc = idx.to_whoosh_document(instance)
-```
-
-Auto-maps Python models to Whoosh schemas.
-
-#### Supported model types
-
-- Dataclasses (`dataclasses.is_dataclass`)
-- Pydantic v2 (`BaseModel`)
-- SQLAlchemy (`__mapper__`)
-- SQLModel (`SQLModel` subclasses)
-- msgspec (`msgspec.Struct`)
-- Plain classes with `__annotations__`
-
-#### Type mappings
-
-| Python type | Whoosh field |
-|-------------|--------------|
-| `str` | `TEXT` |
-| `int` / `float` | `NUMERIC` |
-| `bool` | `BOOLEAN` |
-| `datetime` / `date` | `DATETIME` |
-| `Decimal` | `NUMERIC(int, decimal_places=2)` |
-| `Enum` | `KEYWORD` |
-| `bytes` | `KEYWORD` (hex-encoded) |
-| `list[str]` | `KEYWORD` |
-
-### SearchField and SearchOptions
-
-```python
-from whoosh_modern.models import SearchField, SearchOptions
-
-class Book:
-    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
-    count: int = SearchField(sortable=True)
-```
-
-### AutoIndexer
-
-```python
-from whoosh_modern.models import AutoIndexer
-
-auto = AutoIndexer(ix, on_error="raise")
-auto.register(Book)
-auto.index(instance)
-auto.remove(instance)
-await auto.index_async(instance)
-await auto.remove_async(instance)
-```
-
-Automatic indexing with SQLAlchemy event hooks.
-
----
-
-## Plugins
-
-### VectorPlugin
-
-```python
-from whoosh_modern.vector.plugin import VectorPlugin
-```
-
-Registers vector providers and adds vector_search to searcher.
-
-### AutocompletePlugin
-
-```python
-from whoosh_modern.autocomplete.plugin import AutocompletePlugin
-```
-
-Registers autocomplete providers.
 
 
 ## DOCUMENT: Overview
@@ -2828,6 +2703,305 @@ finally:
 ```
 
 
+## DOCUMENT: Data Sources
+
+# Data Sources
+
+Whoosh-NG provides a flexible data source layer for indexing documents from SQL databases, REST APIs, and custom data providers.
+
+## DataSource Protocol
+
+All data sources implement the `DataSource` protocol, which defines the interface for querying, schema discovery, and metadata retrieval.
+
+```python
+from whoosh_modern.data_sources import DataSource
+
+class DataSource(Protocol):
+    @property
+    def name(self) -> str: ...
+
+    def discover_schema(self) -> Schema: ...
+    def iter_documents(self) -> Iterator[Document]: ...
+    def document_count(self) -> int: ...
+    def metadata(self) -> Mapping[str, Any]: ...
+```
+
+### Capability Protocols
+
+| Protocol | Description |
+|----------|-------------|
+| `DataSource` | Base protocol: name, schema, iteration, metadata |
+| `IncrementalDataSource` | Supports `iter_changes(since)` |
+| `AsyncDataSource` | Async document streaming via `aiter_documents()` |
+| `RefreshableDataSource` | `refresh()` support |
+| `CountableDataSource` | `document_count()` |
+| `MetadataDataSource` | `metadata()` |
+
+---
+
+## SQLSource
+
+`SQLSource` connects to SQL databases and yields documents from query results.
+
+### Basic Usage
+
+```python
+from whoosh_modern.data_sources import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("mydb.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM products",
+)
+
+# Discover schema from result-set metadata
+schema = source.discover_schema()
+
+# Iterate documents
+for doc in source.iter_documents():
+    print(doc["title"], doc["price"])
+
+# Get metadata
+meta = source.metadata()
+# {"type": "sql", "query": "SELECT * FROM products", ...}
+
+# Get document count
+count = source.document_count()
+```
+
+### GROUP BY Aggregation
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="""
+        SELECT category, COUNT(*) as doc_count,
+               AVG(price) as avg_price
+        FROM products
+        GROUP BY category
+    """,
+)
+
+# Each aggregated row becomes a document
+for doc in source.iter_documents():
+    print(doc["category"], doc["doc_count"], doc["avg_price"])
+```
+
+### JOINs with Column Aliases
+
+SQLSource uses `PRAGMA table_info` for schema discovery. Always use column aliases in JOINs.
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="""
+        SELECT
+            p.id AS product_id,
+            p.name AS product_name,
+            c.name AS category_name
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+    """,
+)
+```
+
+### Incremental Sync
+
+```python
+from datetime import datetime
+
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM articles",
+    incremental_field="updated_at",
+    id_field="id",
+)
+
+# Get documents changed since a timestamp
+for doc in source.iter_changes(since=datetime(2025, 1, 1)):
+    print(doc["id"], doc["updated_at"])
+```
+
+---
+
+## RESTSource
+
+`RESTSource` fetches documents from REST APIs with pagination and authentication.
+
+### Basic Usage
+
+```python
+from whoosh_modern.data_sources import RESTSource
+
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    method="GET",
+    headers={"Authorization": "Bearer your_token"},
+    pagination="page",
+    page_size=50,
+)
+
+# Discover schema from first page
+schema = source.discover_schema()
+
+# Iterate all documents (handles pagination automatically)
+for doc in source.iter_documents():
+    print(doc["name"], doc["price"])
+
+# Get document count
+count = source.document_count()
+```
+
+### Pagination Strategies
+
+| Strategy | Parameters | Behavior |
+|----------|-----------|----------|
+| `page` | `?page=N&size=M` | Fetches page N with M items per page |
+| `offset` | `?offset=N&limit=M` | Fetches M items starting at N |
+| `cursor` | `?cursor=XYZ&size=M` | Follows `next_cursor` in response |
+
+```python
+# Page-based pagination
+source = RESTSource(
+    url="https://api.example.com/articles",
+    pagination="page",
+    page_size=50,
+)
+
+# Offset-based pagination
+source = RESTSource(
+    url="https://api.example.com/records",
+    pagination="offset",
+    page_size=100,
+)
+
+# Cursor-based pagination
+source = RESTSource(
+    url="https://api.example.com/feed",
+    pagination="cursor",
+    page_size=100,
+)
+```
+
+### Authentication
+
+```python
+# Bearer token via headers
+source = RESTSource(
+    url="https://api.example.com/data",
+    headers={"Authorization": "Bearer your_token"},
+)
+
+# API key via headers
+source = RESTSource(
+    url="https://api.example.com/data",
+    headers={"X-API-Key": "your_api_key"},
+)
+
+# Basic auth via headers
+import base64
+creds = base64.b64encode(b"user:pass").decode()
+source = RESTSource(
+    url="https://api.example.com/data",
+    headers={"Authorization": f"Basic {creds}"},
+)
+```
+
+### Document Path
+
+For nested API responses, use `document_path` to extract documents:
+
+```python
+# API returns: {"data": {"results": [...]}}
+source = RESTSource(
+    url="https://api.example.com/api/v2/products",
+    document_path="data.results",
+    pagination="page",
+)
+```
+
+
+## DOCUMENT: Facets
+
+# Facet Manager
+
+`FacetManager` manages facet configuration for a Whoosh `Schema`. It auto-discovers facetable fields and supports manual overrides.
+
+## Basic Usage
+
+```python
+from whoosh.fields import Schema, TEXT, NUMERIC, BOOLEAN
+from whoosh_modern.facets import FacetManager, TermsFacet, RangeFacet
+
+schema = Schema(
+    title=TEXT(stored=True),
+    category=TEXT(sortable=True),
+    price=NUMERIC(),
+    active=BOOLEAN(),
+)
+
+manager = FacetManager(schema)
+```
+
+## Auto-Discovery
+
+FacetManager automatically identifies facetable fields:
+
+| Whoosh Field Type | Facet Type |
+|-------------------|------------|
+| `KEYWORD`, `BOOLEAN`, `ID` | `TermsFacet` |
+| `NUMERIC` | `RangeFacet` |
+| `DATETIME` | `DateRangeFacet` |
+| `TEXT` | None (not facetable) |
+
+```python
+# Auto-discovered facets
+facets = manager.get_facets()
+# {"category": TermsFacet(limit=100), "price": RangeFacet()}
+```
+
+## Manual Override
+
+```python
+from whoosh_modern.facets import TermsFacet
+
+manager.set_manual_override("category", {
+    "type": "terms",
+    "limit": 50,
+})
+manager.set_manual_override("price", {
+    "type": "range",
+    "buckets": ["0-10", "10-50", "50-100", "100+"],
+})
+```
+
+## Inspection
+
+```python
+# Is a field facetable?
+manager.is_facetable("category")   # True
+manager.is_facetable("title")      # False
+
+# Get config for a field
+config = manager.get_facet_config("category")
+# {"type": "terms", "limit": 50}
+
+# Get all configs
+all_configs = manager.get_all_facet_configs()
+
+# Get statistics
+stats = manager.get_facet_stats()
+# {
+#     "total_fields": 4,
+#     "auto_discovered_facets": 2,
+#     "manual_overrides": 1,
+#     "total_facets_configured": 3,
+#     "facet_fields": ["category", "price", ...]
+# }
+```
+
+
 ## DOCUMENT: Fastapi Search
 
 # FastAPI Integration
@@ -2972,6 +3146,82 @@ api.register_index_endpoint("/documents", schema)
 - All blocking calls run off the event loop via `run_sync`.
 - Use `BufferedWriter` for high-throughput indexing via POST.
 - `WhooshFastAPI` class offers per-endpoint registration for custom integrations.
+
+
+## DOCUMENT: Middleware Pipeline
+
+# Middleware Pipeline
+
+The middleware pipeline wraps operations with cross-cutting concerns: retry, logging, etc.
+
+## Architecture
+
+```python
+from whoosh_modern.middleware import Middleware, MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
+
+# Chain middlewares
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
+)
+
+# Execute an operation through the chain
+result = pipeline.execute(my_operation)
+```
+
+## RetryMiddleware
+
+```python
+from whoosh_modern.middleware import RetryMiddleware
+
+retry = RetryMiddleware(attempts=3, backoff="exponential")
+
+@retry.wrap
+def flaky_operation():
+    # Will retry up to 3 times on exception
+    return fetch_data()
+```
+
+Backoff strategies:
+- `"exponential"`: 1s, 2s, 4s, 8s...
+- `"linear"`: 1s, 2s, 3s, 4s...
+
+## LoggingMiddleware
+
+```python
+from whoosh_modern.middleware import LoggingMiddleware
+import logging
+
+logger = logging.getLogger("benchmark")
+logging_mw = LoggingMiddleware(logger=logger)
+
+@logging_mw.wrap
+def tracked_operation():
+    return fetch_data()
+# Logs: "Operation tracked_operation completed in 0.123s"
+# On error: "Operation tracked_operation failed after 0.123s: <error>"
+```
+
+## Custom Middleware
+
+```python
+from whoosh_modern.middleware import Middleware
+
+class TimingMiddleware(Middleware):
+    def __init__(self):
+        self.timings = []
+
+    def wrap(self, operation):
+        def wrapped(*args, **kwargs):
+            start = time.time()
+            try:
+                result = operation(*args, **kwargs)
+                self.timings.append(time.time() - start)
+                return result
+            except Exception:
+                raise
+        return wrapped
+```
 
 
 ## DOCUMENT: Middleware
@@ -3438,6 +3688,93 @@ manager.register(AutocompletePlugin())
 ```
 
 
+## DOCUMENT: Schema Discovery
+
+# Schema Discovery
+
+Schema discovery infers Whoosh `Schema` from data source results. It operates on **actual result metadata and sample documents**, not SQL syntax.
+
+## How It Works
+
+### From Result Sets
+
+```python
+from whoosh_modern.schema_discovery import SchemaDiscovery
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+cursor = conn.cursor()
+cursor.execute("PRAGMA table_info(reuters_articles)")
+columns = [(row[1], row[2]) for row in cursor.fetchall()]
+# [("id", "INTEGER"), ("article_date", "TEXT"), ("headline", "TEXT"), ...]
+
+schema = SchemaDiscovery.from_result_set(columns)
+```
+
+### From Sample Documents
+
+```python
+from whoosh_modern.data_sources.sql import SQLSource
+
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles LIMIT 10",
+)
+
+# Get a few documents
+docs = list(source.iter_documents())[:10]
+
+# Infer schema from document values
+schema = SchemaDiscovery.from_sample(docs)
+```
+
+### Detect ID Field
+
+```python
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
+# Returns "id" if an ID field is found, otherwise None
+```
+
+## SQL Type Mapping
+
+| SQL Type | Whoosh Field |
+|----------|-------------|
+| `VARCHAR`, `TEXT`, `CHAR`, `STRING_AGG` | `TEXT` |
+| `INTEGER`, `BIGINT`, `SMALLINT`, `COUNT`, `SUM`, `AVG`, `MIN`, `MAX` | `NUMERIC` |
+| `FLOAT`, `DOUBLE`, `DECIMAL` | `NUMERIC` |
+| `BOOLEAN` | `BOOLEAN` |
+| `DATE`, `TIMESTAMP` | `DATETIME` |
+| `UUID` | `ID` |
+| `JSON`, `ENUM` | `KEYWORD` |
+
+## Duplicate Column Detection
+
+`from_result_set` raises `SchemaDiscoveryError` on duplicate column names.
+
+```python
+columns = [
+    ("id", "INTEGER"),
+    ("headline", "TEXT"),
+    ("id", "INTEGER"),  # Duplicate!
+]
+
+try:
+    schema = SchemaDiscovery.from_result_set(columns)
+except SchemaDiscoveryError as e:
+    print(f"Duplicate column: {e.field}")
+```
+
+Use explicit SQL aliases to avoid duplicates:
+
+```sql
+SELECT
+    p.id AS product_id,
+    c.id AS category_id
+FROM products p
+JOIN categories c ON p.category_id = c.id
+```
+
+
 ## DOCUMENT: Search Models
 
 # Search Models
@@ -3566,6 +3903,83 @@ shutil.rmtree(tmp)
 ```
 
 
+## DOCUMENT: Search View
+
+# SearchView
+
+`SearchView` integrates a `DataSource` with Whoosh indexing. It discovers schema, validates the source, builds the index, and supports incremental refresh.
+
+## Basic Usage
+
+```python
+from whoosh_modern.views import SearchView
+from whoosh_modern.data_sources.sql import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
+)
+
+view = SearchView(
+    name="reuters",
+    source=source,
+)
+
+# Build index (discovers schema, validates, populates)
+ix = view.build("indexdir")
+```
+
+## Incremental Refresh
+
+```python
+# Rebuild from scratch
+count = view.reindex()
+
+# Incremental refresh (only changed docs)
+count = view.refresh()
+```
+
+## Validation
+
+```python
+# Run validation before building
+results = view.validate()
+for result in results:
+    print(f"Level {result.level}: {'PASS' if result.passed else 'FAIL'}")
+    for error in result.errors:
+        print(f"  ERROR: {error}")
+```
+
+## Field Overrides
+
+```python
+from whoosh.fields import TEXT, NUMERIC
+
+view = SearchView(
+    name="custom",
+    source=source,
+    fields={
+        "title": TEXT(stored=True),
+        "price": NUMERIC(sortable=True),
+    },
+)
+```
+
+## Strict Mode
+
+```python
+view = SearchView(
+    name="strict",
+    source=source,
+    strict=True,  # Raise ValidationError on any failure
+)
+```
+
+
 ## DOCUMENT: Search
 
 # Search Examples
@@ -3682,6 +4096,76 @@ with ix.searcher() as s:
 - `search_page()` handles pagination.
 - `filter` restricts results without affecting scores.
 - `sortedby` sorts by field value or relevance score.
+
+
+## DOCUMENT: Validation
+
+# Validation Framework
+
+The validation framework runs checks against a data source before indexing. It provides 4 distinct validation levels with different failure modes.
+
+## Validation Levels
+
+| Level | Method | Purpose |
+|-------|--------|---------|
+| **Level 1** | `validate_structural(source)` | DataSource availability, schema detection |
+| **Level 2** | `validate_search(schema)` | Indexable fields, analyzer compatibility |
+| **Level 3** | `validate_performance(schema, source)` | Performance warnings (TEXT fields, etc.) |
+| **Level 4** | `validate_runtime(source, sample_size)` | Sample iteration, type validation |
+
+## Basic Usage
+
+```python
+from whoosh_modern.validation import ValidationFramework, ValidationResult
+from whoosh_modern.data_sources.sql import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(connection=conn, query="SELECT * FROM reuters_articles")
+
+validator = ValidationFramework()
+
+# Run all 4 validation levels
+results: list[ValidationResult] = validator.validate(source)
+
+for result in results:
+    level_name = f"Level {result.level}"
+    status = "PASS" if result.passed else "FAIL"
+    print(f"{level_name}: {status}")
+    for error in result.errors:
+        print(f"  ERROR: {error}")
+    for warning in result.warnings:
+        print(f"  WARN: {warning}")
+```
+
+## Individual Level Validation
+
+```python
+# Level 1: Structural
+errors = validator.validate_structural(source)
+
+# Level 2: Search
+from whoosh.fields import Schema
+schema = source.discover_schema()
+errors = validator.validate_search(schema)
+
+# Level 3: Performance
+warnings = validator.validate_performance(schema, source)
+
+# Level 4: Runtime
+errors = validator.validate_runtime(source, sample_size=100)
+```
+
+## Validation Results
+
+```python
+@dataclass
+class ValidationResult:
+    level: int
+    passed: bool
+    warnings: list[str]
+    errors: list[str]
+```
 
 
 ## DOCUMENT: Vector Search
@@ -6104,6 +6588,12 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[FastAPI Integration]({{ '/en/examples/fastapi/' | relative_url }})** — REST API with FastAPI
 - **[Middleware Examples]({{ '/en/examples/middleware/' | relative_url }})** — Custom middleware patterns
 - **[Plugin Development]({{ '/en/examples/plugin-dev/' | relative_url }})** — Building plugins
+- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Schema Discovery]({{ '/en/examples/schema-discovery/' | relative_url }})** — Result-set introspection
+- **[Facet Manager]({{ '/en/examples/facets/' | relative_url }})** — Auto-discovery and manual overrides
+- **[Validation Framework]({{ '/en/examples/validation/' | relative_url }})** — 4-level validation
+- **[SearchView]({{ '/en/examples/search-view/' | relative_url }})** — Full pipeline integration
+- **[Middleware Pipeline]({{ '/en/examples/middleware-pipeline/' | relative_url }})** — Retry, cache, logging
 
 ## Quick Overview
 
@@ -6226,6 +6716,28 @@ from whoosh.plugins.manager import PluginManager
 from whoosh_modern.vector.plugin import VectorPlugin
 
 PluginManager.load_plugins()
+```
+
+## Data Sources
+
+```bash
+pip install whoosh-ng
+```
+
+```python
+import sqlite3
+from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.views import SearchView
+
+# Use existing benchmark data
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+)
+
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
 ```
 
 
@@ -6812,224 +7324,90 @@ class SkipOperation(Skip)
 
 # API Moderne
 
-Recherche vectorielle, autocomplétion, indexation de modèles et autres fonctionnalités avancées.
+Sources de données, découverte de schéma, facettes, validation, middleware et SearchView.
 
-## VectorField
-
-```python
-from whoosh.fields import VectorField
-
-champ = VectorField(dimensions=384, metric="cosine", stored=False)
-```
-
-Champ de vecteur d'embedding.
-
----
-
-### VectorProvider
+## DataSource Protocol
 
 ```python
-class whoosh.vector.base.VectorProvider
+from whoosh_modern.data_sources import DataSource, SQLSource, RESTSource
 ```
 
-Classe de base pour les providers de vecteurs.
-
-#### Méthodes
-
-##### `add_vector()`
+### SQLSource
 
 ```python
-provider.add_vector(doc_id, embedding: list[float])
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
+)
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-Indexer un vecteur.
-
-##### `search()`
+### RESTSource
 
 ```python
-results = provider.search(query_embedding, limit=10)
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
+)
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-Rechercher des vecteurs.
-
-### Providers intégrés
-
-#### NumpyProvider
+## SchemaDiscovery
 
 ```python
-from whoosh.vector.numpy_provider import NumpyProvider
+from whoosh_modern.schema_discovery import SchemaDiscovery
 
-provider = NumpyProvider()
+schema = SchemaDiscovery.from_result_set(columns)
+schema = SchemaDiscovery.from_sample(docs)
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
 ```
 
-Similarité cosinus NumPy pure. Meilleur pour les petits index.
-
----
-
-#### HNSWProvider
+## FacetManager
 
 ```python
-from whoosh.vector.hnsw_provider import HNSWProvider
+from whoosh_modern.facets import FacetManager
 
-provider = HNSWProvider(dimensions=384, metric="cosine")
+manager = FacetManager(schema)
+facets = manager.get_facets()
+manager.set_manual_override("price", {"type": "range"})
 ```
 
-Hierarchical Navigable Small World. ANN rapide pour les grands index.
-
----
-
-#### FaissProvider
+## ValidationFramework
 
 ```python
-from whoosh.vector.faiss_provider import FaissProvider
+from whoosh_modern.validation import ValidationFramework, ValidationResult
+
+validator = ValidationFramework()
+results = validator.validate(source)
 ```
 
-Facebook AI Similarity Search. Très grands index.
-
----
-
-#### QdrantProvider
+## Middleware Pipeline
 
 ```python
-from whoosh.vector.qdrant_provider import QdrantProvider
+from whoosh_modern.middleware import MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
+
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
+)
+result = pipeline.execute(operation)
 ```
 
-Intégration DB vectorielle distribuée.
-
----
-
-## API d'indexation de modèles
-
-### ModelIndex
+## SearchView
 
 ```python
-from whoosh_modern.models import ModelIndex
+from whoosh_modern.views import SearchView
 
-idx = ModelIndex(Book)
-schema = idx.schema
-doc = idx.to_whoosh_document(instance)
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
+count = view.reindex()
+results = view.validate()
 ```
-
-Mappe automatiquement des modèles Python vers des schémas Whoosh.
-
-#### Types de modèles supportés
-
-- Dataclasses (`dataclasses.is_dataclass`)
-- Pydantic v2 (`BaseModel`)
-- SQLAlchemy (`__mapper__`)
-- SQLModel (sous-classes de `SQLModel`)
-- msgspec (`msgspec.Struct`)
-- Classes Python avec `__annotations__`
-
-#### Mappings de types
-
-| Type Python | Champ Whoosh |
-|-------------|--------------|
-| `str` | `TEXT` |
-| `int` / `float` | `NUMERIC` |
-| `bool` | `BOOLEAN` |
-| `datetime` / `date` | `DATETIME` |
-| `Decimal` | `NUMERIC(int, decimal_places=2)` |
-| `Enum` | `KEYWORD` |
-| `bytes` | `KEYWORD` (stockage hexadécimal) |
-| `list[str]` | `KEYWORD` |
-
-### SearchField et SearchOptions
-
-```python
-from whoosh_modern.models import SearchField, SearchOptions
-
-class Book:
-    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
-    count: int = SearchField(sortable=True)
-```
-
-### AutoIndexer
-
-```python
-from whoosh_modern.models import AutoIndexer
-
-auto = AutoIndexer(ix, on_error="raise")
-auto.register(Book)
-auto.index(instance)
-auto.remove(instance)
-await auto.index_async(instance)
-await auto.remove_async(instance)
-```
-
-Indexation automatique avec hooks d'événements SQLAlchemy.
-
----
-
-## API Autocomplétion
-
-### AutocompleteProvider
-
-```python
-class whoosh_modern.autocomplete.base.AutocompleteProvider
-```
-
-Classe de base pour les providers d'autocomplétion.
-
-#### Méthodes
-
-##### `suggest()`
-
-```python
-suggestions = provider.suggest(
-    prefix: str,
-    limit: int = 5,
-    fuzzy: int = 0
-) -> list[str]
-```
-
-Obtenir des suggestions d'autocomplétion.
-
----
-
-### Providers intégrés
-
-#### EdgeNgramProvider
-
-```python
-from whoosh_modern.autocomplete.edge_ngram import EdgeNgramProvider
-
-provider = EdgeNgramProvider(searcher, fieldname)
-```
-
-Complétion de préfixe via edge n-grammes.
-
----
-
-#### NgramProvider
-
-```python
-from whoosh_modern.autocomplete.ngram import NgramProvider
-
-provider = NgramProvider(searcher, fieldname)
-```
-
-Complétion infixe via n-grammes.
-
----
-
-## Plugins
-
-### VectorPlugin
-
-```python
-from whoosh_modern.vector.plugin import VectorPlugin
-```
-
-Enregistre les providers de vecteurs et ajoute vector_search au searcher.
-
-### AutocompletePlugin
-
-```python
-from whoosh_modern.autocomplete.plugin import AutocompletePlugin
-```
-
-Enregistre les providers d'autocomplétion.
 
 
 ## DOCUMENT: Overview
@@ -7724,6 +8102,167 @@ with ix.writer() as writer:
 ```
 
 
+## DOCUMENT: Data Sources
+
+# Sources de données
+
+Whoosh-NG fournit une couche de sources de données flexible pour l'indexation de documents à partir de bases de données SQL, d'API REST et de fournisseurs personnalisés.
+
+## Protocole DataSource
+
+Toutes les sources implémentent le protocole `DataSource` :
+
+```python
+from whoosh_modern.data_sources import DataSource
+
+class DataSource(Protocol):
+    @property
+    def name(self) -> str: ...
+
+    def discover_schema(self) -> Schema: ...
+    def iter_documents(self) -> Iterator[Document]: ...
+    def document_count(self) -> int: ...
+    def metadata(self) -> Mapping[str, Any]: ...
+```
+
+## SQLSource
+
+```python
+from whoosh_modern.data_sources import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("mydb.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM products",
+    incremental_field="updated_at",
+    id_field="id",
+)
+
+schema = source.discover_schema()
+count = source.document_count()
+docs = list(source.iter_documents())
+```
+
+### GROUP BY
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="""
+        SELECT category, COUNT(*) as doc_count
+        FROM products
+        GROUP BY category
+    """,
+)
+```
+
+### JOINs avec alias
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="""
+        SELECT p.id AS product_id, c.name AS category_name
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+    """,
+)
+```
+
+### Synchronisation incrémentale
+
+```python
+from datetime import datetime
+
+for doc in source.iter_changes(since=datetime(2025, 1, 1)):
+    print(doc["id"], doc["updated_at"])
+```
+
+## RESTSource
+
+```python
+from whoosh_modern.data_sources import RESTSource
+
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
+    headers={"Authorization": "Bearer token"},
+)
+
+schema = source.discover_schema()
+docs = list(source.iter_documents())
+```
+
+### Stratégies de pagination
+
+| Stratégie | Paramètres |
+|----------|-----------|
+| `page` | `?page=N&size=M` |
+| `offset` | `?offset=N&limit=M` |
+| `cursor` | `?cursor=XYZ&size=M` |
+
+```python
+source = RESTSource(
+    url="https://api.example.com/data",
+    pagination="cursor",
+    page_size=100,
+)
+```
+
+
+## DOCUMENT: Facets
+
+# Gestionnaire de facettes
+
+`FacetManager` gère la configuration des facettes pour un schéma Whoosh.
+
+## Usage basique
+
+```python
+from whoosh.fields import Schema, TEXT, NUMERIC, BOOLEAN
+from whoosh_modern.facets import FacetManager, TermsFacet, RangeFacet
+
+schema = Schema(
+    title=TEXT(stored=True),
+    category=TEXT(sortable=True),
+    price=NUMERIC(),
+    active=BOOLEAN(),
+)
+
+manager = FacetManager(schema)
+```
+
+## Auto-découverte
+
+| Type Whoosh | Facette auto-découverte |
+|-------------|-------------------------|
+| `KEYWORD`, `BOOLEAN`, `ID` | `TermsFacet` |
+| `NUMERIC` | `RangeFacet` |
+| `DATETIME` | `DateRangeFacet` |
+
+```python
+facets = manager.get_facets()
+manager.is_facetable("category")  # True
+manager.is_facetable("title")     # False
+```
+
+## Remplacement manuel
+
+```python
+manager.set_manual_override("category", {"type": "terms", "limit": 50})
+manager.set_manual_override("price", {"type": "range", "buckets": ["0-10", "10-50"]})
+```
+
+## Statistiques
+
+```python
+stats = manager.get_facet_stats()
+# {"total_fields": 4, "auto_discovered_facets": 2, ...}
+```
+
+
 ## DOCUMENT: Fastapi Search
 
 # Intégration FastAPI
@@ -7841,6 +8380,56 @@ async def index_docs(docs: list[dict]):
 - Tous les appels bloquants s'exécutent hors boucle d'événements via `run_sync`.
 - Utilisez `BufferedWriter` pour l'indexation en masse.
 - `WhooshFastAPI` classe offre une enregistrement par endpoint pour les intégrations personnalisées.
+
+
+## DOCUMENT: Middleware Pipeline
+
+# Pipeline de middleware
+
+Le pipeline de middleware enveloppe les opérations avec des préoccupations transversales : nouvelle tentative, journalisation, etc.
+
+## Architecture
+
+```python
+from whoosh_modern.middleware import Middleware, MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
+
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
+)
+
+result = pipeline.execute(my_operation)
+```
+
+## RetryMiddleware
+
+```python
+from whoosh_modern.middleware import RetryMiddleware
+
+retry = RetryMiddleware(attempts=3, backoff="exponential")
+
+@retry.wrap
+def operation():
+    return fetch_data()
+```
+
+Stratégies de backoff :
+- `"exponential"` : 1s, 2s, 4s, 8s...
+- `"linear"` : 1s, 2s, 3s, 4s...
+
+## LoggingMiddleware
+
+```python
+from whoosh_modern.middleware import LoggingMiddleware
+import logging
+
+logger = logging.getLogger("benchmark")
+logging_mw = LoggingMiddleware(logger=logger)
+
+@logging_mw.wrap
+def tracked():
+    return fetch_data()
+```
 
 
 ## DOCUMENT: Middleware
@@ -8195,6 +8784,47 @@ PluginManager.load_plugins()
 ```
 
 
+## DOCUMENT: Schema Discovery
+
+# Découverte de schéma
+
+La découverte de schéma infère un schéma Whoosh à partir des métadonnées de résultats ou d'échantillons de documents.
+
+## Depuis les métadonnées de colonnes
+
+```python
+from whoosh_modern.schema_discovery import SchemaDiscovery
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+cursor = conn.cursor()
+cursor.execute("PRAGMA table_info(reuters_articles)")
+columns = [(row[1], row[2]) for row in cursor.fetchall()]
+
+schema = SchemaDiscovery.from_result_set(columns)
+```
+
+## Depuis des échantillons de documents
+
+```python
+from whoosh_modern.data_sources.sql import SQLSource
+
+source = SQLSource(connection=conn, query="SELECT * FROM reuters_articles LIMIT 10")
+docs = list(source.iter_documents())[:10]
+schema = SchemaDiscovery.from_sample(docs)
+```
+
+## Détection du champ ID
+
+```python
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
+```
+
+## Détection des doublons
+
+`from_result_set` lève `SchemaDiscoveryError` sur les noms de colonnes dupliqués.
+
+
 ## DOCUMENT: Search Models
 
 # Modèles de recherche
@@ -8323,6 +8953,65 @@ shutil.rmtree(tmp)
 ```
 
 
+## DOCUMENT: Search View
+
+# SearchView
+
+`SearchView` intègre une source de données avec l'indexation Whoosh.
+
+## Usage basique
+
+```python
+from whoosh_modern.views import SearchView
+from whoosh_modern.data_sources.sql import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
+)
+
+view = SearchView(
+    name="reuters",
+    source=source,
+)
+
+# Créer l'index
+ix = view.build("indexdir")
+```
+
+## Rafraîchissement incrémental
+
+```python
+# Réindexation complète
+count = view.reindex()
+
+# Rafraîchissement incrémental
+count = view.refresh()
+```
+
+## Validation
+
+```python
+results = view.validate()
+for result in results:
+    print(f"Niveau {result.level}: {'PASS' if result.passed else 'FAIL'}")
+```
+
+## Mode strict
+
+```python
+view = SearchView(
+    name="strict",
+    source=source,
+    strict=True,  # Lever ValidationError en cas d'échec
+)
+```
+
+
 ## DOCUMENT: Search
 
 # Recherche
@@ -8438,6 +9127,49 @@ with ix.searcher() as s:
 - `search_page()` pour la pagination.
 - `filter` pour les filtres (ne pas inclure dans le score).
 - `sortedby` pour trier par champ ou score.
+
+
+## DOCUMENT: Validation
+
+# Framework de validation
+
+Le framework de validation exécute 4 niveaux de vérifications sur une source de données avant l'indexation.
+
+## Les 4 niveaux
+
+| Niveau | Méthode | Objectif |
+|-------|---------|---------|
+| **Niveau 1** | `validate_structural(source)` | Disponibilité de la source, détection de schéma |
+| **Niveau 2** | `validate_search(schema)` | Champs indexables, compatibilité des analyseurs |
+| **Niveau 3** | `validate_performance(schema, source)` | Avertissements de performance (TEXT, etc.) |
+| **Niveau 4** | `validate_runtime(source, sample_size)` | Itération d'échantillon, validation de types |
+
+## Usage basique
+
+```python
+from whoosh_modern.validation import ValidationFramework, ValidationResult
+from whoosh_modern.data_sources.sql import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(connection=conn, query="SELECT * FROM reuters_articles")
+
+validator = ValidationFramework()
+results: list[ValidationResult] = validator.validate(source)
+
+for result in results:
+    status = "PASS" if result.passed else "FAIL"
+    print(f"Niveau {result.level}: {status}")
+```
+
+## Validation individuelle
+
+```python
+errors = validator.validate_structural(source)
+errors = validator.validate_search(schema)
+warnings = validator.validate_performance(schema, source)
+errors = validator.validate_runtime(source, sample_size=100)
+```
 
 
 ## DOCUMENT: Vector Search
@@ -10262,14 +10994,40 @@ with ix.searcher() as s:
     print(results[0])
 ```
 
-## Fonctionnalités
+## Documentation
 
-- Pur Python, aucune dépendance native
-- Moteur de recherche embarqué
-- Architecture de plugins pour l'extensibilité
-- Pipeline de middleware pour les préoccupations transversales
-- Support de recherche vectorielle (NumPy, HNSW, Faiss)
-- Support asynchrone via extra optionnel
+- **[API Reference](/whoosh-ng/fr/api/overview/)** — Documentation complète des modules
+- **[Guides](/whoosh-ng/fr/guides/)** — Tutoriels et bonnes pratiques
+- **[Exemples](/whoosh-ng/fr/examples/)** — Exemples de code exécutables
+- **[English Documentation](/whoosh-ng/en/)** — Documentation in English
+
+## Structure de la documentation
+
+### Guides utilisateur
+
+- **[Indexation]({{ '/fr/guides/indexing/' | relative_url }})** — Ajouter, mettre à jour et supprimer des documents
+- **[Recherche]({{ '/fr/guides/searching/' | relative_url }})** — Analyse de requêtes, surbrillance et facettes
+- **[Conception de schéma]({{ '/fr/guides/schema/' | relative_url }})** — Types de champs, stockage et options d'indexation
+- **[Middleware]({{ '/fr/guides/middleware/' | relative_url }})** — Hooks de pipeline et middleware personnalisé
+- **[Plugins]({{ '/fr/guides/plugins/' | relative_url }})** — Étendre Whoosh-NG avec des plugins
+- **[Recherche vectorielle]({{ '/fr/guides/vector/' | relative_url }})** — Intégration NumPy, HNSW et Faiss
+
+### API Reference
+
+- **[Modern API]({{ '/fr/api/modern/' | relative_url }})** — Sources de données, validation, facettes, middleware
+
+### Exemples
+
+- **[Indexation basique]({{ '/fr/examples/basic-indexing/' | relative_url }})** — Exemples d'indexation de documents
+- **[Recherche]({{ '/fr/examples/search/' | relative_url }})** — Interrogation et récupération de résultats
+- **[FastAPI]({{ '/fr/examples/fastapi/' | relative_url }})** — API REST avec FastAPI
+- **[Middleware]({{ '/fr/examples/middleware/' | relative_url }})** — Patterns de middleware personnalisés
+- **[Sources de données]({{ '/fr/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Découverte de schéma]({{ '/fr/examples/schema-discovery/' | relative_url }})** — Inspection des jeux de résultats
+- **[Gestionnaire de facettes]({{ '/fr/examples/facets/' | relative_url }})** — Auto-découverte et remplacements manuels
+- **[Framework de validation]({{ '/fr/examples/validation/' | relative_url }})** — Validation 4 niveaux
+- **[SearchView]({{ '/fr/examples/search-view/' | relative_url }})** — Intégration du pipeline complet
+- **[Pipeline de middleware]({{ '/fr/examples/middleware-pipeline/' | relative_url }})** — Nouvelle tentative, cache, journalisation
 
 
 ## DOCUMENT: Quickstart
@@ -10313,6 +11071,28 @@ from whoosh.plugins.manager import PluginManager
 from whoosh_modern.vector.plugin import VectorPlugin
 
 PluginManager.load_plugins()
+```
+
+## Sources de données
+
+```bash
+pip install whoosh-ng
+```
+
+```python
+import sqlite3
+from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.views import SearchView
+
+# Utiliser les données de benchmark existantes
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+)
+
+vue = SearchView(name="reuters", source=source)
+ix = vue.build("indexdir")
 ```
 
 
