@@ -24,6 +24,7 @@ from whoosh_modern.models import (
 try:
     from sqlalchemy import create_engine
     from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
     HAS_SQLALCHEMY = True
 except ImportError:
     HAS_SQLALCHEMY = False
