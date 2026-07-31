@@ -174,4 +174,3 @@ schema = (
 | `scorable` | `bool` | Stocke la longueur pour BM25F |
 | `stored` | `bool` | Stocke la valeur |
 | `unique` | `bool` | Identifie les documents de façon unique |
-

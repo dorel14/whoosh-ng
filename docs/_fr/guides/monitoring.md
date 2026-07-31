@@ -68,4 +68,3 @@ def on_searched(event: SearchExecuted):
 3. **Endpoint health**: Utilisez `/health` pour les health checks load balancer
 4. **Logging structuré**: Corrélez les événements search/index avec des request IDs
 5. **Alerting**: Définissez des alertes sur les taux d'erreur et les latences
-

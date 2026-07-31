@@ -95,4 +95,3 @@ from whoosh.registry import ProviderRegistry
 
 ProviderRegistry.register("sqlite", SQLiteBackend(), "mon_app")
 ```
-

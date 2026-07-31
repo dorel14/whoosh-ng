@@ -97,4 +97,3 @@ print(restored == tuple(values))  # True
 - `NumpyProvider` implémente la similarité cosinus.
 - Enregistrez le plugin via `VectorPlugin().register(manager)`.
 - Utilisez `filter_ids` dans `provider.search()` pour restreindre les documents.
-

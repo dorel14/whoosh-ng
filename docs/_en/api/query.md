@@ -299,4 +299,3 @@ class whoosh.qparser.QueryParserError(Exception)
 ```
 
 Raised on parse errors.
-

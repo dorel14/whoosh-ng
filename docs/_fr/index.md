@@ -63,4 +63,3 @@ with ix.searcher() as s:
 - **[Framework de validation]({{ '/fr/examples/validation/' | relative_url }})** — Validation 4 niveaux
 - **[SearchView]({{ '/fr/examples/search-view/' | relative_url }})** — Intégration du pipeline complet
 - **[Pipeline de middleware]({{ '/fr/examples/middleware-pipeline/' | relative_url }})** — Nouvelle tentative, cache, journalisation
-

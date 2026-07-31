@@ -202,4 +202,3 @@ with ix.searcher() as s:
         print("Recherche annulée: trop lente")
     results = tlc.results()
 ```
-

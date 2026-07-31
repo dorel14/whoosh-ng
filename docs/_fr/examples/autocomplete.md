@@ -68,4 +68,3 @@ print(suggestions)  # ['python', 'programming']
 - Utilisez des champs `KEYWORD` pour les tags/mots-clés.
 - Enregistrez `AutocompletePlugin` pour activer les suggestions.
 - Le provider inverted supporte les correspondances floues (`maxdist`).
-

@@ -241,4 +241,3 @@ from whoosh import sorting
 facet = sorting.FieldFacet("category")
 results = searcher.search(query, sortedby="date")
 ```
-

@@ -92,4 +92,3 @@ except LockError:
 ### IndexMissingError
 
 Levée quand l'index n'existe pas.
-

@@ -87,4 +87,3 @@ async def suggest(q: str, limit: int = 5):
 - Use `KEYWORD` fields to store multi-value tags/terms.
 - Register `AutocompletePlugin` to enable suggestions.
 - The inverted index provider supports fuzzy matching (`maxdist`).
-

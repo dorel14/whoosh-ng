@@ -66,4 +66,3 @@ source = SQLSource(
 vue = SearchView(name="reuters", source=source)
 ix = vue.build("indexdir")
 ```
-

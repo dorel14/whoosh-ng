@@ -98,4 +98,3 @@ writer = apply_middleware_to_writer(ix.writer(), [LoggingMiddleware()])
 ## Compatibilité
 
 Whoosh-NG 4.0 maintient la compatibilité ascendante. Si vous trouvez un changement cassant, signalez-le comme une issue.
-

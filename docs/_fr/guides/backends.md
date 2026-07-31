@@ -57,4 +57,3 @@ backend = MemoryBackend()  # Utile pour les tests
 3. **Mémoire pour les tests**: Rapide, pas de nettoyage nécessaire
 4. **Fichiers composés**: Activez pour réduire le nombre de fichiers
 5. **Stratégie de sauvegarde**: File = copier le répertoire; SQLite = copier le fichier
-

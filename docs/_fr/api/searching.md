@@ -92,4 +92,3 @@ from whoosh import sorting
 facet = sorting.FieldFacet("categorie")
 results = searcher.search(query, sortedby="date")
 ```
-

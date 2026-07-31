@@ -120,4 +120,3 @@ with ix.searcher() as s:
 - `MultifieldParser` recherche sur plusieurs champs avec des boosts optionnels.
 - `FieldFacet` permet les facettes et le tri.
 - `hit.highlights()` renvoie des fragments mis en évidence prêts à afficher.
-

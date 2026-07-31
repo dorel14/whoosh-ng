@@ -72,4 +72,3 @@ schema = Schema(
     compte=NUMERIC(int, stored=True)
 )
 ```
-

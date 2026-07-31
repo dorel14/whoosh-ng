@@ -154,4 +154,3 @@ indexer.commit()
 3. **Hybrid search**: Combine vector and keyword search for best results
 4. **Cache embeddings**: Pre-compute and store to avoid recomputation
 5. **Batch indexing**: Index vectors in batches for efficiency
-

@@ -65,4 +65,3 @@ source = SQLSource(
 view = SearchView(name="reuters", source=source)
 ix = view.build("indexdir")
 ```
-

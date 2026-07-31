@@ -41,4 +41,3 @@ pip install whoosh-ng[metrics]
 2. Expose `/metrics` in production.
 3. Use `/health` for load balancer health checks.
 4. Emit `DocumentIndexed` and `SearchExecuted` events.
-

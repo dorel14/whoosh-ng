@@ -98,4 +98,3 @@ with ix.searcher() as base_searcher:
 | `after_search` | Recherche | Après le retour des résultats |
 | `on_error` | Erreur | En cas d'exception |
 | `on_commit` | Commit | Après writer.commit() |
-
