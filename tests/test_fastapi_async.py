@@ -15,7 +15,7 @@ from whoosh_fastapi import create_app  # noqa: E402
 
 
 def _build_index() -> str:
-    schema = fields.Schema(title=fields.TEXT, content=fields.TEXT)
+    schema = fields.Schema(title=fields.TEXT(stored=True), content=fields.TEXT(stored=True))
     tmp = tempfile.mkdtemp()
     ix = create_in(tmp, schema)
     with ix.writer() as w:

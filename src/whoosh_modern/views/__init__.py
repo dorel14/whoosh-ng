@@ -163,9 +163,7 @@ class SearchView:
         for field_name, _field_type in schema.items():
             if field_name in doc:
                 value = doc[field_name]
-                if value is not None and not isinstance(
-                    value, (str, bytes, list, tuple)
-                ):
+                if value is not None and not isinstance(value, (str, bytes, list, tuple)):
                     value = str(value)
                 prepared[field_name] = value
         return prepared

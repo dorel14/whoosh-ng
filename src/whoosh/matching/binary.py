@@ -618,7 +618,7 @@ class AndNotMatcher(BiMatcher):
     def supports_block_quality(self):
         return self.a.supports_block_quality()
 
-    def replace(self, minquality=0):
+    def replace(self, minquality=0) -> mcore.Matcher:
         if not self.a.is_active():
             # The a matcher is required, so if it's inactive, return an
             # inactive matcher
@@ -736,7 +736,7 @@ class AndMaybeMatcher(AdditiveBiMatcher):
             rb = self.b.skip_to(id)
         return ra or rb
 
-    def replace(self, minquality=0):
+    def replace(self, minquality=0) -> mcore.Matcher:
         a = self.a
         b = self.b
         a_active = a.is_active()

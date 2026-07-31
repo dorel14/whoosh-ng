@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -92,6 +93,7 @@ class TestLevenshtein:
         assert relative("abc", "abc") == 1.0
 
 
+@pytest.mark.skipif(shutil.which("uv") is None, reason="uv not installed")
 class TestLegacyCleanupTypecheck:
     @pytest.mark.parametrize("path", CLEANED_FILES)
     def test_pyright_clean(self, path: Path):

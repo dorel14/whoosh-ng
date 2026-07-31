@@ -29,7 +29,7 @@ class AutoIndexer:
 
     def _attach_sqlalchemy_listeners(self, model: type) -> None:
         try:
-             from sqlalchemy import event as sa_event  # pyright: ignore[reportMissingImports]
+            from sqlalchemy import event as sa_event  # pyright: ignore[reportMissingImports]
         except ImportError:
             return
 
