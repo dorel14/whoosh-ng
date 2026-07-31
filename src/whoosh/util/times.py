@@ -309,9 +309,9 @@ class timespan:
             end of the time span.
         """
 
-        if not isinstance(start, (datetime, adatetime)):
+        if not isinstance(start, datetime | adatetime):
             raise TimeError(f"{start!r} is not a datetime object")
-        if not isinstance(end, (datetime, adatetime)):
+        if not isinstance(end, datetime | adatetime):
             raise TimeError(f"{end!r} is not a datetime object")
 
         self.start = copy.copy(start)

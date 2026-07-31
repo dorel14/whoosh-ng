@@ -627,7 +627,7 @@ class DateParser:
         parser = self.get_parser()
 
         d, newpos = parser.parse(text, dt, pos=pos, debug=debug)
-        if isinstance(d, (adatetime, timespan)):
+        if isinstance(d, adatetime | timespan):
             d = d.disambiguated(dt)
 
         return (d, newpos)
@@ -641,7 +641,7 @@ class DateParser:
             parser = ToEnd(parser)
 
         d = parser.date_from(text, basedate, pos=pos, debug=debug)
-        if isinstance(d, (adatetime, timespan)):
+        if isinstance(d, adatetime | timespan):
             d = d.disambiguated(basedate)
         return d
 

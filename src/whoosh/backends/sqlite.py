@@ -27,7 +27,7 @@ def _sql_type_for(ftype_cls: type) -> str:
 
 def _encode_value(value: Any) -> Any:
     """Convert complex Python objects to SQLite-friendly primitives."""
-    if isinstance(value, (dict, list, set, tuple)):
+    if isinstance(value, dict | list | set | tuple):
         return json.dumps(value, default=str)
     return value
 
@@ -256,7 +256,7 @@ class SQLiteBackend(Backend):
         schema = schema or self._schema
         if schema is None:
             return []
-        return [name for name, ftype in schema.items() if isinstance(ftype, (TEXT, KEYWORD))]
+        return [name for name, ftype in schema.items() if isinstance(ftype, TEXT | KEYWORD)]
 
     def _ensure_doc_table(self, schema: Schema) -> None:
         con = self._get_conn()

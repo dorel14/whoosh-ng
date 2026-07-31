@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT, Schema
+from whoosh.fields import Schema
 
 
 class TermsFacet:

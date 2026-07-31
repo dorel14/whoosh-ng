@@ -4,9 +4,7 @@ from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import Any
 
-from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT, Schema
-from whoosh_modern.exceptions import ValidationError
-from whoosh_modern.schema_discovery import SchemaDiscovery
+from whoosh.fields import Schema
 
 
 @dataclass
@@ -117,18 +115,18 @@ class ValidationFramework:
     @staticmethod
     def _check_type(value: Any, field_type: Any) -> bool:
         """Check if a value is compatible with a Whoosh field type."""
-        from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT
+        from whoosh.fields import DATETIME, ID, KEYWORD, NUMERIC, TEXT
 
         if isinstance(field_type, ID):
             return isinstance(value, str)
         if isinstance(field_type, KEYWORD):
             return isinstance(value, str)
         if isinstance(field_type, NUMERIC):
-            return isinstance(value, (int, float))
+            return isinstance(value, int | float)
         if isinstance(field_type, DATETIME):
-            return isinstance(value, (int, float))
+            return isinstance(value, int | float)
         if isinstance(field_type, TEXT):
-            return isinstance(value, (str, bytes))
+            return isinstance(value, str | bytes)
         return True
 
     def validate(self, source: Any) -> list[ValidationResult]:

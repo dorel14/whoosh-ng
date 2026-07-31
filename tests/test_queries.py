@@ -120,7 +120,7 @@ def test_replace():
 
 def test_apply():
     def visit(q):
-        if isinstance(q, (Term, Variations, FuzzyTerm)):
+        if isinstance(q, Term | Variations | FuzzyTerm):
             q.text = q.text.upper()
             return q
         return q.apply(visit)

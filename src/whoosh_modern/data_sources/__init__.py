@@ -16,12 +16,15 @@ class DataSource(Protocol):
     @property
     def name(self) -> str:
         """Return the data source name."""
+        ...
 
     def discover_schema(self) -> Schema:
         """Return Whoosh Schema inferred from data source."""
+        ...
 
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from source as dict-like mappings."""
+        ...
 
 
 @runtime_checkable
@@ -30,6 +33,7 @@ class IncrementalDataSource(Protocol):
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since timestamp."""
+        ...
 
 
 @runtime_checkable
@@ -38,6 +42,7 @@ class AsyncDataSource(Protocol):
 
     async def aiter_documents(self) -> AsyncIterator[Document]:
         """Async document streaming."""
+        ...
 
 
 @runtime_checkable
@@ -46,6 +51,7 @@ class RefreshableDataSource(Protocol):
 
     def refresh(self) -> None:
         """Refresh source state."""
+        ...
 
 
 @runtime_checkable
@@ -54,6 +60,7 @@ class CountableDataSource(Protocol):
 
     def document_count(self) -> int:
         """Return total document count."""
+        ...
 
 
 @runtime_checkable
@@ -62,3 +69,4 @@ class MetadataDataSource(Protocol):
 
     def metadata(self) -> Mapping[str, Any]:
         """Return source metadata."""
+        ...

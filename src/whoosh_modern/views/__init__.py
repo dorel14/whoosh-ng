@@ -9,7 +9,6 @@ from whoosh.fields import Schema
 from whoosh.index import create_in, exists_in, open_dir
 from whoosh_modern.exceptions import ValidationError
 from whoosh_modern.middleware import Middleware
-from whoosh_modern.schema_discovery import SchemaDiscovery
 from whoosh_modern.validation import ValidationFramework, ValidationResult
 
 logger = logging.getLogger(__name__)

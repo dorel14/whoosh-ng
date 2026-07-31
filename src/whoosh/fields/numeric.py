@@ -251,7 +251,7 @@ class NUMERIC(FieldType):
 
     def index(self, num, **kwargs):
         # If the user gave us a list of numbers, recurse on the list
-        if isinstance(num, (list, tuple)):
+        if isinstance(num, list | tuple):
             for n in num:
                 yield from self.index(n)
             return
@@ -268,7 +268,7 @@ class NUMERIC(FieldType):
             return x
 
         dc = self.decimal_places
-        if dc and isinstance(x, (str, Decimal)):
+        if dc and isinstance(x, str | Decimal):
             x = Decimal(x) * (10**dc)
         elif isinstance(x, Decimal):
             raise TypeError(
@@ -294,7 +294,7 @@ class NUMERIC(FieldType):
         return x
 
     def to_column_value(self, x):
-        if isinstance(x, (list, tuple, array)):
+        if isinstance(x, list | tuple | array):
             x = x[0]
         x = self.prepare_number(x)
         return to_sortable(self.numtype, self.bits, self.signed, x)
@@ -417,7 +417,7 @@ class DATETIME(NUMERIC):
     def to_column_value(self, x):
         if isinstance(x, bytes):
             raise Exception(f"{x!r} is not a datetime")
-        if isinstance(x, (list, tuple)):
+        if isinstance(x, list | tuple):
             x = x[0]
         return self.prepare_datetime(x)
 

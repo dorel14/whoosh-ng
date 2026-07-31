@@ -411,7 +411,7 @@ class Searcher:
     def _filter_to_comb(self, obj):
         if obj is None:
             return None
-        if isinstance(obj, (set, DocIdSet)):
+        if isinstance(obj, set | DocIdSet):
             c = obj
         elif isinstance(obj, Results):
             c = obj.docs()

@@ -200,7 +200,7 @@ class SequenceValues(Values):
 
     @staticmethod
     def is_valid(v):
-        return isinstance(v, (list, tuple))
+        return isinstance(v, list | tuple)
 
     @staticmethod
     def common(v1, v2):
@@ -315,7 +315,7 @@ class IntListValues(SequenceValues):
 
     @staticmethod
     def is_valid(v):
-        if isinstance(v, (list, tuple)):
+        if isinstance(v, list | tuple):
             if len(v) < 2:
                 return True
             for i in range(1, len(v)):

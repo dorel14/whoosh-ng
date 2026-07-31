@@ -71,7 +71,7 @@ class HookedStorageProvider(StorageProvider):
 
     async def write(self, key: str, data: bytes) -> None:
         updated = await call_hook("before_write", key, data)
-        await self.provider.write(key, updated if isinstance(updated, (bytes, bytearray)) else data)
+        await self.provider.write(key, updated if isinstance(updated, bytes | bytearray) else data)
         await call_hook("after_write", key, data)
 
     async def delete(self, key: str) -> None:

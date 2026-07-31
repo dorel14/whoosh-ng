@@ -35,9 +35,12 @@ These specs test the full indexing and search pipeline with real data. Run with 
 |------|------|-------------|
 | `reuters` | Reuters news articles (old Whoosh API) | Index and search 21578 news articles using direct Whoosh calls |
 | `reuters_modern` | Reuters news articles (new Whoosh-NG API) | Index and search 21578 news articles using SQLSource + SearchView |
-| `dictionary` | dcvgr10.txt | Index and search dictionary entries |
-| `customers` | customers-2000000.csv | Index and search 2M customer records |
-| `stock_etab` | StockEtablissement_utf8.csv | Index and search French establishment data |
+| `dictionary` | dcvgr10.txt (old Whoosh API) | Index and search dictionary entries using direct Whoosh calls |
+| `dictionary_modern` | dcvgr10.txt (new Whoosh-NG API) | Index and search dictionary entries using SQLSource + SearchView |
+| `customers` | customers-2000000.csv (old Whoosh API) | Index and search 2M customer records using direct Whoosh calls |
+| `customers_modern` | customers-2000000.csv (new Whoosh-NG API) | Index and search 2M customer records using SQLSource + SearchView |
+| `stock_etab` | StockEtablissement_utf8.csv (old Whoosh API) | Index and search French establishment data using direct Whoosh calls |
+| `stock_etab_modern` | StockEtablissement_utf8.csv (new Whoosh-NG API) | Index and search French establishment data using SQLSource + SearchView |
 
 **Examples:**
 

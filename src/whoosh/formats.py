@@ -125,10 +125,7 @@ class Format:
 
 
 def tokens(value, analyzer, kwargs):
-    if isinstance(value, (tuple, list)):
-        gen = entoken(value, **kwargs)
-    else:
-        gen = analyzer(value, **kwargs)
+    gen = entoken(value, **kwargs) if isinstance(value, tuple | list) else analyzer(value, **kwargs)
     return unstopped(gen)
 
 

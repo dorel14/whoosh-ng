@@ -2,7 +2,6 @@
 
 import logging
 import re
-import sqlite3
 from collections.abc import Iterator, Mapping
 from datetime import datetime
 from typing import Any

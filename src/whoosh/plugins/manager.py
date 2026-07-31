@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 from abc import ABC
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
@@ -11,7 +10,6 @@ if TYPE_CHECKING:
     from whoosh.middleware.chain import MiddlewareChain  # type: ignore[import]
     from whoosh.query import Query  # type: ignore[import]
 
-from whoosh.hooks import HookImpl, register_hook  # type: ignore[import]
 from whoosh.utils.async_utils import is_async_callable, run_async_from_sync  # type: ignore[import]
 
 logger = logging.getLogger(__name__)

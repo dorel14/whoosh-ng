@@ -185,6 +185,9 @@ known-first-party = ["whoosh", "whoosh_modern", "whoosh_fastapi", "whoosh_admin"
 "src/whoosh/lang/stopwords.py" = ["E501"]
 "src/whoosh/query/ranges.py" = ["E501"]
 "tests/test_parsing.py" = ["E501", "N802"]
+"benchmark/benchmark_restsource.py" = ["N802"]
+"tests/test_data_sources/conftest.py" = ["N802"]
+"tests/test_data_sources/test_restsource.py" = ["N802"]
 "src/whoosh/analysis/filters.py" = ["B905"]
 "src/whoosh/async_writer.py" = ["B904"]
 "src/whoosh/filedb/misc.py" = ["E731"]
@@ -362,6 +365,10 @@ module = "cached_property"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+module = "requests"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = "setuptools"
 ignore_missing_imports = true
 
@@ -464,6 +471,12 @@ module = [
   "whoosh_modern.__init__",
   "whoosh_modern.vector.__init__",
   "whoosh_modern.vector.numpy_provider",
+  "whoosh_admin",
+  "whoosh_fastapi",
+  "whoosh_modern.data_sources",
+  "whoosh_modern.facets",
+  "whoosh_modern.validation",
+  "whoosh_modern.models",
 ]
 ignore_errors = true
 

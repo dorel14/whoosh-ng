@@ -2,10 +2,8 @@
 
 import json
 import logging
-import urllib.error
 import urllib.request
 from collections.abc import Iterator, Mapping
-from datetime import datetime
 from typing import Any
 
 from whoosh.fields import Schema
@@ -133,7 +131,7 @@ class RESTSource:
             except Exception as e:
                 from urllib.error import HTTPError, URLError
 
-                if isinstance(e, (HTTPError, URLError)):
+                if isinstance(e, HTTPError | URLError):
                     if isinstance(e, HTTPError) and e.code == 429:
                         retry_after = e.headers.get("Retry-After")
                         if retry_after:
@@ -221,7 +219,7 @@ class RESTSource:
         cursor: str | None = None,
     ) -> str:
         """Build URL with pagination parameters."""
-        from urllib.parse import urlencode, urljoin
+        from urllib.parse import urlencode
 
         url = self.url
         params: dict[str, Any] = {}

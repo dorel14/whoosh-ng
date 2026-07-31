@@ -156,7 +156,7 @@ class FieldType:
             raise Exception(
                 "%s field %r cannot index without a format" % (self.__class__.__name__, self)
             )
-        if not isinstance(value, (str, list, tuple)):
+        if not isinstance(value, str | list | tuple):
             raise ValueError(f"{value!r} is not unicode or sequence")
         assert isinstance(self.format, formats.Format)
 
@@ -201,7 +201,7 @@ class FieldType:
         encodes it using UTF-8.
         """
 
-        if isinstance(value, (list, tuple)):
+        if isinstance(value, list | tuple):
             value = value[0]
         if not isinstance(value, bytes):
             value = utf8encode(value)[0]
@@ -310,7 +310,7 @@ class FieldType:
         this behavior.
         """
 
-        if isinstance(value, (list, tuple)):
+        if isinstance(value, list | tuple):
             words = value
         else:
             words = [token.text for token in self.analyzer(value, no_morph=True)]

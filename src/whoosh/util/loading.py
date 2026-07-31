@@ -28,7 +28,7 @@
 from __future__ import annotations
 
 import pickle
-from typing import Any, BinaryIO, Optional
+from typing import Any, BinaryIO
 
 
 class RenamingUnpickler(pickle.Unpickler):

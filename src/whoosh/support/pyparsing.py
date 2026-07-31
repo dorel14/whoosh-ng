@@ -404,7 +404,7 @@ class ParseResults:
                         setattr(self, name, toklist)
 
     def __getitem__(self, i):
-        if isinstance(i, (int, slice)):
+        if isinstance(i, int | slice):
             return self.__toklist[i]
         else:
             if i not in self.__accum_names:
@@ -426,7 +426,7 @@ class ParseResults:
             sub.__parent = wkref(self)
 
     def __delitem__(self, i):
-        if isinstance(i, (int, slice)):
+        if isinstance(i, int | slice):
             mylen = len(self.__toklist)
             del self.__toklist[i]
 
@@ -1099,7 +1099,7 @@ class ParserElement:
                                 tokens,
                                 self.results_name,
                                 as_list=self.saveas_list
-                                and isinstance(tokens, (ParseResults, list)),
+                                and isinstance(tokens, ParseResults | list),
                                 modal=self.modal_results,
                             )
                 except ParseBaseException as err:
@@ -1114,7 +1114,7 @@ class ParserElement:
                         ret_tokens = ParseResults(
                             tokens,
                             self.results_name,
-                            as_list=self.saveas_list and isinstance(tokens, (ParseResults, list)),
+                            as_list=self.saveas_list and isinstance(tokens, ParseResults | list),
                             modal=self.modal_results,
                         )
 
@@ -2812,7 +2812,7 @@ class Each(ParseExpression):
             self.multioptionals = [e.expr for e in self.exprs if isinstance(e, ZeroOrMore)]
             self.multirequired = [e.expr for e in self.exprs if isinstance(e, OneOrMore)]
             self.required = [
-                e for e in self.exprs if not isinstance(e, (Optional, ZeroOrMore, OneOrMore))
+                e for e in self.exprs if not isinstance(e, Optional | ZeroOrMore | OneOrMore)
             ]
             self.required += self.multirequired
             self.initExprGroups = False
@@ -3578,7 +3578,7 @@ def one_of(strs, caseless=False, use_regex=True):
         masks = lambda a, b: b.startswith(a)
         parse_element_class = Literal
 
-    if isinstance(strs, (list, tuple)):
+    if isinstance(strs, list | tuple):
         symbols = list(strs[:])
     elif isinstance(strs, str):
         symbols = strs.split()

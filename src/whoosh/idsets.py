@@ -550,7 +550,7 @@ class BitSet(BaseBitSet):
         """
 
         # If the source is a list, tuple, or set, we can guess the size
-        if not size and isinstance(source, (list, tuple, set, frozenset)):
+        if not size and isinstance(source, list | tuple | set | frozenset):
             size = max(source)
         bytecount = bytes_for_bits(size)
         self.bits = array("B", (0 for _ in range(bytecount)))
@@ -640,7 +640,7 @@ class BitSet(BaseBitSet):
         self.bits[bucket] &= ~(1 << (i & 7))
 
     def _resize_to_other(self, other):
-        if isinstance(other, (list, tuple, set, frozenset)):
+        if isinstance(other, list | tuple | set | frozenset):
             maxbit = max(other)
             if maxbit // 8 > len(self.bits):
                 self._resize(maxbit)

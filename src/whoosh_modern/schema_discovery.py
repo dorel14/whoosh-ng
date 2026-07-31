@@ -1,7 +1,7 @@
 """Schema discovery logic for result sets from various data sources."""
 
 from collections import Counter
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from typing import Any
 
 from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT, Schema

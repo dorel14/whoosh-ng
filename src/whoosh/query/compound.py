@@ -145,7 +145,7 @@ class CompoundQuery(qcore.Query):
                 subqueries.pop(i)
                 continue
 
-            if isinstance(q, (TermRange, NumericRange)):
+            if isinstance(q, TermRange | NumericRange):
                 j = i + 1
                 while j < len(subqueries):
                     if q.overlaps(subqueries[j]):

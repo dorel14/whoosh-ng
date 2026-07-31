@@ -727,7 +727,7 @@ class W3PostingsWriter(base.PostingsWriter):
             assert isinstance(id_, str), f"id_={id_!r}"
         else:
             assert isinstance(id_, int), f"id_={id_!r}"
-        assert isinstance(weight, (int, float)), f"weight={weight!r}"
+        assert isinstance(weight, int | float), f"weight={weight!r}"
         assert isinstance(vbytes, bytes), f"vbytes={vbytes!r}"
         assert length is None or isinstance(length, int)
 

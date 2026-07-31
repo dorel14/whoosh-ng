@@ -66,7 +66,7 @@ class AsyncWriter(IndexWriter):
 
     # -- synchronization helpers -------------------------------------------
 
-    def reader(self):
+    def reader(self, **kwargs):
         return self.index.reader()
 
     def searcher(self, **kwargs):

@@ -26,7 +26,6 @@
 # policies, either expressed or implied, of Matt Chaput.
 
 from collections.abc import Sequence
-from typing import Optional
 
 
 def levenshtein(seq1: Sequence[str], seq2: Sequence[str], limit: int | None = None) -> int:
