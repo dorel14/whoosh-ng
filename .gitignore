@@ -27,6 +27,7 @@ eggs/
 /.vscode
 /benchmark/*_index/
 *_index/
+benchmark_report*
 !.gitignore
 
 # Cruft / local scratch

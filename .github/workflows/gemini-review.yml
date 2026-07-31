@@ -2,7 +2,7 @@ name: Gemini PR Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened]
 
 jobs:
   review:
@@ -33,6 +33,7 @@ jobs:
         run: |
           python - << 'EOF'
           import os
+          import sys
           import requests
           from google import genai
 
@@ -48,45 +49,63 @@ jobs:
               "Accept": "application/vnd.github.v3.diff"
           }
           diff_url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}"
-          diff_resp = requests.get(diff_url, headers=headers)
-          diff_text = diff_resp.text
+
+          try:
+              diff_resp = requests.get(diff_url, headers=headers)
+              diff_resp.raise_for_status()
+              diff_text = diff_resp.text
+          except requests.exceptions.RequestException as e:
+              print(f"Erreur lors de la récupération du diff GitHub : {e}", file=sys.stderr)
+              sys.exit(1)
 
           if not diff_text.strip():
               print("Diff vide, fin du job.")
-              exit(0)
+              sys.exit(0)
 
           # Troncature de sécurité si le diff est massif
           if len(diff_text) > 40000:
               diff_text = diff_text[:40000] + "\n... [Diff tronqué]"
 
           # Gemini Client
-          client = genai.Client(api_key=api_key)
-          
-          prompt = f"""Tu es un expert senior en revue de code. Analyse ce diff de Pull Request.
-          
-          Fournis une revue claire et bien structurée :
-          1. **Résumé des changements**
-          2. **Points d'attention / Bugs potentiels / Problèmes de performance**
-          3. **Suggestions de corrections concrètes** (s'il y en a, utilise les blocs de code Markdown pour les montrer).
+          try:
+              client = genai.Client(api_key=api_key)
+              prompt = f"""Tu es un expert senior en revue de code. Analyse ce diff de Pull Request.
 
-          Voici le diff :
-          ```diff
-          {diff_text}
-          ```
-          """
+              Fournis une revue claire et bien structurée :
+              1. **Résumé des changements**
+              2. **Points d'attention / Bugs potentiels / Problèmes de performance**
+              3. **Suggestions de corrections concrètes** (s'il y en a, utilise les blocs de code Markdown pour les montrer).
 
-          response = client.models.generate_content(
-              model="gemini-2.5-flash",
-              contents=prompt,
-          )
+              Voici le diff :
+              ```diff
+              {diff_text}
+              ```
+              """
+
+              response = client.models.generate_content(
+                  model="gemini-2.5-flash",
+                  contents=prompt,
+              )
+
+              if not response.text:
+                  print("Gemini n'a pas retourné de texte pour la revue.", file=sys.stderr)
+                  sys.exit(1)
+          except Exception as e:
+              print(f"Erreur lors de l'appel à l'API Gemini : {e}", file=sys.stderr)
+              sys.exit(1)
 
           # Publication du commentaire sur la PR
-          comment_body = f"### 🤖 Revue automatique par Gemini\n\n{response.text}"
-          comment_url = f"https://api.github.com/repos/{repo}/issues/{pr_num}/comments"
-          post_headers = {
-              "Authorization": f"token {github_token}",
-              "Accept": "application/vnd.github.v3+json"
-          }
-          requests.post(comment_url, headers=post_headers, json={"body": comment_body})
-          print("Revue publiée avec succès !")
+          try:
+              comment_body = f"### 🤖 Revue automatique par Gemini\n\n{response.text}"
+              comment_url = f"https://api.github.com/repos/{repo}/issues/{pr_num}/comments"
+              post_headers = {
+                  "Authorization": f"token {github_token}",
+                  "Accept": "application/vnd.github.v3+json"
+              }
+              post_resp = requests.post(comment_url, headers=post_headers, json={"body": comment_body})
+              post_resp.raise_for_status()
+              print("Revue publiée avec succès !")
+          except requests.exceptions.RequestException as e:
+              print(f"Erreur lors de la publication du commentaire GitHub : {e}", file=sys.stderr)
+              sys.exit(1)
           EOF

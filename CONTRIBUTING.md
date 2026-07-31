@@ -50,13 +50,18 @@ ruff check .
 # Format
 ruff format .
 
-# Type checking
+# Type checking (new code must pass without errors)
 mypy src/
 pyright src/
 
 # Tests
 pytest --cov=whoosh
 ```
+
+### Type Checking Policy
+
+- **New code and new modules** must pass `mypy` and `pyright` without errors.
+- **Legacy code** (`src/whoosh/` core package) has known type issues and is subject to error thresholds in CI (`legacy-typecheck.yml`). Do not introduce new type errors in legacy modules without fixing existing ones in the same area.
 
 Coverage for new modules must be >= 90%.
 
