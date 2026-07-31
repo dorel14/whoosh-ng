@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from itertools import permutations
 
 import pytest
@@ -151,7 +151,7 @@ def test_lengths():
 
 
 def test_many_lengths():
-    domain = "alfa bravo charlie delta echo".split()
+    domain = ["alfa", "bravo", "charlie", "delta", "echo"]
     schema = fields.Schema(text=fields.TEXT)
     ix = RamStorage().create_index(schema)
     w = ix.writer()
@@ -388,9 +388,9 @@ def test_update2():
             w.commit()
 
         with ix.searcher() as s:
-            results = [d["key"] for _, d in s.iter_docs()]
-            results = " ".join(sorted(results))
-            assert results == "0 1 2 3 4 5 6 7 8 9"
+            results: list[str] = [d["key"] for _, d in s.iter_docs()]
+            results_str = " ".join(sorted(results))
+            assert results_str == "0 1 2 3 4 5 6 7 8 9"
 
 
 def test_update_numeric():
@@ -405,9 +405,9 @@ def test_update_numeric():
                 w.update_document(num=num, text=str(num))
 
         with ix.searcher() as s:
-            results = [d["text"] for _, d in s.iter_docs()]
-            results = " ".join(sorted(results))
-            assert results == "0 1 2 3 4"
+            results: list[str] = [d["text"] for _, d in s.iter_docs()]
+            results_str = " ".join(sorted(results))
+            assert results_str == "0 1 2 3 4"
 
 
 def test_reindex():
@@ -521,7 +521,7 @@ def test_deleteall():
     schema = fields.Schema(text=fields.TEXT)
     with TempIndex(schema, "deleteall") as ix:
         w = ix.writer()
-        domain = "alfa bravo charlie delta echo".split()
+        domain = ["alfa", "bravo", "charlie", "delta", "echo"]
         for i, ls in enumerate(permutations(domain)):
             w.add_document(text=" ".join(ls))
             if not i % 10:
@@ -597,20 +597,20 @@ def test_multivalue():
     )
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
-        w.add_document(id=1, date=datetime(2001, 1, 1, tzinfo=timezone.utc), num=5)
+        w.add_document(id=1, date=datetime(2001, 1, 1, tzinfo=UTC), num=5)
         w.add_document(
             id=2,
             date=[
-                datetime(2002, 2, 2, tzinfo=timezone.utc),
-                datetime(2003, 3, 3, tzinfo=timezone.utc),
+                datetime(2002, 2, 2, tzinfo=UTC),
+                datetime(2003, 3, 3, tzinfo=UTC),
             ],
             num=[1, 2, 3, 12],
         )
-        w.add_document(txt="a b c".split())
+        w.add_document(txt=["a", "b", "c"])
 
     with ix.reader() as r:
         assert ("num", 3) in r
-        assert ("date", datetime(2003, 3, 3, tzinfo=timezone.utc)) in r
+        assert ("date", datetime(2003, 3, 3, tzinfo=UTC)) in r
         assert " ".join(r.field_terms("txt")) == "a b c"
 
 
@@ -752,9 +752,8 @@ def test_index_decimals():
     schema = fields.Schema(name=fields.KEYWORD(stored=True), num=fields.NUMERIC(int))
     ix = RamStorage().create_index(schema)
 
-    with ix.writer() as w:
-        with pytest.raises(TypeError):
-            w.add_document(name="hello", num=Decimal("3.2"))
+    with ix.writer() as w, pytest.raises(TypeError):
+        w.add_document(name="hello", num=Decimal("3.2"))
 
     schema = fields.Schema(
         name=fields.KEYWORD(stored=True), num=fields.NUMERIC(Decimal, decimal_places=5)

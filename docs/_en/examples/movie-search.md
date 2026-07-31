@@ -140,4 +140,3 @@ with ix.searcher() as s:
 - `MultifieldParser` searches multiple fields with optional boosts.
 - `FieldFacet` enables faceted grouping and sorting.
 - `hit.highlights()` returns highlighted snippets ready for display.
-

@@ -107,4 +107,3 @@ Register backends:
 BackendRegistry.register("my_backend", MyBackendClass, "my_package")
 backend = BackendRegistry.get("my_backend")
 ```
-

@@ -338,4 +338,3 @@ Raised when an indexing operation fails.
 class whoosh.index.LockError(Exception)
 class whoosh.index.IndexMissingError(Exception)
 ```
-

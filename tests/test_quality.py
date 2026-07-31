@@ -139,7 +139,7 @@ def test_replacements():
     sc = scoring.WeightScorer(0.25)
     a = matching.ListMatcher([1, 2, 3], [0.25, 0.25, 0.25], scorer=sc)
     b = matching.ListMatcher([1, 2, 3], [0.25, 0.25, 0.25], scorer=sc)
-    um = matching.UnionMatcher(a, b)
+    um = matching.UnionMatcher(a, b)  # type: ignore[abstract]
 
     a2 = a.replace(0.5)
     assert a2.__class__ == matching.NullMatcherClass
@@ -162,6 +162,6 @@ def test_replacements():
     mm = mm.replace(0.25)
     assert mm.current == 2
 
-    dm = matching.DisjunctionMaxMatcher(ls1, ls2)
+    dm = matching.DisjunctionMaxMatcher(ls1, ls2)  # type: ignore[abstract]
     dm = dm.replace(0.15)
     assert dm is ls2

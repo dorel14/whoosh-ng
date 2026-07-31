@@ -3,6 +3,7 @@ import random
 import sys
 from io import BytesIO
 from pickle import dumps, loads
+from typing import Any
 
 import pytest
 
@@ -209,8 +210,8 @@ def test_multivalue():
     schema = fields.Schema(s=fields.TEXT(sortable=True), n=fields.NUMERIC(sortable=True))
     ix = RamStorage().create_index(schema)
     with ix.writer(codec=W3Codec()) as w:
-        w.add_document(s="alfa foxtrot charlie".split(), n=[100, 200, 300])
-        w.add_document(s="juliet bravo india".split(), n=[10, 20, 30])
+        w.add_document(s=["alfa", "foxtrot", "charlie"], n=[100, 200, 300])
+        w.add_document(s=["juliet", "bravo", "india"], n=[10, 20, 30])
 
     with ix.reader() as r:
         scr = r.column_reader("s")
@@ -315,7 +316,7 @@ def test_ref_switch():
 
 
 def test_varbytes_offsets():
-    values = "alfa bravo charlie delta echo foxtrot golf hotel".split()
+    values = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel"]
     vlen = len(values)
 
     # Without offsets:
@@ -386,7 +387,7 @@ def test_raises_typeerror_if_fieldname_is_not_string():
 # If 'condition' is not a callable and not a hashable type, the columns.ColumnQuery object should be created without raising any exception.
 def test_behavior_if_condition_is_not_callable_and_not_hashable():
     fieldname = "test_field"
-    condition = []
+    condition: list[Any] = []
     query = ColumnQuery(fieldname, condition)
     assert query.fieldname == fieldname
     assert query.condition == condition
@@ -442,7 +443,7 @@ def test_matcher_initialization_may_take_long_time_if_condition_callable_is_very
 # Initializes the '_i' attribute to 0.
 def test_initializes_i_attribute_to_0():
     condition = lambda x: x > 0
-    creader = []  # Define creader variable
+    creader: list[Any] = []  # Define creader variable
     matcher = ColumnMatcher(creader, condition)
     assert matcher._i == 0
 
@@ -458,7 +459,7 @@ def test_initializes_creader_attribute():
 # Initializes the 'condition' attribute with the value passed as parameter.
 def test_initializes_condition_attribute():
     condition = lambda x: x > 0
-    creader = []
+    creader: list[Any] = []
     matcher = ColumnMatcher(creader, condition)
     assert matcher.condition == condition
 

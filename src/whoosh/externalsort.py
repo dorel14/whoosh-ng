@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2011 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,12 +52,12 @@ from pickle import dump, load
 try:
     from heapq import merge
 
-    def imerge(iterables):
+    def imerge(iterables):  # type: ignore
         return merge(*iterables)
 
 except ImportError:
 
-    def imerge(iterables):
+    def imerge(iterables):  # type: ignore
         _hpop, _hreplace, _Stop = (heappop, heapreplace, StopIteration)
         h = []
         h_append = h.append

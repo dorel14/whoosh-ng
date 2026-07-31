@@ -117,4 +117,3 @@ with ix.searcher() as s:
 - `search_page()` handles pagination.
 - `filter` restricts results without affecting scores.
 - `sortedby` sorts by field value or relevance score.
-

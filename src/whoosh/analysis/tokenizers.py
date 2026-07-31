@@ -319,7 +319,7 @@ def SpaceSeparatedTokenizer():
     ["hi", "there", "big-time,", "what's", "up"]
     """
 
-    return RegexTokenizer(r"[^ \t\r\n]+")
+    return RegexTokenizer(rcompile(r"[^ \t\r\n]+"))
 
 
 def CommaSeparatedTokenizer():
@@ -335,7 +335,7 @@ def CommaSeparatedTokenizer():
 
     from whoosh.analysis.filters import StripFilter
 
-    return RegexTokenizer(r"[^,]+") | StripFilter()
+    return RegexTokenizer(rcompile(r"[^,]+")) | StripFilter()
 
 
 class PathTokenizer(Tokenizer):

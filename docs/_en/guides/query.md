@@ -203,4 +203,3 @@ class CustomQuery(Query):
         # Return a custom matcher
         return CustomMatcher(searcher, self)
 ```
-

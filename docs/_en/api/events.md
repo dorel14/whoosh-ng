@@ -190,4 +190,3 @@ registry = register_hook("before_search", before_search, registry)
 # Call all hooks
 results = call_hook("before_search", context, registry=registry)
 ```
-

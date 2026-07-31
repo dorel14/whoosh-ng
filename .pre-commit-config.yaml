@@ -15,7 +15,7 @@ repos:
     rev: v0.11.0
     hooks:
       - id: ruff
-        args: [--fix]
+        args: [--fix, --unsafe-fixes]
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -23,6 +23,13 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [cached-property>=2.0.1]
+        files: ^src/
+
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.391
+    hooks:
+      - id: pyright
+        files: ^src/
 
 # Never scan the CI pre-commit log artifact
 exclude: '^precommit\.log$'

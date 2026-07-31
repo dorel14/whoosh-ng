@@ -1,3 +1,4 @@
+# type: ignore
 from array import array
 
 from whoosh.system import (

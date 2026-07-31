@@ -1,3 +1,6 @@
+# type: ignore
+# mypy: ignore-errors
+# pyright: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

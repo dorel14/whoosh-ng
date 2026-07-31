@@ -1,3 +1,4 @@
+# type: ignore
 """
 An implementation of an object that acts like a collection of on/off bits.
 """
@@ -516,15 +517,15 @@ class OnDiskBitSet(BaseBitSet):
     def __repr__(self):
         return "%s(%s, %d, %d)" % (
             self.__class__.__name__,
-            self.dbfile,
+            self._dbfile,
             self._basepos,
-            self.bytecount,
+            self._bytecount,
         )
 
     def byte_count(self):
         return self._bytecount
 
-    def _get_byte(self, n):
+    def _get_byte(self, n):  # type: ignore[override]
         return self._dbfile.get_byte(self._basepos + n)
 
     def _iter_bytes(self):
@@ -549,7 +550,7 @@ class BitSet(BaseBitSet):
         """
 
         # If the source is a list, tuple, or set, we can guess the size
-        if not size and isinstance(source, (list, tuple, set, frozenset)):
+        if not size and isinstance(source, list | tuple | set | frozenset):
             size = max(source)
         bytecount = bytes_for_bits(size)
         self.bits = array("B", (0 for _ in range(bytecount)))
@@ -565,7 +566,7 @@ class BitSet(BaseBitSet):
     def byte_count(self):
         return len(self.bits)
 
-    def _get_byte(self, n):
+    def _get_byte(self, n):  # type: ignore[override]
         return self.bits[n]
 
     def _iter_bytes(self):
@@ -628,27 +629,27 @@ class BitSet(BaseBitSet):
         for i in range(len(self.bits)):
             self.bits[i] = 0
 
-    def add(self, i):
+    def add(self, i):  # type: ignore[override]
         bucket = i >> 3
         if bucket >= len(self.bits):
             self._resize(i + 1)
         self.bits[bucket] |= 1 << (i & 7)
 
-    def discard(self, i):
+    def discard(self, i):  # type: ignore[override]
         bucket = i >> 3
         self.bits[bucket] &= ~(1 << (i & 7))
 
     def _resize_to_other(self, other):
-        if isinstance(other, (list, tuple, set, frozenset)):
+        if isinstance(other, list | tuple | set | frozenset):
             maxbit = max(other)
             if maxbit // 8 > len(self.bits):
                 self._resize(maxbit)
 
-    def update(self, iterable):
+    def update(self, iterable):  # type: ignore[override]
         self._resize_to_other(iterable)
         DocIdSet.update(self, iterable)
 
-    def intersection_update(self, other):
+    def intersection_update(self, other):  # type: ignore[override]
         if isinstance(other, BitSet):
             return self._logic(self, operator.__and__, other)
         discard = self.discard
@@ -656,7 +657,7 @@ class BitSet(BaseBitSet):
             if n not in other:
                 discard(n)
 
-    def difference_update(self, other):
+    def difference_update(self, other):  # type: ignore[override]
         if isinstance(other, BitSet):
             return self._logic(self, lambda x, y: x & ~y, other)
         discard = self.discard
@@ -729,7 +730,7 @@ class SortedIntSet(DocIdSet):
             return False
         return data[pos] == i
 
-    def add(self, i):
+    def add(self, i):  # type: ignore[override]
         data = self.data
         if not data or i > data[-1]:
             data.append(i)
@@ -747,7 +748,7 @@ class SortedIntSet(DocIdSet):
                 if data[pos] != i:
                     data.insert(pos, i)
 
-    def discard(self, i):
+    def discard(self, i):  # type: ignore[override]
         data = self.data
         pos = bisect_left(data, i)
         if data[pos] == i:

@@ -1,0 +1,57 @@
+name: Legacy Type Validation
+on: [push, pull_request]
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  typecheck-legacy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,models]"
+
+      - name: Run mypy on legacy code
+        run: |
+          mypy src/ --config-file pyproject.toml 2>&1 | tee mypy-legacy-report.txt || true
+
+      - name: Run pyright on legacy code
+        run: |
+          pyright src/whoosh/ 2>&1 | tee pyright-legacy-report.txt || true
+
+      - name: Upload typecheck reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-typecheck-reports
+          path: |
+            mypy-legacy-report.txt
+            pyright-legacy-report.txt
+          retention-days: 30
+
+      - name: Check mypy legacy threshold
+        run: |
+          MYPY_ERRORS=$(grep -c "error:" mypy-legacy-report.txt 2>/dev/null || echo "0")
+          echo "Legacy mypy errors: $MYPY_ERRORS"
+          if [ "$MYPY_ERRORS" -gt 200 ]; then
+            echo "Legacy mypy errors exceed threshold of 200"
+            exit 1
+          fi
+
+      - name: Check pyright legacy threshold
+        run: |
+          PYRIGHT_ERRORS=$(grep -c "error:" pyright-legacy-report.txt 2>/dev/null || echo "0")
+          echo "Legacy pyright errors: $PYRIGHT_ERRORS"
+          if [ "$PYRIGHT_ERRORS" -gt 500 ]; then
+            echo "Legacy pyright errors exceed threshold of 500"
+            exit 1
+          fi

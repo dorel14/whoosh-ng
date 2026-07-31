@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import math
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
 
-import numpy as np
+import numpy as np  # pyright: ignore[reportMissingImports]
 
 from whoosh.vector.base import VectorHit, VectorProvider
 
 
 class NumpyProvider(VectorProvider):
     def __init__(self) -> None:
-        self._vectors: dict[str, np.ndarray] = {}
+        self._vectors: dict[str, tuple[np.ndarray, float]] = {}
 
     def add(self, vectors: Iterable[tuple[str, Sequence[float]]]) -> None:
         for doc_id, values in vectors:

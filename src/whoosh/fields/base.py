@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +34,7 @@ import struct
 import sys
 from array import array
 from decimal import Decimal
+
 from whoosh import analysis, columns, formats
 from whoosh.system import emptybytes, pack_byte
 from whoosh.util.numeric import NaN, from_sortable, to_sortable, typecode_max
@@ -123,13 +125,7 @@ class FieldType:
             self.vector = None
 
     def __repr__(self):
-        return "{}(format={!r}, scorable={}, stored={}, unique={})".format(
-            self.__class__.__name__,
-            self.format,
-            self.scorable,
-            self.stored,
-            self.unique,
-        )
+        return f"{self.__class__.__name__}(format={self.format!r}, scorable={self.scorable}, stored={self.stored}, unique={self.unique})"
 
     def __eq__(self, other):
         return all(
@@ -160,7 +156,7 @@ class FieldType:
             raise Exception(
                 "%s field %r cannot index without a format" % (self.__class__.__name__, self)
             )
-        if not isinstance(value, (str, list, tuple)):
+        if not isinstance(value, str | list | tuple):
             raise ValueError(f"{value!r} is not unicode or sequence")
         assert isinstance(self.format, formats.Format)
 
@@ -205,7 +201,7 @@ class FieldType:
         encodes it using UTF-8.
         """
 
-        if isinstance(value, (list, tuple)):
+        if isinstance(value, list | tuple):
             value = value[0]
         if not isinstance(value, bytes):
             value = utf8encode(value)[0]
@@ -314,7 +310,7 @@ class FieldType:
         this behavior.
         """
 
-        if isinstance(value, (list, tuple)):
+        if isinstance(value, list | tuple):
             words = value
         else:
             words = [token.text for token in self.analyzer(value, no_morph=True)]

@@ -7,7 +7,7 @@
 import os.path
 import random
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from whoosh import fields, index
 
@@ -27,11 +27,26 @@ schema = fields.Schema(
     ngrams=fields.NGRAMWORDS,
 )
 
-words = (
-    "alfa bravo charlie delta echo foxtrot golf hotel india"
-    "juliet kilo lima mike november oskar papa quebec romeo"
-    "sierra tango"
-).split()
+words = [
+    "alfa",
+    "bravo",
+    "charlie",
+    "delta",
+    "echo",
+    "foxtrot",
+    "golf",
+    "hotel",
+    "indiajuliet",
+    "kilo",
+    "lima",
+    "mike",
+    "november",
+    "oskar",
+    "papa",
+    "quebec",
+    "romeosierra",
+    "tango",
+]
 
 if not os.path.exists(indexdir):
     os.makedirs(indexdir)
@@ -49,7 +64,7 @@ for segnum in range(3):
                 year=2000 + counter,
                 month=(counter % 12) + 1,
                 day=15,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             )
 
             w.add_document(

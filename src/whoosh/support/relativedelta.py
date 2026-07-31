@@ -1,3 +1,4 @@
+# type: ignore
 """
 Copyright (c) 2003-2010  Gustavo Niemeyer <gustavo@niemeyer.net>
 

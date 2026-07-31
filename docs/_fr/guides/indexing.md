@@ -73,4 +73,3 @@ writer.commit()
 - Commutez par lots pour de meilleures performances
 - Utilisez `BufferedWriter` en environnement multi-processus
 - Libérez toujours le verrou avec `commit()` ou `cancel()`
-

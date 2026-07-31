@@ -1,5 +1,5 @@
 import copy
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from itertools import permutations, zip_longest
 
 import pytest
@@ -88,7 +88,7 @@ def test_or():
 
 
 def test_ors():
-    domain = "alfa bravo charlie delta".split()
+    domain = ["alfa", "bravo", "charlie", "delta"]
     s = fields.Schema(num=fields.STORED, text=fields.TEXT)
     st = RamStorage()
     ix = st.create_index(s)
@@ -353,7 +353,7 @@ def test_open_numeric_ranges():
 
 
 def test_open_date_ranges():
-    basedate = datetime(2011, 1, 24, 6, 25, 0, 0, tzinfo=timezone.utc)
+    basedate = datetime(2011, 1, 24, 6, 25, 0, 0, tzinfo=UTC)
     domain = [basedate + timedelta(days=n) for n in range(-20, 20)]
 
     schema = fields.Schema(date=fields.DATETIME(stored=True))
@@ -369,13 +369,13 @@ def test_open_date_ranges():
         q = qp.parse("[2011-01-10 to]")
         r = [hit["date"] for hit in s.search(q, limit=None)]
         assert len(r) > 0
-        target = [d for d in domain if d >= datetime(2011, 1, 10, 6, 25, tzinfo=timezone.utc)]
+        target = [d for d in domain if d >= datetime(2011, 1, 10, 6, 25, tzinfo=UTC)]
         assert r == target
 
         q = qp.parse("[to 2011-01-30]")
         r = [hit["date"] for hit in s.search(q, limit=None)]
         assert len(r) > 0
-        target = [d for d in domain if d <= datetime(2011, 1, 30, 6, 25, tzinfo=timezone.utc)]
+        target = [d for d in domain if d <= datetime(2011, 1, 30, 6, 25, tzinfo=UTC)]
         assert r == target
 
         # With date parser
@@ -386,13 +386,13 @@ def test_open_date_ranges():
         q = qp.parse("[10 jan 2011 to]")
         r = [hit["date"] for hit in s.search(q, limit=None)]
         assert len(r) > 0
-        target = [d for d in domain if d >= datetime(2011, 1, 10, 6, 25, tzinfo=timezone.utc)]
+        target = [d for d in domain if d >= datetime(2011, 1, 10, 6, 25, tzinfo=UTC)]
         assert r == target
 
         q = qp.parse("[to 30 jan 2011]")
         r = [hit["date"] for hit in s.search(q, limit=None)]
         assert len(r) > 0
-        target = [d for d in domain if d <= datetime(2011, 1, 30, 6, 25, tzinfo=timezone.utc)]
+        target = [d for d in domain if d <= datetime(2011, 1, 30, 6, 25, tzinfo=UTC)]
         assert r == target
 
 
@@ -405,7 +405,7 @@ def test_negated_unlimited_ranges():
 
     domain = ascii_letters
 
-    dt = datetime.now(tz=timezone.utc)
+    dt = datetime.now(tz=UTC)
     for i, letter in enumerate(domain):
         w.add_document(id=letter, num=i, date=dt + timedelta(days=i))
     w.commit()
@@ -658,7 +658,7 @@ def test_phrase_multi():
     schema = fields.Schema(id=fields.STORED, text=fields.TEXT)
     ix = RamStorage().create_index(schema)
 
-    domain = "alfa bravo charlie delta echo".split()
+    domain = ["alfa", "bravo", "charlie", "delta", "echo"]
     w = None
     for i, ls in enumerate(permutations(domain)):
         if w is None:
@@ -859,7 +859,7 @@ def test_finalweighting():
         q = qparser.QueryParser("summary", None).parse("alfa OR bravo")
         r = s.search(q)
         ids = [fs["id"] for fs in r]
-        assert ["2", "4", "1", "3"] == ids
+        assert ids == ["2", "4", "1", "3"]
 
 
 def test_outofdate():
@@ -938,7 +938,7 @@ def test_ngram_phrase():
 
 
 def test_ordered():
-    domain = "alfa bravo charlie delta echo foxtrot".split(" ")
+    domain = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot"]
 
     schema = fields.Schema(f=fields.TEXT(stored=True))
     ix = RamStorage().create_index(schema)
@@ -1060,7 +1060,7 @@ def test_multireader_not():
 def test_boost_phrase():
     schema = fields.Schema(title=fields.TEXT(field_boost=5.0, stored=True), text=fields.TEXT)
     ix = RamStorage().create_index(schema)
-    domain = "alfa bravo charlie delta".split()
+    domain = ["alfa", "bravo", "charlie", "delta"]
     w = ix.writer()
     for ls in permutations(domain):
         t = " ".join(ls)
@@ -1397,15 +1397,29 @@ def test_collapse_nocolumn():
 
 
 def test_collapse_length():
-    domain = (
-        "alfa apple agnostic aplomb arc "
-        "bravo big braid beer "
-        "charlie crouch car "
-        "delta dog "
-        "echo "
-        "foxtrot fold flip "
-        "golf gym goop"
-    ).split()
+    domain = [
+        "alfa",
+        "apple",
+        "agnostic",
+        "aplomb",
+        "arc",
+        "bravo",
+        "big",
+        "braid",
+        "beer",
+        "charlie",
+        "crouch",
+        "car",
+        "delta",
+        "dog",
+        "echo",
+        "foxtrot",
+        "fold",
+        "flip",
+        "golf",
+        "gym",
+        "goop",
+    ]
 
     schema = fields.Schema(key=fields.ID(sortable=True), word=fields.ID(stored=True))
     ix = RamStorage().create_index(schema)
@@ -1433,15 +1447,29 @@ def test_collapse_length():
 
 
 def test_collapse_length_nocolumn():
-    domain = (
-        "alfa apple agnostic aplomb arc "
-        "bravo big braid beer "
-        "charlie crouch car "
-        "delta dog "
-        "echo "
-        "foxtrot fold flip "
-        "golf gym goop"
-    ).split()
+    domain = [
+        "alfa",
+        "apple",
+        "agnostic",
+        "aplomb",
+        "arc",
+        "bravo",
+        "big",
+        "braid",
+        "beer",
+        "charlie",
+        "crouch",
+        "car",
+        "delta",
+        "dog",
+        "echo",
+        "foxtrot",
+        "fold",
+        "flip",
+        "golf",
+        "gym",
+        "goop",
+    ]
 
     schema = fields.Schema(key=fields.ID(), word=fields.ID(stored=True))
     ix = RamStorage().create_index(schema)
@@ -1765,7 +1793,7 @@ def test_find_decimals():
 
 
 def test_limit_scores():
-    domain = "alfa bravo charlie delta echo foxtrot golf".split()
+    domain = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot", "golf"]
 
     schema = fields.Schema(desc=fields.TEXT, parent=fields.KEYWORD(stored=True))
     with TempIndex(schema) as ix:

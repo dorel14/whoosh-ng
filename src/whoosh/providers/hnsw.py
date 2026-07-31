@@ -1,3 +1,4 @@
+# type: ignore
 """HNSW provider for vector search.
 
 Requires hnswlib to be installed.

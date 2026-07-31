@@ -145,4 +145,3 @@ api.register_index_endpoint("/documents", schema)
 - All blocking calls run off the event loop via `run_sync`.
 - Use `BufferedWriter` for high-throughput indexing via POST.
 - `WhooshFastAPI` class offers per-endpoint registration for custom integrations.
-

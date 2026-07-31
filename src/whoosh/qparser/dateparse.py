@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2010 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,7 +28,7 @@
 
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 
 from whoosh.qparser import plugins, syntax
 from whoosh.qparser.taggers import Tagger
@@ -81,7 +82,7 @@ class ParserBase:
 
     def date_from(self, text, dt=None, pos=0, debug=-9999):
         if dt is None:
-            dt = datetime.now(tz=timezone.utc)
+            dt = datetime.now(tz=UTC)
 
         d, pos = self.parse(text, dt, pos, debug + 1)
         return d
@@ -500,15 +501,7 @@ class PlusMinus(Regex):
         rel_mins = f"((?P<mins>[0-9]+) *({minutes}))?"
         rel_secs = f"((?P<secs>[0-9]+) *({seconds}))?"
 
-        self.pattern = "(?P<dir>[+-]) *{} *{} *{} *{} *{} *{} *{}(?=(\\W|$))".format(
-            rel_years,
-            rel_months,
-            rel_weeks,
-            rel_days,
-            rel_hours,
-            rel_mins,
-            rel_secs,
-        )
+        self.pattern = f"(?P<dir>[+-]) *{rel_years} *{rel_months} *{rel_weeks} *{rel_days} *{rel_hours} *{rel_mins} *{rel_secs}(?=(\\W|$))"
         self.expr = rcompile(self.pattern, re.IGNORECASE)
 
     def props_to_date(self, p, dt):
@@ -634,21 +627,21 @@ class DateParser:
         parser = self.get_parser()
 
         d, newpos = parser.parse(text, dt, pos=pos, debug=debug)
-        if isinstance(d, (adatetime, timespan)):
+        if isinstance(d, adatetime | timespan):
             d = d.disambiguated(dt)
 
         return (d, newpos)
 
     def date_from(self, text, basedate=None, pos=0, debug=-9999, toend=True):
         if basedate is None:
-            basedate = datetime.now(tz=timezone.utc)
+            basedate = datetime.now(tz=UTC)
 
         parser = self.get_parser()
         if toend:
             parser = ToEnd(parser)
 
         d = parser.date_from(text, basedate, pos=pos, debug=debug)
-        if isinstance(d, (adatetime, timespan)):
+        if isinstance(d, adatetime | timespan):
             d = d.disambiguated(basedate)
         return d
 

@@ -10,9 +10,9 @@ import pytest
 from whoosh.backends.abc import Backend
 from whoosh.backends.file import FileBackend
 from whoosh.backends.sqlite import SQLiteBackend
-from whoosh.registry import BackendRegistry
-from whoosh.fields import Schema, TEXT, ID, KEYWORD, STORED
+from whoosh.fields import ID, KEYWORD, STORED, TEXT, Schema
 from whoosh.index import EmptyIndexError
+from whoosh.registry import BackendRegistry
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ class ConcreteBackend(Backend):
 
 def test_backend_is_abstract() -> None:
     with pytest.raises(TypeError):
-        Backend()
+        Backend()  # type: ignore[abstract]
 
 
 def test_concrete_backend_instantiable() -> None:
@@ -81,8 +81,12 @@ def test_sqlite_round_trip(tmp_sqlite_path) -> None:
     assert len(fields) == 2
     titles = {f["title"] for f in fields}
     assert titles == {"First", "Second"}
-    assert r.stored_fields(1)["path"] == "/a"
-    assert r.stored_fields(2)["path"] == "/b"
+    sf1 = r.stored_fields(1)
+    assert sf1 is not None
+    assert sf1["path"] == "/a"
+    sf2 = r.stored_fields(2)
+    assert sf2 is not None
+    assert sf2["path"] == "/b"
     r.close()
 
 

@@ -24,6 +24,8 @@
 # The views and conclusions contained in the software and documentation are
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
+
+# pyright: reportAttributeAccessIssue=false
 """The :class:`Results` class returned by a :class:`Searcher`."""
 
 import copy
@@ -310,7 +312,7 @@ class Results:
 
         if not self.has_matched_terms():
             raise NoTermsException
-        return set(self.termdocs.keys())  # type: ignore[attr-defined]
+        return set(self.termdocs.keys())
 
     def _get_fragmenter(self):
         return self.highlighter.fragmenter

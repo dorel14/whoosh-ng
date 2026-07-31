@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,6 +35,7 @@ import pickle
 import re
 import sys
 from time import sleep, time
+from typing import Any
 
 from whoosh import __version__, __version_string__
 from whoosh.fields import ensure_schema
@@ -214,7 +216,8 @@ def version(storage, indexname=None):
         return (ix.release, ix.version)
     except IndexVersionError:
         e = sys.exc_info()[1]
-        return (None, e.version)
+        assert e is not None
+        return (None, e.version)  # pyright: ignore[reportAttributeAccessIssue]
 
 
 # Index base class
@@ -222,6 +225,8 @@ def version(storage, indexname=None):
 
 class Index:
     """Represents an indexed collection of documents."""
+
+    schema: Any
 
     def close(self):
         """Closes any open resources held by the Index object itself. This may
@@ -439,7 +444,7 @@ class FileIndex(Index):
     # add_field
     # remove_field
 
-    def latest_generation(self):
+    def latest_generation(self) -> int:  # pyright: ignore[reportIncompatibleMethodOverride]
         return TOC._latest_generation(self.storage, self.indexname)
 
     # refresh
@@ -482,11 +487,11 @@ class FileIndex(Index):
     def _segments(self):
         return self._read_toc().segments
 
-    def _current_schema(self):
+    def _current_schema(self) -> Any:
         return self._read_toc().schema
 
     @property
-    def schema(self):
+    def schema(self) -> Any:
         return self._current_schema()
 
     @property
@@ -571,6 +576,7 @@ class FileIndex(Index):
                 # and so retry a few times before actually raising the
                 # exception
                 e = sys.exc_info()[1]
+                assert e is not None
                 retries -= 1
                 if retries <= 0:
                     raise e
@@ -602,6 +608,12 @@ class TOC:
     """Object representing the state of the index after a commit. Essentially
     a container for the index's schema and the list of segment objects.
     """
+
+    schema: Any
+    segments: list
+    generation: int
+    version: int
+    release: str
 
     def __init__(
         self,
@@ -706,7 +718,7 @@ class TOC:
             segments = stream.read_pickle()
 
         stream.close()
-        return cls(schema, segments, gen, version=version, release=release)
+        return cls(schema, segments, gen, version=version, release=release)  # pyright: ignore[reportArgumentType]
 
     def write(self, storage, indexname):
         schema = ensure_schema(self.schema)

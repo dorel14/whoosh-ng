@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from whoosh.fields import Schema
     from whoosh.index import Index
-    from whoosh.middleware.base import Middleware
 
 
 class Backend(ABC):

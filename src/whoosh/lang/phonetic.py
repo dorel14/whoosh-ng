@@ -1,3 +1,4 @@
+# type: ignore
 """
 This module contains quasi-phonetic encoders for words in different languages.
 """

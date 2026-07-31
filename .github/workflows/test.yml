@@ -17,7 +17,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      actions: write # Required to push workflow changes
+      actions: write
+      workflows: write # Required to push workflow file changes
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,7 +50,7 @@ jobs:
                 git config user.name "github-actions[bot]"
                 git add -A
                 git commit -m "chore: apply pre-commit fixes"
-                git push origin HEAD:${{ github.head_ref }}
+                git push origin HEAD:${{ github.head_ref || github.ref_name }}
               else
                 echo "Pre-commit still failing after fixes."
                 exit $second_status
@@ -80,7 +81,7 @@ jobs:
           cache-suffix: ${{ matrix.python-version }}
           python-version: ${{ matrix.python-version }}
       - name: Install deps
-        run: uv sync --frozen --extra dev --extra vector
+        run: uv sync --frozen --extra dev --extra vector --extra models --extra api
       - name: Run pytest
         run: uv run pytest tests
 
@@ -97,7 +98,7 @@ jobs:
       - name: Ruff
         run: uv run ruff check .
       - name: Ruff format
-        run: uv run ruff format --check .
+        run: uv run ruff format .
       - name: Mypy
         run: uv run mypy src/whoosh
       - name: Pyright (non-blocking, progressive)

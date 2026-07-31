@@ -1,4 +1,5 @@
 import copy
+from datetime import UTC
 
 import pytest
 
@@ -119,7 +120,7 @@ def test_replace():
 
 def test_apply():
     def visit(q):
-        if isinstance(q, (Term, Variations, FuzzyTerm)):
+        if isinstance(q, Term | Variations | FuzzyTerm):
             q.text = q.text.upper()
             return q
         return q.apply(visit)
@@ -408,13 +409,13 @@ def test_highlight_daterange():
         id="1",
         title="Life Aquatic",
         content="A nautic film crew sets out to kill a gigantic shark.",
-        released=datetime(2004, 12, 25, tzinfo=timezone.utc),
+        released=datetime(2004, 12, 25, tzinfo=UTC),
     )
     w.update_document(
         id="2",
         title="Darjeeling Limited",
         content=("Three brothers meet in India for a life changing train " + "journey."),
-        released=datetime(2007, 10, 27, tzinfo=timezone.utc),
+        released=datetime(2007, 10, 27, tzinfo=UTC),
     )
     w.commit()
 
@@ -426,15 +427,30 @@ def test_highlight_daterange():
         r[0].highlights("content") == 'for a life changing <b class="match term0">train</b> journey'
     )
 
-    r = s.search(DateRange("released", datetime(2007, 1, 1, tzinfo=timezone.utc), None))
+    r = s.search(DateRange("released", datetime(2007, 1, 1, tzinfo=UTC), None))
     assert len(r) == 1
     assert r[0].highlights("content") == ""
 
 
 def test_patterns():
-    domain = (
-        "aaron able acre adage aether after ago ahi aim ajax akimbo alembic all amiga amount ampere"
-    ).split()
+    domain = [
+        "aaron",
+        "able",
+        "acre",
+        "adage",
+        "aether",
+        "after",
+        "ago",
+        "ahi",
+        "aim",
+        "ajax",
+        "akimbo",
+        "alembic",
+        "all",
+        "amiga",
+        "amount",
+        "ampere",
+    ]
     schema = fields.Schema(word=fields.KEYWORD(stored=True))
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
@@ -753,7 +769,7 @@ def test_valid_fieldname_start_minus_one_end_one():
 
 
 # NumericRange with valid fieldname, start=1, and end=-1
-def test_valid_fieldname_start_end():
+def test_valid_fieldname_start_end_negative():
     from whoosh.query.ranges import NumericRange
 
     nr = NumericRange("fieldname", 1, -1)
@@ -795,7 +811,7 @@ def test_valid_fieldname_start_end_excl():
 
 
 # NumericRange with valid fieldname, start=1.5, and end=2.5, boost=2.0, and constantscore=False
-def test_valid_fieldname_start_end_boost_constantscore():
+def test_valid_fieldname_start_end_boost_constantscore_negative():
     from whoosh.query.ranges import NumericRange
 
     nr = NumericRange("fieldname", 1.5, 2.5, boost=2.0, constantscore=False)

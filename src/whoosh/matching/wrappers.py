@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2010 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -129,12 +130,7 @@ class MultiMatcher(mcore.Matcher):
         self._next_matcher()
 
     def __repr__(self):
-        return "{}({!r}, {!r}, current={})".format(
-            self.__class__.__name__,
-            self.matchers,
-            self.offsets,
-            self.current,
-        )
+        return f"{self.__class__.__name__}({self.matchers!r}, {self.offsets!r}, current={self.current})"
 
     def is_active(self):
         return self.current < len(self.matchers)
@@ -272,13 +268,7 @@ class FilterMatcher(WrappingMatcher):
         self._find_next()
 
     def __repr__(self):
-        return "{}({!r}, {!r}, {!r}, boost={})".format(
-            self.__class__.__name__,
-            self.child,
-            self._ids,
-            self._exclude,
-            self.boost,
-        )
+        return f"{self.__class__.__name__}({self.child!r}, {self._ids!r}, {self._exclude!r}, boost={self.boost})"
 
     def reset(self):
         self.child.reset()

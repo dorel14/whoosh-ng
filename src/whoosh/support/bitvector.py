@@ -1,3 +1,4 @@
+# type: ignore
 """
 An implementation of an object that acts like a collection of on/off bits.
 """

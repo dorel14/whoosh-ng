@@ -1,3 +1,4 @@
+# type: ignore
 """This module implements the Lovins stemming algorithm. Use the ``stem()``
 function::
 

@@ -418,12 +418,11 @@ class EnglishStemmer(_StandardStemmer):
                         r1 = r1[:-1]
                         r2 = r2[:-1]
 
-                    elif suffix in ("fulli", "lessli"):
-                        word = word[:-2]
-                        r1 = r1[:-2]
-                        r2 = r2[:-2]
-
-                    elif suffix == "li" and word[-3] in self.__li_ending:
+                    elif (
+                        suffix in ("fulli", "lessli")
+                        or suffix == "li"
+                        and word[-3] in self.__li_ending
+                    ):
                         word = word[:-2]
                         r1 = r1[:-2]
                         r2 = r2[:-2]
@@ -496,9 +495,7 @@ class EnglishStemmer(_StandardStemmer):
                 break
 
         # STEP 5
-        if r2.endswith("l") and word[-2] == "l":
-            word = word[:-1]
-        elif r2.endswith("e"):
+        if r2.endswith("l") and word[-2] == "l" or r2.endswith("e"):
             word = word[:-1]
         elif r1.endswith("e"):
             if len(word) >= 4 and (

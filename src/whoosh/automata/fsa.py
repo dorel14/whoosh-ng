@@ -121,7 +121,7 @@ class NFA(FSA):
                 dests = xs[label]
                 _ = "||" if self.is_final(dests) else ""
 
-    def start(self):
+    def start(self):  # pyright: ignore[reportIncompatibleMethodOverride]
         return frozenset(self._expand({self.initial}))
 
     def add_transition(self, src, label, dest):
@@ -136,8 +136,8 @@ class NFA(FSA):
                 for dest in dests:
                     yield src, label, dest
 
-    def is_final(self, states):
-        return bool(self.final_states.intersection(states))
+    def is_final(self, state):
+        return bool(self.final_states.intersection(state))
 
     def _expand(self, states):
         transitions = self.transitions
@@ -150,22 +150,22 @@ class NFA(FSA):
                 states.update(new_states)
         return states
 
-    def next_state(self, states, label):
+    def next_state(self, state, label):
         transitions = self.transitions
         dest_states = set()
-        for state in states:
-            if state in transitions:
-                xs = transitions[state]
+        for s in state:
+            if s in transitions:
+                xs = transitions[s]
                 if label in xs:
                     dest_states.update(xs[label])
                 if ANY in xs:
                     dest_states.update(xs[ANY])
         return frozenset(self._expand(dest_states))
 
-    def get_labels(self, states):
+    def get_labels(self, src):
         transitions = self.transitions
         labels = set()
-        for state in states:
+        for state in src:
             if state in transitions:
                 labels.update(transitions[state])
         return labels
@@ -244,9 +244,9 @@ class DFA(FSA):
     def is_final(self, state):
         return state in self.final_states
 
-    def next_state(self, src, label):
-        trans = self.transitions.get(src, {})
-        return trans.get(label, self.defaults.get(src, None))
+    def next_state(self, state, label):
+        trans = self.transitions.get(state, {})
+        return trans.get(label, self.defaults.get(state, None))
 
     def next_valid_string(self, string, asbytes=False):
         state = self.start()

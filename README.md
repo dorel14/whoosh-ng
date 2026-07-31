@@ -82,6 +82,12 @@ pip install "whoosh-ng[dev]"
 - **FastAPI Plugin** (`whoosh_fastapi`): REST endpoints for search, autocomplete, vector search, and health checks
 - **Admin UI Plugin** (`whoosh_admin`): Dashboard for index administration
 - **Entry Points**: Auto-loaded plugins under `whoosh.plugins` group
+- **Data Sources** (`whoosh_modern.data_sources`): `DataSource` protocol, `SQLSource` with GROUP BY/JOIN/incremental sync, `RESTSource` with page/offset/cursor pagination and auth
+- **Schema Discovery** (`whoosh_modern.schema_discovery`): Result-set introspection with duplicate column detection and JSON/JSONB handling
+- **FacetManager** (`whoosh_modern.facets`): Auto-discovery of facetable fields with manual override support
+- **Validation Framework** (`whoosh_modern.validation`): 4-level validation (STRICT/WARN/SKIP/NONE) with typed exceptions and field context
+- **Middleware Pipeline** (`whoosh_modern.middleware`): `RetryMiddleware`, `LoggingMiddleware`, `CacheMiddleware` with chainable pipeline
+- **SearchView** (`whoosh_modern.search_view`): Unified interface integrating data sources, schema discovery, facets, validation, and middleware
 
 ### Changed
 
@@ -141,6 +147,76 @@ app = create_app(ix, prefix="/api/v1")
 # POST /api/v1/search          - Full-text search
 # GET  /api/v1/autocomplete?q= - Autocomplete suggestions
 ```
+
+## Example: Data Sources
+
+### SQLSource — Index from a SQL database
+
+```python
+from whoosh_modern.data_sources import SQLSource
+from whoosh import index
+from whoosh.fields import Schema, TEXT, NUMERIC
+import sqlite3
+
+conn = sqlite3.connect("mydb.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM products",
+    incremental_field="updated_at",
+    id_field="id",
+)
+
+# Discover schema from actual result metadata
+schema = source.discover_schema()
+
+# Build index with SearchView
+from whoosh_modern.views import SearchView
+view = SearchView(name="products", source=source)
+ix = view.build("indexdir")
+```
+
+### RESTSource — Index from a REST API
+
+```python
+from whoosh_modern.data_sources import RESTSource
+
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
+    headers={"Authorization": "Bearer your_token"},
+)
+
+schema = source.discover_schema()
+docs = list(source.iter_documents())
+```
+
+### SearchView — Full pipeline integration
+
+```python
+from whoosh_modern.views import SearchView
+from whoosh_modern.data_sources import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("mydb.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
+)
+
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
+
+# Incremental refresh
+count = view.refresh()
+
+# Full reindex
+count = view.reindex()
+```
+
+## Example: Vector Search
 
 ## Example: Vector Search
 

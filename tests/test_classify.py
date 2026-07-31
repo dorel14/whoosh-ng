@@ -125,16 +125,15 @@ def test_more_like(model=classify.Bo2Model):
 
 def test_empty_more_like(model=classify.Bo1Model):
     schema = fields.Schema(text=fields.TEXT)
-    with TempIndex(schema, "emptymore") as ix:
-        with ix.searcher() as s:
-            assert s.doc_count() == 0
-            q = query.Term("a", "b")
-            r = s.search(q)
-            assert r.scored_length() == 0
-            assert r.key_terms("text", model=model) == []
+    with TempIndex(schema, "emptymore") as ix, ix.searcher() as s:
+        assert s.doc_count() == 0
+        q = query.Term("a", "b")
+        r = s.search(q)
+        assert r.scored_length() == 0
+        assert r.key_terms("text", model=model) == []
 
-            ex = classify.Expander(s.reader(), "text", model=model)
-            assert ex.expanded_terms(1) == []
+        ex = classify.Expander(s.reader(), "text", model=model)
+        assert ex.expanded_terms(1) == []
 
 
 def test_fake_more_like(model=classify.Bo1Model):

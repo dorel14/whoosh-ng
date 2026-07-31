@@ -1,4 +1,5 @@
 from itertools import permutations
+from typing import Any
 
 import pytest
 
@@ -139,8 +140,8 @@ def test_sorted_extend():
         keywords=fields.TEXT,
         num=fields.NUMERIC(stored=True, sortable=True),
     )
-    domain = "alfa bravo charlie delta echo foxtrot golf hotel india".split()
-    keys = "juliet kilo lima november oskar papa quebec romeo".split()
+    domain = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel", "india"]
+    keys = ["juliet", "kilo", "lima", "november", "oskar", "papa", "quebec", "romeo"]
 
     combined = 0
     tcount = 0
@@ -489,7 +490,7 @@ def test_lengths2():
     count = 0
     for _ in range(3):
         w = ix.writer()
-        for ls in permutations("alfa bravo charlie".split()):
+        for ls in permutations(["alfa", "bravo", "charlie"]):
             if "bravo" in ls and "charlie" in ls:
                 count += 1
             w.add_document(text=" ".join(ls))
@@ -507,7 +508,7 @@ def test_lengths2():
 def test_stability():
     schema = fields.Schema(text=fields.TEXT)
     ix = RamStorage().create_index(schema)
-    domain = "alfa bravo charlie delta".split()
+    domain = ["alfa", "bravo", "charlie", "delta"]
     w = ix.writer()
     for ls in permutations(domain, 3):
         w.add_document(text=" ".join(ls))
@@ -515,7 +516,7 @@ def test_stability():
 
     with ix.searcher() as s:
         q = query.Term("text", "bravo")
-        last = []
+        last: list[Any] = []
         for i in range(s.doc_frequency("text", "bravo")):
             # Only un-optimized results are stable
             r = s.search(q, limit=i + 1, optimize=False)
@@ -643,7 +644,7 @@ def test_phrase_keywords():
         w.add_document(text="echo foxtrot alfa bravo")
 
     with ix.searcher() as s:
-        q = query.Phrase("text", "alfa bravo".split())
+        q = query.Phrase("text", ["alfa", "bravo"])
         r = s.search(q)
         assert len(r) == 2
         kts = " ".join(t for t, score in r.key_terms("text"))
@@ -672,7 +673,7 @@ def test_filter_by_result():
     schema = fields.Schema(title=fields.TEXT(stored=True), content=fields.TEXT(stored=True))
 
     with TempIndex(schema, "filter") as ix:
-        words = "foo bar baz qux barney".split()
+        words = ["foo", "bar", "baz", "qux", "barney"]
         with ix.writer() as w:
             for x in range(100):
                 t = "even" if x % 2 == 0 else "odd"

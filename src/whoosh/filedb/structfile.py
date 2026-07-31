@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2009 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

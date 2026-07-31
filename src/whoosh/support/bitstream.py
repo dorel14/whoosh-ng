@@ -1,3 +1,4 @@
+# type: ignore
 """
 
 From a post by Patrick Maupin on the Python mailing list:

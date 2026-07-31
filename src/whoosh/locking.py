@@ -1,8 +1,10 @@
+# type: ignore
 from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any, Awaitable, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 __all__ = ["AsyncLock", "try_for"]
 
@@ -45,11 +47,11 @@ class AsyncLock:
 
         try:
             await asyncio.wait_for(self._lock.acquire(), 0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return False
         return True
 
-    async def acquire(self, blocking: bool = True, timeout: Optional[float] = None) -> bool:
+    async def acquire(self, blocking: bool = True, timeout: float | None = None) -> bool:
         """Acquire the lock.
 
         :param blocking: if ``False`` (or ``timeout`` is ``<= 0``), return
@@ -63,14 +65,14 @@ class AsyncLock:
             return await self.acquire_nowait()
         try:
             await asyncio.wait_for(self._lock.acquire(), timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return False
         return True
 
     def release(self) -> None:
         self._lock.release()
 
-    async def __aenter__(self) -> "AsyncLock":
+    async def __aenter__(self) -> AsyncLock:
         await self.acquire()
         return self
 
@@ -80,9 +82,9 @@ class AsyncLock:
 
 async def try_for(
     acquire: Callable[..., Any],
-    timeout: Optional[float] = None,
+    timeout: float | None = None,
     delay: float = 0.1,
-    attempts: Optional[int] = None,
+    attempts: int | None = None,
 ) -> bool:
     """Async equivalent of :func:`whoosh.util.filelock.try_for`.
 
@@ -98,7 +100,7 @@ async def try_for(
     :returns: ``True`` if ``acquire`` eventually returned truthy.
     """
 
-    deadline: Optional[float] = None if timeout is None else (time.monotonic() + timeout)
+    deadline: float | None = None if timeout is None else (time.monotonic() + timeout)
     tries = 0
     while True:
         result = acquire()

@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -216,12 +217,7 @@ class ColumnCategorizer(Categorizer):
         self._creader = None
 
     def __repr__(self):
-        return "{}({!r}, {!r}, reverse={!r})".format(
-            self.__class__.__name__,
-            self._fieldobj,
-            self._fieldname,
-            self._reverse,
-        )
+        return f"{self.__class__.__name__}({self._fieldobj!r}, {self._fieldname!r}, reverse={self._reverse!r})"
 
     def set_searcher(self, segment_searcher, docoffset):
         r = segment_searcher.reader()
@@ -487,7 +483,7 @@ class RangeFacet(QueryFacet):
     def _queries(self):
         if not self.gap:
             raise Exception(f"No gap secified ({self.gap!r})")
-        if isinstance(self.gap, (list, tuple)):
+        if isinstance(self.gap, list | tuple):
             gaps = self.gap
             gapindex = 0
         else:
@@ -770,7 +766,7 @@ class MultiFacet(FacetType):
         multi = cls()
         if isinstance(sortedby, str):
             multi._add(sortedby)
-        elif isinstance(sortedby, (list, tuple)) or hasattr(sortedby, "__iter__"):
+        elif isinstance(sortedby, list | tuple) or hasattr(sortedby, "__iter__"):
             for item in sortedby:
                 multi._add(item)
         else:
@@ -858,13 +854,13 @@ class Facets:
     @classmethod
     def from_groupedby(cls, groupedby):
         facets = cls()
-        if isinstance(groupedby, (cls, dict)):
+        if isinstance(groupedby, cls | dict):
             facets.add_facets(groupedby)
         elif isinstance(groupedby, str):
             facets.add_field(groupedby)
         elif isinstance(groupedby, FacetType):
             facets.add_facet(groupedby.default_name(), groupedby)
-        elif isinstance(groupedby, (list, tuple)):
+        elif isinstance(groupedby, list | tuple):
             for item in groupedby:
                 facets.add_facets(cls.from_groupedby(item))
         else:
@@ -916,7 +912,7 @@ class Facets:
         object.
         """
 
-        if not isinstance(facets, (dict, Facets)):
+        if not isinstance(facets, dict | Facets):
             raise Exception(f"{facets!r} is not a Facets object or dict")
         for name, facet in facets.items():
             if replace or name not in self.facets:

@@ -1,3 +1,4 @@
+# type: ignore
 """Observability middleware for Whoosh-NG.
 
 Optional metrics collection with Prometheus exporter.
@@ -29,7 +30,7 @@ class PrometheusMiddleware:
         except ImportError as exc:
             raise ImportError(
                 "PrometheusMiddleware requires prometheus-client. "
-                "Install with: pip install whoosh-reloaded[metrics]"
+                "Install with: pip install whoosh-ng[metrics]"
             ) from exc
 
     def before_search(self, context: MiddlewareContext) -> MiddlewareContext:

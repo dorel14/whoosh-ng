@@ -13,11 +13,26 @@ if len(sys.argv) < 2:
 indexdir = sys.argv[1]
 print("Reading checkpoint index in", indexdir)
 
-words = (
-    "alfa bravo charlie delta echo foxtrot golf hotel india"
-    "juliet kilo lima mike november oskar papa quebec romeo"
-    "sierra tango"
-).split()
+words = [
+    "alfa",
+    "bravo",
+    "charlie",
+    "delta",
+    "echo",
+    "foxtrot",
+    "golf",
+    "hotel",
+    "indiajuliet",
+    "kilo",
+    "lima",
+    "mike",
+    "november",
+    "oskar",
+    "papa",
+    "quebec",
+    "romeosierra",
+    "tango",
+]
 
 deleted = ("0/42", "1/6", "2/80")
 

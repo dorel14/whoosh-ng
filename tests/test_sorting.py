@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from itertools import permutations
 
 from whoosh import columns, fields, query, sorting
@@ -392,35 +392,35 @@ def test_daterange_facet():
     schema = fields.Schema(id=fields.STORED, date=fields.DATETIME)
     ix = RamStorage().create_index(schema)
     w = ix.writer()
-    w.add_document(id=0, date=datetime(2001, 1, 15, tzinfo=timezone.utc))
-    w.add_document(id=1, date=datetime(2001, 1, 10, tzinfo=timezone.utc))
+    w.add_document(id=0, date=datetime(2001, 1, 15, tzinfo=UTC))
+    w.add_document(id=1, date=datetime(2001, 1, 10, tzinfo=UTC))
     w.add_document(id=2)
-    w.add_document(id=3, date=datetime(2001, 1, 3, tzinfo=timezone.utc))
-    w.add_document(id=4, date=datetime(2001, 1, 8, tzinfo=timezone.utc))
-    w.add_document(id=5, date=datetime(2001, 1, 6, tzinfo=timezone.utc))
+    w.add_document(id=3, date=datetime(2001, 1, 3, tzinfo=UTC))
+    w.add_document(id=4, date=datetime(2001, 1, 8, tzinfo=UTC))
+    w.add_document(id=5, date=datetime(2001, 1, 6, tzinfo=UTC))
     w.commit()
 
     with ix.searcher() as s:
         rf = sorting.DateRangeFacet(
             "date",
-            datetime(2001, 1, 1, tzinfo=timezone.utc),
-            datetime(2001, 1, 20, tzinfo=timezone.utc),
+            datetime(2001, 1, 1, tzinfo=UTC),
+            datetime(2001, 1, 20, tzinfo=UTC),
             timedelta(days=5),
         )
         r = s.search(query.Every(), groupedby={"date": rf})
         dt = datetime
         assert r.groups("date") == {
             (
-                dt(2001, 1, 1, 0, 0, tzinfo=timezone.utc),
-                dt(2001, 1, 6, 0, 0, tzinfo=timezone.utc),
+                dt(2001, 1, 1, 0, 0, tzinfo=UTC),
+                dt(2001, 1, 6, 0, 0, tzinfo=UTC),
             ): [3],
             (
-                dt(2001, 1, 6, 0, 0, tzinfo=timezone.utc),
-                dt(2001, 1, 11, 0, 0, tzinfo=timezone.utc),
+                dt(2001, 1, 6, 0, 0, tzinfo=UTC),
+                dt(2001, 1, 11, 0, 0, tzinfo=UTC),
             ): [1, 4, 5],
             (
-                dt(2001, 1, 11, 0, 0, tzinfo=timezone.utc),
-                dt(2001, 1, 16, 0, 0, tzinfo=timezone.utc),
+                dt(2001, 1, 11, 0, 0, tzinfo=UTC),
+                dt(2001, 1, 16, 0, 0, tzinfo=UTC),
             ): [0],
             None: [2],
         }
@@ -433,10 +433,10 @@ def test_relative_daterange():
 
     schema = fields.Schema(id=fields.STORED, date=fields.DATETIME)
     ix = RamStorage().create_index(schema)
-    basedate = datetime(2001, 1, 1, tzinfo=timezone.utc)
+    basedate = datetime(2001, 1, 1, tzinfo=UTC)
     count = 0
     with ix.writer() as w:
-        while basedate < datetime(2001, 12, 1, tzinfo=timezone.utc):
+        while basedate < datetime(2001, 12, 1, tzinfo=UTC):
             w.add_document(id=count, date=basedate)
             basedate += timedelta(days=14, hours=16)
             count += 1
@@ -445,55 +445,55 @@ def test_relative_daterange():
         gap = relativedelta(months=1)
         rf = sorting.DateRangeFacet(
             "date",
-            dt(2001, 1, 1, tzinfo=timezone.utc),
-            dt(2001, 12, 31, tzinfo=timezone.utc),
+            dt(2001, 1, 1, tzinfo=UTC),
+            dt(2001, 12, 31, tzinfo=UTC),
             gap,
         )
         r = s.search(query.Every(), groupedby={"date": rf})
         assert r.groups("date") == {
             (
-                dt(2001, 1, 1, tzinfo=timezone.utc),
-                dt(2001, 2, 1, tzinfo=timezone.utc),
+                dt(2001, 1, 1, tzinfo=UTC),
+                dt(2001, 2, 1, tzinfo=UTC),
             ): [0, 1, 2],
             (
-                dt(2001, 2, 1, tzinfo=timezone.utc),
-                dt(2001, 3, 1, tzinfo=timezone.utc),
+                dt(2001, 2, 1, tzinfo=UTC),
+                dt(2001, 3, 1, tzinfo=UTC),
             ): [3, 4],
             (
-                dt(2001, 3, 1, tzinfo=timezone.utc),
-                dt(2001, 4, 1, tzinfo=timezone.utc),
+                dt(2001, 3, 1, tzinfo=UTC),
+                dt(2001, 4, 1, tzinfo=UTC),
             ): [5, 6],
             (
-                dt(2001, 4, 1, tzinfo=timezone.utc),
-                dt(2001, 5, 1, tzinfo=timezone.utc),
+                dt(2001, 4, 1, tzinfo=UTC),
+                dt(2001, 5, 1, tzinfo=UTC),
             ): [7, 8],
             (
-                dt(2001, 5, 1, tzinfo=timezone.utc),
-                dt(2001, 6, 1, tzinfo=timezone.utc),
+                dt(2001, 5, 1, tzinfo=UTC),
+                dt(2001, 6, 1, tzinfo=UTC),
             ): [9, 10],
             (
-                dt(2001, 6, 1, tzinfo=timezone.utc),
-                dt(2001, 7, 1, tzinfo=timezone.utc),
+                dt(2001, 6, 1, tzinfo=UTC),
+                dt(2001, 7, 1, tzinfo=UTC),
             ): [11, 12],
             (
-                dt(2001, 7, 1, tzinfo=timezone.utc),
-                dt(2001, 8, 1, tzinfo=timezone.utc),
+                dt(2001, 7, 1, tzinfo=UTC),
+                dt(2001, 8, 1, tzinfo=UTC),
             ): [13, 14],
             (
-                dt(2001, 8, 1, tzinfo=timezone.utc),
-                dt(2001, 9, 1, tzinfo=timezone.utc),
+                dt(2001, 8, 1, tzinfo=UTC),
+                dt(2001, 9, 1, tzinfo=UTC),
             ): [15, 16],
             (
-                dt(2001, 9, 1, tzinfo=timezone.utc),
-                dt(2001, 10, 1, tzinfo=timezone.utc),
+                dt(2001, 9, 1, tzinfo=UTC),
+                dt(2001, 10, 1, tzinfo=UTC),
             ): [17, 18],
             (
-                dt(2001, 10, 1, tzinfo=timezone.utc),
-                dt(2001, 11, 1, tzinfo=timezone.utc),
+                dt(2001, 10, 1, tzinfo=UTC),
+                dt(2001, 11, 1, tzinfo=UTC),
             ): [19, 20],
             (
-                dt(2001, 11, 1, tzinfo=timezone.utc),
-                dt(2001, 12, 1, tzinfo=timezone.utc),
+                dt(2001, 11, 1, tzinfo=UTC),
+                dt(2001, 12, 1, tzinfo=UTC),
             ): [21, 22],
         }
 
@@ -616,7 +616,7 @@ def test_multifacet():
 
 def test_sort_filter():
     schema = fields.Schema(group=fields.ID(stored=True), key=fields.ID(stored=True))
-    groups = "alfa bravo charlie".split()
+    groups = ["alfa", "bravo", "charlie"]
     keys = "abcdefghijklmnopqrstuvwxyz"
     source = []
     for i in range(100):
@@ -962,7 +962,7 @@ def test_sort_text_field():
 def test_filtered_grouped():
     schema = fields.Schema(tag=fields.ID, text=fields.TEXT(stored=True))
     ix = RamStorage().create_index(schema)
-    domain = "alfa bravo charlie delta echo foxtrot".split()
+    domain = ["alfa", "bravo", "charlie", "delta", "echo", "foxtrot"]
 
     with ix.writer() as w:
         for i, ls in enumerate(permutations(domain, 3)):
@@ -1072,9 +1072,31 @@ def test_compound_sort():
     schema = fields.Schema(a=fspec, b=fspec, c=fspec)
     ix = RamStorage().create_index(schema)
 
-    alist = "alfa bravo alfa bravo alfa bravo alfa bravo alfa bravo".split()
-    blist = "alfa bravo charlie alfa bravo charlie alfa bravo charlie alfa".split()
-    clist = "alfa bravo charlie delta echo foxtrot golf hotel india juliet".split()
+    alist = ["alfa", "bravo", "alfa", "bravo", "alfa", "bravo", "alfa", "bravo", "alfa", "bravo"]
+    blist = [
+        "alfa",
+        "bravo",
+        "charlie",
+        "alfa",
+        "bravo",
+        "charlie",
+        "alfa",
+        "bravo",
+        "charlie",
+        "alfa",
+    ]
+    clist = [
+        "alfa",
+        "bravo",
+        "charlie",
+        "delta",
+        "echo",
+        "foxtrot",
+        "golf",
+        "hotel",
+        "india",
+        "juliet",
+    ]
     assert all(len(ls) == 10 for ls in (alist, blist, clist))
 
     with ix.writer() as w:

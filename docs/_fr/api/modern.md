@@ -6,110 +6,87 @@ lang: fr
 
 # API Moderne
 
-Features introduites dans Whoosh-NG 4.0.
+Sources de données, découverte de schéma, facettes, validation, middleware et SearchView.
 
-## VectorField
+## DataSource Protocol
 
 ```python
-from whoosh.fields import VectorField
-
-champ = VectorField(dimensions=384, metric="cosine", stored=False)
+from whoosh_modern.data_sources import DataSource, SQLSource, RESTSource
 ```
 
-### Attributs
+### SQLSource
 
-| Attribut | Type | Description |
-|----------|------|-------------|
-| `dimensions` | int | Dimensions du vecteur |
-| `metric` | str | Métrique de similarité (`"cosine"`, `"euclidean"`, `"dot"`) |
-| `stored` | bool | Stocker le vecteur |
-| `provider` | str | Provider à utiliser |
-
-**Exemple:**
 ```python
-schema = Schema(
-    titre=TEXT(stored=True),
-    embedding=VectorField(dimensions=384, metric="cosine")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
 )
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-## VectorSearch
+### RESTSource
 
 ```python
-class whoosh.vector.VectorSearch(searcher)
-```
-
-Moteur de recherche vectorielle.
-
-### Méthodes
-
-| Méthode | Description |
-|---------|-------------|
-| `vs.search(fieldname, vector, limit, **kwargs)` | Recherche par similarité vectorielle |
-| `vs.index_vectors(fieldname, vectors)` | Indexer des vecteurs |
-| `vs.save()` | Sauvegarde l'index vectoriel |
-| `vs.load()` | Charge l'index vectoriel |
-
-**Exemple:**
-```python
-with ix.searcher() as s:
-    vs = s.vector_search("embedding", query_vector, limit=10)
-    for hit in vs:
-        print(hit["titre"], hit.score)
-```
-
-## AutocompleteField
-
-```python
-from whoosh_modern.autocomplete import AutocompleteField
-
-champ = AutocompleteField(
-    prefix_length=3,
-    max_prefix=50,
-    stored=False
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
 )
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-## FastAPI Integration
+## SchemaDiscovery
 
 ```python
-from whoosh_fastapi import WhooshFastAPI
+from whoosh_modern.schema_discovery import SchemaDiscovery
 
-app = FastAPI()
-api = WhooshFastAPI(ix)
-
-api.register_search_endpoint("/search", "content")
-api.register_index_endpoint("/documents", schema)
+schema = SchemaDiscovery.from_result_set(columns)
+schema = SchemaDiscovery.from_sample(docs)
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
 ```
 
-## SchemaBuilder
-
-API fluent pour construire des schémas:
+## FacetManager
 
 ```python
-from whoosh.fields import SchemaBuilder, TEXT, ID, NUMERIC
+from whoosh_modern.facets import FacetManager
 
-schema = (
-    SchemaBuilder()
-    .field("titre", TEXT(stored=True))
-    .field("chemin", ID(stored=True, unique=True))
-    .field("contenu", TEXT)
-    .field("note", NUMERIC(float, stored=True))
-    .build()
+manager = FacetManager(schema)
+facets = manager.get_facets()
+manager.set_manual_override("price", {"type": "range"})
+```
+
+## ValidationFramework
+
+```python
+from whoosh_modern.validation import ValidationFramework, ValidationResult
+
+validator = ValidationFramework()
+results = validator.validate(source)
+```
+
+## Middleware Pipeline
+
+```python
+from whoosh_modern.middleware import MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
+
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
 )
+result = pipeline.execute(operation)
 ```
 
-## Monitoring
+## SearchView
 
 ```python
-from whoosh.middleware import MetricsMiddleware, MiddlewareChain
-from whoosh.middleware.integration import apply_middleware_to_searcher
+from whoosh_modern.views import SearchView
 
-chain = MiddlewareChain([MetricsMiddleware()])
-searcher = apply_middleware_to_searcher(ix.searcher(), chain.middlewares)
-
-metrics = chain.get_metrics()
-print(metrics)
-# {"documents_indexed": 10, "searches_executed": 5}
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
+count = view.reindex()
+results = view.validate()
 ```
-

@@ -70,11 +70,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          
+
           # Mise à jour du README et des Markdown
           find docs/ -name "*.md" -exec sed -i -E \
             "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" {} \;
-          
+
           sed -i -E "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" README.md
 
           # Mise à jour de docs/_config.yml (clé 'version:')
@@ -85,7 +85,7 @@ jobs:
           # Configurer git et commiter les changements
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
+
           # Lance la release VCS (commit + tag)
           python -m semantic_release version --vcs-release
 

@@ -743,7 +743,7 @@ def _is_multiword(text):
     # A phrase-like term is anything the query parser represents with a
     # space (it is stored that way by Phrase/Sequence queries). A plain
     # single term never contains a space. ``text`` is bytes (e.g. b"a b").
-    text = text.decode("utf-8", "replace") if isinstance(text, (bytes, bytearray)) else text
+    text = text.decode("utf-8", "replace") if isinstance(text, bytes | bytearray) else text
     return isinstance(text, str) and " " in text
 
 

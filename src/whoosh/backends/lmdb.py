@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from whoosh.backends.abc import Backend
-from whoosh.index import EmptyIndexError, FileIndex
 from whoosh.filedb.filestore import FileStorage
+from whoosh.index import EmptyIndexError, FileIndex
 
 if TYPE_CHECKING:
     from whoosh.fields import Schema

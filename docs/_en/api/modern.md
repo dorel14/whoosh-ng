@@ -5,164 +5,99 @@ nav_order: 190
 
 # Modern API
 
-Vector search, autocomplete, and other advanced features.
+Data sources, schema discovery, facets, validation, middleware, and search view.
 
-## Vector API
-
-### VectorField
+## DataSource Protocol
 
 ```python
-class whoosh.fields.VectorField(
-    dimensions: int,
-    metric: str = "cosine",
-    provider: str = "numpy",
-    stored: bool = False
+from whoosh_modern.data_sources import DataSource, SQLSource, RESTSource
+```
+
+### SQLSource
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
 )
+schema = source.discover_schema()
+docs = list(source.iter_documents())
+count = source.document_count()
+meta = source.metadata()
 ```
 
-Embedding vector field.
-
----
-
-### VectorProvider
+### RESTSource
 
 ```python
-class whoosh.vector.base.VectorProvider
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
+    headers={"Authorization": "Bearer token"},
+)
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-Base class for vector providers.
-
-#### Methods
-
-##### `add_vector()`
+## SchemaDiscovery
 
 ```python
-provider.add_vector(doc_id, embedding: list[float])
+from whoosh_modern.schema_discovery import SchemaDiscovery
+
+# From column metadata
+columns = [("id", "INTEGER"), ("title", "TEXT")]
+schema = SchemaDiscovery.from_result_set(columns)
+
+# From sample documents
+schema = SchemaDiscovery.from_sample(docs)
+
+# Detect ID field
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
 ```
 
-Index a vector.
-
-##### `search()`
+## FacetManager
 
 ```python
-results = provider.search(query_embedding, limit=10)
+from whoosh_modern.facets import FacetManager, TermsFacet, RangeFacet
+
+manager = FacetManager(schema)
+facets = manager.get_facets()
+config = manager.get_facet_config("category")
+stats = manager.get_facet_stats()
+manager.set_manual_override("price", {"type": "range", "buckets": [...]})
 ```
 
-Search vectors.
-
-### Built-in Providers
-
-#### NumpyProvider
+## ValidationFramework
 
 ```python
-from whoosh.vector.numpy_provider import NumpyProvider
+from whoosh_modern.validation import ValidationFramework, ValidationResult
 
-provider = NumpyProvider()
+validator = ValidationFramework()
+results = validator.validate(source)
 ```
 
-Pure NumPy cosine similarity. Best for small indexes.
-
----
-
-#### HNSWProvider
+## Middleware Pipeline
 
 ```python
-from whoosh.vector.hnsw_provider import HNSWProvider
+from whoosh_modern.middleware import Middleware, MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
 
-provider = HNSWProvider(dimensions=384, metric="cosine")
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
+)
+result = pipeline.execute(operation)
 ```
 
-Hierarchical Navigable Small World. Fast ANN for large indexes.
-
----
-
-#### FaissProvider
+## SearchView
 
 ```python
-from whoosh.vector.faiss_provider import FaissProvider
+from whoosh_modern.views import SearchView
+
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
+count = view.reindex()
+count = view.refresh()
+results = view.validate()
 ```
-
-Facebook AI Similarity Search. Very large indexes.
-
----
-
-#### QdrantProvider
-
-```python
-from whoosh.vector.qdrant_provider import QdrantProvider
-```
-
-Distributed vector DB integration.
-
----
-
-## Autocomplete API
-
-### AutocompleteProvider
-
-```python
-class whoosh_modern.autocomplete.base.AutocompleteProvider
-```
-
-Base class for autocomplete providers.
-
-#### Methods
-
-##### `suggest()`
-
-```python
-suggestions = provider.suggest(
-    prefix: str,
-    limit: int = 5,
-    fuzzy: int = 0
-) -> list[str]
-```
-
-Get autocomplete suggestions.
-
----
-
-### Built-in Providers
-
-#### EdgeNgramProvider
-
-```python
-from whoosh_modern.autocomplete.edge_ngram import EdgeNgramProvider
-
-provider = EdgeNgramProvider(searcher, fieldname)
-```
-
-Prefix completion using edge n-grams.
-
----
-
-#### NgramProvider
-
-```python
-from whoosh_modern.autocomplete.ngram import NgramProvider
-
-provider = NgramProvider(searcher, fieldname)
-```
-
-Infix completion using n-grams.
-
----
-
-## Plugins
-
-### VectorPlugin
-
-```python
-from whoosh_modern.vector.plugin import VectorPlugin
-```
-
-Registers vector providers and adds vector_search to searcher.
-
-### AutocompletePlugin
-
-```python
-from whoosh_modern.autocomplete.plugin import AutocompletePlugin
-```
-
-Registers autocomplete providers.
-

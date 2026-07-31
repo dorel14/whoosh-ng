@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -124,6 +125,9 @@ class BiWordFilter(Filter):
         prev_startchar = None
         prev_pos = None
         atleastone = False
+        token = None
+        sc = None
+        ps = None
 
         for token in tokens:
             # Save the original text of this token
@@ -161,7 +165,7 @@ class BiWordFilter(Filter):
 
         # If no bi-words were emitted, that is, the token stream only had
         # a single token, then emit that single token.
-        if not atleastone:
+        if not atleastone and token is not None:
             yield token
 
 
@@ -405,6 +409,7 @@ class IntraWordFilter(Filter):
             newec = buf[-1][3]  # end char of last item in buffer
             parts.insert(insertat, (newtext, newpos, newsc, newec))
 
+        pos = 0
         for item in list(parts):
             # item = (text, pos, startchar, endchar)
             text = item[0]
@@ -481,6 +486,7 @@ class IntraWordFilter(Filter):
 
                 # Yield tokens for the parts
                 chars = t.chars
+                base = 0
                 if chars:
                     base = t.startchar
                 for text, pos, startchar, endchar in parts:

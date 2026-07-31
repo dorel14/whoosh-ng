@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import math
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
+
+from whoosh.hooks import hookimpl
+from whoosh.plugins.manager import Plugin
 
 
 class AutocompleteHit:
@@ -10,7 +13,7 @@ class AutocompleteHit:
         self.score = score
 
 
-class AutocompleteProvider:
+class AutocompleteProvider(Plugin):
     def add(self, phrases: Iterable[str]) -> None:
         raise NotImplementedError
 

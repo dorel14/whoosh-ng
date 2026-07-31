@@ -25,6 +25,11 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
+# pyright: reportAttributeAccessIssue=false
+
+from collections.abc import Callable, Iterator
+from typing import Any, cast
+
 from whoosh.analysis.acore import Composable, CompositionError
 from whoosh.analysis.filters import STOP_WORDS, LowercaseFilter, StopFilter
 from whoosh.analysis.intraword import IntraWordFilter
@@ -38,6 +43,7 @@ from whoosh.analysis.tokenizers import (
     default_pattern,
 )
 from whoosh.lang.porter import stem
+from whoosh.util.text import rcompile
 
 # Analyzers
 
@@ -61,7 +67,7 @@ class Analyzer(Composable):
 
 class CompositeAnalyzer(Analyzer):
     def __init__(self, *composables):
-        self.items = []
+        self.items: list[Composable] = []
 
         for comp in composables:
             if isinstance(comp, CompositeAnalyzer):
@@ -87,11 +93,11 @@ class CompositeAnalyzer(Analyzer):
     def __call__(self, value, no_morph=False, **kwargs):
         items = self.items
         # Start with tokenizer
-        gen = items[0](value, **kwargs)
+        gen = cast(Callable[..., Iterator[Any]], items[0])(value, **kwargs)
         # Run filters
         for item in items[1:]:
             if not (no_morph and hasattr(item, "is_morph") and item.is_morph):
-                gen = item(gen)
+                gen = cast(Callable[..., Iterator[Any]], item)(gen)
         return gen
 
     def __getitem__(self, item):
@@ -150,7 +156,7 @@ def KeywordAnalyzer(lowercase=False, commas=False):
 def RegexAnalyzer(expression=r"\w+(\.?\w+)*", gaps=False):
     """Deprecated, just use a RegexTokenizer directly."""
 
-    return RegexTokenizer(expression=expression, gaps=gaps)
+    return RegexTokenizer(expression=rcompile(expression), gaps=gaps)
 
 
 def SimpleAnalyzer(expression=default_pattern, gaps=False):
@@ -258,7 +264,7 @@ def FancyAnalyzer(
     """
 
     return (
-        RegexTokenizer(expression=expression, gaps=gaps)
+        RegexTokenizer(expression=rcompile(expression), gaps=gaps)
         | IntraWordFilter(
             splitwords=splitwords,
             splitnums=splitnums,

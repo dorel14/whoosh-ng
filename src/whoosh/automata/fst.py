@@ -163,20 +163,20 @@ class IntValues(Values):
         return min(v1, v2)
 
     @staticmethod
-    def add(base, v):
-        if base is None:
+    def add(prefix, v):
+        if prefix is None:
             return v
         if v is None:
-            return base
-        return base + v
+            return prefix
+        return prefix + v
 
     @staticmethod
-    def subtract(v, base):
+    def subtract(v, prefix):
         if v is None:
             return None
-        if base is None:
+        if prefix is None:
             return v
-        return v - base
+        return v - prefix
 
     @staticmethod
     def write(dbfile, v):
@@ -187,7 +187,7 @@ class IntValues(Values):
         return dbfile.read_uint()
 
     @staticmethod
-    def skip(dbfile):
+    def skip(dbfile):  # pyright: ignore[reportIncompatibleMethodOverride]
         dbfile.seek(_INT_SIZE, 1)
 
     @staticmethod
@@ -200,7 +200,7 @@ class SequenceValues(Values):
 
     @staticmethod
     def is_valid(v):
-        return isinstance(v, (list, tuple))
+        return isinstance(v, list | tuple)
 
     @staticmethod
     def common(v1, v2):
@@ -268,7 +268,7 @@ class BytesValues(SequenceValues):
         return dbfile.read(length)
 
     @staticmethod
-    def skip(dbfile):
+    def skip(dbfile):  # pyright: ignore[reportIncompatibleMethodOverride]
         length = dbfile.read_int()
         dbfile.seek(length, 1)
 
@@ -284,7 +284,7 @@ class ArrayValues(SequenceValues):
         self.typecode = typecode
         self.itemsize = array(self.typecode).itemsize
 
-    def is_valid(self, v):
+    def is_valid(self, v):  # pyright: ignore[reportIncompatibleMethodOverride]
         return isinstance(v, array) and v.typecode == self.typecode
 
     @staticmethod
@@ -293,12 +293,12 @@ class ArrayValues(SequenceValues):
         dbfile.write_int(len(v))
         dbfile.write_array(v)
 
-    def read(self, dbfile):
+    def read(self, dbfile):  # pyright: ignore[reportIncompatibleMethodOverride]
         typecode = u(dbfile.read(1))
         length = dbfile.read_int()
         return dbfile.read_array(typecode, length)
 
-    def skip(self, dbfile):
+    def skip(self, dbfile):  # pyright: ignore[reportIncompatibleMethodOverride]
         length = dbfile.read_int()
         dbfile.seek(length * self.itemsize, 1)
 
@@ -315,7 +315,7 @@ class IntListValues(SequenceValues):
 
     @staticmethod
     def is_valid(v):
-        if isinstance(v, (list, tuple)):
+        if isinstance(v, list | tuple):
             if len(v) < 2:
                 return True
             for i in range(1, len(v)):
@@ -359,6 +359,8 @@ class Node:
     edges.
     """
 
+    _edges: dict[bytes, "Node"] | None
+
     def __init__(self, owner, address, accept=False):
         self.owner = owner
         self.address = address
@@ -368,11 +370,13 @@ class Node:
     def __iter__(self):
         if self._edges is None:
             self._load()
+        assert self._edges is not None
         return iter(self._edges)
 
     def __contains__(self, key):
         if self._edges is None:
             self._load()
+        assert self._edges is not None
         return key in self._edges
 
     def _load(self):
@@ -389,16 +393,19 @@ class Node:
     def keys(self):
         if self._edges is None:
             self._load()
+        assert self._edges is not None
         return self._edges.keys()
 
     def all_edges(self):
         if self._edges is None:
             self._load()
+        assert self._edges is not None
         return self._edges
 
     def edge(self, key):
         if self._edges is None:
             self._load()
+        assert self._edges is not None
         return self._edges[key]
 
     def flatten(self, sofar=emptybytes):
@@ -440,7 +447,7 @@ class ComboNode(Node):
 class UnionNode(ComboNode):
     """Makes two graphs appear to be the union of the two graphs."""
 
-    def edge(self, key):
+    def edge(self, key):  # pyright: ignore[reportIncompatibleMethodOverride]  # returns UnionNode instead of Node by design
         a = self.a
         b = self.b
         if key in a and key in b:
@@ -454,7 +461,7 @@ class UnionNode(ComboNode):
 class IntersectionNode(ComboNode):
     """Makes two graphs appear to be the intersection of the two graphs."""
 
-    def edge(self, key):
+    def edge(self, key):  # pyright: ignore[reportIncompatibleMethodOverride]  # returns IntersectionNode instead of Node by design
         a = self.a
         b = self.b
         if key in a and key in b:
@@ -579,6 +586,10 @@ class BaseCursor:
             if thislabel > label or _at_last_arc():
                 return False
             _next_arc()
+
+    def copy(self):
+        """Return a copy of this cursor."""
+        raise NotImplementedError
 
     def skip_to(self, key):
         """Moves the cursor to the path represented by the given key bytes."""
@@ -744,7 +755,7 @@ class Cursor(BaseCursor):
         return self
 
     # Override: more efficient implementation manipulating the stack
-    def skip_to(self, key):
+    def skip_to(self, key):  # pyright: ignore[reportIncompatibleMethodOverride]  # return type mismatch: base returns bool, override returns None/Cursor
         key = to_labels(key)
         stack = self.stack
         if not stack:
@@ -754,6 +765,8 @@ class Cursor(BaseCursor):
         _next_arc = self.next_arc
 
         i = self._pop_to_prefix(key)
+        if i is None:
+            raise InactiveCursor
         while stack and i < len(key):
             curlabel = stack[-1].label
             keylabel = key[i]
@@ -1062,7 +1075,7 @@ class GraphWriter:
         nodes = self.nodes
         if len(key) < 1:
             raise KeyError(f"Can't store a null key {key!r}")
-        if lastkey and lastkey > key:
+        if lastkey and lastkey > key:  # pyright: ignore[reportOperatorIssue]  # bytes/tuple comparison by design
             raise KeyError(f"Keys out of order {lastkey!r}..{key!r}")
 
         # Find the common prefix shared by this key and the previous one
@@ -1106,7 +1119,7 @@ class GraphWriter:
             if key == lastkey:
                 # If this key is a duplicate, merge its value with the value of
                 # the previous (same) key
-                lastnode.value = self.merge(lastnode.value, value)
+                lastnode.value = self.merge(lastnode.value, value)  # pyright: ignore[reportOptionalCall]  # merge can return None for sentinel values
             else:
                 nodes[prefixlen].set_last_value(key[prefixlen], value)
         elif value:
@@ -1207,9 +1220,9 @@ class GraphWriter:
             if target is not None:
                 buf.write(pack_uint(target))
             if arc.value is not None:
-                vtype.write(buf, arc.value)
+                vtype.write(buf, arc.value)  # pyright: ignore[reportOptionalMemberAccess]  # vtype is set when value type is configured
             if arc.acceptval is not None:
-                vtype.write(buf, arc.acceptval)
+                vtype.write(buf, arc.acceptval)  # pyright: ignore[reportOptionalMemberAccess]  # vtype is set when value type is configured
 
             here = buf.tell()
             thissize = here - arcstart
@@ -1234,6 +1247,8 @@ class GraphWriter:
 
 
 class BaseGraphReader:
+    _root: int | None
+
     def cursor(self, rootname=None):
         return Cursor(self, self.root(rootname))
 
@@ -1290,6 +1305,8 @@ class BaseGraphReader:
 
 
 class GraphReader(BaseGraphReader):
+    _root: int | None
+
     def __init__(self, dbfile, rootname=None, vtype=None, filebase=0):
         self.dbfile = dbfile
         self.vtype = vtype
@@ -1406,11 +1423,11 @@ class GraphReader(BaseGraphReader):
         else:
             arc.target = dbfile.read_uint()
         if flags & ARC_HAS_VAL:
-            arc.value = self.vtype.read(dbfile)
+            arc.value = self.vtype.read(dbfile)  # pyright: ignore[reportOptionalMemberAccess]  # vtype is set when ARC_HAS_VAL flag is present
         else:
             arc.value = None
         if accept and flags & ARC_HAS_ACCEPT_VAL:
-            arc.acceptval = self.vtype.read(dbfile)
+            arc.acceptval = self.vtype.read(dbfile)  # pyright: ignore[reportOptionalMemberAccess]  # vtype is set when ARC_HAS_ACCEPT_VAL flag is present
         arc.endpos = dbfile.tell()
         return arc
 

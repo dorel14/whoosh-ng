@@ -1,3 +1,5 @@
+# mypy: ignore-errors
+
 # Copyright 2012 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

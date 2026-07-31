@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,13 +33,14 @@ from heapq import heapify, heappop, heapreplace, nlargest
 from math import log
 
 from cached_property import cached_property
+
 from whoosh import columns
 from whoosh.filedb.filestore import OverlayStorage
 from whoosh.matching import MultiMatcher
-from whoosh.support.levenshtein import distance
-from whoosh.system import emptybytes
 from whoosh.reading._base import ReaderClosed, TermNotFound
 from whoosh.reading.term import MultiCursor, combine_terminfos
+from whoosh.support.levenshtein import distance
+from whoosh.system import emptybytes
 
 
 class IndexReader:

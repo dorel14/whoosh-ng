@@ -65,23 +65,23 @@ def test_hash_contents():
         ("whiskey", "xray"),
     ]
     # Convert to bytes
-    samp = {(b(k), b(v)) for k, v in samp}
+    samp_bytes: set[tuple[bytes, bytes]] = {(b(k), b(v)) for k, v in samp}
 
     with TempStorage("hashcontents") as st:
         hw = HashWriter(st.create_file("test.hsh"))
-        hw.add_all(samp)
+        hw.add_all(samp_bytes)
         hw.close()
 
         hr = HashReader.open(st, "test.hsh")
 
-        probes = list(samp)
+        probes = list(samp_bytes)
         random.shuffle(probes)
         for key, value in probes:
             assert hr[key] == value
 
-        assert set(hr.keys()) == {k for k, v in samp}
-        assert set(hr.values()) == {v for k, v in samp}
-        assert set(hr.items()) == samp
+        assert set(hr.keys()) == {k for k, v in samp_bytes}
+        assert set(hr.values()) == {v for k, v in samp_bytes}
+        assert set(hr.items()) == samp_bytes
 
         hr.close()
 

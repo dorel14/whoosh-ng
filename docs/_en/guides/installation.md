@@ -52,4 +52,3 @@ uv run mypy src/whoosh
 
 - [Quick Start]({{ '/en/quickstart/' | relative_url }})
 - [Core Concepts]({{ '/en/guides/core-concepts/' | relative_url }})
-

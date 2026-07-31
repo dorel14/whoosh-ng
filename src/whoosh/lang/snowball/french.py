@@ -257,11 +257,7 @@ class FrenchStemmer(_StandardStemmer):
                     suffix in ("issement", "issements")
                     and suffix in r1
                     and word[-len(suffix) - 1] not in self.__vowels
-                ):
-                    word = word[: -len(suffix)]
-                    step1_success = True
-
-                elif (
+                ) or (
                     suffix
                     in (
                         "ance",
@@ -433,10 +429,7 @@ class FrenchStemmer(_StandardStemmer):
                         elif suffix in ("ier", "i\xe8re", "Ier", "I\xe8re"):
                             word = "".join((word[: -len(suffix)], "i"))
 
-                        elif suffix == "e":
-                            word = word[:-1]
-
-                        elif suffix == "\xeb" and word[-3:-1] == "gu":
+                        elif suffix == "e" or suffix == "\xeb" and word[-3:-1] == "gu":
                             word = word[:-1]
                         break
 

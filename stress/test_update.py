@@ -1,6 +1,5 @@
 import random
 
-
 from whoosh import fields, query
 from whoosh.util.testing import TempIndex
 

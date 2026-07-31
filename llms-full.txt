@@ -6,7 +6,7 @@
 
 # Whoosh-NG Documentation
 
-> **Version**: Latest | Last updated: 2026-07-12
+> **Version**: Latest | Last updated: 2026-07-26
 
 Welcome to the official documentation for **Whoosh-NG**, a pure-Python full-text indexing and search library modernized for 2025+.
 
@@ -14,8 +14,8 @@ Welcome to the official documentation for **Whoosh-NG**, a pure-Python full-text
 
 This documentation is available in two languages:
 
-- **[English Documentation](/en/quickstart/)** — Complete technical documentation in English (source language)
-- **[Documentation Française](/fr/quickstart/)** — Traduction française complète
+- **[English Documentation]({{ '/en/quickstart/' | relative_url }})** — Complete technical documentation in English (source language)
+- **[Documentation Française]({{ '/fr/quickstart/' | relative_url }})** — Traduction française complète
 
 Both versions are kept synchronized, with code examples remaining in English for consistency.
 
@@ -23,45 +23,45 @@ Both versions are kept synchronized, with code examples remaining in English for
 
 ### Getting Started
 
-- **[Installation](/en/guides/installation/)** — Setup instructions and configuration
-- **[Quick Start](/en/quickstart/)** — 5-minute tutorial to create your first index
-- **[Core Concepts](/en/guides/core-concepts/)** — Understanding schemas, fields, and search
+- **[Installation]({{ '/en/guides/installation/' | relative_url }})** — Setup instructions and configuration
+- **[Quick Start]({{ '/en/quickstart/' | relative_url }})** — 5-minute tutorial to create your first index
+- **[Core Concepts]({{ '/en/guides/core-concepts/' | relative_url }})** — Understanding schemas, fields, and search
 
 ### User Guides
 
-- **[Indexing](/en/guides/indexing/)** — Adding, updating, and deleting documents
-- **[Searching](/en/guides/searching/)** — Query parsing, highlighting, and facets
-- **[Schema Design](/en/guides/schema/)** — Field types, storage, and indexing options
-- **[Query Language](/en/guides/query/)** — Lucene-like query syntax
-- **[Middleware](/en/guides/middleware/)** — Pipeline hooks and custom middleware
-- **[Backends](/en/guides/backends/)** — File, SQLite, and memory storage
-- **[Plugins](/en/guides/plugins/)** — Extending Whoosh-NG with plugins
-- **[Autocomplete](/en/guides/autocomplete/)** — Autocomplete providers
-- **[Vector Search](/en/guides/vector/)** — NumPy, HNSW, and Faiss integration
-- **[Monitoring](/en/guides/monitoring/)** — Metrics and observability
-- **[Migration](/en/guides/migration/)** — Migrating from classic Whoosh
+- **[Indexing]({{ '/en/guides/indexing/' | relative_url }})** — Adding, updating, and deleting documents
+- **[Searching]({{ '/en/guides/searching/' | relative_url }})** — Query parsing, highlighting, and facets
+- **[Schema Design]({{ '/en/guides/schema/' | relative_url }})** — Field types, storage, and indexing options
+- **[Query Language]({{ '/en/guides/query/' | relative_url }})** — Lucene-like query syntax
+- **[Middleware]({{ '/en/guides/middleware/' | relative_url }})** — Pipeline hooks and custom middleware
+- **[Backends]({{ '/en/guides/backends/' | relative_url }})** — File, SQLite, and memory storage
+- **[Plugins]({{ '/en/guides/plugins/' | relative_url }})** — Extending Whoosh-NG with plugins
+- **[Autocomplete]({{ '/en/guides/autocomplete/' | relative_url }})** — Autocomplete providers
+- **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, and Faiss integration
+- **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
+- **[Migration]({{ '/en/guides/migration/' | relative_url }})** — Migrating from classic Whoosh
 
 ### API Reference
 
-- **[API Overview](/en/api/overview/)** — Complete module reference
-- **[Core API](/en/api/core/)** — Index creation and management
-- **[Fields](/en/api/fields/)** — Schema and field type definitions
-- **[Writing API](/en/api/writing/)** — IndexWriter interface
-- **[Searching API](/en/api/searching/)** — Searcher and Results
-- **[Query API](/en/api/query/)** — Query classes and parsers
-- **[Events](/en/api/events/)** — Event bus system
-- **[Middleware API](/en/api/middleware/)** — Middleware pipeline
-- **[Plugins API](/en/api/plugins/)** — Plugin system and registry
-- **[Backends API](/en/api/backends/)** — Storage backend abstractions
-- **[Modern API](/en/api/modern/)** — Modern extensions
+- **[API Overview]({{ '/en/api/overview/' | relative_url }})** — Complete module reference
+- **[Core API]({{ '/en/api/core/' | relative_url }})** — Index creation and management
+- **[Fields]({{ '/en/api/fields/' | relative_url }})** — Schema and field type definitions
+- **[Writing API]({{ '/en/api/writing/' | relative_url }})** — IndexWriter interface
+- **[Searching API]({{ '/en/api/searching/' | relative_url }})** — Searcher and Results
+- **[Query API]({{ '/en/api/query/' | relative_url }})** — Query classes and parsers
+- **[Events]({{ '/en/api/events/' | relative_url }})** — Event bus system
+- **[Middleware API]({{ '/en/api/middleware/' | relative_url }})** — Middleware pipeline
+- **[Plugins API]({{ '/en/api/plugins/' | relative_url }})** — Plugin system and registry
+- **[Backends API]({{ '/en/api/backends/' | relative_url }})** — Storage backend abstractions
+- **[Modern API]({{ '/en/api/modern/' | relative_url }})** — Modern extensions
 
 ### Examples
 
-- **[Basic Indexing](/en/examples/basic-indexing/)** — Document indexing examples
-- **[Search Examples](/en/examples/search/)** — Querying and retrieving results
-- **[FastAPI Integration](/en/examples/fastapi/)** — REST API with FastAPI
-- **[Middleware Examples](/en/examples/middleware/)** — Custom middleware patterns
-- **[Plugin Development](/en/examples/plugin-dev/)** — Building plugins
+- **[Basic Indexing]({{ '/en/examples/basic-indexing/' | relative_url }})** — Document indexing examples
+- **[Search Examples]({{ '/en/examples/search/' | relative_url }})** — Querying and retrieving results
+- **[FastAPI Integration]({{ '/en/examples/fastapi/' | relative_url }})** — REST API with FastAPI
+- **[Middleware Examples]({{ '/en/examples/middleware/' | relative_url }})** — Custom middleware patterns
+- **[Plugin Development]({{ '/en/examples/plugin-dev/' | relative_url }})** — Building plugins
 
 ## Quick Overview
 
@@ -1381,166 +1381,102 @@ def apply_middleware_to_searcher(
 
 # Modern API
 
-Vector search, autocomplete, and other advanced features.
+Data sources, schema discovery, facets, validation, middleware, and search view.
 
-## Vector API
-
-### VectorField
+## DataSource Protocol
 
 ```python
-class whoosh.fields.VectorField(
-    dimensions: int,
-    metric: str = "cosine",
-    provider: str = "numpy",
-    stored: bool = False
+from whoosh_modern.data_sources import DataSource, SQLSource, RESTSource
+```
+
+### SQLSource
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
 )
+schema = source.discover_schema()
+docs = list(source.iter_documents())
+count = source.document_count()
+meta = source.metadata()
 ```
 
-Embedding vector field.
-
----
-
-### VectorProvider
+### RESTSource
 
 ```python
-class whoosh.vector.base.VectorProvider
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
+    headers={"Authorization": "Bearer token"},
+)
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-Base class for vector providers.
-
-#### Methods
-
-##### `add_vector()`
+## SchemaDiscovery
 
 ```python
-provider.add_vector(doc_id, embedding: list[float])
+from whoosh_modern.schema_discovery import SchemaDiscovery
+
+# From column metadata
+columns = [("id", "INTEGER"), ("title", "TEXT")]
+schema = SchemaDiscovery.from_result_set(columns)
+
+# From sample documents
+schema = SchemaDiscovery.from_sample(docs)
+
+# Detect ID field
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
 ```
 
-Index a vector.
-
-##### `search()`
+## FacetManager
 
 ```python
-results = provider.search(query_embedding, limit=10)
+from whoosh_modern.facets import FacetManager, TermsFacet, RangeFacet
+
+manager = FacetManager(schema)
+facets = manager.get_facets()
+config = manager.get_facet_config("category")
+stats = manager.get_facet_stats()
+manager.set_manual_override("price", {"type": "range", "buckets": [...]})
 ```
 
-Search vectors.
-
-### Built-in Providers
-
-#### NumpyProvider
+## ValidationFramework
 
 ```python
-from whoosh.vector.numpy_provider import NumpyProvider
+from whoosh_modern.validation import ValidationFramework, ValidationResult
 
-provider = NumpyProvider()
+validator = ValidationFramework()
+results = validator.validate(source)
 ```
 
-Pure NumPy cosine similarity. Best for small indexes.
-
----
-
-#### HNSWProvider
+## Middleware Pipeline
 
 ```python
-from whoosh.vector.hnsw_provider import HNSWProvider
+from whoosh_modern.middleware import Middleware, MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
 
-provider = HNSWProvider(dimensions=384, metric="cosine")
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
+)
+result = pipeline.execute(operation)
 ```
 
-Hierarchical Navigable Small World. Fast ANN for large indexes.
-
----
-
-#### FaissProvider
+## SearchView
 
 ```python
-from whoosh.vector.faiss_provider import FaissProvider
+from whoosh_modern.views import SearchView
+
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
+count = view.reindex()
+count = view.refresh()
+results = view.validate()
 ```
-
-Facebook AI Similarity Search. Very large indexes.
-
----
-
-#### QdrantProvider
-
-```python
-from whoosh.vector.qdrant_provider import QdrantProvider
-```
-
-Distributed vector DB integration.
-
----
-
-## Autocomplete API
-
-### AutocompleteProvider
-
-```python
-class whoosh_modern.autocomplete.base.AutocompleteProvider
-```
-
-Base class for autocomplete providers.
-
-#### Methods
-
-##### `suggest()`
-
-```python
-suggestions = provider.suggest(
-    prefix: str,
-    limit: int = 5,
-    fuzzy: int = 0
-) -> list[str]
-```
-
-Get autocomplete suggestions.
-
----
-
-### Built-in Providers
-
-#### EdgeNgramProvider
-
-```python
-from whoosh_modern.autocomplete.edge_ngram import EdgeNgramProvider
-
-provider = EdgeNgramProvider(searcher, fieldname)
-```
-
-Prefix completion using edge n-grams.
-
----
-
-#### NgramProvider
-
-```python
-from whoosh_modern.autocomplete.ngram import NgramProvider
-
-provider = NgramProvider(searcher, fieldname)
-```
-
-Infix completion using n-grams.
-
----
-
-## Plugins
-
-### VectorPlugin
-
-```python
-from whoosh_modern.vector.plugin import VectorPlugin
-```
-
-Registers vector providers and adds vector_search to searcher.
-
-### AutocompletePlugin
-
-```python
-from whoosh_modern.autocomplete.plugin import AutocompletePlugin
-```
-
-Registers autocomplete providers.
 
 
 ## DOCUMENT: Overview
@@ -2767,6 +2703,305 @@ finally:
 ```
 
 
+## DOCUMENT: Data Sources
+
+# Data Sources
+
+Whoosh-NG provides a flexible data source layer for indexing documents from SQL databases, REST APIs, and custom data providers.
+
+## DataSource Protocol
+
+All data sources implement the `DataSource` protocol, which defines the interface for querying, schema discovery, and metadata retrieval.
+
+```python
+from whoosh_modern.data_sources import DataSource
+
+class DataSource(Protocol):
+    @property
+    def name(self) -> str: ...
+
+    def discover_schema(self) -> Schema: ...
+    def iter_documents(self) -> Iterator[Document]: ...
+    def document_count(self) -> int: ...
+    def metadata(self) -> Mapping[str, Any]: ...
+```
+
+### Capability Protocols
+
+| Protocol | Description |
+|----------|-------------|
+| `DataSource` | Base protocol: name, schema, iteration, metadata |
+| `IncrementalDataSource` | Supports `iter_changes(since)` |
+| `AsyncDataSource` | Async document streaming via `aiter_documents()` |
+| `RefreshableDataSource` | `refresh()` support |
+| `CountableDataSource` | `document_count()` |
+| `MetadataDataSource` | `metadata()` |
+
+---
+
+## SQLSource
+
+`SQLSource` connects to SQL databases and yields documents from query results.
+
+### Basic Usage
+
+```python
+from whoosh_modern.data_sources import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("mydb.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM products",
+)
+
+# Discover schema from result-set metadata
+schema = source.discover_schema()
+
+# Iterate documents
+for doc in source.iter_documents():
+    print(doc["title"], doc["price"])
+
+# Get metadata
+meta = source.metadata()
+# {"type": "sql", "query": "SELECT * FROM products", ...}
+
+# Get document count
+count = source.document_count()
+```
+
+### GROUP BY Aggregation
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="""
+        SELECT category, COUNT(*) as doc_count,
+               AVG(price) as avg_price
+        FROM products
+        GROUP BY category
+    """,
+)
+
+# Each aggregated row becomes a document
+for doc in source.iter_documents():
+    print(doc["category"], doc["doc_count"], doc["avg_price"])
+```
+
+### JOINs with Column Aliases
+
+SQLSource uses `PRAGMA table_info` for schema discovery. Always use column aliases in JOINs.
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="""
+        SELECT
+            p.id AS product_id,
+            p.name AS product_name,
+            c.name AS category_name
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+    """,
+)
+```
+
+### Incremental Sync
+
+```python
+from datetime import datetime
+
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM articles",
+    incremental_field="updated_at",
+    id_field="id",
+)
+
+# Get documents changed since a timestamp
+for doc in source.iter_changes(since=datetime(2025, 1, 1)):
+    print(doc["id"], doc["updated_at"])
+```
+
+---
+
+## RESTSource
+
+`RESTSource` fetches documents from REST APIs with pagination and authentication.
+
+### Basic Usage
+
+```python
+from whoosh_modern.data_sources import RESTSource
+
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    method="GET",
+    headers={"Authorization": "Bearer your_token"},
+    pagination="page",
+    page_size=50,
+)
+
+# Discover schema from first page
+schema = source.discover_schema()
+
+# Iterate all documents (handles pagination automatically)
+for doc in source.iter_documents():
+    print(doc["name"], doc["price"])
+
+# Get document count
+count = source.document_count()
+```
+
+### Pagination Strategies
+
+| Strategy | Parameters | Behavior |
+|----------|-----------|----------|
+| `page` | `?page=N&size=M` | Fetches page N with M items per page |
+| `offset` | `?offset=N&limit=M` | Fetches M items starting at N |
+| `cursor` | `?cursor=XYZ&size=M` | Follows `next_cursor` in response |
+
+```python
+# Page-based pagination
+source = RESTSource(
+    url="https://api.example.com/articles",
+    pagination="page",
+    page_size=50,
+)
+
+# Offset-based pagination
+source = RESTSource(
+    url="https://api.example.com/records",
+    pagination="offset",
+    page_size=100,
+)
+
+# Cursor-based pagination
+source = RESTSource(
+    url="https://api.example.com/feed",
+    pagination="cursor",
+    page_size=100,
+)
+```
+
+### Authentication
+
+```python
+# Bearer token via headers
+source = RESTSource(
+    url="https://api.example.com/data",
+    headers={"Authorization": "Bearer your_token"},
+)
+
+# API key via headers
+source = RESTSource(
+    url="https://api.example.com/data",
+    headers={"X-API-Key": "your_api_key"},
+)
+
+# Basic auth via headers
+import base64
+creds = base64.b64encode(b"user:pass").decode()
+source = RESTSource(
+    url="https://api.example.com/data",
+    headers={"Authorization": f"Basic {creds}"},
+)
+```
+
+### Document Path
+
+For nested API responses, use `document_path` to extract documents:
+
+```python
+# API returns: {"data": {"results": [...]}}
+source = RESTSource(
+    url="https://api.example.com/api/v2/products",
+    document_path="data.results",
+    pagination="page",
+)
+```
+
+
+## DOCUMENT: Facets
+
+# Facet Manager
+
+`FacetManager` manages facet configuration for a Whoosh `Schema`. It auto-discovers facetable fields and supports manual overrides.
+
+## Basic Usage
+
+```python
+from whoosh.fields import Schema, TEXT, NUMERIC, BOOLEAN
+from whoosh_modern.facets import FacetManager, TermsFacet, RangeFacet
+
+schema = Schema(
+    title=TEXT(stored=True),
+    category=TEXT(sortable=True),
+    price=NUMERIC(),
+    active=BOOLEAN(),
+)
+
+manager = FacetManager(schema)
+```
+
+## Auto-Discovery
+
+FacetManager automatically identifies facetable fields:
+
+| Whoosh Field Type | Facet Type |
+|-------------------|------------|
+| `KEYWORD`, `BOOLEAN`, `ID` | `TermsFacet` |
+| `NUMERIC` | `RangeFacet` |
+| `DATETIME` | `DateRangeFacet` |
+| `TEXT` | None (not facetable) |
+
+```python
+# Auto-discovered facets
+facets = manager.get_facets()
+# {"category": TermsFacet(limit=100), "price": RangeFacet()}
+```
+
+## Manual Override
+
+```python
+from whoosh_modern.facets import TermsFacet
+
+manager.set_manual_override("category", {
+    "type": "terms",
+    "limit": 50,
+})
+manager.set_manual_override("price", {
+    "type": "range",
+    "buckets": ["0-10", "10-50", "50-100", "100+"],
+})
+```
+
+## Inspection
+
+```python
+# Is a field facetable?
+manager.is_facetable("category")   # True
+manager.is_facetable("title")      # False
+
+# Get config for a field
+config = manager.get_facet_config("category")
+# {"type": "terms", "limit": 50}
+
+# Get all configs
+all_configs = manager.get_all_facet_configs()
+
+# Get statistics
+stats = manager.get_facet_stats()
+# {
+#     "total_fields": 4,
+#     "auto_discovered_facets": 2,
+#     "manual_overrides": 1,
+#     "total_facets_configured": 3,
+#     "facet_fields": ["category", "price", ...]
+# }
+```
+
+
 ## DOCUMENT: Fastapi Search
 
 # FastAPI Integration
@@ -2884,26 +3119,9 @@ async def index_docs(docs: list[dict]):
     return {"indexed": len(docs)}
 ```
 
-## Key points
+## 7. Alternative: WhooshFastAPI Class
 
-- `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, and `/autocomplete` endpoints.
-- All blocking calls run off the event loop via `run_sync`.
-- Use `BufferedWriter` for high-throughput indexing via POST.
-
-
-## DOCUMENT: Fastapi
-
-# FastAPI Integration
-
-Minimal working FastAPI service backed by Whoosh-NG.
-
-## Installation
-
-```bash
-pip install whoosh-ng[api] fastapi uvicorn
-```
-
-## App
+For more control, use the `WhooshFastAPI` class directly:
 
 ```python
 from fastapi import FastAPI
@@ -2922,42 +3140,87 @@ api.register_search_endpoint("/search", "content")
 api.register_index_endpoint("/documents", schema)
 ```
 
-## Scripted Bulk Load
+## Key points
+
+- `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, and `/autocomplete` endpoints.
+- All blocking calls run off the event loop via `run_sync`.
+- Use `BufferedWriter` for high-throughput indexing via POST.
+- `WhooshFastAPI` class offers per-endpoint registration for custom integrations.
+
+
+## DOCUMENT: Middleware Pipeline
+
+# Middleware Pipeline
+
+The middleware pipeline wraps operations with cross-cutting concerns: retry, logging, etc.
+
+## Architecture
 
 ```python
-from fastapi import FastAPI
-from whoosh import index
-from whoosh.fields import Schema, TEXT, ID
-from whoosh.writing import BufferedWriter
+from whoosh_modern.middleware import Middleware, MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
 
-app = FastAPI()
-ix = index.open_dir("indexdir")
+# Chain middlewares
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
+)
 
-@app.post("/load")
-def load_documents(docs: list[dict]):
-    with BufferedWriter(ix, period=30, limit=50) as w:
-        for doc in docs:
-            w.add_document(**doc)
-    return {"loaded": len(docs)}
+# Execute an operation through the chain
+result = pipeline.execute(my_operation)
 ```
 
-## Query Endpoint
+## RetryMiddleware
 
 ```python
-from fastapi import FastAPI
-from whoosh import index
-from whoosh.qparser import QueryParser
+from whoosh_modern.middleware import RetryMiddleware
 
-app = FastAPI()
-ix = index.open_dir("indexdir")
+retry = RetryMiddleware(attempts=3, backoff="exponential")
 
-@app.get("/search")
-def search(q: str):
-    with ix.searcher() as searcher:
-        parser = QueryParser("content", ix.schema)
-        parsed = parser.parse(q)
-        results = searcher.search(parsed)
-        return [hit.fields() for hit in results]
+@retry.wrap
+def flaky_operation():
+    # Will retry up to 3 times on exception
+    return fetch_data()
+```
+
+Backoff strategies:
+- `"exponential"`: 1s, 2s, 4s, 8s...
+- `"linear"`: 1s, 2s, 3s, 4s...
+
+## LoggingMiddleware
+
+```python
+from whoosh_modern.middleware import LoggingMiddleware
+import logging
+
+logger = logging.getLogger("benchmark")
+logging_mw = LoggingMiddleware(logger=logger)
+
+@logging_mw.wrap
+def tracked_operation():
+    return fetch_data()
+# Logs: "Operation tracked_operation completed in 0.123s"
+# On error: "Operation tracked_operation failed after 0.123s: <error>"
+```
+
+## Custom Middleware
+
+```python
+from whoosh_modern.middleware import Middleware
+
+class TimingMiddleware(Middleware):
+    def __init__(self):
+        self.timings = []
+
+    def wrap(self, operation):
+        def wrapped(*args, **kwargs):
+            start = time.time()
+            try:
+                result = operation(*args, **kwargs)
+                self.timings.append(time.time() - start)
+                return result
+            except Exception:
+                raise
+        return wrapped
 ```
 
 
@@ -3425,6 +3688,298 @@ manager.register(AutocompletePlugin())
 ```
 
 
+## DOCUMENT: Schema Discovery
+
+# Schema Discovery
+
+Schema discovery infers Whoosh `Schema` from data source results. It operates on **actual result metadata and sample documents**, not SQL syntax.
+
+## How It Works
+
+### From Result Sets
+
+```python
+from whoosh_modern.schema_discovery import SchemaDiscovery
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+cursor = conn.cursor()
+cursor.execute("PRAGMA table_info(reuters_articles)")
+columns = [(row[1], row[2]) for row in cursor.fetchall()]
+# [("id", "INTEGER"), ("article_date", "TEXT"), ("headline", "TEXT"), ...]
+
+schema = SchemaDiscovery.from_result_set(columns)
+```
+
+### From Sample Documents
+
+```python
+from whoosh_modern.data_sources.sql import SQLSource
+
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles LIMIT 10",
+)
+
+# Get a few documents
+docs = list(source.iter_documents())[:10]
+
+# Infer schema from document values
+schema = SchemaDiscovery.from_sample(docs)
+```
+
+### Detect ID Field
+
+```python
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
+# Returns "id" if an ID field is found, otherwise None
+```
+
+## SQL Type Mapping
+
+| SQL Type | Whoosh Field |
+|----------|-------------|
+| `VARCHAR`, `TEXT`, `CHAR`, `STRING_AGG` | `TEXT` |
+| `INTEGER`, `BIGINT`, `SMALLINT`, `COUNT`, `SUM`, `AVG`, `MIN`, `MAX` | `NUMERIC` |
+| `FLOAT`, `DOUBLE`, `DECIMAL` | `NUMERIC` |
+| `BOOLEAN` | `BOOLEAN` |
+| `DATE`, `TIMESTAMP` | `DATETIME` |
+| `UUID` | `ID` |
+| `JSON`, `ENUM` | `KEYWORD` |
+
+## Duplicate Column Detection
+
+`from_result_set` raises `SchemaDiscoveryError` on duplicate column names.
+
+```python
+columns = [
+    ("id", "INTEGER"),
+    ("headline", "TEXT"),
+    ("id", "INTEGER"),  # Duplicate!
+]
+
+try:
+    schema = SchemaDiscovery.from_result_set(columns)
+except SchemaDiscoveryError as e:
+    print(f"Duplicate column: {e.field}")
+```
+
+Use explicit SQL aliases to avoid duplicates:
+
+```sql
+SELECT
+    p.id AS product_id,
+    c.id AS category_id
+FROM products p
+JOIN categories c ON p.category_id = c.id
+```
+
+
+## DOCUMENT: Search Models
+
+# Search Models
+
+Examples for auto-mapping Python models to Whoosh schemas.
+
+## Dataclass
+
+```python
+from dataclasses import dataclass
+from whoosh.fields import Schema, TEXT, NUMERIC
+from whoosh_modern.models import ModelIndex
+import tempfile
+import shutil
+
+@dataclass
+class Book:
+    title: str
+    year: int
+    tags: list[str] | None = None
+
+idx = ModelIndex(Book)
+print(idx.schema)
+```
+
+## Pydantic
+
+```python
+from pydantic import BaseModel
+from whoosh_modern.models import register_model
+
+class BookModel(BaseModel):
+    title: str
+    year: int
+    tags: list[str] | None = None
+
+idx = register_model(BookModel)
+schema = idx.schema
+```
+
+## SQLAlchemy
+
+```python
+from sqlalchemy import Column, Integer, String
+from whoosh_modern.models import register_model
+
+class BookSQL:
+    __tablename__ = "book"
+    title = Column(String, info={"search": {"fulltext": True, "stored": True}})
+    year = Column(Integer, info={"search": {"sortable": True}})
+
+idx = register_model(BookSQL)
+schema = idx.schema
+```
+
+## SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Book(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
+## msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Book(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
+## Indexing documents
+
+```python
+from whoosh import index
+
+tmp = tempfile.mkdtemp()
+ix = index.create_in(tmp, schema)
+
+with ix.writer() as w:
+    book = Book(title="Whoosh Guide", year=2024, tags=["python", "search"])
+    doc = idx.to_whoosh_document(book)
+    w.add_document(**doc)
+    w.commit()
+```
+
+## Auto-indexing with AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+
+# Index a single instance
+book = Book(title="New Book", year=2024, tags=["python"])
+auto.index(book)
+
+# Remove by ID
+auto.remove(book)
+
+# Async versions
+await auto.index_async(book)
+await auto.remove_async(book)
+```
+
+For SQLAlchemy models, `AutoIndexer` automatically hooks into `after_insert`, `after_update`, and `after_delete` events.
+
+## Cleanup
+
+```python
+shutil.rmtree(tmp)
+```
+
+
+## DOCUMENT: Search View
+
+# SearchView
+
+`SearchView` integrates a `DataSource` with Whoosh indexing. It discovers schema, validates the source, builds the index, and supports incremental refresh.
+
+## Basic Usage
+
+```python
+from whoosh_modern.views import SearchView
+from whoosh_modern.data_sources.sql import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
+)
+
+view = SearchView(
+    name="reuters",
+    source=source,
+)
+
+# Build index (discovers schema, validates, populates)
+ix = view.build("indexdir")
+```
+
+## Incremental Refresh
+
+```python
+# Rebuild from scratch
+count = view.reindex()
+
+# Incremental refresh (only changed docs)
+count = view.refresh()
+```
+
+## Validation
+
+```python
+# Run validation before building
+results = view.validate()
+for result in results:
+    print(f"Level {result.level}: {'PASS' if result.passed else 'FAIL'}")
+    for error in result.errors:
+        print(f"  ERROR: {error}")
+```
+
+## Field Overrides
+
+```python
+from whoosh.fields import TEXT, NUMERIC
+
+view = SearchView(
+    name="custom",
+    source=source,
+    fields={
+        "title": TEXT(stored=True),
+        "price": NUMERIC(sortable=True),
+    },
+)
+```
+
+## Strict Mode
+
+```python
+view = SearchView(
+    name="strict",
+    source=source,
+    strict=True,  # Raise ValidationError on any failure
+)
+```
+
+
 ## DOCUMENT: Search
 
 # Search Examples
@@ -3543,6 +4098,76 @@ with ix.searcher() as s:
 - `sortedby` sorts by field value or relevance score.
 
 
+## DOCUMENT: Validation
+
+# Validation Framework
+
+The validation framework runs checks against a data source before indexing. It provides 4 distinct validation levels with different failure modes.
+
+## Validation Levels
+
+| Level | Method | Purpose |
+|-------|--------|---------|
+| **Level 1** | `validate_structural(source)` | DataSource availability, schema detection |
+| **Level 2** | `validate_search(schema)` | Indexable fields, analyzer compatibility |
+| **Level 3** | `validate_performance(schema, source)` | Performance warnings (TEXT fields, etc.) |
+| **Level 4** | `validate_runtime(source, sample_size)` | Sample iteration, type validation |
+
+## Basic Usage
+
+```python
+from whoosh_modern.validation import ValidationFramework, ValidationResult
+from whoosh_modern.data_sources.sql import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(connection=conn, query="SELECT * FROM reuters_articles")
+
+validator = ValidationFramework()
+
+# Run all 4 validation levels
+results: list[ValidationResult] = validator.validate(source)
+
+for result in results:
+    level_name = f"Level {result.level}"
+    status = "PASS" if result.passed else "FAIL"
+    print(f"{level_name}: {status}")
+    for error in result.errors:
+        print(f"  ERROR: {error}")
+    for warning in result.warnings:
+        print(f"  WARN: {warning}")
+```
+
+## Individual Level Validation
+
+```python
+# Level 1: Structural
+errors = validator.validate_structural(source)
+
+# Level 2: Search
+from whoosh.fields import Schema
+schema = source.discover_schema()
+errors = validator.validate_search(schema)
+
+# Level 3: Performance
+warnings = validator.validate_performance(schema, source)
+
+# Level 4: Runtime
+errors = validator.validate_runtime(source, sample_size=100)
+```
+
+## Validation Results
+
+```python
+@dataclass
+class ValidationResult:
+    level: int
+    passed: bool
+    warnings: list[str]
+    errors: list[str]
+```
+
+
 ## DOCUMENT: Vector Search
 
 # Vector Search with Whoosh‑NG
@@ -3647,6 +4272,130 @@ print(restored == tuple(values))  # True
 - `NumpyProvider` implements cosine similarity via dot product.
 - Register the plugin via `VectorPlugin().register(manager)` or use `PluginManager.load_plugins()`.
 - Use `filter_ids` in `provider.search()` to restrict to a subset of documents.
+
+
+## DOCUMENT: Auto Indexing
+
+# Auto-Indexing
+
+Whoosh-NG provides `AutoIndexer` to automatically keep a Whoosh index in sync with your data models.
+
+## Overview
+
+`AutoIndexer` maintains a registry of models and their corresponding Whoosh schemas. It can:
+
+- **Index** model instances into a Whoosh index
+- **Remove** instances by their ID field
+- **Hook** into SQLAlchemy events for automatic sync
+- **Handle errors** with configurable strategies
+
+## Basic usage
+
+```python
+from whoosh_modern.models import AutoIndexer, ModelIndex
+from whoosh.filedb.filestore import RamStorage
+
+# Create a Whoosh index
+storage = RamStorage()
+schema = ModelIndex(Book).schema
+ix = storage.create_index(schema)
+
+# Create auto-indexer
+auto = AutoIndexer(ix, on_error="raise")
+
+# Register a model
+auto.register(Book)
+
+# Index an instance
+book = Book(title="Hello", year=2024)
+auto.index(book)
+
+# Remove by ID
+auto.remove(book)
+```
+
+## Error handling
+
+The `on_error` parameter controls what happens when indexing fails:
+
+- `"raise"` (default): re-raise the exception
+- `"log"`: log the error and continue
+- `"skip"`: silently skip the error
+
+```python
+auto = AutoIndexer(ix, on_error="log")
+```
+
+## SQLAlchemy integration
+
+For SQLAlchemy models, `AutoIndexer` automatically registers event listeners:
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from whoosh_modern.models import register_sqlalchemy_model
+
+engine = create_engine("sqlite:///app.db")
+Base = DeclarativeBase()
+
+class Book(Base):
+    __tablename__ = "books"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+
+Base.metadata.create_all(engine)
+
+# Register with AutoIndexer
+auto = AutoIndexer(ix)
+auto.register(Book)
+
+# Now any SQLAlchemy session operation automatically syncs:
+# - after_insert -> index.document()
+# - after_update -> index.document()
+# - after_delete -> remove.document()
+```
+
+## Async support
+
+For async applications, use `index_async` and `remove_async`:
+
+```python
+import asyncio
+
+async def main():
+    book = Book(title="Async", year=2024)
+    await auto.index_async(book)
+    await auto.remove_async(book)
+
+asyncio.run(main())
+```
+
+These methods run the synchronous indexing in a worker thread via `asyncio.to_thread()` to avoid blocking the event loop.
+
+## API reference
+
+### `AutoIndexer(index, on_error="raise")`
+
+- `index`: a Whoosh `Index` instance
+- `on_error`: error handling strategy (`"raise"`, `"log"`, `"skip"`)
+
+### Methods
+
+- `register(model) -> ModelIndex`: register a model class and return its `ModelIndex`
+- `index(instance)`: index a model instance
+- `remove(instance)`: remove a model instance by its ID field
+- `index_async(instance)`: async version of `index`
+- `remove_async(instance)`: async version of `remove`
+
+### Helper functions
+
+```python
+from whoosh_modern.models import index_document, remove_document
+
+# One-off indexing without creating an AutoIndexer
+index_document(ix, book_instance, on_error="raise")
+remove_document(ix, book_instance, on_error="raise")
+```
 
 
 ## DOCUMENT: Autocomplete
@@ -4249,8 +4998,85 @@ uv run mypy src/whoosh
 
 ## Next Steps
 
-- [Quick Start](/en/quickstart)
-- [Core Concepts](/en/guides/core-concepts)
+- [Quick Start]({{ '/en/quickstart/' | relative_url }})
+- [Core Concepts]({{ '/en/guides/core-concepts/' | relative_url }})
+
+
+## DOCUMENT: Legacy Cleanup
+
+# Legacy Code Cleanup Strategy
+
+This guide explains how Whoosh-NG separates modern typed code from legacy code,
+and how the legacy cleanup is progressing.
+
+## Why a legacy boundary?
+
+`whoosh-modern` is the new, fully typed surface of Whoosh-NG.
+The original `whoosh` package still works at runtime, but it carries decades of
+Python 2/3 compatibility patterns, dynamic metaprogramming, and untyped internals.
+Trying to force strict types on all of it at once would block development.
+
+The cleanup strategy is **incremental and opt-in**:
+
+1. `src/whoosh_modern/` is typed and linted with `pyright` and `mypy` strict.
+2. `src/whoosh/` is the legacy surface. It is split into:
+   - **excluded modules** (documented in `pyrightconfig.json`) — code that is too
+     dynamic or vendored for an economical type pass right now;
+   - **cleanup candidates** — small, isolated files that are straightforward to
+     annotate and verify.
+3. Each sprint, a wave of candidates is typed, tested, and promoted out of the
+   high-tolerance zone.
+
+## Current pyright/mypy thresholds (Sprint 2)
+
+| Checker | Scope | Threshold |
+|---------|-------|-----------|
+| `pyright` | `src/whoosh_modern/` | **0 errors** (strict) |
+| `pyright` | legacy | **≤ 500 errors** (tolerant) |
+| `mypy` | `src/` | **0 errors** (via overrides + `ignore_errors`) |
+
+## Exclusion rationale (pyrightconfig.json)
+
+The `exclude` list in `pyrightconfig.json` groups excluded files by theme:
+
+- **Vendored / no stubs**: `pyparsing.py`, `relativedelta.py`
+- **Migration shims**: `codec/whoosh2.py`, `codec/whoosh3.py`
+- **Dynamic parsing**: `qparser/`, `query/`, `analysis/`, `automata/`
+- **Large datastores**: `filedb/`, `reading/`, `writing/`
+- **Heuristic / data-driven**: `lang/dmetaphone.py`, `lang/lovins.py`,
+  `lang/phonetic.py`, `lang/wordnet.py`
+- **Core dynamic objects**: `classify.py`, `index.py`, `locking.py`,
+  `formats.py`, `middleware/`
+- **Vendored low-level**: `support/bench.py`, `support/base85.py`,
+  `support/bitstream.py`, `support/bitvector.py`, `support/charset.py`,
+  `support/levenshtein.py`
+
+## Sprint 2 cleanup plan
+
+For Sprint 2, the focus is on small utility and support modules that have few
+external dependencies and no heavy metaprogramming.
+
+Candidate wave:
+
+- `src/whoosh/util/varints.py`
+- `src/whoosh/util/text.py`
+- `src/whoosh/util/loading.py`
+- `src/whoosh/support/bitstream.py`
+- `src/whoosh/support/levenshtein.py`
+
+For each file:
+
+1. Remove the blanket `# type: ignore` (if present).
+2. Add precise function signatures.
+3. Run `pyright` and `mypy` to confirm **0 new errors**.
+4. Move the file out of `pyrightconfig.json` excludes.
+5. Add a regression test in `tests/test_legacy_cleanup.py`.
+
+## Long-term goal
+
+Eventually every file in `src/whoosh/` should be checkable by `mypy` and
+`pyright` without blanket excludes. Until then, the exclude list is the
+explicit ledger of debt, and each sprint chips away at it.
 
 
 ## DOCUMENT: Middleware
@@ -4600,8 +5426,8 @@ from whoosh.middleware.exceptions import MiddlewareError, StopOperation
 ## Getting Help
 
 - [GitHub Issues](https://github.com/your-org/whoosh-NG/issues)
-- [Documentation](/en/)
-- [Migration Examples](/en/examples/migration)
+- [Documentation]({{ '/en/' | relative_url }})
+- [Migration Examples]({{ '/en/examples/migration/' | relative_url }})
 
 
 ## DOCUMENT: Monitoring
@@ -5080,9 +5906,176 @@ schema = (
 ## Modifying fields
 
 ```python
-writer.add_field("summary", TEXT(stored=True))
-writer.remove_field("legacy_field")
+writer.add_document(
+    title="Multi-tag post",
+    tags=["whoosh", "python", "search"],
+    content="..."
+)
 ```
+
+## Search Models
+
+Whoosh-NG can auto-map Python models (dataclasses, Pydantic, SQLAlchemy, SQLModel, msgspec) to a Whoosh `Schema` using `ModelIndex`.
+
+### Level 1: Auto-mapping
+
+```python
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
+
+@dataclass
+class Book:
+    title: str
+    count: int
+    tag: str | None = None
+
+idx = ModelIndex(Book)
+schema = idx.schema
+```
+
+`ModelIndex` inspects type annotations and maps them to Whoosh fields:
+
+| Python type | Whoosh field |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (hex-encoded) |
+| `list[str]` | `KEYWORD` |
+| `Optional[T]` | mapped type or `STORED` |
+
+ID fields are auto-detected: explicit `SearchOptions(id=True)` > field named `id`/`ID`/`_id` > first `str` field.
+
+### Level 2: Explicit options
+
+Use `SearchField` to override defaults:
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
+    count: int = SearchField(sortable=True)
+    tags: list[str] = SearchField(multi=True)
+```
+
+### Level 3: Annotated types
+
+Use `Annotated` to attach metadata directly to annotations:
+
+```python
+from typing import Annotated
+from whoosh_modern.models import SearchField
+
+class Book:
+    title: Annotated[str, SearchField(fulltext=True, stored=True)]
+```
+
+### Integrations
+
+#### Dataclass
+
+```python
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
+
+@dataclass
+class Article:
+    title: str
+    body: str
+    published: datetime.datetime
+
+idx = ModelIndex(Article)
+```
+
+#### Pydantic v2
+
+```python
+from pydantic import BaseModel
+from whoosh_modern.models import register_model
+
+class Article(BaseModel):
+    title: str
+    body: str
+    published: datetime.datetime
+
+    # Per-field search metadata via json_schema_extra
+    model_config = {"json_schema_extra": {"search": {"fulltext": True}}}
+
+idx = register_model(Article)
+```
+
+#### SQLAlchemy
+
+```python
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import DeclarativeBase
+from whoosh_modern.models import register_model
+
+class Base(DeclarativeBase):
+    pass
+
+class Article(Base):
+    __tablename__ = "articles"
+    id = Column(Integer, primary_key=True)
+    title = Column(String, info={"search": {"fulltext": True, "stored": True}})
+    published = Column(DateTime, info={"search": {"sortable": True}})
+
+idx = register_model(Article)
+```
+
+#### SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Article(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    published: datetime.datetime
+
+idx = register_model(Article)
+```
+
+#### msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Article(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    published: datetime.datetime
+
+idx = register_model(Article)
+```
+
+### Converting instances
+
+```python
+doc = idx.to_whoosh_document(book_instance)
+writer.add_document(**doc)
+```
+
+`to_whoosh_document` handles:
+- dataclass: `dataclasses.fields()` iteration
+- Pydantic/SQLModel: `model_fields` iteration
+- SQLAlchemy: `__mapper__.columns` iteration
+- Enum values converted to `.value`
+- `bytes` converted to hex string
+
+## Best practices
+
+1. **Minimal**: Only index what you search
+2. **STORED sparingly**: Increases index size
+3. **Unique fields**: Use `unique=True` for identifiers
+4. **Field boost**: Boost important fields at schema level
+5. **TEXT options**: Disable `phrase` if you don't need phrase search
+6. **ID field**: Let `ModelIndex` auto-detect or explicitly mark with `SearchOptions(id=True)`
 
 
 ## DOCUMENT: Searching
@@ -5547,8 +6540,8 @@ Welcome to the official documentation for **Whoosh-NG**, a pure-Python full-text
 
 This documentation is available in two languages:
 
-- **[English Documentation](/en/quickstart/)** — Complete technical documentation in English (source language)
-- **[Documentation Française](/fr/quickstart/)** — Traduction française complète
+- **[English Documentation]({{ '/en/quickstart/' | relative_url }})** — Complete technical documentation in English (source language)
+- **[Documentation Française]({{ '/fr/quickstart/' | relative_url }})** — Traduction française complète
 
 Both versions are kept synchronized, with code examples remaining in English for consistency.
 
@@ -5556,45 +6549,51 @@ Both versions are kept synchronized, with code examples remaining in English for
 
 ### Getting Started
 
-- **[Installation](/en/guides/installation/)** — Setup instructions and configuration
-- **[Quick Start](/en/quickstart/)** — 5-minute tutorial to create your first index
-- **[Core Concepts](/en/guides/core-concepts/)** — Understanding schemas, fields, and search
+- **[Installation]({{ '/en/guides/installation/' | relative_url }})** — Setup instructions and configuration
+- **[Quick Start]({{ '/en/quickstart/' | relative_url }})** — 5-minute tutorial to create your first index
+- **[Core Concepts]({{ '/en/guides/core-concepts/' | relative_url }})** — Understanding schemas, fields, and search
 
 ### User Guides
 
-- **[Indexing](/en/guides/indexing/)** — Adding, updating, and deleting documents
-- **[Searching](/en/guides/searching/)** — Query parsing, highlighting, and facets
-- **[Schema Design](/en/guides/schema/)** — Field types, storage, and indexing options
-- **[Query Language](/en/guides/query/)** — Lucene-like query syntax
-- **[Middleware](/en/guides/middleware/)** — Pipeline hooks and custom middleware
-- **[Backends](/en/guides/backends/)** — File, SQLite, and memory storage
-- **[Plugins](/en/guides/plugins/)** — Extending Whoosh-NG with plugins
-- **[Autocomplete](/en/guides/autocomplete/)** — Autocomplete providers
-- **[Vector Search](/en/guides/vector/)** — NumPy, HNSW, and Faiss integration
-- **[Monitoring](/en/guides/monitoring/)** — Metrics and observability
-- **[Migration](/en/guides/migration/)** — Migrating from classic Whoosh
+- **[Indexing]({{ '/en/guides/indexing/' | relative_url }})** — Adding, updating, and deleting documents
+- **[Searching]({{ '/en/guides/searching/' | relative_url }})** — Query parsing, highlighting, and facets
+- **[Schema Design]({{ '/en/guides/schema/' | relative_url }})** — Field types, storage, and indexing options
+- **[Query Language]({{ '/en/guides/query/' | relative_url }})** — Lucene-like query syntax
+- **[Middleware]({{ '/en/guides/middleware/' | relative_url }})** — Pipeline hooks and custom middleware
+- **[Backends]({{ '/en/guides/backends/' | relative_url }})** — File, SQLite, and memory storage
+- **[Plugins]({{ '/en/guides/plugins/' | relative_url }})** — Extending Whoosh-NG with plugins
+- **[Autocomplete]({{ '/en/guides/autocomplete/' | relative_url }})** — Autocomplete providers
+- **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, and Faiss integration
+- **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
+- **[Migration]({{ '/en/guides/migration/' | relative_url }})** — Migrating from classic Whoosh
 
 ### API Reference
 
-- **[API Overview](/en/api/overview/)** — Complete module reference
-- **[Core API](/en/api/core/)** — Index creation and management
-- **[Fields](/en/api/fields/)** — Schema and field type definitions
-- **[Writing API](/en/api/writing/)** — IndexWriter interface
-- **[Searching API](/en/api/searching/)** — Searcher and Results
-- **[Query API](/en/api/query/)** — Query classes and parsers
-- **[Events](/en/api/events/)** — Event bus system
-- **[Middleware API](/en/api/middleware/)** — Middleware pipeline
-- **[Plugins API](/en/api/plugins/)** — Plugin system and registry
-- **[Backends API](/en/api/backends/)** — Storage backend abstractions
-- **[Modern API](/en/api/modern/)** — Modern extensions
+- **[API Overview]({{ '/en/api/overview/' | relative_url }})** — Complete module reference
+- **[Core API]({{ '/en/api/core/' | relative_url }})** — Index creation and management
+- **[Fields]({{ '/en/api/fields/' | relative_url }})** — Schema and field type definitions
+- **[Writing API]({{ '/en/api/writing/' | relative_url }})** — IndexWriter interface
+- **[Searching API]({{ '/en/api/searching/' | relative_url }})** — Searcher and Results
+- **[Query API]({{ '/en/api/query/' | relative_url }})** — Query classes and parsers
+- **[Events]({{ '/en/api/events/' | relative_url }})** — Event bus system
+- **[Middleware API]({{ '/en/api/middleware/' | relative_url }})** — Middleware pipeline
+- **[Plugins API]({{ '/en/api/plugins/' | relative_url }})** — Plugin system and registry
+- **[Backends API]({{ '/en/api/backends/' | relative_url }})** — Storage backend abstractions
+- **[Modern API]({{ '/en/api/modern/' | relative_url }})** — Modern extensions
 
 ### Examples
 
-- **[Basic Indexing](/en/examples/basic-indexing/)** — Document indexing examples
-- **[Search Examples](/en/examples/search/)** — Querying and retrieving results
-- **[FastAPI Integration](/en/examples/fastapi/)** — REST API with FastAPI
-- **[Middleware Examples](/en/examples/middleware/)** — Custom middleware patterns
-- **[Plugin Development](/en/examples/plugin-dev/)** — Building plugins
+- **[Basic Indexing]({{ '/en/examples/basic-indexing/' | relative_url }})** — Document indexing examples
+- **[Search Examples]({{ '/en/examples/search/' | relative_url }})** — Querying and retrieving results
+- **[FastAPI Integration]({{ '/en/examples/fastapi/' | relative_url }})** — REST API with FastAPI
+- **[Middleware Examples]({{ '/en/examples/middleware/' | relative_url }})** — Custom middleware patterns
+- **[Plugin Development]({{ '/en/examples/plugin-dev/' | relative_url }})** — Building plugins
+- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Schema Discovery]({{ '/en/examples/schema-discovery/' | relative_url }})** — Result-set introspection
+- **[Facet Manager]({{ '/en/examples/facets/' | relative_url }})** — Auto-discovery and manual overrides
+- **[Validation Framework]({{ '/en/examples/validation/' | relative_url }})** — 4-level validation
+- **[SearchView]({{ '/en/examples/search-view/' | relative_url }})** — Full pipeline integration
+- **[Middleware Pipeline]({{ '/en/examples/middleware-pipeline/' | relative_url }})** — Retry, cache, logging
 
 ## Quick Overview
 
@@ -5717,6 +6716,28 @@ from whoosh.plugins.manager import PluginManager
 from whoosh_modern.vector.plugin import VectorPlugin
 
 PluginManager.load_plugins()
+```
+
+## Data Sources
+
+```bash
+pip install whoosh-ng
+```
+
+```python
+import sqlite3
+from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.views import SearchView
+
+# Use existing benchmark data
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+)
+
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
 ```
 
 
@@ -6303,111 +7324,89 @@ class SkipOperation(Skip)
 
 # API Moderne
 
-Features introduites dans Whoosh-NG 4.0.
+Sources de données, découverte de schéma, facettes, validation, middleware et SearchView.
 
-## VectorField
+## DataSource Protocol
 
 ```python
-from whoosh.fields import VectorField
-
-champ = VectorField(dimensions=384, metric="cosine", stored=False)
+from whoosh_modern.data_sources import DataSource, SQLSource, RESTSource
 ```
 
-### Attributs
+### SQLSource
 
-| Attribut | Type | Description |
-|----------|------|-------------|
-| `dimensions` | int | Dimensions du vecteur |
-| `metric` | str | Métrique de similarité (`"cosine"`, `"euclidean"`, `"dot"`) |
-| `stored` | bool | Stocker le vecteur |
-| `provider` | str | Provider à utiliser |
-
-**Exemple:**
 ```python
-schema = Schema(
-    titre=TEXT(stored=True),
-    embedding=VectorField(dimensions=384, metric="cosine")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
 )
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-## VectorSearch
+### RESTSource
 
 ```python
-class whoosh.vector.VectorSearch(searcher)
-```
-
-Moteur de recherche vectorielle.
-
-### Méthodes
-
-| Méthode | Description |
-|---------|-------------|
-| `vs.search(fieldname, vector, limit, **kwargs)` | Recherche par similarité vectorielle |
-| `vs.index_vectors(fieldname, vectors)` | Indexer des vecteurs |
-| `vs.save()` | Sauvegarde l'index vectoriel |
-| `vs.load()` | Charge l'index vectoriel |
-
-**Exemple:**
-```python
-with ix.searcher() as s:
-    vs = s.vector_search("embedding", query_vector, limit=10)
-    for hit in vs:
-        print(hit["titre"], hit.score)
-```
-
-## AutocompleteField
-
-```python
-from whoosh_modern.autocomplete import AutocompleteField
-
-champ = AutocompleteField(
-    prefix_length=3,
-    max_prefix=50,
-    stored=False
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
 )
+schema = source.discover_schema()
+docs = list(source.iter_documents())
 ```
 
-## FastAPI Integration
+## SchemaDiscovery
 
 ```python
-from whoosh_fastapi import WhooshFastAPI
+from whoosh_modern.schema_discovery import SchemaDiscovery
 
-app = FastAPI()
-api = WhooshFastAPI(ix)
-
-api.register_search_endpoint("/search", "content")
-api.register_index_endpoint("/documents", schema)
+schema = SchemaDiscovery.from_result_set(columns)
+schema = SchemaDiscovery.from_sample(docs)
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
 ```
 
-## SchemaBuilder
-
-API fluent pour construire des schémas:
+## FacetManager
 
 ```python
-from whoosh.fields import SchemaBuilder, TEXT, ID, NUMERIC
+from whoosh_modern.facets import FacetManager
 
-schema = (
-    SchemaBuilder()
-    .field("titre", TEXT(stored=True))
-    .field("chemin", ID(stored=True, unique=True))
-    .field("contenu", TEXT)
-    .field("note", NUMERIC(float, stored=True))
-    .build()
+manager = FacetManager(schema)
+facets = manager.get_facets()
+manager.set_manual_override("price", {"type": "range"})
+```
+
+## ValidationFramework
+
+```python
+from whoosh_modern.validation import ValidationFramework, ValidationResult
+
+validator = ValidationFramework()
+results = validator.validate(source)
+```
+
+## Middleware Pipeline
+
+```python
+from whoosh_modern.middleware import MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
+
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
 )
+result = pipeline.execute(operation)
 ```
 
-## Monitoring
+## SearchView
 
 ```python
-from whoosh.middleware import MetricsMiddleware, MiddlewareChain
-from whoosh.middleware.integration import apply_middleware_to_searcher
+from whoosh_modern.views import SearchView
 
-chain = MiddlewareChain([MetricsMiddleware()])
-searcher = apply_middleware_to_searcher(ix.searcher(), chain.middlewares)
-
-metrics = chain.get_metrics()
-print(metrics)
-# {"documents_indexed": 10, "searches_executed": 5}
+view = SearchView(name="reuters", source=source)
+ix = view.build("indexdir")
+count = view.reindex()
+results = view.validate()
 ```
 
 
@@ -7103,11 +8102,172 @@ with ix.writer() as writer:
 ```
 
 
+## DOCUMENT: Data Sources
+
+# Sources de données
+
+Whoosh-NG fournit une couche de sources de données flexible pour l'indexation de documents à partir de bases de données SQL, d'API REST et de fournisseurs personnalisés.
+
+## Protocole DataSource
+
+Toutes les sources implémentent le protocole `DataSource` :
+
+```python
+from whoosh_modern.data_sources import DataSource
+
+class DataSource(Protocol):
+    @property
+    def name(self) -> str: ...
+
+    def discover_schema(self) -> Schema: ...
+    def iter_documents(self) -> Iterator[Document]: ...
+    def document_count(self) -> int: ...
+    def metadata(self) -> Mapping[str, Any]: ...
+```
+
+## SQLSource
+
+```python
+from whoosh_modern.data_sources import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("mydb.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM products",
+    incremental_field="updated_at",
+    id_field="id",
+)
+
+schema = source.discover_schema()
+count = source.document_count()
+docs = list(source.iter_documents())
+```
+
+### GROUP BY
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="""
+        SELECT category, COUNT(*) as doc_count
+        FROM products
+        GROUP BY category
+    """,
+)
+```
+
+### JOINs avec alias
+
+```python
+source = SQLSource(
+    connection=conn,
+    query="""
+        SELECT p.id AS product_id, c.name AS category_name
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+    """,
+)
+```
+
+### Synchronisation incrémentale
+
+```python
+from datetime import datetime
+
+for doc in source.iter_changes(since=datetime(2025, 1, 1)):
+    print(doc["id"], doc["updated_at"])
+```
+
+## RESTSource
+
+```python
+from whoosh_modern.data_sources import RESTSource
+
+source = RESTSource(
+    url="https://api.example.com/v2/products",
+    pagination="page",
+    page_size=50,
+    headers={"Authorization": "Bearer token"},
+)
+
+schema = source.discover_schema()
+docs = list(source.iter_documents())
+```
+
+### Stratégies de pagination
+
+| Stratégie | Paramètres |
+|----------|-----------|
+| `page` | `?page=N&size=M` |
+| `offset` | `?offset=N&limit=M` |
+| `cursor` | `?cursor=XYZ&size=M` |
+
+```python
+source = RESTSource(
+    url="https://api.example.com/data",
+    pagination="cursor",
+    page_size=100,
+)
+```
+
+
+## DOCUMENT: Facets
+
+# Gestionnaire de facettes
+
+`FacetManager` gère la configuration des facettes pour un schéma Whoosh.
+
+## Usage basique
+
+```python
+from whoosh.fields import Schema, TEXT, NUMERIC, BOOLEAN
+from whoosh_modern.facets import FacetManager, TermsFacet, RangeFacet
+
+schema = Schema(
+    title=TEXT(stored=True),
+    category=TEXT(sortable=True),
+    price=NUMERIC(),
+    active=BOOLEAN(),
+)
+
+manager = FacetManager(schema)
+```
+
+## Auto-découverte
+
+| Type Whoosh | Facette auto-découverte |
+|-------------|-------------------------|
+| `KEYWORD`, `BOOLEAN`, `ID` | `TermsFacet` |
+| `NUMERIC` | `RangeFacet` |
+| `DATETIME` | `DateRangeFacet` |
+
+```python
+facets = manager.get_facets()
+manager.is_facetable("category")  # True
+manager.is_facetable("title")     # False
+```
+
+## Remplacement manuel
+
+```python
+manager.set_manual_override("category", {"type": "terms", "limit": 50})
+manager.set_manual_override("price", {"type": "range", "buckets": ["0-10", "10-50"]})
+```
+
+## Statistiques
+
+```python
+stats = manager.get_facet_stats()
+# {"total_fields": 4, "auto_discovered_facets": 2, ...}
+```
+
+
 ## DOCUMENT: Fastapi Search
 
 # Intégration FastAPI
 
-Un service FastAPI complet exposant la recherche Whoosh‑NG via HTTP.
+Un service FastAPI complet exposant la recherche Whoosh-NG via HTTP.
 
 ## 1. Installation
 
@@ -7115,7 +8275,7 @@ Un service FastAPI complet exposant la recherche Whoosh‑NG via HTTP.
 pip install "whoosh-ng[api]" fastapi uvicorn
 ```
 
-## 2. Créer l’index
+## 2. Créer l'index
 
 ```python
 # setup_index.py
@@ -7153,7 +8313,7 @@ from whoosh_fastapi import create_app
 
 ix = index.open_dir("docs_index")
 
-# Utiliser l’aide
+# Option A: Utiliser l'aide
 app = create_app(ix, prefix="/api/v1")
 
 # Option B: endpoints manuels
@@ -7181,7 +8341,7 @@ if __name__ == "__main__":
 uvicorn main:app --reload --port 8000
 ```
 
-## 5. Tester l’API
+## 5. Tester l'API
 
 ```bash
 # Vérification de santé
@@ -7191,77 +8351,9 @@ curl http://localhost:8000/api/v1/health
 curl -X POST http://localhost:8000/api/v1/search \
   -H "Content-Type: application/json" \
   -d '{"q": "python recherche"}'
-```
 
-## Points clés
-
-- `create_app()` de `whoosh_fastapi` fournit les endpoints `/health`, `/search` et `/autocomplete`.
-- Tous les appels bloquants s’exécutent hors boucle d’événements via `run_sync`.
-
-
-## DOCUMENT: Fastapi
-
-# Intégration FastAPI
-
-Un service REST complet exposant la recherche Whoosh‑NG via HTTP.
-
-## 1. Installation
-
-```bash
-pip install "whoosh-ng[api]" fastapi uvicorn
-```
-
-## 2. Schéma et création de l’index
-
-```python
-from whoosh import index
-from whoosh.fields import Schema, TEXT, ID
-
-schema = Schema(
-    id=ID(stored=True, unique=True),
-    title=TEXT(stored=True),
-    content=TEXT,
-)
-
-ix = index.create_in("docs_index", schema)
-
-# Indexer des documents
-with ix.writer() as w:
-    w.add_document(id="1", title="Python Basics", content="Learn Python fundamentals.")
-    w.add_document(id="2", title="FastAPI Tutorial", content="REST API with FastAPI.")
-    w.commit()
-```
-
-## 3. Service REST avec create_app
-
-```python
-from fastapi import FastAPI
-from whoosh_fastapi import create_app
-
-app = create_app(ix, prefix="/api/v1")
-
-# L’application fournit automatiquement :
-# - GET  /api/v1/health   → {"status": "ok"}
-# - POST /api/v1/search   → {"hits": [...], "total": N}
-# - GET  /api/v1/autocomplete?q=... → {"suggestions": [...]}
-```
-
-## 4. Démarrer le serveur
-
-```bash
-uvicorn main:app --reload --port 8000
-```
-
-## 5. Requêtes de test
-
-```bash
-# Vérification de santé
-curl http://localhost:8000/api/v1/health
-
-# Recherche
-curl -X POST http://localhost:8000/api/v1/search \
-  -H "Content-Type: application/json" \
-  -d '{"q": "python"}'
+# Get document by ID
+curl http://localhost:8000/api/v1/documents/doc1
 
 # Autocomplétion
 curl "http://localhost:8000/api/v1/autocomplete?q=py"
@@ -7270,10 +8362,9 @@ curl "http://localhost:8000/api/v1/autocomplete?q=py"
 ## 6. Indexation en lot
 
 ```python
+# Ajouter à main.py pour l'indexation dynamique
 from fastapi import FastAPI
 from whoosh.writing import BufferedWriter
-
-ix = index.open_dir("docs_index")
 
 @app.post("/api/v1/index")
 async def index_docs(docs: list[dict]):
@@ -7285,9 +8376,60 @@ async def index_docs(docs: list[dict]):
 
 ## Points clés
 
-- `create_app()` de `whoosh_fastapi` expose `/health`, `/search` et `/autocomplete`.
-- Les appels bloquants s’exécutent hors boucle d’événements.
-- Utilisez `BufferedWriter` pour l’indexation en masse.
+- `create_app()` de `whoosh_fastapi` fournit les endpoints `/health`, `/search` et `/autocomplete`.
+- Tous les appels bloquants s'exécutent hors boucle d'événements via `run_sync`.
+- Utilisez `BufferedWriter` pour l'indexation en masse.
+- `WhooshFastAPI` classe offre une enregistrement par endpoint pour les intégrations personnalisées.
+
+
+## DOCUMENT: Middleware Pipeline
+
+# Pipeline de middleware
+
+Le pipeline de middleware enveloppe les opérations avec des préoccupations transversales : nouvelle tentative, journalisation, etc.
+
+## Architecture
+
+```python
+from whoosh_modern.middleware import Middleware, MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
+
+pipeline = MiddlewarePipeline(
+    RetryMiddleware(attempts=3, backoff="exponential"),
+    LoggingMiddleware(),
+)
+
+result = pipeline.execute(my_operation)
+```
+
+## RetryMiddleware
+
+```python
+from whoosh_modern.middleware import RetryMiddleware
+
+retry = RetryMiddleware(attempts=3, backoff="exponential")
+
+@retry.wrap
+def operation():
+    return fetch_data()
+```
+
+Stratégies de backoff :
+- `"exponential"` : 1s, 2s, 4s, 8s...
+- `"linear"` : 1s, 2s, 3s, 4s...
+
+## LoggingMiddleware
+
+```python
+from whoosh_modern.middleware import LoggingMiddleware
+import logging
+
+logger = logging.getLogger("benchmark")
+logging_mw = LoggingMiddleware(logger=logger)
+
+@logging_mw.wrap
+def tracked():
+    return fetch_data()
+```
 
 
 ## DOCUMENT: Middleware
@@ -7642,6 +8784,234 @@ PluginManager.load_plugins()
 ```
 
 
+## DOCUMENT: Schema Discovery
+
+# Découverte de schéma
+
+La découverte de schéma infère un schéma Whoosh à partir des métadonnées de résultats ou d'échantillons de documents.
+
+## Depuis les métadonnées de colonnes
+
+```python
+from whoosh_modern.schema_discovery import SchemaDiscovery
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+cursor = conn.cursor()
+cursor.execute("PRAGMA table_info(reuters_articles)")
+columns = [(row[1], row[2]) for row in cursor.fetchall()]
+
+schema = SchemaDiscovery.from_result_set(columns)
+```
+
+## Depuis des échantillons de documents
+
+```python
+from whoosh_modern.data_sources.sql import SQLSource
+
+source = SQLSource(connection=conn, query="SELECT * FROM reuters_articles LIMIT 10")
+docs = list(source.iter_documents())[:10]
+schema = SchemaDiscovery.from_sample(docs)
+```
+
+## Détection du champ ID
+
+```python
+id_field = SchemaDiscovery.detect_id_field(dict(schema))
+```
+
+## Détection des doublons
+
+`from_result_set` lève `SchemaDiscoveryError` sur les noms de colonnes dupliqués.
+
+
+## DOCUMENT: Search Models
+
+# Modèles de recherche
+
+Exemples de mapping automatique de modèles Python vers des schémas Whoosh.
+
+## Dataclass
+
+```python
+from dataclasses import dataclass
+from whoosh.fields import Schema, TEXT, NUMERIC
+from whoosh_modern.models import ModelIndex
+import tempfile
+import shutil
+
+@dataclass
+class Book:
+    title: str
+    year: int
+    tags: list[str] | None = None
+
+idx = ModelIndex(Book)
+print(idx.schema)
+```
+
+## Pydantic
+
+```python
+from pydantic import BaseModel
+from whoosh_modern.models import register_model
+
+class BookModel(BaseModel):
+    title: str
+    year: int
+    tags: list[str] | None = None
+
+idx = register_model(BookModel)
+schema = idx.schema
+```
+
+## SQLAlchemy
+
+```python
+from sqlalchemy import Column, Integer, String
+from whoosh_modern.models import register_model
+
+class BookSQL:
+    __tablename__ = "book"
+    title = Column(String, info={"search": {"fulltext": True, "stored": True}})
+    year = Column(Integer, info={"search": {"sortable": True}})
+
+idx = register_model(BookSQL)
+schema = idx.schema
+```
+
+## SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Book(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
+## msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Book(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    year: int
+
+idx = register_model(Book)
+schema = idx.schema
+```
+
+## Indexation de documents
+
+```python
+from whoosh import index
+
+tmp = tempfile.mkdtemp()
+ix = index.create_in(tmp, schema)
+
+with ix.writer() as w:
+    book = Book(title="Guide Whoosh", year=2024, tags=["python", "recherche"])
+    doc = idx.to_whoosh_document(book)
+    w.add_document(**doc)
+    w.commit()
+```
+
+## Auto-indexation avec AutoIndexer
+
+```python
+from whoosh_modern.models import AutoIndexer
+
+auto = AutoIndexer(ix, on_error="raise")
+auto.register(Book)
+
+# Indexer une instance unique
+book = Book(title="Nouveau livre", year=2024, tags=["python"])
+auto.index(book)
+
+# Supprimer par ID
+auto.remove(book)
+
+# Versions asynchrones
+await auto.index_async(book)
+await auto.remove_async(book)
+```
+
+Pour les modèles SQLAlchemy, `AutoIndexer` se connecte automatiquement aux événements `after_insert`, `after_update` et `after_delete`.
+
+## Nettoyage
+
+```python
+shutil.rmtree(tmp)
+```
+
+
+## DOCUMENT: Search View
+
+# SearchView
+
+`SearchView` intègre une source de données avec l'indexation Whoosh.
+
+## Usage basique
+
+```python
+from whoosh_modern.views import SearchView
+from whoosh_modern.data_sources.sql import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+    incremental_field="article_date",
+    id_field="id",
+)
+
+view = SearchView(
+    name="reuters",
+    source=source,
+)
+
+# Créer l'index
+ix = view.build("indexdir")
+```
+
+## Rafraîchissement incrémental
+
+```python
+# Réindexation complète
+count = view.reindex()
+
+# Rafraîchissement incrémental
+count = view.refresh()
+```
+
+## Validation
+
+```python
+results = view.validate()
+for result in results:
+    print(f"Niveau {result.level}: {'PASS' if result.passed else 'FAIL'}")
+```
+
+## Mode strict
+
+```python
+view = SearchView(
+    name="strict",
+    source=source,
+    strict=True,  # Lever ValidationError en cas d'échec
+)
+```
+
+
 ## DOCUMENT: Search
 
 # Recherche
@@ -7759,6 +9129,49 @@ with ix.searcher() as s:
 - `sortedby` pour trier par champ ou score.
 
 
+## DOCUMENT: Validation
+
+# Framework de validation
+
+Le framework de validation exécute 4 niveaux de vérifications sur une source de données avant l'indexation.
+
+## Les 4 niveaux
+
+| Niveau | Méthode | Objectif |
+|-------|---------|---------|
+| **Niveau 1** | `validate_structural(source)` | Disponibilité de la source, détection de schéma |
+| **Niveau 2** | `validate_search(schema)` | Champs indexables, compatibilité des analyseurs |
+| **Niveau 3** | `validate_performance(schema, source)` | Avertissements de performance (TEXT, etc.) |
+| **Niveau 4** | `validate_runtime(source, sample_size)` | Itération d'échantillon, validation de types |
+
+## Usage basique
+
+```python
+from whoosh_modern.validation import ValidationFramework, ValidationResult
+from whoosh_modern.data_sources.sql import SQLSource
+import sqlite3
+
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(connection=conn, query="SELECT * FROM reuters_articles")
+
+validator = ValidationFramework()
+results: list[ValidationResult] = validator.validate(source)
+
+for result in results:
+    status = "PASS" if result.passed else "FAIL"
+    print(f"Niveau {result.level}: {status}")
+```
+
+## Validation individuelle
+
+```python
+errors = validator.validate_structural(source)
+errors = validator.validate_search(schema)
+warnings = validator.validate_performance(schema, source)
+errors = validator.validate_runtime(source, sample_size=100)
+```
+
+
 ## DOCUMENT: Vector Search
 
 # Recherche Vectorielle avec Whoosh‑NG
@@ -7854,6 +9267,130 @@ print(restored == tuple(values))  # True
 - `NumpyProvider` implémente la similarité cosinus.
 - Enregistrez le plugin via `VectorPlugin().register(manager)`.
 - Utilisez `filter_ids` dans `provider.search()` pour restreindre les documents.
+
+
+## DOCUMENT: Auto Indexing
+
+# Auto-indexation
+
+Whoosh-NG fournit `AutoIndexer` pour maintenir automatiquement un index Whoosh en synchronisation avec vos modèles de données.
+
+## Vue d'ensemble
+
+`AutoIndexer` maintient un registre de modèles et de leurs schémas Whoosh correspondants. Il peut :
+
+- **Indexer** des instances de modèle dans un index Whoosh
+- **Supprimer** des instances par leur champ ID
+- **Se connecter** aux événements SQLAlchemy pour une synchronisation automatique
+- **Gérer les erreurs** avec des stratégies configurables
+
+## Utilisation basique
+
+```python
+from whoosh_modern.models import AutoIndexer, ModelIndex
+from whoosh.filedb.filestore import RamStorage
+
+# Créer un index Whoosh
+storage = RamStorage()
+schema = ModelIndex(Book).schema
+ix = storage.create_index(schema)
+
+# Créer l'auto-indexeur
+auto = AutoIndexer(ix, on_error="raise")
+
+# Enregistrer un modèle
+auto.register(Book)
+
+# Indexer une instance
+book = Book(title="Bonjour", year=2024)
+auto.index(book)
+
+# Supprimer par ID
+auto.remove(book)
+```
+
+## Gestion des erreurs
+
+Le paramètre `on_error` contrôle ce qui se passe lorsque l'indexation échoue :
+
+- `"raise"` (défaut) : relève l'exception
+- `"log"` : journalise l'erreur et continue
+- `"skip"` : ignore silencieusement l'erreur
+
+```python
+auto = AutoIndexer(ix, on_error="log")
+```
+
+## Intégration SQLAlchemy
+
+Pour les modèles SQLAlchemy, `AutoIndexer` enregistre automatiquement des écouteurs d'événements :
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from whoosh_modern.models import register_sqlalchemy_model
+
+engine = create_engine("sqlite:///app.db")
+Base = DeclarativeBase()
+
+class Book(Base):
+    __tablename__ = "books"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+
+Base.metadata.create_all(engine)
+
+# Enregistrer avec AutoIndexer
+auto = AutoIndexer(ix)
+auto.register(Book)
+
+# Toute opération de session SQLAlchemy se synchronise automatiquement :
+# - after_insert -> index.document()
+# - after_update -> index.document()
+# - after_delete -> remove.document()
+```
+
+## Support asynchrone
+
+Pour les applications asynchrones, utilisez `index_async` et `remove_async` :
+
+```python
+import asyncio
+
+async def main():
+    book = Book(title="Async", year=2024)
+    await auto.index_async(book)
+    await auto.remove_async(book)
+
+asyncio.run(main())
+```
+
+Ces méthodes exécutent l'indexation synchrone dans un thread de travail via `asyncio.to_thread()` pour ne pas bloquer la boucle d'événements.
+
+## Référence API
+
+### `AutoIndexer(index, on_error="raise")`
+
+- `index` : une instance Whoosh `Index`
+- `on_error` : stratégie de gestion d'erreur (`"raise"`, `"log"`, `"skip"`)
+
+### Méthodes
+
+- `register(model) -> ModelIndex` : enregistrer une classe modèle et retourner son `ModelIndex`
+- `index(instance)` : indexer une instance de modèle
+- `remove(instance)` : supprimer une instance de modèle par son champ ID
+- `index_async(instance)` : version async de `index`
+- `remove_async(instance)` : version async de `remove`
+
+### Fonctions utilitaires
+
+```python
+from whoosh_modern.models import index_document, remove_document
+
+# Indexation ponctuelle sans créer d'AutoIndexer
+index_document(ix, book_instance, on_error="raise")
+remove_document(ix, book_instance, on_error="raise")
+```
 
 
 ## DOCUMENT: Autocomplete
@@ -8240,8 +9777,86 @@ uv run mypy src/whoosh
 
 ## Prochaines étapes
 
-- [Démarrage rapide](/fr/quickstart)
-- [Concepts fondamentaux](/fr/guides/core-concepts)
+- [Démarrage rapide]({{ '/fr/quickstart/' | relative_url }})
+- [Concepts fondamentaux]({{ '/fr/guides/core-concepts/' | relative_url }})
+
+
+## DOCUMENT: Legacy Cleanup
+
+# Stratégie de nettoyage du code legacy
+
+Ce guide explique comment Whoosh-NG sépare le code moderne typé du code legacy,
+et comment le nettoyage progressif est organisé.
+
+## Pourquoi une frontière legacy ?
+
+`whoosh-modern` est la nouvelle surface de Whoosh-NG, entièrement typée.
+Le package `whoosh` original fonctionne toujours au runtime, mais il contient
+des décennies de motifs de compatibilité Python 2/3, de métaprogrammation
+dynamique et d'internes non typés. Forcer des types stricts sur l'ensemble
+d'un coup bloquerait le développement.
+
+La stratégie de nettoyage est **incrémentale et opt-in** :
+
+1. `src/whoosh_modern/` est typé et vérifié avec `pyright` et `mypy` en mode strict.
+2. `src/whoosh/` est la surface legacy. Elle est divisée en :
+   - **modules exclus** (documentés dans `pyrightconfig.json`) — code trop
+     dynamique ou vendu pour justifier un passage de types rentable maintenant ;
+   - **candidats au nettoyage** — petits fichiers isolés, faciles à annoter et
+     à vérifier.
+3. Chaque sprint, une vague de candidats est typée, testée, puis sortie de la
+   zone de tolérance élevée.
+
+## Seuils actuels (Sprint 2)
+
+| Vérificateur | Portée | Seuil |
+|--------------|--------|-------|
+| `pyright` | `src/whoosh_modern/` | **0 erreur** (strict) |
+| `pyright` | legacy | **≤ 500 erreurs** (tolérant) |
+| `mypy` | `src/` | **0 erreur** (via overrides + `ignore_errors`) |
+
+## Justification des exclusions (`pyrightconfig.json`)
+
+La liste `exclude` de `pyrightconfig.json` regroupe les fichiers par thème :
+
+- **Vendu / sans stubs** : `pyparsing.py`, `relativedelta.py`
+- **Shims de migration** : `codec/whoosh2.py`, `codec/whoosh3.py`
+- **Parsing dynamique** : `qparser/`, `query/`, `analysis/`, `automata/`
+- **Stockage fichiers** : `filedb/`, `reading/`, `writing/`
+- **Heuristique / data-driven** : `lang/dmetaphone.py`, `lang/lovins.py`,
+  `lang/phonetic.py`, `lang/wordnet.py`
+- **Objets dynamiques** : `classify.py`, `index.py`, `locking.py`,
+  `formats.py`, `middleware/`
+- **Bas niveau vendu** : `support/bench.py`, `support/base85.py`,
+  `support/bitstream.py`, `support/bitvector.py`, `support/charset.py`,
+  `support/levenshtein.py`
+
+## Plan Sprint 2
+
+Pour le Sprint 2, l'accent est mis sur les petits modules utilitaires et de
+support, sans dépendances externes ni métaprogrammation lourde.
+
+Vague de candidats :
+
+- `src/whoosh/util/varints.py`
+- `src/whoosh/util/text.py`
+- `src/whoosh/util/loading.py`
+- `src/whoosh/support/bitstream.py`
+- `src/whoosh/support/levenshtein.py`
+
+Pour chaque fichier :
+
+1. Supprimer le `# type: ignore` global (si présent).
+2. Ajouter des signatures de fonctions précises.
+3. Lancer `pyright` et `mypy` pour confirmer **0 nouvelle erreur**.
+4. Retirer le fichier des exclusions de `pyrightconfig.json`.
+5. Ajouter un test de régression dans `tests/test_legacy_cleanup.py`.
+
+## Objectif long terme
+
+Chaque fichier de `src/whoosh/` doit finir par être vérifiable par `mypy` et
+`pyright` sans exclusion globale. D'ici là, la liste d'exclusion est le
+registre explicite de la dette, et chaque sprint la réduit.
 
 
 ## DOCUMENT: Middleware
@@ -8894,20 +10509,176 @@ writer = ix.writer()
 writer.add_field("description", TEXT(stored=True))
 
 # Supprimer un champ
-writer.remove_field("deprecated_field")
+writer.remove_field("legacy_field")
 
 writer.commit()
 ```
 
 > Note: Supprimer un champ ne fait que le retirer du schéma. Les données ne sont libérées qu'à l'optimisation.
 
+## Modèles de recherche
+
+Whoosh-NG peut mapper automatiquement des modèles Python (dataclasses, Pydantic, SQLAlchemy, SQLModel, msgspec) vers un `Schema` Whoosh via `ModelIndex`.
+
+### Niveau 1 : Auto-mapping
+
+```python
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
+
+@dataclass
+class Book:
+    title: str
+    count: int
+    tag: str | None = None
+
+idx = ModelIndex(Book)
+schema = idx.schema
+```
+
+`ModelIndex` inspecte les annotations de type et les mappe vers des champs Whoosh :
+
+| Type Python | Champ Whoosh |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (stockage hexadécimal) |
+| `list[str]` | `KEYWORD` |
+| `Optional[T]` | type mappé ou `STORED` |
+
+Les champs ID sont auto-détectés : `SearchOptions(id=True)` explicite > nom `id`/`ID`/`_id` > premier champ `str`.
+
+### Niveau 2 : Options explicites
+
+Utilisez `SearchField` pour remplacer les valeurs par défaut :
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True)
+    count: int = SearchField(sortable=True)
+    tags: list[str] = SearchField(multi=True)
+```
+
+### Niveau 3 : Types annotés
+
+Utilisez `Annotated` pour attacher des métadonnées directement aux annotations :
+
+```python
+from typing import Annotated
+from whoosh_modern.models import SearchField
+
+class Book:
+    title: Annotated[str, SearchField(fulltext=True, stored=True)]
+```
+
+### Intégrations
+
+#### Dataclass
+
+```python
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
+
+@dataclass
+class Article:
+    title: str
+    body: str
+    published: datetime.datetime
+
+idx = ModelIndex(Article)
+```
+
+#### Pydantic v2
+
+```python
+from pydantic import BaseModel
+from whoosh_modern.models import register_model
+
+class Article(BaseModel):
+    title: str
+    body: str
+    published: datetime.datetime
+
+    # Métadonnées de recherche par champ via json_schema_extra
+    model_config = {"json_schema_extra": {"search": {"fulltext": True}}}
+
+idx = register_model(Article)
+```
+
+#### SQLAlchemy
+
+```python
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import DeclarativeBase
+from whoosh_modern.models import register_model
+
+class Base(DeclarativeBase):
+    pass
+
+class Article(Base):
+    __tablename__ = "articles"
+    id = Column(Integer, primary_key=True)
+    title = Column(String, info={"search": {"fulltext": True, "stored": True}})
+    published = Column(DateTime, info={"search": {"sortable": True}})
+
+idx = register_model(Article)
+```
+
+#### SQLModel
+
+```python
+from sqlmodel import SQLModel, Field
+from whoosh_modern.models import register_model
+
+class Article(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
+    published: datetime.datetime
+
+idx = register_model(Article)
+```
+
+#### msgspec
+
+```python
+import msgspec
+from whoosh_modern.models import register_model
+
+class Article(msgspec.Struct):
+    title: str = msgspec.field(metadata={"search": {"fulltext": True}})
+    published: datetime.datetime
+
+idx = register_model(Article)
+```
+
+### Conversion d'instances
+
+```python
+doc = idx.to_whoosh_document(book_instance)
+writer.add_document(**doc)
+```
+
+`to_whoosh_document` gère :
+- dataclass : itération via `dataclasses.fields()`
+- Pydantic/SQLModel : itération via `model_fields`
+- SQLAlchemy : itération via `__mapper__.columns`
+- Valeurs Enum converties en `.value`
+- `bytes` convertis en chaîne hexadécimale
+
 ## Bonnes pratiques
 
-1. **Minimal**: N'indexez que ce que vous cherchez
-2. **STORED avec parcimonie**: Augmente la taille de l'index
-3. **Champs uniques**: Utilisez `unique=True` pour les identifiants
-4. **Boost de champ**: Boostez les champs importants au niveau schéma
-5. **TEXT options**: Désactivez `phrase` si vous n'avez pas besoin de recherche de phrase
+1. **Minimal** : N'indexez que ce que vous cherchez
+2. **STORED avec parcimonie** : Augmente la taille de l'index
+3. **Champs uniques** : Utilisez `unique=True` pour les identifiants
+4. **Boost de champ** : Boostez les champs importants au niveau schéma
+5. **TEXT options** : Désactivez `phrase` si vous n'avez pas besoin de recherche de phrase
+6. **Champ ID** : Laissez `ModelIndex` auto-détecter ou marquez explicitement avec `SearchOptions(id=True)`
 
 
 ## DOCUMENT: Searching
@@ -9223,14 +10994,40 @@ with ix.searcher() as s:
     print(results[0])
 ```
 
-## Fonctionnalités
+## Documentation
 
-- Pur Python, aucune dépendance native
-- Moteur de recherche embarqué
-- Architecture de plugins pour l'extensibilité
-- Pipeline de middleware pour les préoccupations transversales
-- Support de recherche vectorielle (NumPy, HNSW, Faiss)
-- Support asynchrone via extra optionnel
+- **[API Reference](/whoosh-ng/fr/api/overview/)** — Documentation complète des modules
+- **[Guides](/whoosh-ng/fr/guides/)** — Tutoriels et bonnes pratiques
+- **[Exemples](/whoosh-ng/fr/examples/)** — Exemples de code exécutables
+- **[English Documentation](/whoosh-ng/en/)** — Documentation in English
+
+## Structure de la documentation
+
+### Guides utilisateur
+
+- **[Indexation]({{ '/fr/guides/indexing/' | relative_url }})** — Ajouter, mettre à jour et supprimer des documents
+- **[Recherche]({{ '/fr/guides/searching/' | relative_url }})** — Analyse de requêtes, surbrillance et facettes
+- **[Conception de schéma]({{ '/fr/guides/schema/' | relative_url }})** — Types de champs, stockage et options d'indexation
+- **[Middleware]({{ '/fr/guides/middleware/' | relative_url }})** — Hooks de pipeline et middleware personnalisé
+- **[Plugins]({{ '/fr/guides/plugins/' | relative_url }})** — Étendre Whoosh-NG avec des plugins
+- **[Recherche vectorielle]({{ '/fr/guides/vector/' | relative_url }})** — Intégration NumPy, HNSW et Faiss
+
+### API Reference
+
+- **[Modern API]({{ '/fr/api/modern/' | relative_url }})** — Sources de données, validation, facettes, middleware
+
+### Exemples
+
+- **[Indexation basique]({{ '/fr/examples/basic-indexing/' | relative_url }})** — Exemples d'indexation de documents
+- **[Recherche]({{ '/fr/examples/search/' | relative_url }})** — Interrogation et récupération de résultats
+- **[FastAPI]({{ '/fr/examples/fastapi/' | relative_url }})** — API REST avec FastAPI
+- **[Middleware]({{ '/fr/examples/middleware/' | relative_url }})** — Patterns de middleware personnalisés
+- **[Sources de données]({{ '/fr/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Découverte de schéma]({{ '/fr/examples/schema-discovery/' | relative_url }})** — Inspection des jeux de résultats
+- **[Gestionnaire de facettes]({{ '/fr/examples/facets/' | relative_url }})** — Auto-découverte et remplacements manuels
+- **[Framework de validation]({{ '/fr/examples/validation/' | relative_url }})** — Validation 4 niveaux
+- **[SearchView]({{ '/fr/examples/search-view/' | relative_url }})** — Intégration du pipeline complet
+- **[Pipeline de middleware]({{ '/fr/examples/middleware-pipeline/' | relative_url }})** — Nouvelle tentative, cache, journalisation
 
 
 ## DOCUMENT: Quickstart
@@ -9274,6 +11071,28 @@ from whoosh.plugins.manager import PluginManager
 from whoosh_modern.vector.plugin import VectorPlugin
 
 PluginManager.load_plugins()
+```
+
+## Sources de données
+
+```bash
+pip install whoosh-ng
+```
+
+```python
+import sqlite3
+from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.views import SearchView
+
+# Utiliser les données de benchmark existantes
+conn = sqlite3.connect("benchmark/benchmark_data.db")
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM reuters_articles",
+)
+
+vue = SearchView(name="reuters", source=source)
+ix = vue.build("indexdir")
 ```
 
 

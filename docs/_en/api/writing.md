@@ -242,4 +242,3 @@ class whoosh.writing.IndexingError(Exception)
 ```
 
 Raised when an indexing operation fails.
-

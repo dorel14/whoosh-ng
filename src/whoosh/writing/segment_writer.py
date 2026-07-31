@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -285,7 +286,7 @@ class SegmentWriter(IndexWriter):
         add_post = self.pool.add
 
         docboost = self._doc_boost(fields)
-        fieldnames = sorted([name for name in fields.keys() if not name.startswith("_")])
+        fieldnames = sorted([name for name in fields if not name.startswith("_")])
         self._check_fields(schema, fieldnames)
 
         perdocwriter.start_doc(docnum)

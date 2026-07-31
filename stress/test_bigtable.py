@@ -1,6 +1,5 @@
 from random import randint, shuffle
 
-
 from whoosh.filedb.filetables import HashReader, HashWriter
 from whoosh.util.testing import TempStorage
 

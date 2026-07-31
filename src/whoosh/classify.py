@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2008 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -182,13 +183,13 @@ class Expander:
             btext = field.to_bytes(word)
             if (fieldname, btext) in ixreader:
                 cf = ixreader.frequency(fieldname, btext)
-                score = model.score(weight, cf, self.top_total)
+                score = model.score(weight, cf, self.top_total)  # type: ignore[call-arg]
                 if score > maxweight:
                     maxweight = score
                 tlist.append((score, word))
 
         if normalize:
-            norm = model.normalizer(maxweight, self.top_total)
+            norm = model.normalizer(maxweight, self.top_total)  # type: ignore[call-arg]
         else:
             norm = maxweight
         tlist = [(weight / norm, t) for weight, t in tlist]

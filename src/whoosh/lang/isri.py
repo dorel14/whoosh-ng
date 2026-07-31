@@ -304,12 +304,9 @@ class ISRIStemmer:
         ):  #  مفعلة  -    تفعلة   -  افعلة
             self.stm = self.stm[1:4]
             return self.stm
-        elif (self.stm[0] in self.pr53[3]) & (
-            self.stm[2] == "\u062a"
-        ):  #  مفتعل  -    يفتعل   -  تفتعل
-            self.stm = self.stm[1] + self.stm[3:]
-            return self.stm
-        elif (self.stm[0] in self.pr53[4]) & (self.stm[2] == "\u0627"):  # مفاعل  -  تفاعل
+        elif (self.stm[0] in self.pr53[3]) & (self.stm[2] == "\u062a") or (
+            self.stm[0] in self.pr53[4]
+        ) & (self.stm[2] == "\u0627"):  #  مفتعل  -    يفتعل   -  تفتعل
             self.stm = self.stm[1] + self.stm[3:]
             return self.stm
         elif (self.stm[2] in self.pr53[5]) & (self.stm[4] == "\u0629"):  #     فعولة  -   فعالة

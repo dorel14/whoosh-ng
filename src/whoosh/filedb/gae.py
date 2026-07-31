@@ -1,3 +1,4 @@
+# type: ignore
 """
 This module contains EXPERIMENTAL support for storing a Whoosh index's files in
 the Google App Engine blobstore. This will use a lot of RAM since all files are

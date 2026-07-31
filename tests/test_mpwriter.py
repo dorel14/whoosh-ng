@@ -38,7 +38,7 @@ def _do_basic(writerclass):
     # List of string values added to the index
     docs = []
     # A ring buffer for creating string values
-    buf = deque()
+    buf: deque[str] = deque()
     for ls in permutations("abcd"):
         word = "".join(ls)
         # Remember this word is in the index (to check lexicon)
@@ -123,9 +123,8 @@ def test_no_add():
     from whoosh.multiproc import MpWriter
 
     schema = fields.Schema(text=fields.TEXT(stored=True, spelling=True, vector=True))
-    with TempIndex(schema) as ix:
-        with ix.writer(procs=3) as w:
-            assert type(w) == MpWriter
+    with TempIndex(schema) as ix, ix.writer(procs=3) as w:
+        assert type(w) == MpWriter
 
 
 def _do_merge(writerclass):
@@ -225,7 +224,7 @@ def test_no_score_no_store():
     domain = {}
     keys = list("abcdefghijklmnopqrstuvwx")
     random.shuffle(keys)
-    words = "alfa bravo charlie delta".split()
+    words = ["alfa", "bravo", "charlie", "delta"]
     for i, key in enumerate(keys):
         domain[key] = words[i % len(words)]
 
@@ -245,7 +244,7 @@ def test_multisegment():
     from whoosh.multiproc import MpWriter
 
     schema = fields.Schema(a=fields.TEXT(stored=True, spelling=True, vector=True))
-    words = "alfa bravo charlie delta echo".split()
+    words = ["alfa", "bravo", "charlie", "delta", "echo"]
     with TempIndex(schema) as ix:
         with ix.writer(procs=3, multisegment=True, batchsize=10) as w:
             assert w.__class__ == MpWriter
@@ -266,10 +265,9 @@ def test_multisegment():
 def test_batchsize_eq_doccount():
     check_multi()
     schema = fields.Schema(a=fields.KEYWORD(stored=True))
-    with TempIndex(schema) as ix:
-        with ix.writer(procs=4, batchsize=10) as w:
-            for i in range(10):
-                w.add_document(a=str(i))
+    with TempIndex(schema) as ix, ix.writer(procs=4, batchsize=10) as w:
+        for i in range(10):
+            w.add_document(a=str(i))
 
 
 def test_finish_segment():

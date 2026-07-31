@@ -13,8 +13,8 @@ from whoosh.index import Index
 from whoosh.utils.async_utils import run_sync
 
 try:
-    from fastapi import FastAPI
-    from fastapi.responses import JSONResponse
+    from fastapi import FastAPI  # pyright: ignore[reportMissingImports]
+    from fastapi.responses import JSONResponse  # pyright: ignore[reportMissingImports]
 
     def _run_search(index: Index, query: str, **kwargs: Any) -> tuple[list[dict[str, Any]], int]:
         from whoosh.qparser import QueryParser

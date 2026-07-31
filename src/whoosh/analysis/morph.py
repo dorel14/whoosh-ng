@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -130,7 +131,7 @@ class StemFilter(Filter):
     def cache_info(self):
         if self.cachesize <= 1:
             return None
-        return self._stem.cache_info()
+        return self._stem.cache_info()  # type: ignore[attr-defined]
 
     def __eq__(self, other):
         return other and self.__class__ is other.__class__ and self.stemfn == other.stemfn

@@ -52,6 +52,7 @@ method will return ``True``.
 from abc import abstractmethod
 from itertools import repeat
 from typing import Any
+
 # Exceptions
 
 
@@ -140,7 +141,7 @@ class Matcher:
 
         return []
 
-    def replace(self, minquality=0):
+    def replace(self, minquality=0) -> "Matcher":
         """Returns a possibly-simplified version of this matcher. For example,
         if one of the children of a UnionMatcher is no longer active, calling
         this method on the UnionMatcher will return the other child.
@@ -475,10 +476,8 @@ class ListMatcher(Matcher):
             self._all_weights,
         )
 
-    def replace(self, minquality=0):
-        if not self.is_active():
-            return NullMatcher()
-        elif minquality and self.max_quality() < minquality:
+    def replace(self, minquality=0) -> "Matcher":
+        if not self.is_active() or minquality and self.max_quality() < minquality:
             return NullMatcher()
         else:
             return self

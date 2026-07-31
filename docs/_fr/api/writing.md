@@ -157,4 +157,3 @@ class whoosh.writing.IndexingError(Exception)
 ```
 
 Levée quand une opération d'indexation échoue.
-

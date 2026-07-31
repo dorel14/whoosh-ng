@@ -99,6 +99,18 @@ class Token:
     ...or, call token.copy() to get a copy of the token object.
     """
 
+    text: str = ""
+    pos: int = 0
+    startchar: int = 0
+    endchar: int = 0
+    original: str | None = None
+    positions: bool = False
+    chars: bool = False
+    stopped: bool = False
+    boost: float = 1.0
+    removestops: bool = True
+    mode: str = ""
+
     def __init__(self, positions=False, chars=False, removestops=True, mode="", **kwargs):
         """
         :param positions: Whether tokens should have the token position in the

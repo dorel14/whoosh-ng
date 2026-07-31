@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2012 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +37,7 @@ from whoosh.writing import SegmentWriter
 
 
 class MemWriter(SegmentWriter):
-    def commit(self, mergetype=None, optimize=False, merge=True):
+    def commit(self, mergetype=None, optimize=None, merge=None, callback=None):
         self._finalize_segment()
 
 
@@ -140,7 +141,7 @@ class MemPerDocReader(base.PerDocumentReader):
     def deleted_docs(self):
         return self._segment.deleted_docs()
 
-    def supports_columns(self):
+    def supports_columns(self):  # type: ignore[override]
         return True
 
     def has_column(self, fieldname):
@@ -165,7 +166,7 @@ class MemPerDocReader(base.PerDocumentReader):
     def max_field_length(self, fieldname):
         return max(lens[fieldname] for lens in self._segment._lengths.values() if fieldname in lens)
 
-    def has_vector(self, docnum, fieldname):
+    def has_vector(self, docnum, fieldname):  # type: ignore[override]
         return docnum in self._segment._vectors and fieldname in self._segment._vectors[docnum]
 
     def vector(self, docnum, fieldname, format_):
@@ -203,7 +204,7 @@ class MemFieldWriter(base.FieldWriter):
         self._fieldname = fieldname
         self._fieldobj = fieldobj
 
-    def start_term(self, btext):
+    def start_term(self, btext):  # type: ignore[override]
         if self._btext is not None:
             raise ValueError("Called start_term in a term")
         fieldname = self._fieldname
@@ -222,8 +223,8 @@ class MemFieldWriter(base.FieldWriter):
         self._btext = btext
 
     def add(self, docnum, weight, vbytes, length):
-        self._postings.append((docnum, weight, vbytes))
-        self._terminfo.add_posting(docnum, weight, length)
+        self._postings.append((docnum, weight, vbytes))  # type: ignore[union-attr]
+        self._terminfo.add_posting(docnum, weight, length)  # type: ignore[union-attr]
 
     def finish_term(self):
         if self._btext is None:
@@ -270,7 +271,7 @@ class MemTermsReader(base.TermsReader):
     def term_info(self, fieldname, text):
         return self._segment._terminfos[fieldname, text]
 
-    def matcher(self, fieldname, btext, format_, scorer=None):
+    def matcher(self, fieldname, btext, format_, scorer=None):  # type: ignore[override]
         items = self._invindex[fieldname][btext]
         ids, weights, values = zip(*items)
         return ListMatcher(ids, weights, values, format_, scorer=scorer)
@@ -320,7 +321,8 @@ class MemSegment(base.Segment):
             return self._doccount - len(self._stored)
 
     def is_deleted(self, docnum):
-        return docnum not in self._stored
+        with self._lock:
+            return docnum not in self._stored
 
     def deleted_docs(self):
         stored = self._stored
@@ -328,5 +330,5 @@ class MemSegment(base.Segment):
             if docnum not in stored:
                 yield docnum
 
-    def should_assemble(self):
+    def should_assemble(self):  # type: ignore[override]
         return False

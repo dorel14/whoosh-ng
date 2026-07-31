@@ -1,3 +1,4 @@
+# type: ignore
 # module pyparsing.py
 #
 # Copyright (c) 2003-2009  Paul T. McGuire
@@ -192,7 +193,7 @@ def _xml_escape(data):
 
     # ampersand must be replaced first
     from_symbols = "&><\"'"
-    to_symbols = ["&" + s + ";" for s in "amp gt lt quot apos".split()]
+    to_symbols = ["&" + s + ";" for s in ["amp", "gt", "lt", "quot", "apos"]]
     for from_, to_ in zip(from_symbols, to_symbols):
         data = data.replace(from_, to_)
     return data
@@ -263,7 +264,18 @@ class ParseBaseException(Exception):
         return line_str.strip()
 
     def __dir__(self):
-        return "loc msg pstr parserElement lineno col line markInputLine __str__ __repr__".split()
+        return [
+            "loc",
+            "msg",
+            "pstr",
+            "parserElement",
+            "lineno",
+            "col",
+            "line",
+            "markInputLine",
+            "__str__",
+            "__repr__",
+        ]
 
 
 class ParseException(ParseBaseException):
@@ -392,7 +404,7 @@ class ParseResults:
                         setattr(self, name, toklist)
 
     def __getitem__(self, i):
-        if isinstance(i, (int, slice)):
+        if isinstance(i, int | slice):
             return self.__toklist[i]
         else:
             if i not in self.__accum_names:
@@ -414,7 +426,7 @@ class ParseResults:
             sub.__parent = wkref(self)
 
     def __delitem__(self, i):
-        if isinstance(i, (int, slice)):
+        if isinstance(i, int | slice):
             mylen = len(self.__toklist)
             del self.__toklist[i]
 
@@ -1087,7 +1099,7 @@ class ParserElement:
                                 tokens,
                                 self.results_name,
                                 as_list=self.saveas_list
-                                and isinstance(tokens, (ParseResults, list)),
+                                and isinstance(tokens, ParseResults | list),
                                 modal=self.modal_results,
                             )
                 except ParseBaseException as err:
@@ -1102,7 +1114,7 @@ class ParserElement:
                         ret_tokens = ParseResults(
                             tokens,
                             self.results_name,
-                            as_list=self.saveas_list and isinstance(tokens, (ParseResults, list)),
+                            as_list=self.saveas_list and isinstance(tokens, ParseResults | list),
                             modal=self.modal_results,
                         )
 
@@ -1878,15 +1890,9 @@ class Word(Token):
             if self.body_charsOrig == self.init_charsOrig:
                 self.reString = f"[{_escape_regex_range_chars(self.init_charsOrig)}]+"
             elif len(self.body_charsOrig) == 1:
-                self.reString = "{}[{}]*".format(
-                    re.escape(self.init_charsOrig),
-                    _escape_regex_range_chars(self.body_charsOrig),
-                )
+                self.reString = f"{re.escape(self.init_charsOrig)}[{_escape_regex_range_chars(self.body_charsOrig)}]*"
             else:
-                self.reString = "[{}][{}]*".format(
-                    _escape_regex_range_chars(self.init_charsOrig),
-                    _escape_regex_range_chars(self.body_charsOrig),
-                )
+                self.reString = f"[{_escape_regex_range_chars(self.init_charsOrig)}][{_escape_regex_range_chars(self.body_charsOrig)}]*"
             if self.as_keyword:
                 self.reString = r"\b" + self.reString + r"\b"
             try:
@@ -2806,7 +2812,7 @@ class Each(ParseExpression):
             self.multioptionals = [e.expr for e in self.exprs if isinstance(e, ZeroOrMore)]
             self.multirequired = [e.expr for e in self.exprs if isinstance(e, OneOrMore)]
             self.required = [
-                e for e in self.exprs if not isinstance(e, (Optional, ZeroOrMore, OneOrMore))
+                e for e in self.exprs if not isinstance(e, Optional | ZeroOrMore | OneOrMore)
             ]
             self.required += self.multirequired
             self.initExprGroups = False
@@ -3572,7 +3578,7 @@ def one_of(strs, caseless=False, use_regex=True):
         masks = lambda a, b: b.startswith(a)
         parse_element_class = Literal
 
-    if isinstance(strs, (list, tuple)):
+    if isinstance(strs, list | tuple):
         symbols = list(strs[:])
     elif isinstance(strs, str):
         symbols = strs.split()
@@ -4126,7 +4132,7 @@ anyOpenTag, anyCloseTag = make_html_tags(Word(alphas, alphanums + "_:"))
 commonHTMLEntity = Combine(
     _L("&") + one_of("gt lt amp nbsp quot").set_results_name("entity") + ";"
 ).streamline()
-_htmlEntityMap = dict(zip("gt lt amp nbsp quot".split(), '><& "'))
+_htmlEntityMap = dict(zip(["gt", "lt", "amp", "nbsp", "quot"], '><& "'))
 replaceHTMLEntity = lambda t: t.entity in _htmlEntityMap and _htmlEntityMap[t.entity] or None
 
 # it's easy to get these comment structures wrong - they're very common, so may as well make them available

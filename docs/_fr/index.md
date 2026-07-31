@@ -29,12 +29,37 @@ with ix.searcher() as s:
     print(results[0])
 ```
 
-## Fonctionnalités
+## Documentation
 
-- Pur Python, aucune dépendance native
-- Moteur de recherche embarqué
-- Architecture de plugins pour l'extensibilité
-- Pipeline de middleware pour les préoccupations transversales
-- Support de recherche vectorielle (NumPy, HNSW, Faiss)
-- Support asynchrone via extra optionnel
+- **[API Reference](/whoosh-ng/fr/api/overview/)** — Documentation complète des modules
+- **[Guides](/whoosh-ng/fr/guides/)** — Tutoriels et bonnes pratiques
+- **[Exemples](/whoosh-ng/fr/examples/)** — Exemples de code exécutables
+- **[English Documentation](/whoosh-ng/en/)** — Documentation in English
 
+## Structure de la documentation
+
+### Guides utilisateur
+
+- **[Indexation]({{ '/fr/guides/indexing/' | relative_url }})** — Ajouter, mettre à jour et supprimer des documents
+- **[Recherche]({{ '/fr/guides/searching/' | relative_url }})** — Analyse de requêtes, surbrillance et facettes
+- **[Conception de schéma]({{ '/fr/guides/schema/' | relative_url }})** — Types de champs, stockage et options d'indexation
+- **[Middleware]({{ '/fr/guides/middleware/' | relative_url }})** — Hooks de pipeline et middleware personnalisé
+- **[Plugins]({{ '/fr/guides/plugins/' | relative_url }})** — Étendre Whoosh-NG avec des plugins
+- **[Recherche vectorielle]({{ '/fr/guides/vector/' | relative_url }})** — Intégration NumPy, HNSW et Faiss
+
+### API Reference
+
+- **[Modern API]({{ '/fr/api/modern/' | relative_url }})** — Sources de données, validation, facettes, middleware
+
+### Exemples
+
+- **[Indexation basique]({{ '/fr/examples/basic-indexing/' | relative_url }})** — Exemples d'indexation de documents
+- **[Recherche]({{ '/fr/examples/search/' | relative_url }})** — Interrogation et récupération de résultats
+- **[FastAPI]({{ '/fr/examples/fastapi/' | relative_url }})** — API REST avec FastAPI
+- **[Middleware]({{ '/fr/examples/middleware/' | relative_url }})** — Patterns de middleware personnalisés
+- **[Sources de données]({{ '/fr/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Découverte de schéma]({{ '/fr/examples/schema-discovery/' | relative_url }})** — Inspection des jeux de résultats
+- **[Gestionnaire de facettes]({{ '/fr/examples/facets/' | relative_url }})** — Auto-découverte et remplacements manuels
+- **[Framework de validation]({{ '/fr/examples/validation/' | relative_url }})** — Validation 4 niveaux
+- **[SearchView]({{ '/fr/examples/search-view/' | relative_url }})** — Intégration du pipeline complet
+- **[Pipeline de middleware]({{ '/fr/examples/middleware-pipeline/' | relative_url }})** — Nouvelle tentative, cache, journalisation

@@ -5,7 +5,7 @@ without breaking existing APIs.
 """
 
 from whoosh.middleware.chain import MiddlewareChain
-from whoosh.middleware.wrappers import MiddlewareWriter, MiddlewareSearcher
+from whoosh.middleware.wrappers import MiddlewareSearcher, MiddlewareWriter
 from whoosh.plugins.manager import PluginManager
 
 

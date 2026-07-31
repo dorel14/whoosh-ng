@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2011 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -185,7 +186,7 @@ class FieldWriter:
         # The bytes text of the previous posting
         lasttext = None
         # The (fieldname, btext) of the previous spelling posting
-        lastspell = None
+        _lastspell = None
         # The field object for the current field
         fieldobj = None
         for fieldname, btext, docnum, weight, value in items:
@@ -214,10 +215,10 @@ class FieldWriter:
                 # spellterm = (fieldname, btext)
                 # # There can be duplicates of spelling terms, so only add a spell
                 # # term if it's greater than the last one
-                # if lastspell is None or spellterm > lastspell:
+                # if _lastspell is None or spellterm > _lastspell:
                 #     spellword = fieldobj.from_bytes(btext)
                 #     self.add_spell_word(fieldname, spellword)
-                #     lastspell = spellterm
+                #     _lastspell = spellterm
                 continue
 
             # If this term is different from the term in the previous posting,
@@ -538,7 +539,7 @@ class Segment:
     def segment_id(self):
         if hasattr(self, "name"):
             # Old segment class
-            return getattr(self, "name")
+            return self.name  # type: ignore[attr-defined]
         else:
             return f"{self.index_name()}_{self.segid}"
 

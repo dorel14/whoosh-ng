@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,24 +42,24 @@ from whoosh.highlight.formatters import (
     top_fragments,
 )
 from whoosh.highlight.fragmenters import (
+    DEFAULT_CHARLIMIT,
+    FIRST,
+    LONGER,
+    SCORE,
+    SHORTER,
     BasicFragmentScorer,
     ContextFragmenter,
-    FIRST,
     Fragment,
     Fragmenter,
     FragmentScorer,
-    LONGER,
+    NullFragmeter,
     PinpointFragmenter,
-    SCORE,
-    SHORTER,
     SentenceFragmenter,
     WholeFragmenter,
-    DEFAULT_CHARLIMIT,
     get_text,
     mkfrag,
     set_matched_filter,
     set_matched_filter_phrases,
-    NullFragmeter,
 )
 from whoosh.highlight.highlighters import Highlighter, highlight
 

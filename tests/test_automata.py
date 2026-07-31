@@ -339,15 +339,15 @@ def test_minimize_dfa():
 
 
 def test_strings_dfa():
-    strings = "able alfa alpha apple bar bear beat boom boot".split()
+    strings = ["able", "alfa", "alpha", "apple", "bar", "bear", "beat", "boom", "boot"]
     dfa = fsa.strings_dfa(strings)
     output = list(dfa.generate_all())
     assert output == strings
 
     domain = "abcd"
-    words = set()
+    words: set[str] = set()
     for i in range(1, len(domain) + 1):
         words.update("".join(p) for p in permutations(domain[:i]))
-    words = sorted(words)
-    dfa = fsa.strings_dfa(words)
-    assert list(dfa.generate_all()) == words
+    sorted_words = sorted(words)
+    dfa = fsa.strings_dfa(sorted_words)
+    assert list(dfa.generate_all()) == sorted_words

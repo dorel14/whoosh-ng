@@ -54,11 +54,9 @@ def test_all():
         with ix.searcher(weighting=weighting) as s:
             try:
                 for word in domain:
-                    s.search(query.Term("text", word))  # type: ignore[call-issue]
-            except ValueError:
-                e = sys.exc_info()[1]
-                e.msg = f"Error searching with {wclass!r}: {e}"  # type: ignore[attr-defined]
-                raise
+                    s.search(query.Term("text", word))
+            except ValueError as e:
+                raise TypeError(f"Error searching with {wclass!r}: {e}") from e
 
 
 def test_compatibility():
@@ -78,12 +76,12 @@ def test_compatibility():
     schema = fields.Schema(text=fields.TEXT)
     ix = RamStorage().create_index(schema)
     w = ix.writer()
-    domain = "alfa bravo charlie delta".split()
+    domain = ["alfa", "bravo", "charlie", "delta"]
     for ls in permutations(domain, 3):
         w.add_document(text=u(" ").join(ls))
     w.commit()
 
-    s = ix.searcher(weighting=LegacyWeighting())  # type: ignore[call-issue]
+    s = ix.searcher(weighting=LegacyWeighting())
     r = s.search(query.Term("text", u("bravo")))
     assert r.score(0) == 2.25
 
