@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Coroutine
 from typing import Any, TypeVar, overload
 
 T = TypeVar("T")
@@ -59,7 +59,7 @@ def is_async_callable(func: Callable[..., Any]) -> bool:
     return inspect.iscoroutinefunction(method)
 
 
-def run_async_from_sync(coro: Awaitable[T]) -> T:
+def run_async_from_sync(coro: Coroutine[Any, Any, T]) -> T:
     """Run a coroutine from synchronous code.
 
     Use this bridge when sync core code (e.g. ``PluginManager.register``) needs

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC
-from collections.abc import Awaitable
+from collections.abc import Coroutine
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
@@ -103,7 +103,7 @@ class PluginManager:
         self._enabled.add(plugin.name)
         if is_async_callable(plugin.register):
             coro = plugin.register(self)  # type: ignore[func-returns-value]
-            run_async_from_sync(cast("Awaitable[None]", coro))
+            run_async_from_sync(cast("Coroutine[Any, Any, None]", coro))
         else:
             plugin.register(self)
         plugin.register_hooks()

@@ -7,7 +7,7 @@ from .types import SearchOptions
 def register_model(model: type) -> ModelIndex:
     """Register a Pydantic model and return a ModelIndex."""
     try:
-        from pydantic import BaseModel
+        from pydantic import BaseModel  # pyright: ignore[reportMissingImports]
     except ImportError as exc:
         raise ImportError("pydantic is required for Pydantic integration") from exc
 

@@ -178,7 +178,7 @@ def test_auto_indexer_error_raise():
     auto = AutoIndexer(ix, on_error="raise")
 
     class Bad:
-        x = 0
+        x: int = 0
 
         @property  # type: ignore[no-redef]
         def x(self):

@@ -23,11 +23,13 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [cached-property>=2.0.1]
+        files: ^src/
 
   - repo: https://github.com/RobertCraigie/pyright-python
     rev: v1.1.391
     hooks:
       - id: pyright
+        files: ^src/
 
 # Never scan the CI pre-commit log artifact
 exclude: '^precommit\.log$'

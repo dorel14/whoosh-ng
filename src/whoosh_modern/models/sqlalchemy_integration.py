@@ -9,8 +9,8 @@ from .types import SearchOptions
 def register_model(model: type) -> ModelIndex:
     """Register a SQLAlchemy model and return a ModelIndex."""
     try:
-        from sqlalchemy import inspect as sa_inspect
-        from sqlalchemy.orm import Mapper
+        from sqlalchemy import inspect as sa_inspect  # pyright: ignore[reportMissingImports]
+        from sqlalchemy.orm import Mapper  # pyright: ignore[reportMissingImports]
     except ImportError as exc:
         raise ImportError("sqlalchemy is required for SQLAlchemy integration") from exc
 

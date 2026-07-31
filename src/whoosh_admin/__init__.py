@@ -6,8 +6,8 @@ Provides a management interface for index exploration and queries.
 from __future__ import annotations
 
 try:
-    from fastapi import FastAPI
-    from fastapi.responses import HTMLResponse
+    from fastapi import FastAPI  # pyright: ignore[reportMissingImports]
+    from fastapi.responses import HTMLResponse  # pyright: ignore[reportMissingImports]
 
     def create_admin_app(index, *, prefix: str = "/admin") -> FastAPI:
         """Create admin UI FastAPI application.

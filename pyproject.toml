@@ -383,7 +383,7 @@ module = "hnswlib"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["pydantic", "msgspec", "sqlalchemy", "sqlalchemy.orm", "sqlmodel"]
+module = ["pydantic", "msgspec", "sqlalchemy", "sqlalchemy.orm", "sqlmodel", "fastapi", "fastapi.responses", "numpy"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]

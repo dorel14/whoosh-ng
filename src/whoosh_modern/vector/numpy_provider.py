@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable, Sequence
 
-import numpy as np
+import numpy as np  # pyright: ignore[reportMissingImports]
 
 from whoosh.vector.base import VectorHit, VectorProvider
 

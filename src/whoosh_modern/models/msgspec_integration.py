@@ -10,7 +10,7 @@ from .types import SearchOptions
 def register_model(model: type) -> ModelIndex:
     """Register a msgspec Struct model and return a ModelIndex."""
     try:
-        import msgspec
+        import msgspec  # pyright: ignore[reportMissingImports]
     except ImportError as exc:
         raise ImportError("msgspec is required for Msgspec integration") from exc
 

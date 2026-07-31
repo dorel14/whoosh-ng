@@ -149,7 +149,8 @@ class SearchView:
         """Prepare a document for indexing.
 
         Preserves list/tuple values as multi-valued fields instead of
-        joining them into a single string.
+        joining them into a single string. Converts non-string scalar values
+        (e.g. integers from SQL) to strings for Whoosh compatibility.
 
         Args:
             doc: Source document as a dict.
@@ -162,5 +163,9 @@ class SearchView:
         for field_name, _field_type in schema.items():
             if field_name in doc:
                 value = doc[field_name]
+                if value is not None and not isinstance(
+                    value, (str, bytes, list, tuple)
+                ):
+                    value = str(value)
                 prepared[field_name] = value
         return prepared
