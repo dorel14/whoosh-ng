@@ -86,7 +86,8 @@ class TypeMapper:
 
 def _default_mappings() -> None:
     TypeMapper.register(str, lambda opt: TEXT(stored=opt.stored, analyzer=opt.analyzer or None))
-    TypeMapper.register(SearchField, lambda opt: TEXT(stored=opt.stored, analyzer=opt.analyzer or None))
+    TypeMapper.register(SearchField,
+                        lambda opt: TEXT(stored=opt.stored, analyzer=opt.analyzer or None))
     TypeMapper.register(int, lambda opt: NUMERIC(int, stored=opt.stored, sortable=opt.sortable))
     TypeMapper.register(
         float,
