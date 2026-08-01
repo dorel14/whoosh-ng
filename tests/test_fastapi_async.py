@@ -52,3 +52,25 @@ async def test_search_endpoint(app) -> None:
         body = resp.json()
         assert body["total"] >= 1
         assert any("world" in str(hit.get("fields", {})) for hit in body["hits"])
+
+
+@pytest.mark.asyncio
+async def test_autocomplete_endpoint_with_provider() -> None:
+    from whoosh_modern.autocomplete.factory import create_autocomplete
+
+    tmp = _build_index()
+    try:
+        provider = create_autocomplete("inverted")
+        provider.add(["machine learning", "machine vision", "hello world"])
+        autocomplete_app = create_app(open_dir(tmp), autocomplete=provider)
+        transport = httpx.ASGITransport(app=autocomplete_app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get("/api/v1/autocomplete?q=mach")
+            assert resp.status_code == 200
+            body = resp.json()
+            assert len(body["suggestions"]) >= 1
+            assert "machine learning" in body["suggestions"]
+    finally:
+        for f in os.listdir(tmp):
+            os.remove(os.path.join(tmp, f))
+        os.rmdir(tmp)

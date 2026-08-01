@@ -363,10 +363,6 @@ module = [
 disable_error_code = ["assignment", "attr-defined", "no-redef", "union-attr"]
 
 [[tool.mypy.overrides]]
-module = "cached_property"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
 module = "requests"
 ignore_missing_imports = true
 
@@ -474,8 +470,6 @@ module = [
   "whoosh.writing.async_writer",
   "whoosh.writing.buffered_writer",
   "whoosh.writing.writer",
-  "whoosh_modern.__init__",
-  "whoosh_modern.vector.__init__",
   "whoosh_modern.vector.numpy_provider",
   "whoosh_admin",
   "whoosh_fastapi",
@@ -491,6 +485,9 @@ addopts = [
   "-ra",
   "--tb=short",
   "--cov=whoosh",
+  "--cov=whoosh_modern",
+  "--cov=whoosh_fastapi",
+  "--cov=whoosh_admin",
   "--cov-report=term",
   "--cov-report=html:htmlcov",
   "--cov-report=xml:coverage.xml",
@@ -515,7 +512,7 @@ markers = [
 
 [tool.coverage.run]
 branch = true
-source = ["src/whoosh"]
+source = ["src/whoosh", "src/whoosh_modern", "src/whoosh_fastapi", "src/whoosh_admin"]
 omit = [
   "*/tests/*",
   "docs/*",

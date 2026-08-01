@@ -1,6 +1,6 @@
 """DataSource protocol and capability interfaces."""
 
-from collections.abc import AsyncIterator, Iterator, Mapping
+from collections.abc import AsyncIterator, Callable, Iterator, Mapping
 from typing import Any, Protocol, runtime_checkable
 
 from whoosh.fields import Schema
@@ -69,4 +69,17 @@ class MetadataDataSource(Protocol):
 
     def metadata(self) -> Mapping[str, Any]:
         """Return source metadata."""
+        ...
+
+
+@runtime_checkable
+class ObservableDataSource(Protocol):
+    """Protocol for data sources that emit change events."""
+
+    def add_observer(self, callback: Callable[[str, Document], None]) -> None:
+        """Register an observer callback for document events."""
+        ...
+
+    def remove_observer(self, callback: Callable[[str, Document], None]) -> None:
+        """Unregister an observer callback."""
         ...

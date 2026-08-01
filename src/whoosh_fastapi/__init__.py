@@ -29,11 +29,17 @@ try:
             ]
             return hits, len(results)
 
-    def create_app(index: Index, *, prefix: str = "/api/v1") -> FastAPI:
+    def create_app(
+        index: Index,
+        *,
+        prefix: str = "/api/v1",
+        autocomplete: Any = None,
+    ) -> FastAPI:
         """Create a FastAPI application for Whoosh-NG.
 
         :param index: An Index instance to expose via API
         :param prefix: API endpoint prefix (default: /api/v1)
+        :param autocomplete: Optional AutocompleteProvider for the autocomplete endpoint
         :returns: Configured FastAPI application
         """
         app = FastAPI(title="Whoosh-NG API", version="4.0.0")
@@ -51,8 +57,10 @@ try:
 
         @app.get(f"{prefix}/autocomplete")
         async def autocomplete_endpoint(q: str) -> dict[str, Any]:
-            suggestions: list[str] = []
-            return {"suggestions": suggestions}
+            if autocomplete is None:
+                return {"suggestions": []}
+            hits = autocomplete.search(q, limit=10)
+            return {"suggestions": [hit.text for hit in hits]}
 
         return app
 

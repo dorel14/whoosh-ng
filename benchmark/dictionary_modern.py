@@ -1,5 +1,6 @@
 import os.path
 import sqlite3
+from typing import Any
 
 from benchmark import WhooshLikeSpec
 from whoosh_modern.data_sources.sql import SQLSource
@@ -12,13 +13,13 @@ class DictionaryModern(WhooshLikeSpec):
     headline_field = "head"
     default_query = "bawd"
 
-    def __init__(self, options, args):
+    def __init__(self, options: Any, args: Any) -> None:
         super().__init__(options, args)
-        self._conn = None
-        self._source = None
-        self._view = None
+        self._conn: sqlite3.Connection | None = None
+        self._source: SQLSource | None = None
+        self._view: SearchView | None = None
 
-    def _ensure_setup(self):
+    def _ensure_setup(self) -> None:
         if self._conn is None:
             bench_dir = os.path.dirname(os.path.abspath(__file__))
             db_path = os.path.join(bench_dir, "benchmark_data.db")
@@ -34,12 +35,14 @@ class DictionaryModern(WhooshLikeSpec):
                 source=self._source,
             )
 
-    def whoosh_schema(self):
+    def whoosh_schema(self) -> Any:
         self._ensure_setup()
+        assert self._source is not None
         return self._source.discover_schema()
 
-    def documents(self):
+    def documents(self) -> Any:
         self._ensure_setup()
+        assert self._source is not None
         schema_fields = set(self._source.discover_schema().names())
         for doc in self._source.iter_documents():
             filtered = {
