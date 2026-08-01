@@ -1,0 +1,53 @@
+name: Sync Version
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+    paths:
+      - "pyproject.toml"
+  pull_request:
+    paths:
+      - "pyproject.toml"
+
+jobs:
+  sync-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run sync script
+        run: python scripts/sync_version.py
+
+      - name: Commit and push version sync
+        if: github.event_name == 'push'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          if ! git diff --exit-code; then
+            git add -A
+            git commit -m "chore(release): synchronize version from pyproject.toml [skip ci]"
+            git push
+          else
+            echo "Version is already in sync"
+          fi
+
+      - name: Report unsynced versions on PR
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::pyproject.toml version is not synchronized with src/whoosh/__init__.py and/or README.md. Run 'python scripts/sync_version.py' locally and commit the changes."
+            git --no-pager diff
+            exit 1
+          else
+            echo "Version is in sync"
+          fi

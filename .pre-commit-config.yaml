@@ -31,5 +31,15 @@ repos:
       - id: pyright
         files: ^src/
 
+  - repo: local
+    hooks:
+      - id: sync-version
+        name: Sync version from pyproject.toml
+        entry: python scripts/sync_version.py
+        language: system
+        pass_filenames: false
+        files: ^(pyproject\.toml|README\.md|src/whoosh/__init__\.py)$
+        stages: [pre-commit]
+
 # Never scan the CI pre-commit log artifact
 exclude: '^precommit\.log$'
