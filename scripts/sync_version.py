@@ -25,8 +25,8 @@ def update_init_py(version: str) -> bool:
     tuple_repr = "(" + ", ".join(str(p) for p in parts) + ")"
 
     new_content = re.sub(
-        r'__version__ = \([^)]+\)',
-        f'__version__ = {tuple_repr}',
+        r"__version__ = \([^)]+\)",
+        f"__version__ = {tuple_repr}",
         content,
     )
 
@@ -47,14 +47,14 @@ def update_readme(version: str) -> bool:
     content = README_MD.read_text()
 
     new_content = re.sub(
-        r'Version \d+\.\d+\.\d+ brings',
-        f'Version {version} brings',
+        r"Version \d+\.\d+\.\d+ brings",
+        f"Version {version} brings",
         content,
     )
 
     new_content = re.sub(
-        r'## Recent Changes in \d+\.\d+\.\d+',
-        f'## Recent Changes in {version}',
+        r"## Recent Changes in \d+\.\d+\.\d+",
+        f"## Recent Changes in {version}",
         new_content,
     )
 
