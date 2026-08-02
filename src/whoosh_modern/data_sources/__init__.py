@@ -26,6 +26,10 @@ class DataSource(Protocol):
         """Yield documents from source as dict-like mappings."""
         ...
 
+    def health_check(self) -> bool:
+        """Return True if the data source is reachable and healthy."""
+        ...
+
 
 @runtime_checkable
 class IncrementalDataSource(Protocol):

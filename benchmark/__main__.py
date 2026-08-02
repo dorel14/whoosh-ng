@@ -189,6 +189,7 @@ def _run_indexing(spec, options) -> tuple[int, float]:
     count = 0
     skip = int(options.skip)
     upto = int(options.upto) if options.upto else 0
+    batch_size = int(getattr(options, "batch_size", 0) or 0)
     start = time.perf_counter()
 
     for doc in spec.documents():
@@ -201,6 +202,13 @@ def _run_indexing(spec, options) -> tuple[int, float]:
             break
         if options.every and count % int(options.every) == 0:
             print(f"  ... {count} docs indexed")
+        if batch_size and count % batch_size == 0:
+            writer.commit(merge=False)
+            writer = ix.writer(
+                limitmb=options.limitmb,
+                procs=options.procs,
+                multisegment=options.merge == 0,
+            )
 
     writer.commit(merge=options.merge == 1)
     elapsed = time.perf_counter() - start
@@ -292,6 +300,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--skip", default="1", help="Initial docs to skip (default: 1)")
     parser.add_argument("--upto", default=0, help="Maximum docs to index (0=unlimited)")
     parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=0,
+        help="Commit writer every N docs (0=disable batch commits)",
+    )
+    parser.add_argument(
         "--pytest-args",
         default="",
         help="Extra arguments passed to pytest when running a pytest-benchmark spec",
@@ -358,6 +372,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         chunk=args.chunk,
         skip=args.skip,
         upto=args.upto,
+        batch_size=args.batch_size,
         termfile=None,
     )
 

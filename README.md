@@ -68,7 +68,6 @@ pip install "whoosh-ng[dev]"
 - **[French Documentation](/whoosh-ng/fr/)** - Documentation en français
 
 ## Recent Changes in 2.0.0
-## Recent Changes in 2.0.0
 
 ### Added
 

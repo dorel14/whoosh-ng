@@ -201,6 +201,15 @@ class RESTSource:
                 break
         return count
 
+    def health_check(self) -> bool:
+        """Return True if the REST endpoint is reachable."""
+        try:
+            url = self._build_url(page=1, offset=0, cursor=None)
+            self._http_client.fetch(url, self._get_headers())
+            return True
+        except Exception:
+            return False
+
     def metadata(self) -> dict[str, Any]:
         """Return metadata about this REST source."""
         return {

@@ -1,4 +1,5 @@
-"""SQL DataSource implementation with GROUP BY, JOIN, and incremental support."""
+"""SQL DataSource implementation with GROUP BY, JOIN, incremental support,
+and connection pooling."""
 
 import logging
 import re
@@ -43,6 +44,35 @@ def _validate_identifier(name: str) -> None:
         )
 
 
+class _ConnectionPool:
+    """Simple connection pool for SQLite or DB-API 2.0 connections."""
+
+    def __init__(self, connection: Any, max_size: int = 5) -> None:
+        self._connection = connection
+        self._max_size = max_size
+        self._available: list[Any] = [connection]
+
+    def acquire(self) -> Any:
+        """Acquire a connection from the pool."""
+        if self._available:
+            return self._available.pop()
+        if hasattr(self._connection, "connect"):
+            return self._connection.connect()
+        return self._connection
+
+    def release(self, connection: Any) -> None:
+        """Release a connection back to the pool."""
+        if len(self._available) < self._max_size:
+            self._available.append(connection)
+
+    def close_all(self) -> None:
+        """Close all pooled connections."""
+        while self._available:
+            conn = self._available.pop()
+            if hasattr(conn, "close"):
+                conn.close()
+
+
 class SQLSource:
     """SQL data source implementing the DataSource protocol."""
 
@@ -52,18 +82,37 @@ class SQLSource:
         query: str,
         incremental_field: str | None = None,
         id_field: str | None = None,
+        pool_size: int = 5,
     ) -> None:
         self.connection = connection
         self.query = query
         self.incremental_field = incremental_field
         self.id_field = id_field
+        self.pool_size = pool_size
         self.last_sync_value: Any = None
         self._schema: Schema | None = None
+        self._pool: _ConnectionPool | None = None
 
     @property
     def name(self) -> str:
         """Return the data source name."""
         return f"sql:{self.query[:50]}"
+
+    def health_check(self) -> bool:
+        """Return True if the database connection is healthy."""
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+            return True
+        except Exception:
+            return False
+
+    def _get_connection(self) -> Any:
+        """Get a connection, using the pool if available."""
+        if self._pool is None:
+            self._pool = _ConnectionPool(self.connection, max_size=self.pool_size)
+        return self._pool.acquire()
 
     def discover_schema(self) -> Schema:
         """Discover schema from query result metadata."""
@@ -162,6 +211,7 @@ class SQLSource:
             "query": self.query,
             "incremental_field": self.incremental_field,
             "id_field": self.id_field,
+            "pool_size": self.pool_size,
         }
 
 
