@@ -46,6 +46,7 @@ class ParquetSource:
         self.sample_size = sample_size
         self.engine = engine
         self._schema: Schema | None = None
+        self._compiled_mapper: Any = None
 
     @property
     def name(self) -> str:
@@ -57,10 +58,7 @@ class ParquetSource:
         return os.path.isfile(self.path) and os.access(self.path, os.R_OK)
 
     def _read_parquet(self, sample: bool = False) -> Any:
-        """Read the Parquet file and return a DataFrame.
-
-        If ``sample`` is True, only read the first ``self.sample_size`` rows.
-        """
+        """Read the Parquet file and return a DataFrame."""
         try:
             import pandas as pd
 
@@ -95,13 +93,9 @@ class ParquetSource:
         )
 
     def _iter_pyarrow_batches(self, batch_size: int = _BATCH_SIZE) -> Iterator[dict[str, Any]]:
-        """Stream documents from a Parquet file using PyArrow batches.
-
-        Reads row groups in batches to avoid loading the entire dataset into
-        memory. Falls back to pandas/polars iterrows if PyArrow is unavailable.
-        """
+        """Stream documents from a Parquet file using PyArrow batches."""
         try:
-            import pyarrow.parquet as pq  # type: ignore[import-untyped]
+            import pyarrow.parquet as pq
         except ImportError:
             df = self._read_parquet()
             for _, row in df.iterrows():
@@ -116,6 +110,38 @@ class ParquetSource:
             for i in range(length):
                 yield {key: _to_datetime(batch_dict[key][i]) for key in keys}
 
+    def compile_mapper(self) -> Any:
+        """Return a compiled document mapper for this source.
+
+        Pre-computes column keys for fast batch extraction.
+        """
+        if self._compiled_mapper is not None:
+            return self._compiled_mapper
+
+        try:
+            import pyarrow.parquet as pq
+
+            pf = pq.ParquetFile(self.path)
+            batch = next(pf.iter_batches(batch_size=1))
+            keys = list(batch.to_pydict().keys())
+
+            def _pyarrow_mapper(batch_dict: dict[str, Any], length: int) -> list[dict[str, Any]]:
+                result = []
+                for i in range(length):
+                    result.append({key: _to_datetime(batch_dict[key][i]) for key in keys})
+                return result
+
+            self._compiled_mapper = _pyarrow_mapper
+        except ImportError:
+            keys = list(self._read_parquet(sample=True).columns)
+
+            def _fallback_mapper(row: Any) -> dict[str, Any]:
+                return {k: _to_datetime(v) for k, v in zip(keys, row, strict=True)}
+
+            self._compiled_mapper = _fallback_mapper
+
+        return self._compiled_mapper
+
     def discover_schema(self) -> Schema:
         """Discover schema from Parquet file metadata."""
         if not self.health_check():
@@ -125,7 +151,7 @@ class ParquetSource:
             )
 
         try:
-            import pyarrow.parquet as pq  # type: ignore[import-untyped]
+            import pyarrow.parquet as pq
 
             schema = pq.read_schema(self.path)
             columns: dict[str, Any] = {}
@@ -200,6 +226,40 @@ class ParquetSource:
 
         yield from self._iter_pyarrow_batches()
 
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the Parquet file in batches.
+
+        Uses PyArrow native batch reading when available to avoid loading
+        the entire dataset into memory.
+        """
+        if not self.health_check():
+            raise DataSourceError(
+                f"Parquet file not found or not readable: {self.path}",
+                source="parquet",
+            )
+
+        try:
+            import pyarrow.parquet as pq
+
+            pf = pq.ParquetFile(self.path)
+            for pb in pf.iter_batches(batch_size=batch_size):
+                batch_dict = pb.to_pydict()
+                keys = list(batch_dict.keys())
+                length = len(pb)
+                batch_docs: list[dict[str, Any]] = []
+                for i in range(length):
+                    batch_docs.append({key: _to_datetime(batch_dict[key][i]) for key in keys})
+                yield batch_docs
+        except ImportError:
+            batch: list[dict[str, Any]] = []
+            for doc in self._iter_pyarrow_batches():
+                batch.append(dict(doc))
+                if len(batch) >= batch_size:
+                    yield batch
+                    batch = []
+            if batch:
+                yield batch
+
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp (not implemented for Parquet)."""
         return iter([])
@@ -213,10 +273,10 @@ class ParquetSource:
             )
 
         try:
-            import pyarrow.parquet as pq  # type: ignore[import-untyped]
+            import pyarrow.parquet as pq
 
             pf = pq.ParquetFile(self.path)
-            return pf.metadata.num_rows
+            return int(pf.metadata.num_rows)
         except ImportError:
             pass
 

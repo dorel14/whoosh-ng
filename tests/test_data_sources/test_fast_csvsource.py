@@ -1,4 +1,4 @@
-"""Tests for CSVSource."""
+"""Tests for FastCSVSource."""
 
 import csv
 import os
@@ -22,7 +22,7 @@ def _create_csv_file(data: list[dict[str, str]]) -> str:
     return path
 
 
-class TestCSVSource:
+class TestFastCSVSource:
     def test_health_check_valid_file(self):
         path = _create_csv_file([{"id": "1", "title": "Test"}])
         try:
@@ -115,5 +115,39 @@ class TestCSVSource:
             source = FastCSVSource(path=path, delimiter=",")
             docs = list(source.iter_documents())
             assert len(docs) == 1
+        finally:
+            os.remove(path)
+
+    def test_field_sanitization(self):
+        path = _create_csv_file([{"col name": "1", "another col": "Hello"}])
+        try:
+            source = FastCSVSource(path=path)
+            docs = list(source.iter_documents())
+            assert len(docs) == 1
+            assert "col_name" in docs[0]
+            assert "another_col" in docs[0]
+        finally:
+            os.remove(path)
+
+    def test_stream_batches(self):
+        path = _create_csv_file([
+            {"id": str(i), "title": f"Doc {i}"} for i in range(25)
+        ])
+        try:
+            source = FastCSVSource(path=path)
+            batches = list(source.stream_batches(batch_size=10))
+            assert len(batches) == 3
+            assert len(batches[0]) == 10
+            assert len(batches[1]) == 10
+            assert len(batches[2]) == 5
+        finally:
+            os.remove(path)
+
+    def test_empty_csv(self):
+        path = _create_csv_file([])
+        try:
+            source = FastCSVSource(path=path)
+            docs = list(source.iter_documents())
+            assert len(docs) == 0
         finally:
             os.remove(path)

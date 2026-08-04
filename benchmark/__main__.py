@@ -11,8 +11,9 @@ import argparse
 import os
 import sys
 import time
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from pathlib import Path
+from typing import Any
 
 from whoosh import index, qparser, query, scoring
 from whoosh.support.bench import Spec
@@ -167,6 +168,12 @@ def _run_pytest_spec(
     return result
 
 
+def _chunked(items: list[Any], chunk_size: int) -> Iterator[list[Any]]:
+    """Yield successive chunk_size-sized chunks from items."""
+    for i in range(0, len(items), chunk_size):
+        yield items[i : i + chunk_size]
+
+
 def _run_indexing(spec, options) -> tuple[int, float]:
     """Run indexing benchmark and return (doc_count, elapsed_seconds)."""
     schema = spec.whoosh_schema()
@@ -179,12 +186,15 @@ def _run_indexing(spec, options) -> tuple[int, float]:
         shutil.rmtree(idx_dir)
     os.makedirs(idx_dir, exist_ok=True)
 
+    use_profiling = getattr(options, "profile", False)
+    profiler: IndexProfiler | None = None
+    if use_profiling:
+        from whoosh_modern.profiling import IndexProfiler
+
+        profiler = IndexProfiler()
+        profiler.__enter__()
+
     ix = index.create_in(idx_dir, schema)
-    writer = ix.writer(
-        limitmb=options.limitmb,
-        procs=options.procs,
-        multisegment=options.merge == 0,
-    )
 
     count = 0
     skip = int(options.skip)
@@ -192,14 +202,97 @@ def _run_indexing(spec, options) -> tuple[int, float]:
     batch_size = int(getattr(options, "batch_size", 0) or 0)
     start = time.perf_counter()
 
-    for doc in spec.documents():
-        if skip > 0:
-            skip -= 1
-            continue
-        writer.add_document(**doc)
-        count += 1
-        if upto and count >= upto:
-            break
+    if use_profiling and profiler is not None:
+        if batch_size > 0:
+            from whoosh_modern.indexing import BatchIndexWriter
+
+            with profiler.step("reading"):
+                batches = list(spec.batches(batch_size))
+
+            writer = BatchIndexWriter(
+                ix,
+                batch_size=batch_size,
+                limitmb=options.limitmb,
+                commit_every=options.every if options.every else None,
+                multisegment=options.merge == 0,
+            )
+            with profiler.step("analyzing"):
+                for batch in batches:
+                    if skip > 0:
+                        skip -= len(batch)
+                        if skip < 0:
+                            batch = batch[-skip:]
+                            skip = 0
+                        if not batch:
+                            continue
+                    if upto and count >= upto:
+                        break
+                    added = writer.add_batch(batch)
+                    count += added
+                    if options.every and count % int(options.every) == 0:
+                        print(f"  ... {count} docs indexed")
+            with profiler.step("committing"):
+                writer.close()
+        else:
+            with profiler.step("reading"):
+                docs = list(spec.documents())
+
+            writer2 = ix.writer(
+                limitmb=options.limitmb,
+                procs=options.procs,
+                multisegment=options.merge == 0,
+            )
+            with profiler.step("analyzing"):
+                for doc in docs:
+                    if skip > 0:
+                        skip -= 1
+                        continue
+                    writer2.add_document(**doc)
+                    count += 1
+                    if upto and count >= upto:
+                        break
+            with profiler.step("committing"):
+                writer2.commit(merge=options.merge == 1)
+    elif batch_size > 0:
+        from whoosh_modern.indexing import BatchIndexWriter
+
+        batches = spec.batches(batch_size)
+        with BatchIndexWriter(
+            ix,
+            batch_size=batch_size,
+            limitmb=options.limitmb,
+            commit_every=options.every if options.every else None,
+            multisegment=options.merge == 0,
+        ) as writer:
+            for batch in batches:
+                if skip > 0:
+                    skip -= len(batch)
+                    if skip < 0:
+                        batch = batch[-skip:]
+                        skip = 0
+                    if not batch:
+                        continue
+                if upto and count >= upto:
+                    break
+                added = writer.add_batch(batch)
+                count += added
+                if options.every and count % int(options.every) == 0:
+                    print(f"  ... {count} docs indexed")
+    else:
+        writer = ix.writer(
+            limitmb=options.limitmb,
+            procs=options.procs,
+            multisegment=options.merge == 0,
+        )
+        docs = spec.documents()
+        for doc in docs:
+            if skip > 0:
+                skip -= 1
+                continue
+            writer.add_document(**doc)
+            count += 1
+            if upto and count >= upto:
+                break
         if options.every and count % int(options.every) == 0:
             print(f"  ... {count} docs indexed")
         if batch_size and count % batch_size == 0:
@@ -209,9 +302,14 @@ def _run_indexing(spec, options) -> tuple[int, float]:
                 procs=options.procs,
                 multisegment=options.merge == 0,
             )
+        writer.commit(merge=options.merge == 1)
 
-    writer.commit(merge=options.merge == 1)
     elapsed = time.perf_counter() - start
+    if use_profiling and profiler is not None:
+        profiler.add_documents(count)
+        profiler.__exit__(None, None, None)
+        print(profiler.report())
+
     print(f"Indexed {count} docs in {elapsed:.3f}s ({count / elapsed:.1f} docs/s)")
     return count, elapsed
 
@@ -306,6 +404,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Commit writer every N docs (0=disable batch commits)",
     )
     parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Enable IndexProfiler to measure each indexing step",
+    )
+    parser.add_argument(
         "--pytest-args",
         default="",
         help="Extra arguments passed to pytest when running a pytest-benchmark spec",
@@ -373,6 +476,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         skip=args.skip,
         upto=args.upto,
         batch_size=args.batch_size,
+        profile=args.profile,
         termfile=None,
     )
 

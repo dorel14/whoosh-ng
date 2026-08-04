@@ -340,7 +340,7 @@ def CommaSeparatedTokenizer():
 
 class PathTokenizer(Tokenizer):
     """A simple tokenizer that given a string ``"/a/b/c"`` yields tokens
-    ``["/a", "/a/b", "/a/b/c"]``.
+    ``["/a", "/a/b", "/a/c"]``.
     """
 
     def __init__(self, expression="[^/]+"):
@@ -356,3 +356,101 @@ class PathTokenizer(Tokenizer):
                 token.pos = pos
                 pos += 1
             yield token
+
+
+class CachedRegexTokenizer(Tokenizer):
+    """A :class:`RegexTokenizer` wrapper that caches tokenization results.
+
+    The cache stores lightweight token tuples instead of full
+    :class:`~whoosh.analysis.Token` objects, and rebuilds fresh
+    ``Token`` instances on each call so that caller-visible state
+    (positions, chars, removestops, mode, ``**kwargs``) is still
+    honored.
+
+    Example::
+
+        >>> from whoosh.analysis import CachedRegexTokenizer
+        >>> tok = CachedRegexTokenizer()
+        >>> tokens = list(tok("France"))
+        >>> tokens[0].text
+        'France'
+    """
+
+    def __init__(self, expression=default_pattern, gaps=False, maxsize=8192):
+        self._inner = RegexTokenizer(expression, gaps=gaps)
+        self._cache: dict[str, tuple[tuple, ...]] = {}
+        self._maxsize = maxsize
+
+    def __eq__(self, other):
+        if self.__class__ is other.__class__:
+            return self._inner == other._inner
+        return False
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self._inner!r})"
+
+    def __call__(self, value, positions=False, chars=False, keeporiginal=False,
+                 removestops=True, start_pos=0, start_char=0,
+                 tokenize=True, mode="", **kwargs):
+        assert isinstance(value, str), f"{value!r} is not unicode"
+
+        if not tokenize:
+            t = Token(positions, chars, removestops=removestops, mode=mode, **kwargs)
+            t.original = t.text = value
+            t.boost = 1.0
+            if positions:
+                t.pos = start_pos
+            if chars:
+                t.startchar = start_char
+                t.endchar = start_char + len(value)
+            yield t
+            return
+
+        try:
+            cached = self._cache.get(value)
+        except TypeError:
+            cached = None
+
+        if cached is None:
+            tokens = []
+            for token in self._inner(
+                value,
+                positions=positions,
+                chars=chars,
+                keeporiginal=keeporiginal,
+                removestops=removestops,
+                start_pos=start_pos,
+                start_char=start_char,
+                tokenize=tokenize,
+                mode=mode,
+                **kwargs,
+            ):
+                tokens.append(
+                    (
+                        token.text,
+                        token.boost,
+                        token.original if keeporiginal else None,
+                        token.pos if positions else None,
+                        token.startchar if chars else None,
+                        token.endchar if chars else None,
+                    )
+                )
+            cache = self._cache
+            if len(cache) >= self._maxsize:
+                cache.pop(next(iter(cache)))
+            cache[value] = tuple(tokens)
+            cached = cache[value]
+
+        for idx, item in enumerate(cached):
+            text, boost, original, pos, startchar, endchar = item
+            t = Token(positions, chars, removestops=removestops, mode=mode, **kwargs)
+            t.text = text
+            t.boost = boost
+            if keeporiginal:
+                t.original = original
+            if positions:
+                t.pos = start_pos + idx
+            if chars:
+                t.startchar = start_char + startchar
+                t.endchar = start_char + endchar
+            yield t

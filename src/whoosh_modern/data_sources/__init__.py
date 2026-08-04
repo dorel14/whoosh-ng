@@ -26,6 +26,23 @@ class DataSource(Protocol):
         """Yield documents from source as dict-like mappings."""
         ...
 
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents in batches for efficient bulk indexing.
+
+        Default implementation groups :meth:`iter_documents` into lists of
+        ``batch_size``. DataSource implementations should override this when
+        they can read batches natively (e.g. SQL cursor fetchmany, Parquet
+        row-group reads, JSONL line buffering).
+        """
+        batch: list[dict[str, Any]] = []
+        for doc in self.iter_documents():
+            batch.append(dict(doc))
+            if len(batch) >= batch_size:
+                yield batch
+                batch = []
+        if batch:
+            yield batch
+
     def health_check(self) -> bool:
         """Return True if the data source is reachable and healthy."""
         ...

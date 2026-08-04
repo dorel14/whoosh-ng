@@ -40,6 +40,8 @@ class JSONSource:
         self.id_field = id_field
         self.sample_size = sample_size
         self._schema: Schema | None = None
+        self._compiled_mapper: Any = None
+        self._cached_data: Any = None
 
     @property
     def name(self) -> str:
@@ -52,9 +54,12 @@ class JSONSource:
 
     def _read_file(self) -> Any:
         """Read and parse the JSON file."""
+        if self._cached_data is not None:
+            return self._cached_data
         try:
             with open(self.path, encoding=self.encoding) as f:
-                return json.load(f)
+                self._cached_data = json.load(f)
+            return self._cached_data
         except json.JSONDecodeError as e:
             raise DataSourceError(
                 f"Invalid JSON in {self.path}: {e}",
@@ -86,12 +91,75 @@ class JSONSource:
             return []
         return []
 
-    def discover_schema(self) -> Schema:
-        """Discover schema from sample documents in the JSON file.
+    def _is_jsonl(self) -> bool:
+        """Check if the file is line-delimited JSON (JSONL)."""
+        try:
+            with open(self.path, encoding=self.encoding) as f:
+                first_line = f.readline().strip()
+                if not (first_line.startswith("{") or first_line.startswith("[")):
+                    return False
+                second_line = f.readline().strip()
+                if not second_line:
+                    return False
+                return second_line.startswith("{") or second_line.startswith("[")
+        except Exception:
+            return False
 
-        Uses sampling to avoid loading the entire file into memory for
-        large JSON datasets.
+    def _iter_jsonl(self) -> Iterator[dict[str, Any]]:
+        """Iterate over line-delimited JSON (JSONL) efficiently."""
+        with open(self.path, encoding=self.encoding) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    doc = json.loads(line)
+                    if isinstance(doc, dict):
+                        yield doc
+                except json.JSONDecodeError:
+                    continue
+
+    def compile_mapper(self) -> Any:
+        """Return a compiled document mapper for this source.
+
+        The mapper is a callable that transforms raw data into
+        Whoosh documents. For JSON, this is the _extract_documents
+        function bound with the document_path.
         """
+        if self._compiled_mapper is not None:
+            return self._compiled_mapper
+
+        document_path = self.document_path
+        if document_path:
+            parts = document_path.split(".")
+
+            def mapper(data: Any) -> list[dict[str, Any]]:
+                result = data
+                for part in parts:
+                    if isinstance(result, dict):
+                        result = result.get(part, [])
+                    else:
+                        return []
+                return [item for item in result if isinstance(item, dict)]
+
+            self._compiled_mapper = mapper
+        else:
+
+            def mapper(data: Any) -> list[dict[str, Any]]:
+                if isinstance(data, list):
+                    return [item for item in data if isinstance(item, dict)]
+                if isinstance(data, dict):
+                    results = data.get("results") or data.get("data")
+                    if isinstance(results, list):
+                        return [item for item in results if isinstance(item, dict)]
+                return []
+
+            self._compiled_mapper = mapper
+
+        return self._compiled_mapper
+
+    def discover_schema(self) -> Schema:
+        """Discover schema from sample documents in the JSON file."""
         if not self.health_check():
             raise DataSourceError(
                 f"JSON file not found or not readable: {self.path}",
@@ -102,7 +170,7 @@ class JSONSource:
         for i, doc in enumerate(self.iter_documents()):
             if i >= self.sample_size:
                 break
-            documents.append(doc)
+            documents.append(dict(doc))
 
         if not documents:
             return Schema()
@@ -118,9 +186,62 @@ class JSONSource:
                 source="json",
             )
 
+        if self._cached_data is not None:
+            data = self._cached_data
+            documents = self._extract_documents(data)
+            yield from documents
+            return
+
+        if self._is_jsonl():
+            yield from self._iter_jsonl()
+            return
+
         data = self._read_file()
         documents = self._extract_documents(data)
         yield from documents
+
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the JSON file in batches."""
+        if not self.health_check():
+            raise DataSourceError(
+                f"JSON file not found or not readable: {self.path}",
+                source="json",
+            )
+
+        if self._cached_data is not None:
+            data = self._cached_data
+            documents = self._extract_documents(data)
+            batch: list[dict[str, Any]] = []
+            for doc in documents:
+                batch.append(doc)
+                if len(batch) >= batch_size:
+                    yield batch
+                    batch = []
+            if batch:
+                yield batch
+            return
+
+        if self._is_jsonl():
+            jsonl_batch: list[dict[str, Any]] = []
+            for doc in self._iter_jsonl():
+                jsonl_batch.append(doc)
+                if len(jsonl_batch) >= batch_size:
+                    yield jsonl_batch
+                    jsonl_batch = []
+            if jsonl_batch:
+                yield jsonl_batch
+            return
+
+        data = self._read_file()
+        documents = self._extract_documents(data)
+        batch = []
+        for doc in documents:
+            batch.append(doc)
+            if len(batch) >= batch_size:
+                yield batch
+                batch = []
+        if batch:
+            yield batch
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp (not implemented for JSON)."""
@@ -133,6 +254,10 @@ class JSONSource:
                 f"JSON file not found or not readable: {self.path}",
                 source="json",
             )
+
+        if self._is_jsonl():
+            return sum(1 for _ in self._iter_jsonl())
+
         return sum(1 for _ in self.iter_documents())
 
     def metadata(self) -> dict[str, Any]:

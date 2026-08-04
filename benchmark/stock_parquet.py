@@ -6,7 +6,6 @@ import os
 
 from benchmark import WhooshLikeSpec
 from whoosh import fields
-
 from whoosh_modern.data_sources.parquet_ds import ParquetSource
 
 

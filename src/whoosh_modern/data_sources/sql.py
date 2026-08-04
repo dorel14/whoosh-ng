@@ -23,15 +23,7 @@ _SQL_KEYWORD_PATTERN = re.compile(
 
 
 def _validate_identifier(name: str) -> None:
-    """Validate that an identifier name is safe for SQL interpolation.
-
-    Args:
-        name: The identifier to validate.
-
-    Raises:
-        DataSourceError: If the name contains SQL keywords, semicolons,
-            or whitespace.
-    """
+    """Validate that an identifier name is safe for SQL interpolation."""
     if not name:
         raise DataSourceError("Incremental field name cannot be empty")
     if '"' in name or " " in name or ";" in name or "'" in name:
@@ -92,6 +84,8 @@ class SQLSource:
         self.last_sync_value: Any = None
         self._schema: Schema | None = None
         self._pool: _ConnectionPool | None = None
+        self._columns: list[str] | None = None
+        self._compiled_mapper: Any = None
 
     @property
     def name(self) -> str:
@@ -114,6 +108,32 @@ class SQLSource:
             self._pool = _ConnectionPool(self.connection, max_size=self.pool_size)
         return self._pool.acquire()
 
+    def _get_columns(self) -> list[str]:
+        """Get column names from the query result, cached."""
+        if self._columns is not None:
+            return self._columns
+
+        cursor = self.connection.cursor()
+        cursor.execute(self.query)
+        self._columns = [desc[0] for desc in cursor.description] if cursor.description else []
+        return self._columns
+
+    def compile_mapper(self) -> Any:
+        """Return a compiled document mapper for this source.
+
+        Pre-computes column names for fast row-to-doc mapping.
+        """
+        if self._compiled_mapper is not None:
+            return self._compiled_mapper
+
+        columns = self._get_columns()
+
+        def mapper(row: Any) -> dict[str, Any]:
+            return dict(zip(columns, row, strict=True))
+
+        self._compiled_mapper = mapper
+        return self._compiled_mapper
+
     def discover_schema(self) -> Schema:
         """Discover schema from query result metadata."""
         schema_query = self.query.rstrip(";")
@@ -124,7 +144,6 @@ class SQLSource:
         cursor.execute(schema_query)
         columns = [(desc[0], desc[1]) for desc in cursor.description] if cursor.description else []
 
-        # Check for duplicate column names
         seen_names: set[str] = set()
         for col_name, _ in columns:
             if col_name in seen_names:
@@ -134,7 +153,6 @@ class SQLSource:
                 )
             seen_names.add(col_name)
 
-        # Validate incremental_field against discovered columns
         if self.incremental_field:
             column_names = {col_name for col_name, _ in columns}
             if self.incremental_field not in column_names:
@@ -157,20 +175,31 @@ class SQLSource:
         """Yield documents from the SQL query result."""
         cursor = self.connection.cursor()
         cursor.execute(self.query)
-        columns = [desc[0] for desc in cursor.description] if cursor.description else []
+        columns = self._get_columns()
 
         for row in cursor:
-            doc: dict[str, Any] = {}
-            for col_name, value in zip(columns, row, strict=True):
-                doc[col_name] = value
-            yield doc
+            yield dict(zip(columns, row, strict=True))
+
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the SQL query result in batches.
+
+        Uses fetchmany() for efficient batch reading from the database.
+        """
+        cursor = self.connection.cursor()
+        cursor.execute(self.query)
+        columns = self._get_columns()
+
+        while True:
+            rows = cursor.fetchmany(batch_size)
+            if not rows:
+                break
+            yield [dict(zip(columns, row, strict=True)) for row in rows]
 
     def iter_changes(self, since: datetime) -> Iterator[Document]:
         """Yield documents changed since a timestamp."""
         if not self.incremental_field:
             return
 
-        # Validate the incremental_field against discovered schema
         schema = self.discover_schema()
         field_names = {name for name, _ in schema.items()}
         if self.incremental_field not in field_names:
@@ -188,13 +217,10 @@ class SQLSource:
             else f"{self.query} WHERE {self.incremental_field} > {placeholder}"
         )
         cursor.execute(query, (since,))
-        columns = [desc[0] for desc in cursor.description] if cursor.description else []
+        columns = self._get_columns()
 
         for row in cursor:
-            doc: dict[str, Any] = {}
-            for col_name, value in zip(columns, row, strict=True):
-                doc[col_name] = value
-            yield doc
+            yield dict(zip(columns, row, strict=True))
 
     def document_count(self) -> int:
         """Return total document count."""
@@ -216,14 +242,7 @@ class SQLSource:
 
 
 def _validate_query_is_select(query: str) -> None:
-    """Validate that a query is a SELECT statement before wrapping it.
-
-    Args:
-        query: The SQL query to validate.
-
-    Raises:
-        DataSourceError: If the query is not a SELECT statement.
-    """
+    """Validate that a query is a SELECT statement before wrapping it."""
     stripped = query.strip().lstrip("(").strip()
     if not stripped.upper().startswith("SELECT"):
         raise DataSourceError(

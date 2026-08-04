@@ -14,18 +14,7 @@ Document = Mapping[str, Any]
 
 
 class PandasSource:
-    """Pandas DataFrame data source implementing the DataSource protocol.
-
-    Supports iterating over a pandas DataFrame and discovering the Whoosh schema
-    from the DataFrame's dtypes.
-
-    Example:
-        import pandas as pd
-        from whoosh_modern.data_sources.pandas_ds import PandasSource
-
-        df = pd.DataFrame({"id": [1, 2], "title": ["Hello", "World"]})
-        source = PandasSource(dataframe=df)
-    """
+    """Pandas DataFrame data source implementing the DataSource protocol."""
 
     def __init__(
         self,
@@ -39,6 +28,7 @@ class PandasSource:
         self.id_field = id_field
         self.sample_size = sample_size
         self._schema: Schema | None = None
+        self._compiled_mapper: Any = None
 
     @property
     def name(self) -> str:
@@ -85,10 +75,41 @@ class PandasSource:
 
         return TEXT(stored=True)
 
+    def compile_mapper(self) -> Any:
+        """Return a compiled document mapper for this source.
+
+        Pre-computes column names for fast DataFrame-to-dict conversion.
+        Uses to_dict(orient='records') for batch extraction.
+        """
+        if self._compiled_mapper is not None:
+            return self._compiled_mapper
+
+        columns = list(self._dataframe.columns)
+
+        def mapper(df_batch: Any) -> list[dict[str, Any]]:
+            return df_batch[columns].to_dict(orient="records")  # type: ignore[no-any-return]
+
+        self._compiled_mapper = mapper
+        return self._compiled_mapper
+
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the DataFrame."""
         for _, row in self._dataframe.iterrows():
             yield row.to_dict()
+
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the DataFrame in batches.
+
+        Uses to_dict(orient='records') for efficient batch extraction.
+        """
+        df = self._dataframe
+        length = len(df)
+        columns = list(df.columns)
+
+        for start in range(0, length, batch_size):
+            end = min(start + batch_size, length)
+            batch_df = df.iloc[start:end]
+            yield batch_df[columns].to_dict(orient="records")
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp (not implemented for Pandas)."""

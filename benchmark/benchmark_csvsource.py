@@ -8,7 +8,7 @@ import pytest
 
 pytest.importorskip("pytest_benchmark")
 
-from whoosh_modern.data_sources.csv import CSVSource
+from whoosh_modern.data_sources.fast_csv import FastCSVSource
 
 BENCHMARK_DIR = Path(__file__).parent
 CSV_PATH = BENCHMARK_DIR / "Datas" / "customers-2000000.csv"
@@ -18,7 +18,7 @@ class BenchmarkCSVSource:
     """Benchmark suite for CSVSource on 2M customer records."""
 
     def setup_method(self):
-        self.source = CSVSource(
+        self.source = FastCSVSource(
             path=str(CSV_PATH),
             incremental_field=None,
             id_field="Customer Id",
@@ -39,5 +39,5 @@ class BenchmarkCSVSource:
 
     def benchmark_metadata(self, benchmark):
         meta = benchmark(self.source.metadata)
-        assert meta["type"] == "csv"
+        assert meta["type"] == "fast_csv"
         assert meta["path"] == str(CSV_PATH)

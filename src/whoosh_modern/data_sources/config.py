@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from whoosh_modern.data_sources.csv import CSVSource
+from whoosh_modern.data_sources.fast_csv import FastCSVSource
 from whoosh_modern.data_sources.graphql import GraphQLSource
 from whoosh_modern.data_sources.json import JSONSource
 from whoosh_modern.data_sources.pydantic import PydanticSource
@@ -87,7 +87,7 @@ class DataSourceConfig:
         if source_type == "csv":
             if not self.path:
                 raise ValueError("CSVSource requires a 'path' parameter")
-            return CSVSource(
+            return FastCSVSource(
                 path=self.path,
                 delimiter=self.delimiter,
                 encoding=self.encoding,

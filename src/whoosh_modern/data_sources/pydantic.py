@@ -38,22 +38,7 @@ def _model_to_dict(model: Any) -> dict[str, Any]:
 
 
 class PydanticSource:
-    """Pydantic model collection data source implementing the DataSource protocol.
-
-    Supports iterating over a list of Pydantic model instances and
-    discovering the Whoosh schema from the model fields.
-
-    Example:
-        from pydantic import BaseModel
-
-        class Article(BaseModel):
-            id: int
-            title: str
-            body: str
-
-        articles = [Article(id=1, title="Hello", body="World")]
-        source = PydanticSource(models=articles, model=Article)
-    """
+    """Pydantic model collection data source implementing the DataSource protocol."""
 
     def __init__(
         self,
@@ -75,6 +60,7 @@ class PydanticSource:
         self.id_field = id_field
         self.sample_size = sample_size
         self._schema: Schema | None = None
+        self._compiled_mapper: Any = None
 
     @property
     def name(self) -> str:
@@ -95,10 +81,46 @@ class PydanticSource:
         self._schema = Schema(**fields)
         return self._schema
 
+    def compile_mapper(self) -> Any:
+        """Return a compiled document mapper for this source.
+
+        Pre-computes the model_to_dict function for repeated use.
+        """
+        if self._compiled_mapper is not None:
+            return self._compiled_mapper
+
+        model_type = self._model_type
+        if hasattr(model_type, "model_dump"):
+
+            def _mapper_v2(model: Any) -> dict[str, Any]:
+                return model.model_dump(mode="python")  # type: ignore[no-any-return]
+
+            self._compiled_mapper = _mapper_v2
+        elif hasattr(model_type, "dict"):
+
+            def _mapper_v1(model: Any) -> dict[str, Any]:
+                return model.dict()  # type: ignore[no-any-return]
+
+            self._compiled_mapper = _mapper_v1
+        else:
+            self._compiled_mapper = _model_to_dict
+        return self._compiled_mapper
+
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the Pydantic model list."""
         for model_instance in self._models:
             yield _model_to_dict(model_instance)
+
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the Pydantic model list in batches."""
+        batch: list[dict[str, Any]] = []
+        for model_instance in self._models:
+            batch.append(_model_to_dict(model_instance))
+            if len(batch) >= batch_size:
+                yield batch
+                batch = []
+        if batch:
+            yield batch
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp (not implemented for PydanticSource)."""

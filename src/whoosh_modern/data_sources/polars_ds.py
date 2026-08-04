@@ -22,18 +22,7 @@ def _to_datetime(value: Any) -> Any:
 
 
 class PolarsSource:
-    """Polars DataFrame data source implementing the DataSource protocol.
-
-    Supports iterating over a Polars DataFrame and discovering the Whoosh schema
-    from the DataFrame's dtypes.
-
-    Example:
-        import polars as pl
-        from whoosh_modern.data_sources.polars_ds import PolarsSource
-
-        df = pl.DataFrame({"id": [1, 2], "title": ["Hello", "World"]})
-        source = PolarsSource(dataframe=df)
-    """
+    """Polars DataFrame data source implementing the DataSource protocol."""
 
     def __init__(
         self,
@@ -47,6 +36,7 @@ class PolarsSource:
         self.id_field = id_field
         self.sample_size = sample_size
         self._schema: Schema | None = None
+        self._compiled_mapper: Any = None
 
     @property
     def name(self) -> str:
@@ -93,10 +83,42 @@ class PolarsSource:
 
         return TEXT(stored=True)
 
+    def compile_mapper(self) -> Any:
+        """Return a compiled document mapper for this source.
+
+        Pre-computes column names for fast row extraction.
+        """
+        if self._compiled_mapper is not None:
+            return self._compiled_mapper
+
+        columns = list(self._dataframe.columns)
+
+        def mapper(row: Any) -> dict[str, Any]:
+            return {k: _to_datetime(v) for k, v in zip(columns, row, strict=True)}
+
+        self._compiled_mapper = mapper
+        return self._compiled_mapper
+
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the DataFrame."""
         for row in self._dataframe.iter_rows(named=True):
             yield {k: _to_datetime(v) for k, v in row.items()}
+
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the DataFrame in batches.
+
+        Uses slice-based batching for efficient batch extraction.
+        """
+        df = self._dataframe
+        length = len(df)
+
+        for start in range(0, length, batch_size):
+            end = min(start + batch_size, length)
+            batch_df = df.slice(start, end - start)
+            yield [
+                {k: _to_datetime(v) for k, v in row.items()}
+                for row in batch_df.iter_rows(named=True)
+            ]
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp (not implemented for Polars)."""

@@ -76,12 +76,7 @@ def _get_http_client(timeout: int) -> Any:
 
 
 class GraphQLSource:
-    """GraphQL API data source implementing the DataSource protocol.
-
-    Supports:
-    - Standard GraphQL queries with pagination via cursor-based pagination.
-    - Configurable document path for nested response data.
-    """
+    """GraphQL API data source implementing the DataSource protocol."""
 
     def __init__(
         self,
@@ -151,7 +146,6 @@ class GraphQLSource:
                 return [item for item in result if isinstance(item, dict)]
             return []
 
-        # Auto-find first list in data
         for value in result.values():
             if isinstance(value, list):
                 return [item for item in value if isinstance(item, dict)]
@@ -177,6 +171,30 @@ class GraphQLSource:
             ) from e
         documents = self._extract_documents(data)
         yield from documents
+
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the GraphQL API in batches.
+
+        For GraphQL, each response is treated as a batch.
+        """
+        payload: dict[str, Any] = {"query": self.query}
+        try:
+            data = self._http_client.post(self.url, payload, self._get_headers())
+        except Exception as e:
+            raise DataSourceError(
+                f"GraphQL request failed: {e}",
+                source="graphql",
+            ) from e
+        documents = self._extract_documents(data)
+
+        batch: list[dict[str, Any]] = []
+        for doc in documents:
+            batch.append(doc)
+            if len(batch) >= batch_size:
+                yield batch
+                batch = []
+        if batch:
+            yield batch
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp (not implemented for GraphQL)."""

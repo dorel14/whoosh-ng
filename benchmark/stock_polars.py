@@ -8,7 +8,6 @@ import polars as pl
 
 from benchmark import WhooshLikeSpec
 from whoosh import fields
-
 from whoosh_modern.data_sources.polars_ds import PolarsSource
 
 

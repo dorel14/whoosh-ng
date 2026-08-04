@@ -259,8 +259,7 @@ class W3PerDocWriter(base.PerDocWriterWithColumns):
         vpostwriter.start_postings(fieldobj.vector, W3TermInfo())
         for text, weight, vbytes in items:
             vpostwriter.add_posting(text, weight, vbytes)
-        # finish_postings() returns terminfo object
-        vinfo = vpostwriter.finish_postings()
+        vinfo = vpostwriter.finish_postings(allow_compact=False)
 
         # Add row to vector lookup column
         vecfield = _vecfield(fieldname)  # Compute vector column name
@@ -745,25 +744,69 @@ class W3PostingsWriter(base.PostingsWriter):
             if length > self._maxlength:
                 self._maxlength = length
 
-    def finish_postings(self):
+    def finish_postings(self, allow_compact=True):
         terminfo = self._terminfo
-        # If we have fewer than "inlinelimit" postings in this posting list,
-        # "inline" the postings into the terminfo instead of writing them to
-        # the posting file
-        if not self.written() and len(self) < self._inlinelimit:
+        posting_count = len(self)
+
+        if posting_count == 0:
+            terminfo.set_extent(self._startoffset, 0)
+        elif posting_count == 1 and allow_compact and not self.written():
+            id_ = self._ids[0]
+            weight = self._weights[0]
+            value = self._values[0] if self._values else emptybytes
+            terminfo._weight += weight
+            terminfo._df += 1
+            if self._minlength is not None:
+                if terminfo._minlength is None:
+                    terminfo._minlength = self._minlength
+                else:
+                    terminfo._minlength = min(terminfo._minlength, self._minlength)
+            terminfo._maxlength = max(terminfo._maxlength, self._maxlength)
+            terminfo._maxweight = max(terminfo._maxweight, weight)
+            if terminfo._minid is None:
+                terminfo._minid = id_
+            else:
+                terminfo._minid = min(terminfo._minid, id_)
+            if terminfo._maxid is None:
+                terminfo._maxid = id_
+            else:
+                terminfo._maxid = max(terminfo._maxid, id_)
+            terminfo.set_compact_inline(id_, weight, value)
+        elif posting_count <= 8 and allow_compact and not self.written():
+            ids = list(self._ids)
+            weights = list(self._weights)
+            values = list(self._values) if self._values else [emptybytes] * posting_count
+            if len(values) < posting_count:
+                values.extend([emptybytes] * (posting_count - len(values)))
+            terminfo._weight += sum(weights)
+            terminfo._df += posting_count
+            if self._minlength is not None:
+                if terminfo._minlength is None:
+                    terminfo._minlength = self._minlength
+                else:
+                    terminfo._minlength = min(terminfo._minlength, self._minlength)
+            terminfo._maxlength = max(terminfo._maxlength, self._maxlength)
+            terminfo._maxweight = max(terminfo._maxweight, max(weights))
+            if terminfo._minid is None:
+                terminfo._minid = ids[0]
+            else:
+                terminfo._minid = min(terminfo._minid, ids[0])
+            if terminfo._maxid is None:
+                terminfo._maxid = ids[-1]
+            else:
+                terminfo._maxid = max(terminfo._maxid, ids[-1])
+            terminfo.set_compact_short_inline(ids, weights, values)
+        elif not self.written() and posting_count < self._inlinelimit:
             terminfo.add_block(self)
-            terminfo.set_inline(self._ids, self._weights, self._values)
+            terminfo.set_inlined(self._ids, self._weights, self._values)
         else:
-            # If there are leftover items in the current block, write them out
             if self._ids:
                 self._write_block(last=True)
             startoffset = self._startoffset
             length = self._postfile.tell() - startoffset
             terminfo.set_extent(startoffset, length)
 
-        # Clear self._terminfo to indicate we're between terms
         self._terminfo = None
-        # Return the current terminfo object
         return terminfo
 
     def _new_block(self):
@@ -1187,11 +1230,19 @@ class W3TermInfo(TermInfo):
     # I   | Maximum (last) ID
     _struct = struct.Struct("!BfIBBfII")
 
+    # Flag values
+    _FLAG_OFFSET = 0
+    _FLAG_INLINE_PICKLE = 1
+    _FLAG_INLINE_COMPACT = 2
+    _FLAG_INLINE_COMPACT_SHORT = 3
+
     def __init__(self, *args, **kwargs):
         TermInfo.__init__(self, *args, **kwargs)
         self._offset = None
         self._length = None
         self._inlined = None
+        self._compact_inline = None
+        self._compact_short_inline = None
 
     def add_block(self, block):
         self._weight += sum(block._weights)
@@ -1218,16 +1269,43 @@ class W3TermInfo(TermInfo):
 
     def set_inlined(self, ids, weights, values):
         self._inlined = (tuple(ids), tuple(weights), tuple(values))
+        self._compact_inline = None
+        self._compact_short_inline = None
+
+    def set_compact_inline(self, id_, weight, value):
+        self._compact_inline = (id_, weight, value)
+        self._inlined = None
+        self._compact_short_inline = None
+
+    def set_compact_short_inline(self, ids, weights, values):
+        self._compact_short_inline = (tuple(ids), tuple(weights), tuple(values))
+        self._inlined = None
+        self._compact_inline = None
+
+    def is_compact_inline(self):
+        return self._compact_inline is not None
+
+    def is_compact_short_inline(self):
+        return self._compact_short_inline is not None
 
     def is_inlined(self):
-        return self._inlined is not None
+        return (
+            self._inlined is not None
+            or self._compact_inline is not None
+            or self._compact_short_inline is not None
+        )
 
     def inlined_postings(self):
-        return self._inlined
+        if self.is_compact_short_inline():
+            return self._compact_short_inline
+        if self.is_compact_inline():
+            id_, weight, value = self._compact_inline
+            return [id_], [weight], [value]
+        if self._inlined is not None:
+            return self._inlined
+        return [], [], []
 
     def to_bytes(self):
-        isinlined = self.is_inlined()
-
         # Encode the lengths as 0-255 values
         minlength = 0 if self._minlength is None else length_to_byte(self._minlength)
         maxlength = length_to_byte(self._maxlength)
@@ -1236,9 +1314,18 @@ class W3TermInfo(TermInfo):
         minid = 0xFFFFFFFF if self._minid is None else self._minid
         maxid = 0xFFFFFFFF if self._maxid is None else self._maxid
 
+        if self.is_compact_short_inline():
+            flags = self._FLAG_INLINE_COMPACT_SHORT
+        elif self.is_compact_inline():
+            flags = self._FLAG_INLINE_COMPACT
+        elif self._inlined is not None:
+            flags = self._FLAG_INLINE_PICKLE
+        else:
+            flags = self._FLAG_OFFSET
+
         # Pack the term info into bytes
         st = self._struct.pack(
-            isinlined,
+            flags,
             self._weight,
             self._df,
             minlength,
@@ -1248,8 +1335,23 @@ class W3TermInfo(TermInfo):
             maxid,
         )
 
-        if isinlined:
-            # Postings are inlined - dump them using the pickle protocol
+        if self.is_compact_short_inline():
+            ids, weights, values = self._compact_short_inline
+            postbytes = (
+                struct.pack("!B", len(ids))
+                + struct.pack("!" + "I" * len(ids), *ids)
+                + struct.pack("!" + "f" * len(weights), *weights)
+                + struct.pack("!" + "H" * len(values), *map(len, values))
+                + b"".join(values)
+            )
+        elif self.is_compact_inline():
+            id_, weight, value = self._compact_inline
+            postbytes = (
+                struct.pack("!If", id_, weight)
+                + struct.pack("!H", len(value))
+                + value
+            )
+        elif self._inlined is not None:
             postbytes = dumps(self._inlined)
         else:
             postbytes = pack_long(self._offset) + pack_int(self._length)
@@ -1271,11 +1373,50 @@ class W3TermInfo(TermInfo):
         terminfo._minid = None if vals[6] == 0xFFFFFFFF else vals[6]
         terminfo._maxid = None if vals[7] == 0xFFFFFFFF else vals[7]
 
-        if flags:
-            # Postings are stored inline
+        if flags == cls._FLAG_INLINE_COMPACT_SHORT:
+            terminfo._compact_short_inline = None
+            terminfo._inlined = None
+            terminfo._compact_inline = None
+            pos = st.size
+            count = struct.unpack("!B", s[pos : pos + 1])[0]
+            pos += 1
+            ids = list(struct.unpack("!" + "I" * count, s[pos : pos + 4 * count]))
+            pos += 4 * count
+            weights = list(
+                struct.unpack("!" + "f" * count, s[pos : pos + 4 * count])
+            )
+            pos += 4 * count
+            lengths = list(
+                struct.unpack("!" + "H" * count, s[pos : pos + 2 * count])
+            )
+            pos += 2 * count
+            values = []
+            for length in lengths:
+                values.append(s[pos : pos + length])
+                pos += length
+            terminfo._compact_short_inline = (ids, weights, values)
+        elif flags == cls._FLAG_INLINE_COMPACT:
+            terminfo._compact_short_inline = None
+            terminfo._inlined = None
+            pos = st.size
+            id_ = struct.unpack("!I", s[pos : pos + 4])[0]
+            pos += 4
+            weight = struct.unpack("!f", s[pos : pos + 4])[0]
+            pos += 4
+            value_len = struct.unpack("!H", s[pos : pos + 2])[0]
+            pos += 2
+            value = s[pos : pos + value_len]
+            terminfo._compact_inline = (id_, weight, value)
+            terminfo._compact_short_inline = None
+            terminfo._inlined = None
+        elif flags == cls._FLAG_INLINE_PICKLE:
             terminfo._inlined = loads(s[st.size :])
+            terminfo._compact_inline = None
+            terminfo._compact_short_inline = None
         else:
-            # Last bytes are pointer into posting file and length
+            terminfo._inlined = None
+            terminfo._compact_inline = None
+            terminfo._compact_short_inline = None
             offpos = st.size
             lenpos = st.size + _LONG_SIZE
             terminfo._offset = unpack_long(s[offpos:lenpos])[0]

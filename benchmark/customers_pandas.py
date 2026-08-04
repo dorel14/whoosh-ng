@@ -9,7 +9,6 @@ import pandas as pd
 
 from benchmark import WhooshLikeSpec
 from whoosh import fields
-
 from whoosh_modern.data_sources.pandas_ds import PandasSource
 
 
@@ -21,7 +20,7 @@ class CustomersPandas(WhooshLikeSpec):
     name = "customers_pandas"
     main_field = "City"
     headline_field = "First_Name"
-    default_query = "London"
+    default_query = "Bradleymouth"
 
     def __init__(self, options, args):
         super().__init__(options, args)

@@ -27,36 +27,28 @@
 # policies, either expressed or implied, of Matt Chaput.
 """Customized sorting pool for postings."""
 
-import sys
-
 from whoosh.externalsort import SortingPool
 from whoosh.util import random_name
 
 
 def _posting_size(item):
-    """Return a reliable estimate of the memory size of a posting tuple
-    ``(fieldname, textbytes, docnum, weight, vbytes)``.
+    """Return a lightweight estimate of the memory size of a posting tuple.
 
-    Uses :func:`sys.getsizeof` on the tuple and its elements, with a fallback to
-    item-counting when ``sys.getsizeof`` is unavailable or raises. This replaces
-    the previous implementation's hard-coded per-type byte constants, which were
-    fragile and dependent on the CPython object layout.
+    Uses the known structure of the posting item instead of ``sys.getsizeof``
+    to avoid the allocator overhead on hot paths. The value is only used to
+    decide when to flush the current run, so a small estimation error is
+    acceptable.
     """
 
     try:
-        size = sys.getsizeof(item)
-        for sub in item:
-            try:
-                size += sys.getsizeof(sub)
-            except Exception:
-                size += 1
         fieldname, textbytes, docnum, weight, vbytes = item
+        size = 64
         size += len(fieldname) + len(textbytes)
         if vbytes is not None:
             size += len(vbytes)
         return size
     except Exception:
-        return 1 + len(item)
+        return 64
 
 
 class PostingPool(SortingPool):

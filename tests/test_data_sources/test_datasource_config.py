@@ -5,7 +5,7 @@ import sqlite3
 import pytest
 
 from whoosh_modern.data_sources.config import DataSourceConfig
-from whoosh_modern.data_sources.csv import CSVSource
+from whoosh_modern.data_sources.fast_csv import FastCSVSource
 from whoosh_modern.data_sources.json import JSONSource
 from whoosh_modern.data_sources.rest import RESTSource
 from whoosh_modern.data_sources.sql import SQLSource
@@ -53,7 +53,7 @@ class TestDataSourceConfig:
         try:
             config = DataSourceConfig(type="csv", path=path)
             source = config.create()
-            assert isinstance(source, CSVSource)
+            assert isinstance(source, FastCSVSource)
         finally:
             os.remove(path)
 

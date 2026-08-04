@@ -181,55 +181,34 @@ class FieldWriter:
         else:
             dfl = lambda docnum, fieldname: 0
 
-        # The fieldname of the previous posting
+        field_cache = {}
         lastfn = None
-        # The bytes text of the previous posting
         lasttext = None
-        # The (fieldname, btext) of the previous spelling posting
-        _lastspell = None
-        # The field object for the current field
         fieldobj = None
         for fieldname, btext, docnum, weight, value in items:
-            # Check for out-of-order postings. This is convoluted because Python
-            # 3 removed the ability to compare a string to None
-            if lastfn is not None and fieldname < lastfn:
-                raise OutOfOrderError(f"Field {lastfn!r} .. {fieldname!r}")
-            if fieldname == lastfn and lasttext and btext < lasttext:
-                raise OutOfOrderError(f"Term {lastfn}:{lasttext!r} .. {fieldname}:{btext!r}")
-
-            # If the fieldname of this posting is different from the last one,
-            # tell the writer we're starting a new field
             if fieldname != lastfn:
-                if lasttext is not None:
+                if lastfn is not None:
+                    if fieldname < lastfn:
+                        raise OutOfOrderError(f"Field {lastfn!r} .. {fieldname!r}")
                     finish_term()
-                if lastfn is not None and fieldname != lastfn:
                     finish_field()
-                fieldobj = schema[fieldname]
+                fieldobj = field_cache.get(fieldname)
+                if fieldobj is None:
+                    fieldobj = schema[fieldname]
+                    field_cache[fieldname] = fieldobj
                 start_field(fieldname, fieldobj)
                 lastfn = fieldname
                 lasttext = None
 
-            # HACK: items where docnum == -1 indicate words that should be added
-            # to the spelling graph, not the postings
             if docnum == -1:
-                # spellterm = (fieldname, btext)
-                # # There can be duplicates of spelling terms, so only add a spell
-                # # term if it's greater than the last one
-                # if _lastspell is None or spellterm > _lastspell:
-                #     spellword = fieldobj.from_bytes(btext)
-                #     self.add_spell_word(fieldname, spellword)
-                #     _lastspell = spellterm
                 continue
 
-            # If this term is different from the term in the previous posting,
-            # tell the writer to start a new term
             if btext != lasttext:
                 if lasttext is not None:
                     finish_term()
                 start_term(btext)
                 lasttext = btext
 
-            # Add this posting
             length = dfl(docnum, fieldname)
             if value is None:
                 value = emptybytes

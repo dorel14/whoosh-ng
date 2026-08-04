@@ -6,7 +6,6 @@ import os
 
 from benchmark import WhooshLikeSpec
 from whoosh import fields
-
 from whoosh_modern.data_sources.json import JSONSource
 
 
@@ -32,8 +31,12 @@ class GouvJSON(WhooshLikeSpec):
     def whoosh_schema(self):
         schema = self._source.discover_schema()
         filtered = {
-            name: field for name, field in schema.items()
-            if isinstance(field, (fields.TEXT, fields.ID, fields.NUMERIC, fields.BOOLEAN, fields.DATETIME))
+            name: field
+            for name, field in schema.items()
+            if isinstance(
+                field,
+                (fields.TEXT, fields.ID, fields.NUMERIC, fields.BOOLEAN, fields.DATETIME),
+            )
         }
         from whoosh.fields import Schema
         return Schema(**filtered)
