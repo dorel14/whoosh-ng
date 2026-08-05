@@ -10,8 +10,13 @@ on:
     paths:
       - "pyproject.toml"
 
+permissions:
+  contents: read
+
 jobs:
   sync-version:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
