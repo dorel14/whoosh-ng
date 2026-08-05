@@ -104,6 +104,14 @@ dev = [
 benchmark = [
   "pytest-benchmark>=4",
 ]
+profiling = [
+  "psutil",
+  "re2",
+  "pystemmer",
+]
+fast-stemming = [
+  "pystemmer",
+]
 
 [project.entry-points."whoosh_ng.plugins"]
 whoosh_autocomplete = "whoosh_modern.autocomplete.plugin:AutocompletePlugin"
@@ -367,19 +375,27 @@ module = "requests"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "setuptools"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "sphinx_rtd_theme"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "hnswlib"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["pydantic", "msgspec", "sqlalchemy", "sqlalchemy.orm", "sqlmodel", "fastapi", "fastapi.responses", "numpy"]
+module = [
+  "pydantic",
+  "msgspec",
+  "sqlalchemy",
+  "sqlalchemy.orm",
+  "sqlmodel",
+  "fastapi",
+  "fastapi.responses",
+  "numpy",
+  "pandas",
+  "polars",
+  "pyarrow",
+  "pyarrow.parquet",
+  "tortoise",
+  "psutil",
+  "re2",
+  "Stemmer",
+  "setuptools",
+  "sphinx_rtd_theme",
+  "hnswlib",
+]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]

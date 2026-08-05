@@ -19,7 +19,6 @@ import os
 from typing import Any
 
 from whoosh import index
-from whoosh.codec.whoosh3 import W3Segment
 
 
 class IndexQualityAnalyzer:

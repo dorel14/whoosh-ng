@@ -96,7 +96,7 @@ class AnalyzerComparator:
 
         t0 = time.perf_counter()
         for text in texts:
-            tokens = profiler.profile_text(text)
+            profiler.profile_text(text)
         total_time = time.perf_counter() - t0
 
         result.total_time = total_time

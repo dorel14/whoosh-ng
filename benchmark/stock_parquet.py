@@ -31,3 +31,6 @@ class StockParquet(WhooshLikeSpec):
 
     def documents(self):
         yield from self._source.iter_documents()
+
+    def batches(self, batch_size: int = 1000):
+        yield from self._source.stream_batches(batch_size=batch_size)

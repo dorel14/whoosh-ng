@@ -88,6 +88,7 @@ class UnifiedPipelineProfiler:
                     t0 = time.perf_counter()
                     scorable = field.scorable
                     length = 0
+                    vbytes = b""
                     for tbytes, freq, weight, vbytes in items:
                         weight *= fieldboost
                         if scorable:

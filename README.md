@@ -50,8 +50,14 @@ pip install "whoosh-ng[fuzzy]"
 # Phonetic search
 pip install "whoosh-ng[phonetic]"
 
+# Profiling tools (psutil, re2, pystemmer)
+pip install "whoosh-ng[profiling]"
+
+# Fast stemming with PyStemmer C backend
+pip install "whoosh-ng[fast-stemming]"
+
 # All optional features
-pip install "whoosh-ng[vector,async,api,metrics,postgres,fuzzy,phonetic]"
+pip install "whoosh-ng[vector,async,api,metrics,postgres,fuzzy,phonetic,profiling,fast-stemming]"
 ```
 
 ### Development Installation
@@ -109,6 +115,7 @@ pip install "whoosh-ng[dev]"
 
 - `Token` now uses `__slots__`: code that iterates `token.__dict__` should use `token.copy()` or slot introspection instead
 - `finish_postings()` signature changed: `allow_compact=True` keyword added
+- **`whoosh_modern` package structure changed**: Import paths for data sources have been updated. For example, `from whoosh_modern.data_sources import SQLSource` should now be `from whoosh_modern.data_sources.sql import SQLSource`. Please update your import statements accordingly.
 
 ### Changed
 

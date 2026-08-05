@@ -51,3 +51,6 @@ class GouvJSON(WhooshLikeSpec):
             }
             if filtered:
                 yield filtered
+
+    def batches(self, batch_size: int = 1000):
+        yield from self._source.stream_batches(batch_size=batch_size)

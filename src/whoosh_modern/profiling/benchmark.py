@@ -209,9 +209,9 @@ def _profile_segments(
 
     if os.path.exists(os.path.join(idx_dir, "segments")):
         with open(os.path.join(idx_dir, "segments")) as f:
-            segment_count = len([line for line in f if line.strip()])
+            _segment_count = len([line for line in f if line.strip()])
     else:
-        segment_count = 1
+        _segment_count = 1
 
     segment_profiler.start_segment(0)
     segment_profiler.stop_segment()
@@ -351,7 +351,7 @@ def _optimize_batch_size(
     source = _create_fake_source(docs)
 
     optimizer = BatchSizeOptimizer(ix.writer(limitmb=128, multisegment=True), source)
-    results = optimizer.benchmark(
+    optimizer.benchmark(
         batch_sizes=[100, 500, 1000, 2500, 5000],
         docs_per_size=min(5000, len(docs)),
     )

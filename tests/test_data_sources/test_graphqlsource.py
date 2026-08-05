@@ -14,7 +14,7 @@ from whoosh_modern.exceptions import DataSourceError
 class MockGraphQLHandler(BaseHTTPRequestHandler):
     """Mock GraphQL API handler for testing."""
 
-    def do_POST(self):
+    def do_POST(self):  # noqa: N802
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length)
         payload = json.loads(body)

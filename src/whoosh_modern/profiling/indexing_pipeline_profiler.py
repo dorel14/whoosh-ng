@@ -19,7 +19,6 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from whoosh import index
 from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT, Schema
 
 

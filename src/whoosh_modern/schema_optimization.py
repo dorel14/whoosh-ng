@@ -6,7 +6,6 @@ that can improve index size and query performance.
 
 from __future__ import annotations
 
-from collections import Counter
 from typing import Any
 
 

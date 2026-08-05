@@ -78,7 +78,7 @@ class ParquetSource:
             pass
 
         try:
-            import pyarrow.parquet as pq  # type: ignore[import-untyped]
+            import pyarrow.parquet as pq
 
             if sample:
                 return pq.read_table(self.path).slice(0, self.sample_size).to_pandas()

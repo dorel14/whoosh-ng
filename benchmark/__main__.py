@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import sys
 import time
 from collections.abc import Iterator, Sequence
@@ -164,31 +165,23 @@ def _run_pytest_spec(
         else:
             report_obj.to_json(out)
         print(f"Report written to {out}")
-
     return result
-
-
-def _chunked(items: list[Any], chunk_size: int) -> Iterator[list[Any]]:
-    """Yield successive chunk_size-sized chunks from items."""
-    for i in range(0, len(items), chunk_size):
-        yield items[i : i + chunk_size]
 
 
 def _run_indexing(spec, options) -> tuple[int, float]:
     """Run indexing benchmark and return (doc_count, elapsed_seconds)."""
     schema = spec.whoosh_schema()
-    bench_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(bench_dir)
-    idx_dir = os.path.join(project_root, "benchmark", "indexes", f"{spec.name}_index")
-    if os.path.exists(idx_dir):
-        import shutil
+    idx_dir = spec.index_dir()
 
+    if os.path.exists(idx_dir):
         shutil.rmtree(idx_dir)
     os.makedirs(idx_dir, exist_ok=True)
 
     use_profiling = getattr(options, "profile", False)
-    profiler: IndexProfiler | None = None
-    commit_profiler = None
+    batch_size = int(getattr(options, "batch_size", 0) or 0)
+    skip = int(options.skip)
+    upto = int(options.upto) if options.upto else 0
+
     if use_profiling:
         from whoosh_modern.profiling import CommitProfilerV2, IndexProfiler
 
@@ -197,101 +190,85 @@ def _run_indexing(spec, options) -> tuple[int, float]:
         commit_profiler = CommitProfilerV2(collect_term_stats=True)
 
     ix = index.create_in(idx_dir, schema)
+    start = time.perf_counter()
+    count = 0
+
+    if use_profiling:
+        if batch_size > 0:
+            count = _run_batch_indexing_with_profiling(
+                ix, spec, options, profiler, commit_profiler, batch_size, skip, upto
+            )
+        else:
+            count = _run_single_doc_indexing_with_profiling(
+                ix, spec, options, profiler, commit_profiler, skip, upto
+            )
+
+        profiler.add_documents(count)
+        profiler.__exit__(None, None, None)
+        print(profiler.report())
+        if commit_profiler is not None:
+            print(commit_profiler.report())
+    elif batch_size > 0:
+        count = _run_batch_indexing(ix, spec, options, batch_size, skip, upto)
+    else:
+        count = _run_single_doc_indexing(ix, spec, options, skip, upto)
+
+    elapsed = time.perf_counter() - start
+    print(f"Indexed {count} docs in {elapsed:.3f}s ({count / elapsed:.1f} docs/s)")
+    return count, elapsed
+
+
+def _run_batch_indexing_with_profiling(
+    ix, spec, options, profiler, commit_profiler, batch_size, skip, upto
+) -> int:
+    from whoosh_modern.indexing import BatchIndexWriter
 
     count = 0
-    skip = int(options.skip)
-    upto = int(options.upto) if options.upto else 0
-    batch_size = int(getattr(options, "batch_size", 0) or 0)
-    start = time.perf_counter()
+    with profiler.step("reading"):
+        batches = list(spec.batches(batch_size))
 
-    if use_profiling and profiler is not None:
-        if batch_size > 0:
-            from whoosh_modern.indexing import BatchIndexWriter
+    writer = BatchIndexWriter(
+        ix,
+        batch_size=batch_size,
+        limitmb=options.limitmb,
+        commit_every=options.progress_every if options.progress_every else None,
+        multisegment=options.merge == 0,
+        callback=commit_profiler.callback if commit_profiler else None,
+        commit_profiler=commit_profiler,
+    )
+    with profiler.step("analyzing"):
+        for batch in batches:
+            if skip > 0:
+                skip -= len(batch)
+                if skip < 0:
+                    batch = batch[-skip:]
+                    skip = 0
+                if not batch:
+                    continue
+            if upto and count >= upto:
+                break
+            added = writer.add_batch(batch)
+            count += added
+            if options.progress_every and count % int(options.progress_every) == 0:
+                print(f"  ... {count} docs indexed")
+    with profiler.step("committing"):
+        writer.close()
+    return count
 
-            with profiler.step("reading"):
-                batches = list(spec.batches(batch_size))
 
-            writer = BatchIndexWriter(
-                ix,
-                batch_size=batch_size,
-                limitmb=options.limitmb,
-                commit_every=options.every if options.every else None,
-                multisegment=options.merge == 0,
-                callback=commit_profiler.callback if commit_profiler else None,
-                commit_profiler=commit_profiler,
-            )
-            with profiler.step("analyzing"):
-                for batch in batches:
-                    if skip > 0:
-                        skip -= len(batch)
-                        if skip < 0:
-                            batch = batch[-skip:]
-                            skip = 0
-                        if not batch:
-                            continue
-                    if upto and count >= upto:
-                        break
-                    added = writer.add_batch(batch)
-                    count += added
-                    if options.every and count % int(options.every) == 0:
-                        print(f"  ... {count} docs indexed")
-            with profiler.step("committing"):
-                writer.close()
-        else:
-            with profiler.step("reading"):
-                docs = list(spec.documents())
+def _run_single_doc_indexing_with_profiling(
+    ix, spec, options, profiler, commit_profiler, skip, upto
+) -> int:
+    count = 0
+    with profiler.step("reading"):
+        docs = list(spec.documents())
 
-            writer2 = ix.writer(
-                limitmb=options.limitmb,
-                procs=options.procs,
-                multisegment=options.merge == 0,
-            )
-            with profiler.step("analyzing"):
-                for doc in docs:
-                    if skip > 0:
-                        skip -= 1
-                        continue
-                    writer2.add_document(**doc)
-                    count += 1
-                    if upto and count >= upto:
-                        break
-            with profiler.step("committing"):
-                writer2.commit(
-                    merge=options.merge == 1,
-                    callback=commit_profiler.callback if commit_profiler else None,
-                )
-    elif batch_size > 0:
-        from whoosh_modern.indexing import BatchIndexWriter
-
-        batches = spec.batches(batch_size)
-        with BatchIndexWriter(
-            ix,
-            batch_size=batch_size,
-            limitmb=options.limitmb,
-            commit_every=options.every if options.every else None,
-            multisegment=options.merge == 0,
-        ) as writer:
-            for batch in batches:
-                if skip > 0:
-                    skip -= len(batch)
-                    if skip < 0:
-                        batch = batch[-skip:]
-                        skip = 0
-                    if not batch:
-                        continue
-                if upto and count >= upto:
-                    break
-                added = writer.add_batch(batch)
-                count += added
-                if options.every and count % int(options.every) == 0:
-                    print(f"  ... {count} docs indexed")
-    else:
-        writer = ix.writer(
-            limitmb=options.limitmb,
-            procs=options.procs,
-            multisegment=options.merge == 0,
-        )
-        docs = spec.documents()
+    writer = ix.writer(
+        limitmb=options.limitmb,
+        procs=options.procs,
+        multisegment=options.merge == 0,
+    )
+    with profiler.step("analyzing"):
         for doc in docs:
             if skip > 0:
                 skip -= 1
@@ -300,28 +277,61 @@ def _run_indexing(spec, options) -> tuple[int, float]:
             count += 1
             if upto and count >= upto:
                 break
-        if options.every and count % int(options.every) == 0:
+    with profiler.step("committing"):
+        writer.commit(
+            merge=options.merge == 1,
+            callback=commit_profiler.callback if commit_profiler else None,
+        )
+    return count
+
+
+def _run_batch_indexing(ix, spec, options, batch_size, skip, upto) -> int:
+    from whoosh_modern.indexing import BatchIndexWriter
+
+    count = 0
+    with BatchIndexWriter(
+        ix,
+        batch_size=batch_size,
+        limitmb=options.limitmb,
+        commit_every=options.progress_every if options.progress_every else None,
+        multisegment=options.merge == 0,
+    ) as writer:
+        for batch in spec.batches(batch_size):
+            if skip > 0:
+                skip -= len(batch)
+                if skip < 0:
+                    batch = batch[-skip:]
+                    skip = 0
+                if not batch:
+                    continue
+            if upto and count >= upto:
+                break
+            added = writer.add_batch(batch)
+            count += added
+            if options.progress_every and count % int(options.progress_every) == 0:
+                print(f"  ... {count} docs indexed")
+    return count
+
+
+def _run_single_doc_indexing(ix, spec, options, skip, upto) -> int:
+    count = 0
+    writer = ix.writer(
+        limitmb=options.limitmb,
+        procs=options.procs,
+        multisegment=options.merge == 0,
+    )
+    for doc in spec.documents():
+        if skip > 0:
+            skip -= 1
+            continue
+        writer.add_document(**doc)
+        count += 1
+        if upto and count >= upto:
+            break
+        if options.progress_every and count % int(options.progress_every) == 0:
             print(f"  ... {count} docs indexed")
-        if batch_size and count % batch_size == 0:
-            writer.commit(merge=False)
-            writer = ix.writer(
-                limitmb=options.limitmb,
-                procs=options.procs,
-                multisegment=options.merge == 0,
-            )
-        writer.commit(merge=options.merge == 1)
-
-    elapsed = time.perf_counter() - start
-    if use_profiling and profiler is not None:
-        profiler.add_documents(count)
-        profiler.__exit__(None, None, None)
-        print(profiler.report())
-
-    if commit_profiler is not None:
-        print(commit_profiler.report())
-
-    print(f"Indexed {count} docs in {elapsed:.3f}s ({count / elapsed:.1f} docs/s)")
-    return count, elapsed
+    writer.commit(merge=options.merge == 1)
+    return count
 
 
 def _run_searching(spec, options) -> tuple[int, float]:
@@ -402,7 +412,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--limitmb", type=int, default=128, help="Max memory usage per writer in MB"
     )
-    parser.add_argument("--every", default=None, help="Report progress every N docs")
+    parser.add_argument(
+        "--progress-every",
+        type=int,
+        default=0,
+        help="Print progress message every N docs (0=disable)",
+    )
     parser.add_argument("--merge", default=1, help="Merge policy (1=SMALL, 0=none)")
     parser.add_argument("--chunk", default=0, help="Chunk size for indexing progress")
     parser.add_argument("--skip", default="1", help="Initial docs to skip (default: 1)")
@@ -480,7 +495,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         procs=args.procs,
         limitmb=args.limitmb,
         indexname=f"{str(args.spec)}_index",
-        every=args.every,
+        progress_every=args.progress_every,
         merge=args.merge,
         chunk=args.chunk,
         skip=args.skip,

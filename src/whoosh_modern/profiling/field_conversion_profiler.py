@@ -21,7 +21,6 @@ from collections import defaultdict
 from typing import Any
 
 from whoosh import fields
-from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT
 
 
 class FieldConversionProfiler:
@@ -56,7 +55,7 @@ class FieldConversionProfiler:
 
             # Measure field.index() call
             t0 = time.perf_counter()
-            items = list(field.index(value))
+            list(field.index(value))
             total = time.perf_counter() - t0
 
             doc_timings[field_key] = total

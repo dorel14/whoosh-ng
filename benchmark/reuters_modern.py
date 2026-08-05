@@ -51,3 +51,8 @@ class ReutersModern(WhooshLikeSpec):
                 if k in schema_fields
             }
             yield filtered
+
+    def batches(self, batch_size: int = 1000):
+        self._ensure_setup()
+        assert self._source is not None
+        yield from self._source.stream_batches(batch_size=batch_size)

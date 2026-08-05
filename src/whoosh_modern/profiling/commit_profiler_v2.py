@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import time
 from collections import OrderedDict
-from collections.abc import Callable, Sequence
 from typing import Any
 
 
@@ -419,7 +418,6 @@ class _TimedSegmentWriter:
     def _patch(self) -> None:
         writer = self._writer
         profiler = self._profiler
-        orig_flush = self._orig_flush
         orig_assemble = self._orig_assemble
         codec_length_stats = getattr(writer.codec, "length_stats", False)
 

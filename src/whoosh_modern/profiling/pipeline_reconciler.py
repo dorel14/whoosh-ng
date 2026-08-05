@@ -105,8 +105,7 @@ class PipelineReconciler:
                     f"  - The simulated pipeline underestimates by {gap:.3f}s ({gap_pct:.1f}%)"
                 )
                 lines.append(
-                    "  - The missing time is in field transformation and "
-                    "indexing pipeline feeding"
+                    "  - The missing time is in field transformation and indexing pipeline feeding"
                 )
                 lines.append(
                     "  - Field conversion + PostingPool.add() + "

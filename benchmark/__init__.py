@@ -75,6 +75,11 @@ class WhooshLikeSpec(Spec):
         read batches natively (e.g. from a DataSource with
         ``stream_batches()``).
         """
+        source = getattr(self, "_source", None)
+        if source is not None and hasattr(source, "stream_batches"):
+            yield from source.stream_batches(batch_size=batch_size)
+            return
+
         batch: list[dict[str, Any]] = []
         for doc in self.documents():
             batch.append(doc)

@@ -15,7 +15,6 @@ Measures:
 from __future__ import annotations
 
 import gc
-import sys
 import time
 from dataclasses import dataclass
 from typing import Any, NamedTuple
