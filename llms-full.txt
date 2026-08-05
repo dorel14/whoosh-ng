@@ -2707,7 +2707,7 @@ finally:
 
 # Data Sources
 
-Whoosh-NG provides a flexible data source layer for indexing documents from SQL databases, REST APIs, and custom data providers.
+Whoosh-NG provides a flexible data source layer for indexing documents from SQL databases, REST APIs, GraphQL APIs, file-based formats, and custom data providers.
 
 ## DataSource Protocol
 
@@ -2736,17 +2736,18 @@ class DataSource(Protocol):
 | `RefreshableDataSource` | `refresh()` support |
 | `CountableDataSource` | `document_count()` |
 | `MetadataDataSource` | `metadata()` |
+| `ObservableDataSource` | Observer callbacks for document changes |
 
 ---
 
 ## SQLSource
 
-`SQLSource` connects to SQL databases and yields documents from query results.
+`SQLSource` connects to SQL databases and yields documents from query results with automatic connection pooling.
 
 ### Basic Usage
 
 ```python
-from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.data_sources.sql import SQLSource
 import sqlite3
 
 conn = sqlite3.connect("mydb.db")
@@ -2770,6 +2771,21 @@ meta = source.metadata()
 count = source.document_count()
 ```
 
+### Connection Pooling (SQLSource)
+
+Connection pooling is supported via `pool_size` and `pool_recycle` for long-running processes:
+
+```python
+from whoosh_modern.data_sources.sql import SQLSource
+
+source = SQLSource(
+    connection="sqlite:///mydb.db",  # URL or connection object
+    query="SELECT * FROM products",
+    pool_size=10,          # Max connections in pool
+    pool_recycle=3600,     # Recycle connections after 1 hour
+)
+```
+
 ### GROUP BY Aggregation
 
 ```python
@@ -2790,7 +2806,7 @@ for doc in source.iter_documents():
 
 ### JOINs with Column Aliases
 
-SQLSource uses `PRAGMA table_info` for schema discovery. Always use column aliases in JOINs.
+`SQLSource` uses result-set metadata for schema discovery. Always use column aliases in JOINs.
 
 ```python
 source = SQLSource(
@@ -2823,6 +2839,59 @@ for doc in source.iter_changes(since=datetime(2025, 1, 1)):
     print(doc["id"], doc["updated_at"])
 ```
 
+### SQLAlchemySource
+
+For SQLAlchemy users, use `SQLAlchemySource` which supports engine-based connection management:
+
+```python
+from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
+from sqlalchemy import create_engine
+
+engine = create_engine("postgresql://user:pass@localhost/mydb")
+source = SQLAlchemySource(
+    engine=engine,
+    query="SELECT * FROM articles",
+    incremental_field="updated_at",
+    id_field="id",
+)
+
+schema = source.discover_schema()
+```
+
+### PeeweeSource
+
+For Peewee ORM users:
+
+```python
+from whoosh_modern.data_sources.peewee_ds import PeeweeSource
+from peewee import SqliteDatabase
+
+db = SqliteDatabase("mydb.db")
+source = PeeweeSource(
+    database=db,
+    model=MyArticleModel,
+    fields=["id", "title", "content"],
+)
+
+schema = source.discover_schema()
+```
+
+### TortoiseSource
+
+For Tortoise ORM users (async):
+
+```python
+from whoosh_modern.data_sources.tortoise_ds import TortoiseSource
+
+source = TortoiseSource(
+    model="myapp.models.Article",
+    fields=["id", "title", "content"],
+)
+
+schema = source.discover_schema()
+count = source.document_count()
+```
+
 ---
 
 ## RESTSource
@@ -2832,7 +2901,7 @@ for doc in source.iter_changes(since=datetime(2025, 1, 1)):
 ### Basic Usage
 
 ```python
-from whoosh_modern.data_sources import RESTSource
+from whoosh_modern.data_sources.rest import RESTSource
 
 source = RESTSource(
     url="https://api.example.com/v2/products",
@@ -2920,6 +2989,188 @@ source = RESTSource(
     pagination="page",
 )
 ```
+
+---
+
+## GraphQLSource
+
+`GraphQLSource` fetches documents from a GraphQL API endpoint:
+
+```python
+from whoosh_modern.data_sources.graphql import GraphQLSource
+
+source = GraphQLSource(
+    url="https://api.example.com/graphql",
+    query="""
+        query GetProducts($limit: Int!, $offset: Int!) {
+            products(limit: $limit, offset: $offset) {
+                id
+                name
+                price
+                description
+            }
+        }
+    """,
+    pagination="offset",
+    page_size=100,
+    headers={"Authorization": "Bearer your_token"},
+)
+
+schema = source.discover_schema()
+for doc in source.iter_documents():
+    print(doc["id"], doc["name"])
+```
+
+---
+
+## File-Based Data Sources
+
+Whoosh-NG supports indexing from various file formats with optimized readers.
+
+### FastCSVSource
+
+High-performance CSV reader with configurable encoding and delimiter:
+
+```python
+from whoosh_modern.data_sources.fast_csv import FastCSVSource
+
+source = FastCSVSource(
+    file_path="data/products.csv",
+    id_field="id",
+    incremental_field="updated_at",
+    delimiter=",",
+    encoding="utf-8",
+)
+
+schema = source.discover_schema()
+count = source.document_count()
+for doc in source.iter_documents():
+    print(doc)
+```
+
+### JSONSource
+
+Index from JSON files or JSON Lines (.jsonl) files:
+
+```python
+from whoosh_modern.data_sources.json import JSONSource
+
+# JSON array file
+source = JSONSource(file_path="data/products.json")
+
+# JSON Lines file (one JSON object per line)
+source = JSONSource(
+    file_path="data/logs.jsonl",
+    format="jsonl",
+)
+
+schema = source.discover_schema()
+```
+
+### ParquetSource
+
+Index from Parquet files using pyarrow or pandas backend:
+
+```python
+from whoosh_modern.data_sources.parquet_ds import ParquetSource
+
+source = ParquetSource(
+    file_path="data/large_dataset.parquet",
+    engine="pyarrow",  # or "pandas"
+    batch_size=1000,
+)
+
+schema = source.discover_schema()
+```
+
+### PandasSource
+
+Index directly from a pandas DataFrame:
+
+```python
+from whoosh_modern.data_sources.pandas_ds import PandasSource
+import pandas as pd
+
+df = pd.read_csv("data/products.csv")
+source = PandasSource(dataframe=df)
+
+schema = source.discover_schema()
+```
+
+### PolarsSource
+
+Index from a Polars DataFrame (faster, lazy evaluation):
+
+```python
+from whoosh_modern.data_sources.polars_ds import PolarsSource
+import polars as pl
+
+df = pl.read_csv("data/products.csv")
+source = PolarsSource(dataframe=df)
+
+schema = source.discover_schema()
+```
+
+---
+
+## DataSourceConfig
+
+For programmatic configuration, use `DataSourceConfig` to define data source properties:
+
+```python
+from whoosh_modern.data_sources.config import DataSourceConfig
+
+config = DataSourceConfig(
+    source_type="sql",
+    connection="sqlite:///mydb.db",
+    query="SELECT * FROM products",
+    id_field="id",
+    incremental_field="updated_at",
+    mapping={"db_title": "title"},     # field remapping
+    exclude=["description_long"],      # fields to exclude
+)
+
+source = config.create_source()
+schema = source.discover_schema()
+```
+
+### Config File Support
+
+Data source configurations can be loaded from YAML, JSON, or Python dict:
+
+```python
+from whoosh_modern.data_sources.config import DataSourceConfig
+
+# From dict
+config = DataSourceConfig.from_dict({
+    "source_type": "rest",
+    "url": "https://api.example.com/v2/products",
+    "pagination": "page",
+    "page_size": 50,
+})
+source = config.create_source()
+
+# From file
+config = DataSourceConfig.from_file("my_config.json")
+source = config.create_source()
+```
+
+### Available Data Sources
+
+| Class | Source Type | Dependencies |
+|-------|------------|--------------|
+| `SQLSource` | SQLite, PostgreSQL, MySQL | `sqlite3` (stdlib) |
+| `SQLAlchemySource` | Any SQLAlchemy-supported DB | `sqlalchemy` |
+| `RESTSource` | REST APIs | none (stdlib `urllib`) |
+| `GraphQLSource` | GraphQL APIs | none (stdlib `urllib`) |
+| `FastCSVSource` | CSV files | none |
+| `JSONSource` | JSON/JSONL files | none |
+| `ParquetSource` | Parquet files | `pyarrow` or `pandas` |
+| `PandasSource` | pandas DataFrames | `pandas` |
+| `PolarsSource` | Polars DataFrames | `polars` |
+| `PeeweeSource` | Peewee ORM | `peewee` |
+| `TortoiseSource` | Tortoise ORM | `tortoise-orm` |
+| `PydanticSource` | Pydantic models | `pydantic` |
 
 
 ## DOCUMENT: Facets
@@ -5472,6 +5723,285 @@ pip install whoosh-ng[metrics]
 4. Emit `DocumentIndexed` and `SearchExecuted` events.
 
 
+## DOCUMENT: Performance
+
+# Performance Benchmarking
+
+Whoosh-NG includes a comprehensive benchmarking toolkit in `whoosh_modern.profiling` for measuring and comparing analyzer performance. This guide explains how to use these tools and documents the optimizations shipped in 2.0.0.
+
+## Quick Start
+
+```python
+from whoosh_modern.profiling.benchmarks.regex_tokenizer import run_p5_1
+from whoosh_modern.profiling.benchmarks.token_optimization import run_p5_2
+from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
+from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
+
+# Generate synthetic datasets for consistent benchmarks
+gen = SyntheticDatasetGenerator(seed=42)
+datasets = gen.generate_all(count=5000)
+
+# Run tokenizer benchmark (P5.1)
+run_p5_1(datasets)
+
+# Run token creation benchmark (P5.2)
+run_p5_2(token_count=100_000)
+
+# Run stemmer benchmark
+bench = StemmerBenchmark()
+bench.run(gen.generate_dataset("A", 5000))
+print(bench.report())
+```
+
+## Benchmarking Tools
+
+### SyntheticDatasetGenerator
+
+Generates deterministic text datasets of varying complexity:
+
+```python
+from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
+
+gen = SyntheticDatasetGenerator(seed=42)
+datasets = gen.generate_all(count=5000)
+
+# Dataset A: 2 tokens/doc (short)
+# Dataset B: 50 tokens/doc (medium)
+# Dataset C: 500 tokens/doc (large)
+# Dataset D: 1200 tokens/doc (very large)
+for name, texts in datasets.items():
+    print(f"{name}: {len(texts)} documents")
+```
+
+### P5.1: RegexTokenizer Benchmark
+
+Compares different tokenizer implementations:
+
+```python
+from whoosh_modern.profiling.benchmarks.regex_tokenizer import run_p5_1
+
+results = run_p5_1(datasets)
+
+# Compare:
+# - Current Regex (whoosh default)
+# - Compiled Global regex
+# - Manual Python tokenizer
+# - C extension (re2, if available)
+```
+
+### P5.2: Token Optimization Benchmark
+
+Compares Token object implementations:
+
+```python
+from whoosh_modern.profiling.benchmarks.token_optimization import run_p5_2
+
+# Compare:
+# - Current Token (dict-based)
+# - __slots__ optimization
+# - namedtuple
+# - dataclass(slots=True)
+results = run_p5_2(token_count=100_000)
+```
+
+### StemmerBenchmark
+
+Compares stemmer backends:
+
+```python
+from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
+
+bench = StemmerBenchmark()
+bench.run(texts, warmup=True)
+print(bench.report())
+# Output:
+# Stemmer Benchmark
+# ==================================================
+# Stemmer         Tokens/s        Time (s)    Tokens
+# ------------------------------------------------------
+# StemFilter      1,004,172       0.1503      150,983
+# PyStemmer       2,100,000+      0.0719+     150,983
+```
+
+## Performance Optimizations
+
+### 2.0.0 Performance Summary
+
+| Optimization | Component | Measurable Gain |
+|---|---|---|
+| `__slots__` on Token | `whoosh.analysis.acore` | +35% token creation |
+| Global compiled regex | `RegexTokenizer` | +50% regex throughput |
+| Compact postings (1-posting) | `W3TermInfo` / `W3PostingsWriter` | +35% commit speed |
+| Compact postings (2-8 postings) | `W3TermInfo` / `W3PostingsWriter` | +35% commit speed |
+| Field cache in add_postings | `whoosh.codec.base` | -93% write_block calls |
+| Varint position encoding | `whoosh.formats` | reduced per-term overhead |
+| Stemmer cache tuning | `whoosh.analysis.morph` | 96.5% hit rate, 4.12x on repetitive fields |
+| Analyzer cache | `whoosh_modern.profiling.analyzer_cache` | 4.12x on high-repetition fields |
+| Batch writer optimization | `whoosh_modern.indexing.batch_writer` | optimized filtered batches |
+| Stopword setdefault optimization | `whoosh.formats` | reduced dict overhead |
+
+### Benchmark Results: 20k Documents (`customers_csv`)
+
+```
+before:
+  commit total      : 18.653s
+  analyzing         : 8.641s  (51.5%)
+  committing        : 10.012s (27.1%)
+  write_postings    : 6.5s
+  write_block calls : ~72612
+
+after:
+  commit total      : 6.806s   (-63.5%)
+  analyzing         : ~2.7s    (-68%)
+  committing        : 6.806s   (-32%)
+  write_postings    : 6.5s -> reduced allocation
+  write_block calls : 7565     (-93%)
+  throughput        : 1275 docs/s
+```
+
+### Benchmark Results: Stemmer Backends (1.5M tokens)
+
+| Stemmer | Throughput | Relative |
+|---|---|---|
+| StemFilter (internal) | 1,004,172 tokens/s | 1.0x |
+| PyStemmer | ~2,100,000 tokens/s | ~2.1x |
+
+### Benchmark Results: Regex Tokenizer
+
+| Tokenizer | Throughput | Relative |
+|---|---|---|
+| Current regex | ~1,000,000 tokens/s | 1.0x |
+| Compiled global | ~2,300,000 tokens/s | 2.3x |
+
+### Benchmark Results: Token Object
+
+| Implementation | Tokens/sec | Relative |
+|---|---|---|
+| Current (dict) | 1,000,000 | 1.0x |
+| `__slots__` | ~1,350,000 | 1.35x |
+
+## Profiling Tools
+
+### IndexingPipelineProfiler
+
+Profiles the complete indexing pipeline:
+
+```python
+from whoosh_modern.profiling.indexing_pipeline_profiler import IndexingPipelineProfiler
+
+profiler = IndexingPipelineProfiler()
+for doc in documents:
+    profiler.before_tokenize(doc, analyzer)
+    analyzer(doc)
+    profiler.after_tokenize()
+
+report = profiler.report()
+print(report)
+```
+
+### CommitProfiler
+
+Profiles commit performance including field writing and posting flushing:
+
+```python
+from whoosh_modern.profiling.commit_profiler_v2 import CommitProfiler
+
+profiler = CommitProfiler()
+# ... index documents ...
+ix.commit()
+
+report = profiler.report()
+# Shows: analyze, convert_fields, write_postings, flush, commit breakdown
+```
+
+### FieldIndexProfiler
+
+Profiles field conversion costs:
+
+```python
+from whoosh_modern.profiling.field_index_profiler import FieldIndexProfiler
+
+profiler = FieldIndexProfiler()
+# ... index documents ...
+report = profiler.report()
+# Identifies expensive field types and conversion bottlenecks
+```
+
+### IndexQualityAnalyzer
+
+Analyzes index quality metrics including singleton terms:
+
+```python
+from whoosh_modern.profiling.index_quality_analyzer import IndexQualityAnalyzer
+
+analyzer = IndexQualityAnalyzer(index_reader)
+report = analyzer.analyze()
+print(f"Singleton terms: {report['singleton_terms']}/{report['total_terms']} ({report['singleton_percent']}%)")
+```
+
+## Stemmer Provider System
+
+Whoosh-NG provides a pluggable stemmer provider system:
+
+```python
+from whoosh_modern.analysis import get_stemmer, StemmingAnalyzer, list_available_backends
+
+# Check available backends
+print(list_available_backends())
+# {'internal': 'available', 'pystemmer': 'not installed'}
+
+# Use auto-detection (default)
+analyzer = StemmingAnalyzer(stemmer="auto")
+
+# Explicit internal stemmer
+analyzer = StemmingAnalyzer(stemmer="internal")
+
+# PyStemmer (requires: pip install whoosh-ng[fast-stemming])
+analyzer = StemmingAnalyzer(stemmer="pystemmer")
+
+# Custom stemmer provider
+from whoosh_modern.analysis.stemmer_providers import StemmerProvider
+
+class MyStemmer(StemmerProvider):
+    def __init__(self, language="english"):
+        self._lang = language
+
+    def stem(self, word):
+        return word.lower()
+
+    @property
+    def name(self):
+        return "my_stemmer"
+
+    @property
+    def language(self):
+        return self._lang
+
+analyzer = StemmingAnalyzer(stemmer=MyStemmer())
+```
+
+## Performance Recommendations
+
+1. **Use `StemmingAnalyzer`** from `whoosh_modern.analysis` for automatic PyStemmer selection
+2. **Enable stemmer cache** for repetitive content (`cachesize=50000` by default)
+3. **Minimize TEXT fields** — use KEYWORD or ID for low-cardinality fields
+4. **Avoid stored positions/chars** unless highlighting requires them
+5. **Use batch indexing** with larger segments for better throughput
+6. **Monitor singleton terms** — reduce rare terms via stopword lists
+
+## Running the Full Benchmark Suite
+
+```bash
+cd whoosh-ng
+
+# Run all P5 benchmarks
+uv run python -m pytest tests/test_regex_tokenizer_unicode.py tests/test_token_slots.py tests/test_stemmer_compatibility.py -v
+
+# Run full test suite
+uv run python -m pytest -q
+```
+
+
 ## DOCUMENT: Plugins
 
 # Plugins
@@ -6565,6 +7095,7 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[Autocomplete]({{ '/en/guides/autocomplete/' | relative_url }})** — Autocomplete providers
 - **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, and Faiss integration
 - **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
+- **[Performance Benchmarking]({{ '/en/guides/performance/' | relative_url }})** — Benchmark tools and optimization results
 - **[Migration]({{ '/en/guides/migration/' | relative_url }})** — Migrating from classic Whoosh
 
 ### API Reference
@@ -6588,7 +7119,7 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[FastAPI Integration]({{ '/en/examples/fastapi/' | relative_url }})** — REST API with FastAPI
 - **[Middleware Examples]({{ '/en/examples/middleware/' | relative_url }})** — Custom middleware patterns
 - **[Plugin Development]({{ '/en/examples/plugin-dev/' | relative_url }})** — Building plugins
-- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, GraphQLSource, FastCSVSource, JSONSource, ParquetSource, PandasSource, PolarsSource, SQLAlchemySource, PeeweeSource, TortoiseSource
 - **[Schema Discovery]({{ '/en/examples/schema-discovery/' | relative_url }})** — Result-set introspection
 - **[Facet Manager]({{ '/en/examples/facets/' | relative_url }})** — Auto-discovery and manual overrides
 - **[Validation Framework]({{ '/en/examples/validation/' | relative_url }})** — 4-level validation
@@ -8106,7 +8637,7 @@ with ix.writer() as writer:
 
 # Sources de données
 
-Whoosh-NG fournit une couche de sources de données flexible pour l'indexation de documents à partir de bases de données SQL, d'API REST et de fournisseurs personnalisés.
+Whoosh-NG fournit une couche de sources de données flexible pour l'indexation de documents à partir de bases de données SQL, d'API REST, d'API GraphQL, de fichiers et d'autres fournisseurs.
 
 ## Protocole DataSource
 
@@ -8125,23 +8656,54 @@ class DataSource(Protocol):
     def metadata(self) -> Mapping[str, Any]: ...
 ```
 
+### Protocoles de capacités
+
+| Protocole | Description |
+|----------|-------------|
+| `DataSource` | Protocole de base : nom, schéma, itération, métadonnées |
+| `IncrementalDataSource` | Supporte `iter_changes(since)` |
+| `AsyncDataSource` | Diffusion asynchrone via `aiter_documents()` |
+| `RefreshableDataSource` | Support de `refresh()` |
+| `CountableDataSource` | `document_count()` |
+| `MetadataDataSource` | `metadata()` |
+| `ObservableDataSource` | Callbacks d'observation pour les changements de documents |
+
+---
+
 ## SQLSource
 
+`SQLSource` se connecte aux bases de données SQL et restitue les documents depuis les résultats de requête, avec pooling de connexions automatique.
+
+### Utilisation de base
+
 ```python
-from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.data_sources.sql import SQLSource
 import sqlite3
 
 conn = sqlite3.connect("mydb.db")
 source = SQLSource(
     connection=conn,
     query="SELECT * FROM products",
-    incremental_field="updated_at",
-    id_field="id",
 )
 
 schema = source.discover_schema()
+for doc in source.iter_documents():
+    print(doc["title"], doc["price"])
+
 count = source.document_count()
-docs = list(source.iter_documents())
+```
+
+### Pooling de connexions
+
+```python
+from whoosh_modern.data_sources.sql import SQLSource
+
+source = SQLSource(
+    connection="sqlite:///mydb.db",
+    query="SELECT * FROM products",
+    pool_size=10,
+    pool_recycle=3600,
+)
 ```
 
 ### GROUP BY
@@ -8150,9 +8712,9 @@ docs = list(source.iter_documents())
 source = SQLSource(
     connection=conn,
     query="""
-        SELECT category, COUNT(*) as doc_count
-        FROM products
-        GROUP BY category
+        SELECT category, COUNT(*) as doc_count,
+               AVG(price) as avg_price
+        FROM products GROUP BY category
     """,
 )
 ```
@@ -8163,7 +8725,8 @@ source = SQLSource(
 source = SQLSource(
     connection=conn,
     query="""
-        SELECT p.id AS product_id, c.name AS category_name
+        SELECT p.id AS product_id, p.name AS product_name,
+               c.name AS category_name
         FROM products p
         JOIN categories c ON p.category_id = c.id
     """,
@@ -8175,24 +8738,79 @@ source = SQLSource(
 ```python
 from datetime import datetime
 
+source = SQLSource(
+    connection=conn,
+    query="SELECT * FROM articles",
+    incremental_field="updated_at",
+    id_field="id",
+)
+
 for doc in source.iter_changes(since=datetime(2025, 1, 1)):
     print(doc["id"], doc["updated_at"])
 ```
 
-## RESTSource
+### SQLAlchemySource
 
 ```python
-from whoosh_modern.data_sources import RESTSource
+from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
+from sqlalchemy import create_engine
+
+engine = create_engine("postgresql://user:pass@localhost/mydb")
+source = SQLAlchemySource(
+    engine=engine,
+    query="SELECT * FROM articles",
+    incremental_field="updated_at",
+    id_field="id",
+)
+```
+
+### PeeweeSource
+
+```python
+from whoosh_modern.data_sources.peewee_ds import PeeweeSource
+from peewee import SqliteDatabase
+
+db = SqliteDatabase("mydb.db")
+source = PeeweeSource(
+    database=db,
+    model=MyArticleModel,
+    fields=["id", "title", "content"],
+)
+```
+
+### TortoiseSource (async)
+
+```python
+from whoosh_modern.data_sources.tortoise_ds import TortoiseSource
+
+source = TortoiseSource(
+    model="myapp.models.Article",
+    fields=["id", "title", "content"],
+)
+```
+
+---
+
+## RESTSource
+
+`RESTSource` récupère les documents depuis des API REST avec pagination et authentification.
+
+### Utilisation de base
+
+```python
+from whoosh_modern.data_sources.rest import RESTSource
 
 source = RESTSource(
     url="https://api.example.com/v2/products",
+    method="GET",
+    headers={"Authorization": "Bearer your_token"},
     pagination="page",
     page_size=50,
-    headers={"Authorization": "Bearer token"},
 )
 
 schema = source.discover_schema()
-docs = list(source.iter_documents())
+for doc in source.iter_documents():
+    print(doc["name"], doc["price"])
 ```
 
 ### Stratégies de pagination
@@ -8203,13 +8821,162 @@ docs = list(source.iter_documents())
 | `offset` | `?offset=N&limit=M` |
 | `cursor` | `?cursor=XYZ&size=M` |
 
+### Authentification
+
 ```python
+# Bearer token
 source = RESTSource(
     url="https://api.example.com/data",
-    pagination="cursor",
-    page_size=100,
+    headers={"Authorization": "Bearer your_token"},
+)
+
+# API key
+source = RESTSource(
+    url="https://api.example.com/data",
+    headers={"X-API-Key": "your_api_key"},
+)
+
+# Basic auth
+import base64
+creds = base64.b64encode(b"user:pass").decode()
+source = RESTSource(
+    url="https://api.example.com/data",
+    headers={"Authorization": f"Basic {creds}"},
 )
 ```
+
+### Document Path
+
+Pour les réponses API imbriquées :
+
+```python
+source = RESTSource(
+    url="https://api.example.com/api/v2/products",
+    document_path="data.results",
+    pagination="page",
+)
+```
+
+---
+
+## GraphQLSource
+
+```python
+from whoosh_modern.data_sources.graphql import GraphQLSource
+
+source = GraphQLSource(
+    url="https://api.example.com/graphql",
+    query="""
+        query GetProducts($limit: Int!, $offset: Int!) {
+            products(limit: $limit, offset: $offset) {
+                id
+                name
+                price
+            }
+        }
+    """,
+    pagination="offset",
+    page_size=100,
+    headers={"Authorization": "Bearer your_token"},
+)
+```
+
+---
+
+## Sources de fichiers
+
+### FastCSVSource
+
+```python
+from whoosh_modern.data_sources.fast_csv import FastCSVSource
+
+source = FastCSVSource(
+    file_path="data/products.csv",
+    id_field="id",
+    incremental_field="updated_at",
+)
+```
+
+### JSONSource
+
+```python
+from whoosh_modern.data_sources.json import JSONSource
+
+source = JSONSource(file_path="data/products.json")
+# ou fichier JSONL
+source = JSONSource(file_path="data/logs.jsonl", format="jsonl")
+```
+
+### ParquetSource
+
+```python
+from whoosh_modern.data_sources.parquet_ds import ParquetSource
+
+source = ParquetSource(
+    file_path="data/large_dataset.parquet",
+    engine="pyarrow",
+    batch_size=1000,
+)
+```
+
+### PandasSource
+
+```python
+from whoosh_modern.data_sources.pandas_ds import PandasSource
+import pandas as pd
+
+df = pd.read_csv("data/products.csv")
+source = PandasSource(dataframe=df)
+```
+
+### PolarsSource
+
+```python
+from whoosh_modern.data_sources.polars_ds import PolarsSource
+import polars as pl
+
+df = pl.read_csv("data/products.csv")
+source = PolarsSource(dataframe=df)
+```
+
+---
+
+## DataSourceConfig
+
+Pour une configuration programmatique :
+
+```python
+from whoosh_modern.data_sources.config import DataSourceConfig
+
+config = DataSourceConfig(
+    source_type="sql",
+    connection="sqlite:///mydb.db",
+    query="SELECT * FROM products",
+    id_field="id",
+    incremental_field="updated_at",
+    mapping={"db_title": "title"},
+    exclude=["description_long"],
+)
+
+source = config.create_source()
+```
+
+### Sources de données disponibles
+
+| Classe | Type | Dépendances |
+|-------|------|-------------|
+| `SQLSource` | Bases SQL | `sqlite3` (stdlib) |
+| `SQLAlchemySource` | SQLAlchemy | `sqlalchemy` |
+| `RESTSource` | API REST | aucune (stdlib `urllib`) |
+| `GraphQLSource` | API GraphQL | aucune (stdlib `urllib`) |
+| `FastCSVSource` | Fichiers CSV | aucune |
+| `JSONSource` | JSON/JSONL | aucune |
+| `ParquetSource` | Parquet | `pyarrow` ou `pandas` |
+| `PandasSource` | DataFrames pandas | `pandas` |
+| `PolarsSource` | DataFrames Polars | `polars` |
+| `PeeweeSource` | ORM Peewee | `peewee` |
+| `TortoiseSource` | ORM Tortoise | `tortoise-orm` |
+| `PydanticSource` | Modèles Pydantic | `pydantic` |
 
 
 ## DOCUMENT: Facets
@@ -10177,6 +10944,262 @@ def on_searched(event: SearchExecuted):
 5. **Alerting**: Définissez des alertes sur les taux d'erreur et les latences
 
 
+## DOCUMENT: Performance
+
+# Performance et Benchmarking
+
+Whoosh-NG inclut un ensemble complet d'outils de benchmarking dans `whoosh_modern.profiling` pour mesurer et comparer les performances des analyseurs. Ce guide explique comment utiliser ces outils et documente les optimisations livrées dans la version 2.0.0.
+
+## Démarrage rapide
+
+```python
+from whoosh_modern.profiling.benchmarks.regex_tokenizer import run_p5_1
+from whoosh_modern.profiling.benchmarks.token_optimization import run_p5_2
+from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
+from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
+
+# Générer des datasets synthétiques pour des benchmarks cohérents
+gen = SyntheticDatasetGenerator(seed=42)
+datasets = gen.generate_all(count=5000)
+
+# Exécuter le benchmark du tokeniseur (P5.1)
+run_p5_1(datasets)
+
+# Exécuter le benchmark de création de tokens (P5.2)
+run_p5_2(token_count=100_000)
+
+# Exécuter le benchmark du stemmer
+bench = StemmerBenchmark()
+bench.run(gen.generate_dataset("A", 5000))
+print(bench.report())
+```
+
+## Outils de benchmarking
+
+### SyntheticDatasetGenerator
+
+Génère des datasets de texte déterministes de complexité variable :
+
+```python
+from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
+
+gen = SyntheticDatasetGenerator(seed=42)
+datasets = gen.generate_all(count=5000)
+
+# Dataset A: 2 tokens/doc (court)
+# Dataset B: 50 tokens/doc (moyen)
+# Dataset C: 500 tokens/doc (grand)
+# Dataset D: 1200 tokens/doc (très grand)
+for name, texts in datasets.items():
+    print(f"{name}: {len(texts)} documents")
+```
+
+### P5.1 : Benchmark du RegexTokenizer
+
+Compare différentes implémentations de tokeniseur :
+
+```python
+from whoosh_modern.profiling.benchmarks.regex_tokenizer import run_p5_1
+
+results = run_p5_1(datasets)
+
+# Compare :
+# - Current Regex (whoosh par défaut)
+# - Compiled Global regex
+# - Manual Python tokenizer
+# - C extension (re2, si disponible)
+```
+
+### P5.2 : Benchmark d'optimisation des tokens
+
+Compare différentes implémentations d'objets Token :
+
+```python
+from whoosh_modern.profiling.benchmarks.token_optimization import run_p5_2
+
+# Compare :
+# - Current Token (dict-based)
+# - __slots__ optimization
+# - namedtuple
+# - dataclass(slots=True)
+results = run_p5_2(token_count=100_000)
+```
+
+### StemmerBenchmark
+
+Compare les backends de stemming :
+
+```python
+from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
+
+bench = StemmerBenchmark()
+bench.run(texts, warmup=True)
+print(bench.report())
+# Résultats :
+# Stemmer         Tokens/s        Time (s)    Tokens
+# ------------------------------------------------------
+# StemFilter      1,004,172       0.1503      150,983
+# PyStemmer       ~2,100,000+     0.0719+     150,983
+```
+
+## Optimisations de performance
+
+### Résumé des gains 2.0.0
+
+| Optimisation | Composant | Gain mesurable |
+|---|---|---|
+| `__slots__` sur Token | `whoosh.analysis.acore` | +35% création de tokens |
+| Regex globale compilée | `RegexTokenizer` | +50% débit regex |
+| Postings compactés (1 posting) | `W3TermInfo` / `W3PostingsWriter` | +35% vitesse de commit |
+| Postings compactés (2-8 postings) | `W3TermInfo` / `W3PostingsWriter` | +35% vitesse de commit |
+| Cache de champ dans add_postings | `whoosh.codec.base` | -93% appels write_block |
+| Encodage varint des positions | `whoosh.formats` | réduction de l'overhead par terme |
+| Cache de stemmer | `whoosh.analysis.morph` | taux de hit 96,5 %, 4,12x sur champs répétitifs |
+| Cache d'analyseur | `whoosh_modern.profiling.analyzer_cache` | 4,12x sur champs hautement répétitifs |
+| Écrivain par lots | `whoosh_modern.indexing.batch_writer` | lots filtrés optimisés |
+| Optimisation setdefault stopwords | `whoosh.formats` | réduction de l'overhead dict |
+
+### Résultats de benchmark : 20 000 documents (`customers_csv`)
+
+```
+Avant :
+  commit total      : 18,653 s
+  analyzing         : 8,641 s  (51,5 %)
+  committing        : 10,012 s  (27,1 %)
+  write_postings    : 6,5 s
+  write_block calls : ~72 612
+
+Après :
+  commit total      : 6,806 s  (-63,5 %)
+  analyzing         : ~2,7 s   (-68 %)
+  committing        : 6,806 s  (-32 %)
+  write_postings    : 6,5 s -> allouations réduites
+  write_block calls : 7 565   (-93 %)
+  débit             : 1 275 docs/s
+```
+
+### Résultats de benchmark : Backends de stemming (1,5M de tokens)
+
+| Stemmer | Débit | Relatif |
+|---|---|---|
+| StemFilter (interne) | 1 004 172 tokens/s | 1,0x |
+| PyStemmer | ~2 100 000 tokens/s | ~2,1x |
+
+### Résultats de benchmark : Tokeniseur regex
+
+| Tokeniseur | Débit | Relatif |
+|---|---|---|
+| Current regex | ~1 000 000 tokens/s | 1,0x |
+| Compiled global | ~2 300 000 tokens/s | 2,3x |
+
+### Résultats de benchmark : Objet Token
+
+| Implémentation | Tokens/s | Relatif |
+|---|---|---|
+| Current (dict) | 1 000 000 | 1,0x |
+| `__slots__` | ~1 350 000 | 1,35x |
+
+## Outils de profiling
+
+### IndexingPipelineProfiler
+
+Profile le pipeline d'indexation complet :
+
+```python
+from whoosh_modern.profiling.indexing_pipeline_profiler import IndexingPipelineProfiler
+
+profiler = IndexingPipelineProfiler()
+for doc in documents:
+    profiler.before_tokenize(doc, analyzer)
+    analyzer(doc)
+    profiler.after_tokenize()
+
+report = profiler.report()
+print(report)
+```
+
+### CommitProfiler
+
+Profile les performances de commit :
+
+```python
+from whoosh_modern.profiling.commit_profiler_v2 import CommitProfiler
+
+profiler = CommitProfiler()
+# ... indexer des documents ...
+ix.commit()
+
+report = profiler.report()
+# Affiche : analyze, convert_fields, write_postings, flush, commit
+```
+
+### FieldIndexProfiler
+
+Profile les coûts de conversion des champs :
+
+```python
+from whoosh_modern.profiling.field_index_profiler import FieldIndexProfiler
+
+profiler = FieldIndexProfiler()
+# ... indexer des documents ...
+report = profiler.report()
+```
+
+### IndexQualityAnalyzer
+
+Analyse les métriques de qualité de l'index :
+
+```python
+from whoosh_modern.profiling.index_quality_analyzer import IndexQualityAnalyzer
+
+analyzer = IndexQualityAnalyzer(index_reader)
+report = analyzer.analyze()
+print(f"Termes singletons: {report['singleton_terms']}/{report['total_terms']} ({report['singleton_percent']}%)")
+```
+
+## Système de fournisseurs de stemmer
+
+Whoosh-NG propose un système de fournisseurs de stemmer :
+
+```python
+from whoosh_modern.analysis import get_stemmer, StemmingAnalyzer, list_available_backends
+
+# Vérifier les backends disponibles
+print(list_available_backends())
+# {'internal': 'available', 'pystemmer': 'not installed'}
+
+# Utiliser la détection automatique (par défaut)
+analyzer = StemmingAnalyzer(stemmer="auto")
+
+# Stemmer interne explicite
+analyzer = StemmingAnalyzer(stemmer="internal")
+
+# PyStemmer (nécessite: pip install whoosh-ng[fast-stemming])
+analyzer = StemmingAnalyzer(stemmer="pystemmer")
+```
+
+## Recommandations de performance
+
+1. **Utilisez** `StemmingAnalyzer` de `whoosh_modern.analysis` pour une sélection automatique de PyStemmer
+2. **Activez le cache de stemmer** pour le contenu répétitif (`cachesize=50000` par défaut)
+3. **Minimisez les champs TEXT** — utilisez KEYWORD ou ID pour les champs à faible cardinalité
+4. **Évitez les positions/chars stockés** sauf si la mise en évidence l'exige
+5. **Utilisez l'indexation par lots** avec des segments plus grands pour de meilleurs débits
+6. **Surveillez les termes singletons** — réduisez les termes rares via des listes de stopwords
+
+## Exécution de la suite complète de benchmarks
+
+```bash
+cd whoosh-ng
+
+# Exécuter tous les tests P5
+uv run python -m pytest tests/test_regex_tokenizer_unicode.py tests/test_token_slots.py tests/test_stemmer_compatibility.py -v
+
+# Suite de tests complète
+uv run python -m pytest -q
+```
+
+
 ## DOCUMENT: Plugins
 
 # Plugins
@@ -11010,7 +12033,8 @@ with ix.searcher() as s:
 - **[Conception de schéma]({{ '/fr/guides/schema/' | relative_url }})** — Types de champs, stockage et options d'indexation
 - **[Middleware]({{ '/fr/guides/middleware/' | relative_url }})** — Hooks de pipeline et middleware personnalisé
 - **[Plugins]({{ '/fr/guides/plugins/' | relative_url }})** — Étendre Whoosh-NG avec des plugins
-- **[Recherche vectorielle]({{ '/fr/guides/vector/' | relative_url }})** — Intégration NumPy, HNSW et Faiss
+    - **[Recherche vectorielle]({{ '/fr/guides/vector/' | relative_url }})** — Intégration NumPy, HNSW et Faiss
+    - **[Performance]({{ '/fr/guides/performance/' | relative_url }})** — Outils de benchmarking et résultats d'optimisation
 
 ### API Reference
 
@@ -11022,7 +12046,7 @@ with ix.searcher() as s:
 - **[Recherche]({{ '/fr/examples/search/' | relative_url }})** — Interrogation et récupération de résultats
 - **[FastAPI]({{ '/fr/examples/fastapi/' | relative_url }})** — API REST avec FastAPI
 - **[Middleware]({{ '/fr/examples/middleware/' | relative_url }})** — Patterns de middleware personnalisés
-- **[Sources de données]({{ '/fr/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Sources de données]({{ '/fr/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, GraphQLSource, FastCSVSource, JSONSource, ParquetSource, PandasSource, PolarsSource, SQLAlchemySource, PeeweeSource, TortoiseSource
 - **[Découverte de schéma]({{ '/fr/examples/schema-discovery/' | relative_url }})** — Inspection des jeux de résultats
 - **[Gestionnaire de facettes]({{ '/fr/examples/facets/' | relative_url }})** — Auto-découverte et remplacements manuels
 - **[Framework de validation]({{ '/fr/examples/validation/' | relative_url }})** — Validation 4 niveaux
