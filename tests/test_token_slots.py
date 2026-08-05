@@ -78,11 +78,11 @@ class TestTokenSlots:
         """Test that __slots__ reduces memory usage."""
         # Create many Token instances
         tokens = [Token() for _ in range(1000)]
-        
+
         # With __slots__, instances should be smaller
         total_size = sum(sys.getsizeof(t) for t in tokens)
         avg_size = total_size / len(tokens)
-        
+
         # Token with slots should be smaller than without
         # Typical dict-based object: ~200 bytes
         # Token with slots: ~80-160 bytes depending on slot count
@@ -95,7 +95,7 @@ class TestTokenSlots:
             t = Token()
             t.text = "test"
             del t
-        
+
         gc.collect()
         # Should not raise any errors
 

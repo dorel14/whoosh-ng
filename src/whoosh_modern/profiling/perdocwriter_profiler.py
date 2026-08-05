@@ -84,6 +84,7 @@ class PerDocWriterProfiler:
 
         def timed_add_vector_items(fieldname, field, items):
             t0 = time.perf_counter()
+            assert orig_add_vector_items is not None
             result = orig_add_vector_items(fieldname, field, items)
             elapsed = time.perf_counter() - t0
             profiler._add_vector_items_time += elapsed

@@ -15,7 +15,7 @@ import json
 import sys
 import time
 from collections import defaultdict
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 sys.path.insert(0, "src")
 
@@ -73,7 +73,8 @@ def run_p4_1_2(schema: Schema, datasets: dict[str, list[str]]) -> dict[str, Any]
         print("-" * 77)
         tpt_total = total_time / total_tokens * 1000 if total_tokens > 0 else 0.0
         print(
-            f"  {'Total':<23} {total_time:>12.4f} {'100.0':>8}% {total_tokens:>10} {tpt_total:>17.4f}"
+            f"  {'Total':<23} {total_time:>12.4f} {'100.0':>8}% "
+            f"{total_tokens:>10} {tpt_total:>17.4f}"
         )
 
         results[dataset_name] = {
@@ -129,7 +130,9 @@ def run_p4_3(schema: Schema, datasets: dict[str, list[str]]) -> dict[str, Any]:
             tpt = total_time / token_count * 1000 if token_count > 0 else 0
 
             print(
-                f"  Dataset {dataset_name}: {total_time:.4f}s, {token_count} tokens, {throughput:.0f} tokens/s, {tpt:.4f} ms/token"
+                f"  Dataset {dataset_name}: {total_time:.4f}s, "
+                f"{token_count} tokens, {throughput:.0f} tokens/s, "
+                f"{tpt:.4f} ms/token"
             )
 
             analyzer_results[dataset_name] = {

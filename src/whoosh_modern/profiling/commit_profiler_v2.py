@@ -411,10 +411,10 @@ class _TimedSegmentWriter:
             state["current_blocks"] = 0
             return orig_finish_postings()
 
-        postwriter.start_postings = start_postings  # type: ignore[method-assign]
-        postwriter.add_posting = add_posting  # type: ignore[method-assign]
-        postwriter._write_block = write_block  # type: ignore[method-assign]
-        postwriter.finish_postings = finish_postings  # type: ignore[method-assign]
+        postwriter.start_postings = start_postings
+        postwriter.add_posting = add_posting
+        postwriter._write_block = write_block
+        postwriter.finish_postings = finish_postings
 
     def _patch(self) -> None:
         writer = self._writer
@@ -433,11 +433,11 @@ class _TimedSegmentWriter:
                     postwriter is not None
                     and getattr(postwriter, "_profiling_patched", False) is False
                 ):
-                    postwriter._profiling_patched = True  # type: ignore[attr-defined]
+                    postwriter._profiling_patched = True
                     self._patch_postings_writer(postwriter)
                 return r
 
-            writer.fieldwriter.start_field = start_field  # type: ignore[method-assign]
+            writer.fieldwriter.start_field = start_field
             self._orig_start_field = orig_start_field
         else:
             self._orig_start_field = None
@@ -487,7 +487,7 @@ class _TimedSegmentWriter:
         writer._close_segment = self._orig_close_segment
 
         if getattr(self, "_orig_start_field", None) is not None:
-            writer.fieldwriter.start_field = self._orig_start_field  # type: ignore[method-assign]
+            writer.fieldwriter.start_field = self._orig_start_field
 
 
 def profile_commit(

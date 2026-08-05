@@ -78,7 +78,7 @@ class AnalyzerComparator:
 
     def _extract_texts(self, docs: list[dict[str, Any]], max_size: int) -> list[str]:
         """Extract text values from documents up to max_size."""
-        texts = []
+        texts: list[str] = []
         for doc in docs:
             if len(texts) >= max_size:
                 break
@@ -122,7 +122,8 @@ class AnalyzerComparator:
             lines.append(f"=== Dataset size: {size} texts ===")
             lines.append("")
             lines.append(
-                f"{'Analyzer':<20} {'Time (s)':<12} {'Tokens':<12} {'Throughput':<15} {'Avg tokens/text':<18}"
+                f"{'Analyzer':<20} {'Time (s)':<12} {'Tokens':<12} "
+                f"{'Throughput':<15} {'Avg tokens/text':<18}"
             )
             lines.append("-" * 77)
 

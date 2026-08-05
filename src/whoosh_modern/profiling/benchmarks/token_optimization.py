@@ -18,11 +18,12 @@ import gc
 import sys
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, NamedTuple, Tuple
+from typing import Any, NamedTuple
 
 
 class Token:
     """Current Token implementation."""
+
     def __init__(self, text: str, stopped: bool = False, pos: int = 0, boost: float = 1.0):
         self.text = text
         self.stopped = stopped
@@ -32,6 +33,7 @@ class Token:
 
 class TokenSlots:
     """Token with __slots__."""
+
     __slots__ = ("text", "stopped", "pos", "boost")
 
     def __init__(self, text: str, stopped: bool = False, pos: int = 0, boost: float = 1.0):
@@ -43,6 +45,7 @@ class TokenSlots:
 
 class TokenNamedTuple(NamedTuple):
     """Token as namedtuple."""
+
     text: str
     stopped: bool
     pos: int
@@ -52,6 +55,7 @@ class TokenNamedTuple(NamedTuple):
 @dataclass(slots=True)
 class TokenDataclassSlots:
     """Token as dataclass with slots."""
+
     text: str
     stopped: bool = False
     pos: int = 0
@@ -68,7 +72,9 @@ class TokenFactory:
         return self._token_class(text=text, stopped=False, pos=pos, boost=1.0)
 
 
-def benchmark_token_creation(name: str, factory: TokenFactory, token_count: int, iterations: int = 3) -> Dict[str, Any]:
+def benchmark_token_creation(
+    name: str, factory: TokenFactory, token_count: int, iterations: int = 3
+) -> dict[str, Any]:
     """Benchmark token creation."""
     times = []
     for _ in range(iterations):
@@ -95,7 +101,7 @@ def benchmark_token_creation(name: str, factory: TokenFactory, token_count: int,
     }
 
 
-def run_p5_2(token_count: int = 100000) -> Dict[str, Any]:
+def run_p5_2(token_count: int = 100000) -> dict[str, Any]:
     """Run P5.2: Token object optimization benchmark."""
     print("=" * 80)
     print("P5.2 Token Object Optimization Benchmark")
@@ -121,6 +127,9 @@ def run_p5_2(token_count: int = 100000) -> Dict[str, Any]:
 
     for result in results:
         tpt_ns = result["time_per_token_ms"] * 1000
-        print(f"  {result['name']:<23} {result['avg_time']:>12.4f} {result['throughput']:>12.0f} {tpt_ns:>17.2f}")
+        print(
+            f"  {result['name']:<23} {result['avg_time']:>12.4f} "
+            f"{result['throughput']:>12.0f} {tpt_ns:>17.2f}"
+        )
 
     return {r["name"]: r for r in results}

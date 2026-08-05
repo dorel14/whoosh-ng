@@ -22,7 +22,7 @@ import sys
 import time
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from whoosh import fields, index
 from whoosh.analysis import StandardAnalyzer, StemmingAnalyzer
@@ -85,10 +85,10 @@ def _profile_analyzer_substeps(schema: fields.Schema, docs: list[dict[str, Any]]
                 from whoosh.lang.porter import stem
 
                 for token in stopped:
-                    _ = stem(token.text)  # type: ignore[no-any-return]
+                    _ = stem(token.text)
 
     print(profiler.report())
-    return profiler.to_dict()
+    return cast(dict[str, Any], profiler.to_dict())
 
 
 def _profile_per_field(schema: fields.Schema, docs: list[dict[str, Any]]) -> dict[str, Any]:
@@ -120,8 +120,8 @@ def _benchmark_analyzers(schema: fields.Schema, docs: list[dict[str, Any]]) -> d
 
     analyzers = {
         "TEXT()": None,
-        "StandardAnalyzer": StandardAnalyzer(),  # type: ignore[no-untyped-call]
-        "StemmingAnalyzer": StemmingAnalyzer(),  # type: ignore[no-untyped-call]
+        "StandardAnalyzer": StandardAnalyzer(),
+        "StemmingAnalyzer": StemmingAnalyzer(),
     }
 
     results = {}
@@ -187,7 +187,7 @@ def _profile_commit(
         writer.commit(merge=False)
 
     print(profiler.report())
-    return profiler.to_dict()
+    return cast(dict[str, Any], profiler.to_dict())
 
 
 def _profile_segments(
@@ -217,7 +217,7 @@ def _profile_segments(
     segment_profiler.stop_segment()
 
     print(segment_profiler.report())
-    return segment_profiler.to_dict()
+    return cast(dict[str, Any], segment_profiler.to_dict())
 
 
 def _analyze_cache(schema: fields.Schema, docs: list[dict[str, Any]]) -> dict[str, Any]:

@@ -110,7 +110,7 @@ class FieldConversionProfiler:
             lines.append("-" * 52)
             for fmt_type in sorted(self._format_timings.keys()):
                 timings = self._format_timings[fmt_type]
-                count = timings["count"]
+                count = int(timings["count"])
                 fmt_total = timings["total_time"]
                 pct = fmt_total / total_time * 100 if total_time > 0 else 0
                 lines.append(f"{fmt_type:<20} {count:>8} {fmt_total:>12.4f} {pct:>8.1f}")

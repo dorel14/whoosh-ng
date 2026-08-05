@@ -149,12 +149,12 @@ class UnifiedPipelineProfiler:
             profiler._total_time += doc_total
             profiler._per_document.append(doc_timings)
 
-        writer.add_document = timed_add_document  # type: ignore[method-assign]
+        writer.add_document = timed_add_document
         self._orig_add_document = orig_add_document
 
     def _unpatch(self) -> None:
         if self._patched:
-            self._writer.add_document = self._orig_add_document  # type: ignore[method-assign]
+            self._writer.add_document = self._orig_add_document
             self._patched = False
 
     def profile_document(self, doc: dict[str, Any]) -> None:
@@ -206,7 +206,8 @@ class UnifiedPipelineProfiler:
             pd_time = sum(t.get(f"perdoc:{fn}", 0.0) for t in self._per_document)
             count = self._field_counts[fn]
             lines.append(
-                f"  {fn:<18} {count:>8} {fi_time * 1000:>13.2f} {pa_time * 1000:>11.2f} {pd_time * 1000:>9.2f}"
+                f"  {fn:<18} {count:>8} {fi_time * 1000:>13.2f} "
+                f"{pa_time * 1000:>11.2f} {pd_time * 1000:>9.2f}"
             )
 
         return "\n".join(lines)

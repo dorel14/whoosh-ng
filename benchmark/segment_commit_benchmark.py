@@ -22,6 +22,7 @@ import os
 import shutil
 import sys
 import time
+from typing import Any
 
 from benchmark import WhooshLikeSpec
 from whoosh import fields, index
@@ -41,6 +42,7 @@ class SegmentCommitBenchmark(WhooshLikeSpec):
 
     def __init__(self, options, args):
         super().__init__(options, args)
+        self._source: Any
         csv_path = os.path.join(self.options.dir, "Datas", "customers-2000000.csv")
         try:
             from whoosh_modern.data_sources.fast_csv import FastCSVSource

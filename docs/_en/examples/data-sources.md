@@ -5,7 +5,7 @@ nav_order: 240
 
 # Data Sources
 
-Whoosh-NG provides a flexible data source layer for indexing documents from SQL databases, REST APIs, and custom data providers.
+Whoosh-NG provides a flexible data source layer for indexing documents from SQL databases, REST APIs, GraphQL APIs, file-based formats, and custom data providers.
 
 ## DataSource Protocol
 
@@ -34,17 +34,18 @@ class DataSource(Protocol):
 | `RefreshableDataSource` | `refresh()` support |
 | `CountableDataSource` | `document_count()` |
 | `MetadataDataSource` | `metadata()` |
+| `ObservableDataSource` | Observer callbacks for document changes |
 
 ---
 
 ## SQLSource
 
-`SQLSource` connects to SQL databases and yields documents from query results.
+`SQLSource` connects to SQL databases and yields documents from query results with automatic connection pooling.
 
 ### Basic Usage
 
 ```python
-from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.data_sources.sql import SQLSource
 import sqlite3
 
 conn = sqlite3.connect("mydb.db")
@@ -68,6 +69,21 @@ meta = source.metadata()
 count = source.document_count()
 ```
 
+### Connection Pooling (SQLSource)
+
+Connection pooling is supported via `pool_size` and `pool_recycle` for long-running processes:
+
+```python
+from whoosh_modern.data_sources.sql import SQLSource
+
+source = SQLSource(
+    connection="sqlite:///mydb.db",  # URL or connection object
+    query="SELECT * FROM products",
+    pool_size=10,          # Max connections in pool
+    pool_recycle=3600,     # Recycle connections after 1 hour
+)
+```
+
 ### GROUP BY Aggregation
 
 ```python
@@ -88,7 +104,7 @@ for doc in source.iter_documents():
 
 ### JOINs with Column Aliases
 
-SQLSource uses `PRAGMA table_info` for schema discovery. Always use column aliases in JOINs.
+`SQLSource` uses result-set metadata for schema discovery. Always use column aliases in JOINs.
 
 ```python
 source = SQLSource(
@@ -121,6 +137,59 @@ for doc in source.iter_changes(since=datetime(2025, 1, 1)):
     print(doc["id"], doc["updated_at"])
 ```
 
+### SQLAlchemySource
+
+For SQLAlchemy users, use `SQLAlchemySource` which supports engine-based connection management:
+
+```python
+from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
+from sqlalchemy import create_engine
+
+engine = create_engine("postgresql://user:pass@localhost/mydb")
+source = SQLAlchemySource(
+    engine=engine,
+    query="SELECT * FROM articles",
+    incremental_field="updated_at",
+    id_field="id",
+)
+
+schema = source.discover_schema()
+```
+
+### PeeweeSource
+
+For Peewee ORM users:
+
+```python
+from whoosh_modern.data_sources.peewee_ds import PeeweeSource
+from peewee import SqliteDatabase
+
+db = SqliteDatabase("mydb.db")
+source = PeeweeSource(
+    database=db,
+    model=MyArticleModel,
+    fields=["id", "title", "content"],
+)
+
+schema = source.discover_schema()
+```
+
+### TortoiseSource
+
+For Tortoise ORM users (async):
+
+```python
+from whoosh_modern.data_sources.tortoise_ds import TortoiseSource
+
+source = TortoiseSource(
+    model="myapp.models.Article",
+    fields=["id", "title", "content"],
+)
+
+schema = source.discover_schema()
+count = source.document_count()
+```
+
 ---
 
 ## RESTSource
@@ -130,7 +199,7 @@ for doc in source.iter_changes(since=datetime(2025, 1, 1)):
 ### Basic Usage
 
 ```python
-from whoosh_modern.data_sources import RESTSource
+from whoosh_modern.data_sources.rest import RESTSource
 
 source = RESTSource(
     url="https://api.example.com/v2/products",
@@ -218,3 +287,185 @@ source = RESTSource(
     pagination="page",
 )
 ```
+
+---
+
+## GraphQLSource
+
+`GraphQLSource` fetches documents from a GraphQL API endpoint:
+
+```python
+from whoosh_modern.data_sources.graphql import GraphQLSource
+
+source = GraphQLSource(
+    url="https://api.example.com/graphql",
+    query="""
+        query GetProducts($limit: Int!, $offset: Int!) {
+            products(limit: $limit, offset: $offset) {
+                id
+                name
+                price
+                description
+            }
+        }
+    """,
+    pagination="offset",
+    page_size=100,
+    headers={"Authorization": "Bearer your_token"},
+)
+
+schema = source.discover_schema()
+for doc in source.iter_documents():
+    print(doc["id"], doc["name"])
+```
+
+---
+
+## File-Based Data Sources
+
+Whoosh-NG supports indexing from various file formats with optimized readers.
+
+### FastCSVSource
+
+High-performance CSV reader with configurable encoding and delimiter:
+
+```python
+from whoosh_modern.data_sources.fast_csv import FastCSVSource
+
+source = FastCSVSource(
+    file_path="data/products.csv",
+    id_field="id",
+    incremental_field="updated_at",
+    delimiter=",",
+    encoding="utf-8",
+)
+
+schema = source.discover_schema()
+count = source.document_count()
+for doc in source.iter_documents():
+    print(doc)
+```
+
+### JSONSource
+
+Index from JSON files or JSON Lines (.jsonl) files:
+
+```python
+from whoosh_modern.data_sources.json import JSONSource
+
+# JSON array file
+source = JSONSource(file_path="data/products.json")
+
+# JSON Lines file (one JSON object per line)
+source = JSONSource(
+    file_path="data/logs.jsonl",
+    format="jsonl",
+)
+
+schema = source.discover_schema()
+```
+
+### ParquetSource
+
+Index from Parquet files using pyarrow or pandas backend:
+
+```python
+from whoosh_modern.data_sources.parquet_ds import ParquetSource
+
+source = ParquetSource(
+    file_path="data/large_dataset.parquet",
+    engine="pyarrow",  # or "pandas"
+    batch_size=1000,
+)
+
+schema = source.discover_schema()
+```
+
+### PandasSource
+
+Index directly from a pandas DataFrame:
+
+```python
+from whoosh_modern.data_sources.pandas_ds import PandasSource
+import pandas as pd
+
+df = pd.read_csv("data/products.csv")
+source = PandasSource(dataframe=df)
+
+schema = source.discover_schema()
+```
+
+### PolarsSource
+
+Index from a Polars DataFrame (faster, lazy evaluation):
+
+```python
+from whoosh_modern.data_sources.polars_ds import PolarsSource
+import polars as pl
+
+df = pl.read_csv("data/products.csv")
+source = PolarsSource(dataframe=df)
+
+schema = source.discover_schema()
+```
+
+---
+
+## DataSourceConfig
+
+For programmatic configuration, use `DataSourceConfig` to define data source properties:
+
+```python
+from whoosh_modern.data_sources.config import DataSourceConfig
+
+config = DataSourceConfig(
+    source_type="sql",
+    connection="sqlite:///mydb.db",
+    query="SELECT * FROM products",
+    id_field="id",
+    incremental_field="updated_at",
+    mapping={"db_title": "title"},     # field remapping
+    exclude=["description_long"],      # fields to exclude
+)
+
+source = config.create_source()
+schema = source.discover_schema()
+```
+
+### Config File Support
+
+Data source configurations can be loaded from YAML, JSON, or Python dict:
+
+```python
+from whoosh_modern.data_sources.config import DataSourceConfig
+
+# From dict
+config = DataSourceConfig.from_dict({
+    "source_type": "rest",
+    "url": "https://api.example.com/v2/products",
+    "pagination": "page",
+    "page_size": 50,
+})
+source = config.create_source()
+
+# From file
+config = DataSourceConfig.from_file("my_config.json")
+source = config.create_source()
+```
+
+### Available Data Sources
+
+| Class | Source Type | Dependencies |
+|-------|------------|--------------|
+| `SQLSource` | SQLite, PostgreSQL, MySQL | `sqlite3` (stdlib) |
+| `SQLAlchemySource` | Any SQLAlchemy-supported DB | `sqlalchemy` |
+| `RESTSource` | REST APIs | none (stdlib `urllib`) |
+| `GraphQLSource` | GraphQL APIs | none (stdlib `urllib`) |
+| `FastCSVSource` | CSV files | none |
+| `JSONSource` | JSON/JSONL files | none |
+| `ParquetSource` | Parquet files | `pyarrow` or `pandas` |
+| `PandasSource` | pandas DataFrames | `pandas` |
+| `PolarsSource` | Polars DataFrames | `polars` |
+| `PeeweeSource` | Peewee ORM | `peewee` |
+| `TortoiseSource` | Tortoise ORM | `tortoise-orm` |
+| `PydanticSource` | Pydantic models | `pydantic` |

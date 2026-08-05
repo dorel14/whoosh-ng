@@ -39,6 +39,7 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[Autocomplete]({{ '/en/guides/autocomplete/' | relative_url }})** — Autocomplete providers
 - **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, and Faiss integration
 - **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
+- **[Performance Benchmarking]({{ '/en/guides/performance/' | relative_url }})** — Benchmark tools and optimization results
 - **[Migration]({{ '/en/guides/migration/' | relative_url }})** — Migrating from classic Whoosh
 
 ### API Reference
@@ -62,7 +63,7 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[FastAPI Integration]({{ '/en/examples/fastapi/' | relative_url }})** — REST API with FastAPI
 - **[Middleware Examples]({{ '/en/examples/middleware/' | relative_url }})** — Custom middleware patterns
 - **[Plugin Development]({{ '/en/examples/plugin-dev/' | relative_url }})** — Building plugins
-- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, GraphQLSource, FastCSVSource, JSONSource, ParquetSource, PandasSource, PolarsSource, SQLAlchemySource, PeeweeSource, TortoiseSource
 - **[Schema Discovery]({{ '/en/examples/schema-discovery/' | relative_url }})** — Result-set introspection
 - **[Facet Manager]({{ '/en/examples/facets/' | relative_url }})** — Auto-discovery and manual overrides
 - **[Validation Framework]({{ '/en/examples/validation/' | relative_url }})** — 4-level validation

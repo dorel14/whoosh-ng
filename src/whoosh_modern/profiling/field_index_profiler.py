@@ -19,7 +19,7 @@ from __future__ import annotations
 import time
 from collections import defaultdict
 from collections.abc import Iterator
-from typing import Any, List, Tuple
+from typing import Any
 
 
 class _TimedStep:
@@ -123,7 +123,8 @@ class FieldIndexProfiler:
 
         lines.append("-" * 77)
         lines.append(
-            f"  {'Total':<23} {total_time:>12.4f} {'100.0':>8}% {self._token_count:>10} {total_time / self._token_count * 1000:>17.4f}"
+            f"  {'Total':<23} {total_time:>12.4f} {'100.0':>8}% "
+            f"{self._token_count:>10} {total_time / self._token_count * 1000:>17.4f}"
         )
 
         return "\n".join(lines)
@@ -152,7 +153,7 @@ class FieldIndexProfiler:
                     / self._counts.get(name, 1)
                     * 1000,
                 }
-                for name in self._timings.keys()
+                for name in self._timings
                 if name != "total"
             },
         }

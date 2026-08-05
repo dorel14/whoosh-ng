@@ -50,7 +50,7 @@ class BatchIndexWriter:
         limitmb: int = 512,
         commit_every: int | None = None,
         multisegment: bool = True,
-        callback: Callable[[str, int], None] | None = None,
+        callback: Callable[..., None] | None = None,
         commit_profiler: Any = None,
         **writer_kwargs: Any,
     ) -> None:
@@ -118,13 +118,12 @@ class BatchIndexWriter:
         self._batch_count += 1
 
         if self._commit_every is not None and self._batch_count % self._commit_every == 0:
-            if self._writer is not None:
-                if self._commit_profiler is not None:
-                    self._commit_profiler.profile(self._writer)
-                else:
-                    self._writer.commit(merge=False, callback=self._callback)
-                self._writer = None
-                self._schema_fields = None
+            if self._writer is not None and self._commit_profiler is not None:
+                self._commit_profiler.profile(self._writer)
+            elif self._writer is not None:
+                self._writer.commit(merge=False, callback=self._callback)
+            self._writer = None
+            self._schema_fields = None
 
         return count
 

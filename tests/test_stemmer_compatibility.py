@@ -9,8 +9,8 @@ import pytest
 
 from whoosh_modern.analysis import (
     get_stemmer,
-    validate_stemmer_compatibility,
     list_available_backends,
+    validate_stemmer_compatibility,
 )
 
 
@@ -75,7 +75,7 @@ class TestStemmerCompatibility:
         """Test stemmer compatibility validation."""
         stemmer = get_stemmer("internal", "english")
         report = validate_stemmer_compatibility(stemmer, test_corpus)
-        
+
         assert report["provider"] == "internal"
         assert report["language"] == "english"
         assert report["total_words"] == len(test_corpus)
@@ -86,7 +86,7 @@ class TestStemmerCompatibility:
         """Test that compatibility report has expected structure."""
         stemmer = get_stemmer("internal", "english")
         report = validate_stemmer_compatibility(stemmer, test_corpus)
-        
+
         assert "provider" in report
         assert "language" in report
         assert "total_words" in report

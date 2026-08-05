@@ -32,14 +32,19 @@ from whoosh_modern.analysis.stemmer_providers import (
     list_available_backends,
 )
 
+_DEFAULT_PATTERN = __import__(
+    "whoosh.analysis.tokenizers", fromlist=["default_pattern"]
+).default_pattern
+_DEFAULT_STOP_WORDS = __import__("whoosh.analysis", fromlist=["STOP_WORDS"]).STOP_WORDS
 
-def StemmingAnalyzer(
-    expression=__import__("whoosh.analysis.tokenizers", fromlist=["default_pattern"]).default_pattern,
-    stoplist=__import__("whoosh.analysis", fromlist=["STOP_WORDS"]).STOP_WORDS,
+
+def stemming_analyzer(
+    expression=_DEFAULT_PATTERN,
+    stoplist=_DEFAULT_STOP_WORDS,
     minsize=2,
     maxsize=None,
     gaps=False,
-    stemmer: Union[str, StemmerProvider] = "auto",
+    stemmer: str | StemmerProvider = "auto",
     ignore=None,
     cachesize=50000,
 ):
@@ -61,9 +66,7 @@ def StemmingAnalyzer(
     elif hasattr(stemmer, "stem"):
         stemfn = stemmer.stem
     else:
-        raise ValueError(
-            f"stemmer must be a string or StemmerProvider, got {type(stemmer)}"
-        )
+        raise ValueError(f"stemmer must be a string or StemmerProvider, got {type(stemmer)}")
 
     return WhooshStemmingAnalyzer(
         expression=expression,
@@ -76,5 +79,7 @@ def StemmingAnalyzer(
         cachesize=cachesize,
     )
 
+
+StemmingAnalyzer = stemming_analyzer
 
 __all__ = ["StemmingAnalyzer", "list_available_backends"]

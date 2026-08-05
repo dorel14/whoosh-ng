@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import time
+from contextlib import suppress
 from typing import Any
 
 from whoosh.analysis import StemFilter
@@ -36,10 +37,8 @@ class StemmerBenchmark:
         self._stemmers: dict[str, Any] = {
             "StemFilter": StemFilter(),
         }
-        try:
+        with suppress(ImportError):
             self._stemmers["PyStemmer"] = PyStemmerFilter("english")
-        except ImportError:
-            pass
         self._results: dict[str, dict[str, Any]] = {}
 
     def run(self, texts: list[str], warmup: bool = True) -> None:

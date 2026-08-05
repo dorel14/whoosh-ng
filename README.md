@@ -62,12 +62,24 @@ pip install "whoosh-ng[dev]"
 
 ## Documentation
 
-- **[API Reference](/whoosh-ng/en/api/overview/)** - Complete module documentation
-- **[User Guides](/whoosh-ng/en/guides/)** - Tutorials and best practices
-- **[Examples](/whoosh-ng/en/examples/)** - Runnable code examples
-- **[French Documentation](/whoosh-ng/fr/)** - Documentation en français
+- **[API Reference](https://dorel14.github.io/whoosh-ng/en/api/overview/)** - Complete module documentation
+- **[User Guides](https://dorel14.github.io/whoosh-ng/en/guides/)** - Tutorials and best practices
+- **[Examples](https://dorel14.github.io/whoosh-ng/en/examples/)** - Runnable code examples
+- **[Data Sources](https://dorel14.github.io/whoosh-ng/en/examples/data-sources/)** - SQL, REST, GraphQL, CSV, JSON, Parquet data sources
+- **[French Documentation](https://dorel14.github.io/whoosh-ng/fr/)** - Documentation en français
 
 ## Recent Changes in 2.0.0
+
+### Performance Highlights
+
+| Gain | Scope | Notes |
+|---|---|---|
+| +68% indexing speed | 20k docs | `analyzing` phase reduced from 8.6s to 2.7s |
+| +35% token creation | per-document | `Token` migrated to `__slots__` |
+| -93% write_block calls | 20k docs | Field cache inline in `W3PostingsWriter` |
+| Compact postings | all segments | Single-posting and short-inline fast paths |
+| Global compiled regex | `RegexTokenizer` | Default pattern compiled once at module load |
+| Stemmer provider | `StemmingAnalyzer` | Select `auto`/`internal`/`pystemmer` backends |
 
 ### Added
 
@@ -82,17 +94,26 @@ pip install "whoosh-ng[dev]"
 - **FastAPI Plugin** (`whoosh_fastapi`): REST endpoints for search, autocomplete, vector search, and health checks
 - **Admin UI Plugin** (`whoosh_admin`): Dashboard for index administration
 - **Entry Points**: Auto-loaded plugins under `whoosh.plugins` group
-- **Data Sources** (`whoosh_modern.data_sources`): `DataSource` protocol, `SQLSource` with GROUP BY/JOIN/incremental sync, `RESTSource` with page/offset/cursor pagination and auth
+- **Data Sources** (`whoosh_modern.data_sources`): `DataSource` protocol with `ObservableDataSource`, `SQLSource` (connection pooling, GROUP BY/JOIN/incremental sync), `SQLAlchemySource`, `RESTSource` (page/offset/cursor pagination + auth), `GraphQLSource`, `FastCSVSource`, `JSONSource`, `ParquetSource`, `PandasSource`, `PolarsSource`, `PeeweeSource`, `TortoiseSource`, `PydanticSource`, and `DataSourceConfig` for declarative config from dict/JSON/YAML files
 - **Schema Discovery** (`whoosh_modern.schema_discovery`): Result-set introspection with duplicate column detection and JSON/JSONB handling
 - **FacetManager** (`whoosh_modern.facets`): Auto-discovery of facetable fields with manual override support
 - **Validation Framework** (`whoosh_modern.validation`): 4-level validation (STRICT/WARN/SKIP/NONE) with typed exceptions and field context
 - **Middleware Pipeline** (`whoosh_modern.middleware`): `RetryMiddleware`, `LoggingMiddleware`, `CacheMiddleware` with chainable pipeline
-- **SearchView** (`whoosh_modern.search_view`): Unified interface integrating data sources, schema discovery, facets, validation, and middleware
+- **SearchView** (`whoosh_modern.views`): Unified interface integrating data sources, schema discovery, facets, validation, and middleware with `build()`, `refresh()`, `reindex()`, `validate()`, `evolve_schema()`, and strict mode
+- **Stemmer Provider System** (`whoosh_modern.analysis`): `get_stemmer()`, `register_stemmer()`, auto-detection between internal Porter stemmer and PyStemmer C backend
+- **Enhanced StemmingAnalyzer** (`whoosh_modern.analysis`): Accepts `stemmer="auto"|"internal"|"pystemmer"|provider` parameter
+
+### Breaking Changes
+
+> **Re-indexing required.** The on-disk posting format in `W3TermInfo` and position/char encoding in `Formats` has changed. Indexes created with pre-2.0 versions are **not readable** by this release. Delete old index directories and re-create them.
+
+- `Token` now uses `__slots__`: code that iterates `token.__dict__` should use `token.copy()` or slot introspection instead
+- `finish_postings()` signature changed: `allow_compact=True` keyword added
 
 ### Changed
 
 - Distribution renamed from `whoosh-reloaded` to **`whoosh-ng`** (import namespace remains `whoosh`)
-- Documentation site moved to GitHub Pages: https://dorel14.github.io/whoosh-ng/
+- Documentation links now absolute (GitHub Pages): `https://dorel14.github.io/whoosh-ng/en/...`
 - **Python 3.11+ required** (dropped Python 3.9/3.10 support)
 - Packaging cleaned: consolidated extras in `pyproject.toml`
 - Type annotations modernized: `mypy src/whoosh` reports 0 errors, `py.typed` marker included
@@ -153,7 +174,7 @@ app = create_app(ix, prefix="/api/v1")
 ### SQLSource — Index from a SQL database
 
 ```python
-from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.data_sources.sql import SQLSource
 from whoosh import index
 from whoosh.fields import Schema, TEXT, NUMERIC
 import sqlite3
@@ -178,7 +199,7 @@ ix = view.build("indexdir")
 ### RESTSource — Index from a REST API
 
 ```python
-from whoosh_modern.data_sources import RESTSource
+from whoosh_modern.data_sources.rest import RESTSource
 
 source = RESTSource(
     url="https://api.example.com/v2/products",
@@ -195,7 +216,7 @@ docs = list(source.iter_documents())
 
 ```python
 from whoosh_modern.views import SearchView
-from whoosh_modern.data_sources import SQLSource
+from whoosh_modern.data_sources.sql import SQLSource
 import sqlite3
 
 conn = sqlite3.connect("mydb.db")
@@ -218,13 +239,12 @@ count = view.reindex()
 
 ## Example: Vector Search
 
-## Example: Vector Search
-
 ```bash
 pip install "whoosh-ng[vector]" numpy
 ```
 
 ```python
+from whoosh import index
 from whoosh.fields import Schema, TEXT, ID, VECTOR
 from whoosh.vector import VectorField
 from whoosh_modern.vector.plugin import VectorPlugin

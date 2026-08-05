@@ -54,7 +54,8 @@ class PipelineReconciler:
 
         # Table of measurements
         lines.append(
-            f"{'Measurement':<25} {'Time (s)':>10} {'Tokens':>12} {'Docs':>10} {'Tokens/s':>12} {'Docs/s':>12}"
+            f"{'Measurement':<25} {'Time (s)':>10} {'Tokens':>12} {'Docs':>10} "
+            f"{'Tokens/s':>12} {'Docs/s':>12}"
         )
         lines.append("-" * 85)
         for name in sorted(self._measurements.keys()):
@@ -104,10 +105,12 @@ class PipelineReconciler:
                     f"  - The simulated pipeline underestimates by {gap:.3f}s ({gap_pct:.1f}%)"
                 )
                 lines.append(
-                    "  - The missing time is in field transformation and indexing pipeline feeding"
+                    "  - The missing time is in field transformation and "
+                    "indexing pipeline feeding"
                 )
                 lines.append(
-                    "  - Field conversion + PostingPool.add() + perdocwriter operations account for the gap"
+                    "  - Field conversion + PostingPool.add() + "
+                    "perdocwriter operations account for the gap"
                 )
             else:
                 lines.append("  - The simulated pipeline matches or exceeds actual measurements")
@@ -119,7 +122,8 @@ class PipelineReconciler:
 
             lines.append(f"  - Analyzer represents {analyzer_pct:.1f}% of actual indexing time")
             lines.append(
-                f"  - Non-analyzer overhead represents {100 - analyzer_pct:.1f}% of actual indexing time"
+                f"  - Non-analyzer overhead represents "
+                f"{100 - analyzer_pct:.1f}% of actual indexing time"
             )
 
         return "\n".join(lines)

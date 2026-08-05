@@ -135,13 +135,13 @@ class IndexingPathProfiler:
             profiler._timings["total"] += doc_total
             profiler._per_document.append(doc_timings)
 
-        writer.add_document = timed_add_document  # type: ignore[method-assign]
+        writer.add_document = timed_add_document
         self._orig_add_document = orig_add_document
 
     def _unpatch(self) -> None:
         """Restore original add_document method."""
         if self._patched:
-            self._writer.add_document = self._orig_add_document  # type: ignore[method-assign]
+            self._writer.add_document = self._orig_add_document
             self._patched = False
 
     def profile_document(self, doc: dict[str, Any]) -> None:

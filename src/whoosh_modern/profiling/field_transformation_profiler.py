@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
+from contextlib import suppress
 from typing import Any
 
 
@@ -66,10 +67,8 @@ class FieldTransformationProfiler:
             prepare_time = 0.0
             if hasattr(field, "prepare"):
                 t0 = time.perf_counter()
-                try:
+                with suppress(Exception):
                     field.prepare(value)
-                except Exception:
-                    pass
                 prepare_time = time.perf_counter() - t0
                 doc_timings[f"{field_key}:prepare"] = prepare_time
                 self._field_timings[field_key]["prepare"] += prepare_time
@@ -78,10 +77,8 @@ class FieldTransformationProfiler:
             to_bytes_time = 0.0
             if hasattr(field, "to_bytes"):
                 t0 = time.perf_counter()
-                try:
+                with suppress(Exception):
                     field.to_bytes(value)
-                except Exception:
-                    pass
                 to_bytes_time = time.perf_counter() - t0
                 doc_timings[f"{field_key}:to_bytes"] = to_bytes_time
                 self._field_timings[field_key]["to_bytes"] += to_bytes_time
@@ -90,10 +87,8 @@ class FieldTransformationProfiler:
             clean_time = 0.0
             if hasattr(field, "clean"):
                 t0 = time.perf_counter()
-                try:
+                with suppress(Exception):
                     field.clean(value)
-                except Exception:
-                    pass
                 clean_time = time.perf_counter() - t0
                 doc_timings[f"{field_key}:clean"] = clean_time
                 self._field_timings[field_key]["clean"] += clean_time
@@ -114,8 +109,8 @@ class FieldTransformationProfiler:
         lines.append("")
 
         # Overall breakdown
-        categories = defaultdict(float)
-        for field_key, timings in self._field_timings.items():
+        categories: defaultdict[str, float] = defaultdict(float)
+        for _, timings in self._field_timings.items():
             for method, t in timings.items():
                 categories[method] += t
 
@@ -131,27 +126,29 @@ class FieldTransformationProfiler:
         # Per-field breakdown
         lines.append("Per-field breakdown:")
         lines.append(
-            f"{'Field':<30} {'Index (ms)':>12} {'Prepare (ms)':>14} {'To_bytes (ms)':>14} {'Clean (ms)':>12}"
+            f"{'Field':<30} {'Index (ms)':>12} {'Prepare (ms)':>14} "
+            f"{'To_bytes (ms)':>14} {'Clean (ms)':>12}"
         )
         lines.append("-" * 86)
 
-        for field_key in sorted(self._field_timings.keys()):
-            timings = self._field_timings[field_key]
-            count = self._field_counts[field_key]
+        for _field_key in sorted(self._field_timings.keys()):
+            timings = self._field_timings[_field_key]
+            count = self._field_counts[_field_key]
             avg_index = timings.get("index", 0.0) / count * 1000 if count > 0 else 0
             avg_prepare = timings.get("prepare", 0.0) / count * 1000 if count > 0 else 0
             avg_to_bytes = timings.get("to_bytes", 0.0) / count * 1000 if count > 0 else 0
             avg_clean = timings.get("clean", 0.0) / count * 1000 if count > 0 else 0
             lines.append(
-                f"{field_key:<30} {avg_index:>12.2f} {avg_prepare:>14.2f} {avg_to_bytes:>14.2f} {avg_clean:>12.2f}"
+                f"{_field_key:<30} {avg_index:>12.2f} {avg_prepare:>14.2f} "
+                f"{avg_to_bytes:>14.2f} {avg_clean:>12.2f}"
             )
 
         return "\n".join(lines)
 
     def to_dict(self) -> dict[str, Any]:
         """Return results as a dict."""
-        categories = defaultdict(float)
-        for field_key, timings in self._field_timings.items():
+        categories: defaultdict[str, float] = defaultdict(float)
+        for _, timings in self._field_timings.items():
             for method, t in timings.items():
                 categories[method] += t
 

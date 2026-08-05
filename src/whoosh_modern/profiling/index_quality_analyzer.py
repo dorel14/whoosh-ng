@@ -53,7 +53,7 @@ class IndexQualityAnalyzer:
             results["total_docs"] = reader.doc_count()
 
             posting_counts = []
-            freq_dist = {}
+            freq_dist: dict[int, int] = {}
             for fieldname, text in reader.all_terms():
                 ti = reader.term_info(fieldname, text)
                 df = ti.doc_frequency()
@@ -83,7 +83,7 @@ class IndexQualityAnalyzer:
 
         # Measure index size
         total_size = 0
-        for dirpath, dirnames, filenames in os.walk(self._idx_dir):
+        for dirpath, _, filenames in os.walk(self._idx_dir):
             for f in filenames:
                 fp = os.path.join(dirpath, f)
                 total_size += os.path.getsize(fp)
@@ -102,16 +102,20 @@ class IndexQualityAnalyzer:
         lines.append("")
         lines.append("Term frequency distribution:")
         lines.append(
-            f"  Singletons (df=1)      : {metrics['singletons']:>8} ({metrics['singletons'] / max(metrics['total_terms'], 1) * 100:5.1f}%)"
+            f"  Singletons (df=1)      : {metrics['singletons']:>8} "
+            f"({metrics['singletons'] / max(metrics['total_terms'], 1) * 100:5.1f}%)"
         )
         lines.append(
-            f"  Low freq (2-10)        : {metrics['low_frequency']:>8} ({metrics['low_frequency'] / max(metrics['total_terms'], 1) * 100:5.1f}%)"
+            f"  Low freq (2-10)        : {metrics['low_frequency']:>8} "
+            f"({metrics['low_frequency'] / max(metrics['total_terms'], 1) * 100:5.1f}%)"
         )
         lines.append(
-            f"  Medium freq (11-100)   : {metrics['medium_frequency']:>8} ({metrics['medium_frequency'] / max(metrics['total_terms'], 1) * 100:5.1f}%)"
+            f"  Medium freq (11-100)   : {metrics['medium_frequency']:>8} "
+            f"({metrics['medium_frequency'] / max(metrics['total_terms'], 1) * 100:5.1f}%)"
         )
         lines.append(
-            f"  High freq (100+)       : {metrics['high_frequency']:>8} ({metrics['high_frequency'] / max(metrics['total_terms'], 1) * 100:5.1f}%)"
+            f"  High freq (100+)       : {metrics['high_frequency']:>8} "
+            f"({metrics['high_frequency'] / max(metrics['total_terms'], 1) * 100:5.1f}%)"
         )
         lines.append("")
         lines.append("Postings per term:")

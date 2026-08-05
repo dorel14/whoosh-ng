@@ -17,7 +17,8 @@ from __future__ import annotations
 import re
 import sys
 import time
-from typing import Any, Callable, Dict, List, Tuple
+from collections.abc import Callable
+from typing import Any
 
 
 class FastRegexTokenizer:
@@ -25,14 +26,14 @@ class FastRegexTokenizer:
 
     _compiled = re.compile(r"\w+(\.?\w+)*", re.UNICODE)
 
-    def __call__(self, text: str, **kwargs: Any) -> List[Any]:
+    def __call__(self, text: str, **kwargs: Any) -> list[Any]:
         return list(self._compiled.finditer(text))
 
 
 class ManualTokenizer:
     """Manual Python tokenizer without regex."""
 
-    def __call__(self, text: str, **kwargs: Any) -> List[Any]:
+    def __call__(self, text: str, **kwargs: Any) -> list[Any]:
         tokens = []
         current = []
         for char in text:
@@ -47,7 +48,9 @@ class ManualTokenizer:
         return tokens
 
 
-def benchmark_tokenizer(name: str, tokenizer: Callable, texts: List[str], iterations: int = 3) -> Dict[str, Any]:
+def benchmark_tokenizer(
+    name: str, tokenizer: Callable, texts: list[str], iterations: int = 3
+) -> dict[str, Any]:
     """Benchmark a tokenizer on given texts."""
     times = []
     token_counts = []
@@ -76,7 +79,7 @@ def benchmark_tokenizer(name: str, tokenizer: Callable, texts: List[str], iterat
     }
 
 
-def run_p5_1(datasets: Dict[str, List[str]]) -> Dict[str, Any]:
+def run_p5_1(datasets: dict[str, list[str]]) -> dict[str, Any]:
     """Run P5.1: Fast RegexTokenizer benchmark."""
     print("=" * 80)
     print("P5.1 Fast RegexTokenizer Benchmark")
@@ -90,6 +93,7 @@ def run_p5_1(datasets: Dict[str, List[str]]) -> Dict[str, Any]:
 
         # Current regex (whoosh default)
         from whoosh.analysis.tokenizers import RegexTokenizer
+
         current_tokenizer = RegexTokenizer()
         dataset_results.append(benchmark_tokenizer("Current Regex", current_tokenizer, texts))
 
@@ -101,20 +105,29 @@ def run_p5_1(datasets: Dict[str, List[str]]) -> Dict[str, Any]:
 
         # Try C extension
         try:
-            import re2
+            import re2  # type: ignore[import-not-found]
+
             class Re2Tokenizer:
-                def __call__(self, text: str, **kwargs: Any) -> List[Any]:
+                def __call__(self, text: str, **kwargs: Any) -> list[Any]:
                     return list(re2.findall(r"\w+(\.?\w+)*", text))
+
             dataset_results.append(benchmark_tokenizer("C Extension (re2)", Re2Tokenizer(), texts))
         except ImportError:
             print("  C Extension (re2): not available")
 
         # Print table
-        print(f"{'Tokenizer':<25} {'Time (s)':>12} {'Tokens':>12} {'Tokens/s':>12} {'Time/token (ms)':>18}")
+        print(
+            f"{'Tokenizer':<25} {'Time (s)':>12} {'Tokens':>12} "
+            f"{'Tokens/s':>12} {'Time/token (ms)':>18}"
+        )
         print("-" * 81)
 
         for result in dataset_results:
-            print(f"  {result['name']:<23} {result['avg_time']:>12.4f} {result['avg_tokens']:>12.0f} {result['throughput']:>12.0f} {result['time_per_token_ms']:>17.4f}")
+            print(
+                f"  {result['name']:<23} {result['avg_time']:>12.4f} "
+                f"{result['avg_tokens']:>12.0f} {result['throughput']:>12.0f} "
+                f"{result['time_per_token_ms']:>17.4f}"
+            )
 
         results[dataset_name] = dataset_results
 

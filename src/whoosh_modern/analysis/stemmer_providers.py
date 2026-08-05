@@ -30,7 +30,8 @@ Usage:
 from __future__ import annotations
 
 import logging
-from typing import Callable, Dict, Protocol, runtime_checkable
+from collections.abc import Callable
+from typing import Any, Protocol, cast, runtime_checkable
 
 logger = logging.getLogger(__name__)
 
@@ -61,15 +62,17 @@ class InternalStemmerProvider:
         self._language = language
         self._stem_fn = self._load_stem_fn(language)
 
-    def _load_stem_fn(self, language: str) -> Callable:
+    def _load_stem_fn(self, language: str) -> Callable[[str], str]:
         """Load the appropriate stem function for the language."""
         try:
             from whoosh.lang import porter
+
             return porter.stem
         except ImportError:
             try:
                 from whoosh.analysis import stem
-                return stem
+
+                return cast(Callable[[str], str], stem)
             except ImportError:
                 logger.warning(f"No internal stemmer found for {language}, using identity")
                 return lambda x: x
@@ -97,17 +100,17 @@ class PyStemmerProvider:
     def _load_stemmer(self, language: str):
         """Load PyStemmer for the given language."""
         try:
-            import Stemmer
+            import Stemmer  # type: ignore[import-not-found]
+
             return Stemmer.Stemmer(language)
         except ImportError:
             raise ImportError(
-                "PyStemmer is not installed. "
-                "Install it with: pip install whoosh-ng[fast-stemming]"
-            )
+                "PyStemmer is not installed. Install it with: pip install whoosh-ng[fast-stemming]"
+            ) from None
 
     def stem(self, word: str) -> str:
         """Stem a word using PyStemmer."""
-        return self._stemmer.stem(word)
+        return cast(str, self._stemmer.stem(word))
 
     @property
     def name(self) -> str:
@@ -134,21 +137,23 @@ class IdentityStemmerProvider:
         return "none"
 
 
-_registry: Dict[str, StemmerProvider] = {}
+_registry: dict[str, StemmerProvider] = {}
 
 
 def register_stemmer(name: str) -> Callable:
     """Decorator to register a custom stemmer provider.
-    
+
     Usage:
         @register_stemmer("my_stemmer")
         class MyStemmer:
             def stem(self, word):
                 return word.lower()
     """
+
     def decorator(cls):
         _registry[name] = cls()
         return cls
+
     return decorator
 
 
@@ -157,7 +162,7 @@ def get_stemmer(
     language: str = "english",
 ) -> StemmerProvider:
     """Get a stemmer provider by backend name.
-    
+
     :param backend: "auto", "internal", "pystemmer", or registered name
     :param language: language code for the stemmer
     :returns: StemmerProvider instance
@@ -176,13 +181,14 @@ def get_stemmer(
 
 def _auto_detect(language: str = "english") -> StemmerProvider:
     """Auto-detect the best available stemmer.
-    
+
     Priority:
     1. PyStemmer (fastest)
     2. Internal stemmer (fallback)
     """
     try:
         import Stemmer
+
         logger.info(f"Auto-detected PyStemmer for {language}")
         return PyStemmerProvider(language)
     except ImportError:
@@ -190,9 +196,9 @@ def _auto_detect(language: str = "english") -> StemmerProvider:
         return InternalStemmerProvider(language)
 
 
-def list_available_backends() -> Dict[str, str]:
+def list_available_backends() -> dict[str, str]:
     """List available stemmer backends.
-    
+
     :returns: dict of backend name -> availability status
     """
     backends = {
@@ -207,6 +213,7 @@ def _is_pystemmer_available() -> bool:
     """Check if PyStemmer is available."""
     try:
         import Stemmer
+
         return True
     except ImportError:
         return False
@@ -215,9 +222,9 @@ def _is_pystemmer_available() -> bool:
 def validate_stemmer_compatibility(
     provider: StemmerProvider,
     test_words: list[str],
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Validate stemmer compatibility with a list of test words.
-    
+
     :param provider: StemmerProvider to validate
     :param test_words: list of words to test
     :returns: dict with compatibility report
@@ -226,17 +233,21 @@ def validate_stemmer_compatibility(
     for word in test_words:
         try:
             stemmed = provider.stem(word)
-            results.append({
-                "word": word,
-                "stemmed": stemmed,
-                "success": True,
-            })
+            results.append(
+                {
+                    "word": word,
+                    "stemmed": stemmed,
+                    "success": True,
+                }
+            )
         except Exception as e:
-            results.append({
-                "word": word,
-                "error": str(e),
-                "success": False,
-            })
+            results.append(
+                {
+                    "word": word,
+                    "error": str(e),
+                    "success": False,
+                }
+            )
 
     return {
         "provider": provider.name,

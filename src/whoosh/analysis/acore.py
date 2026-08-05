@@ -99,9 +99,23 @@ class Token:
     ...or, call token.copy() to get a copy of the token object.
     """
 
-    __slots__ = ("text", "pos", "startchar", "endchar", "original",
-                 "positions", "chars", "stopped", "boost", "removestops", "mode", "boosts", "tokenize",
-                 "matched", "fieldname")
+    __slots__ = (
+        "text",
+        "pos",
+        "startchar",
+        "endchar",
+        "original",
+        "positions",
+        "chars",
+        "stopped",
+        "boost",
+        "removestops",
+        "mode",
+        "boosts",
+        "tokenize",
+        "matched",
+        "fieldname",
+    )
 
     def __init__(self, positions=False, chars=False, removestops=True, mode="", **kwargs):
         """
@@ -134,10 +148,7 @@ class Token:
             setattr(self, key, value)
 
     def __repr__(self):
-        parms = ", ".join(
-            f"{name}={getattr(self, name)!r}"
-            for name in self.__slots__
-        )
+        parms = ", ".join(f"{name}={getattr(self, name)!r}" for name in self.__slots__)
         return f"{self.__class__.__name__}({parms})"
 
     def copy(self):

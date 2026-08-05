@@ -102,7 +102,7 @@ class IndexingPipelineProfiler:
     ) -> dict[str, Any]:
         """Process document according to schema rules."""
         field_values: dict[str, Any] = {}
-        for fieldname, field in self._schema.items():
+        for fieldname, _ in self._schema.items():
             if fieldname in analyzed:
                 field_values[fieldname] = analyzed[fieldname]
             elif fieldname in doc:
@@ -145,16 +145,20 @@ class IndexingPipelineProfiler:
         # Overall totals
         lines.append("Overall timing:")
         lines.append(
-            f"  Analyzer            : {self._analyzer_time:.4f}s ({self._analyzer_time / self._total_time * 100:.1f}%)"
+            f"  Analyzer            : {self._analyzer_time:.4f}s "
+            f"({self._analyzer_time / self._total_time * 100:.1f}%)"
         )
         lines.append(
-            f"  Schema processing   : {self._schema_time:.4f}s ({self._schema_time / self._total_time * 100:.1f}%)"
+            f"  Schema processing   : {self._schema_time:.4f}s "
+            f"({self._schema_time / self._total_time * 100:.1f}%)"
         )
         lines.append(
-            f"  Field conversion    : {self._field_conversion_time:.4f}s ({self._field_conversion_time / self._total_time * 100:.1f}%)"
+            f"  Field conversion    : {self._field_conversion_time:.4f}s "
+            f"({self._field_conversion_time / self._total_time * 100:.1f}%)"
         )
         lines.append(
-            f"  Posting creation    : {self._posting_creation_time:.4f}s ({self._posting_creation_time / self._total_time * 100:.1f}%)"
+            f"  Posting creation    : {self._posting_creation_time:.4f}s "
+            f"({self._posting_creation_time / self._total_time * 100:.1f}%)"
         )
         lines.append(f"  Total               : {self._total_time:.4f}s")
         lines.append("")
