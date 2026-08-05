@@ -3,23 +3,21 @@ title: "Autocomplete"
 nav_order: 260
 ---
 
-# Autocomplete with Whoosh‑NG
+# Autocomplete with Whoosh-NG
 
-This example demonstrates **autocomplete/suggestion** functionality using the `whoosh_modern.autocomplete` plugin.
+Whoosh-NG provides autocomplete functionality through the `whoosh_modern.autocomplete` module.
 
-## 1. Install
+## Install
 
 ```bash
 pip install "whoosh-ng[autocomplete]"
 ```
 
-## 2. Schema with Keyword Field for Terms
+## Schema with Keyword Field for Terms
 
 ```python
 from whoosh import index
 from whoosh.fields import Schema, TEXT, KEYWORD
-from whoosh_modern.autocomplete.plugin import AutocompletePlugin
-from whoosh.plugins.manager import PluginManager
 
 schema = Schema(
     title=TEXT(stored=True),
@@ -29,14 +27,7 @@ schema = Schema(
 ix = index.create_in("autocomplete_index", schema)
 ```
 
-## 3. Register the Plugin
-
-```python
-# Register autocomplete plugin
-AutocompletePlugin().register(PluginManager())
-```
-
-## 4. Index Documents
+## Index Documents
 
 ```python
 with ix.writer() as w:
@@ -47,43 +38,47 @@ with ix.writer() as w:
     w.commit()
 ```
 
-## 5. Use Inverted Index for Suggestions
+## Basic Autocomplete
 
 ```python
-from whoosh_modern.autocomplete.factory import create_autocomplete
-from whoosh.registry import AutocompleteRegistry
-from whoosh.search import searcher
+from whoosh_modern.autocomplete import create_autocomplete
 
-# Get the registered autocomplete provider
-provider = AutocompleteRegistry.get("inverted")
+# Create an autocomplete provider (supports "inverted" provider type)
+provider = create_autocomplete("inverted")
 
-# Index terms from the 'tags' field
-with ix.searcher() as s:
-    for term in s.lexicon("tags"):
-        provider.add_term(term, s.doc_count_all())
+# Add phrases to index
+provider.add(["python", "programming", "javascript", "machine learning", "deep learning"])
 
-# Get suggestions
-suggestions = provider.suggest("py", maxdist=1, limit=5)
-print(suggestions)  # ['python', 'programming']
+# Search for suggestions
+hits = provider.search("py", limit=5)
+for hit in hits:
+    print(hit.text, hit.score)
+# Output: python 1.5, programming 0.2
 ```
 
-## 6. Real-time Suggestion Endpoint
+## Real-time Suggestion Endpoint
 
 ```python
 from fastapi import FastAPI
-from whoosh_modern.autocomplete.factory import create_autocomplete
+from whoosh_modern.autocomplete import create_autocomplete
 
 app = FastAPI()
 provider = create_autocomplete("inverted")
 
+# Populate provider with terms from your index
+# (typically done during indexing)
+provider.add(["python", "programming", "javascript", "machine learning"])
+
 @app.get("/suggest")
 async def suggest(q: str, limit: int = 5):
-    return {"suggestions": provider.suggest(q, limit=limit)}
+    hits = provider.search(q, limit=limit)
+    return {"suggestions": [hit.text for hit in hits]}
 ```
 
-## Key points
+## Key Points
 
 - Install with `pip install whoosh-ng[autocomplete]`.
 - Use `KEYWORD` fields to store multi-value tags/terms.
-- Register `AutocompletePlugin` to enable suggestions.
-- The inverted index provider supports fuzzy matching (`maxdist`).
+- Use `create_autocomplete("inverted")` to create a provider.
+- The `InvertedIndexAutocomplete` provider supports prefix matching with scoring.
+- Each result is an `AutocompleteHit` with `text` and `score` attributes.

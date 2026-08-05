@@ -20,8 +20,8 @@ class DataSource(Protocol):
 
     def discover_schema(self) -> Schema: ...
     def iter_documents(self) -> Iterator[Document]: ...
-    def document_count(self) -> int: ...
-    def metadata(self) -> Mapping[str, Any]: ...
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]: ...
+    def health_check(self) -> bool: ...
 ```
 
 ### Capability Protocols
@@ -71,7 +71,7 @@ count = source.document_count()
 
 ### Connection Pooling (SQLSource)
 
-Connection pooling is supported via `pool_size` and `pool_recycle` for long-running processes:
+Connection pooling is supported via `pool_size` for long-running processes:
 
 ```python
 from whoosh_modern.data_sources.sql import SQLSource
@@ -80,7 +80,6 @@ source = SQLSource(
     connection="sqlite:///mydb.db",  # URL or connection object
     query="SELECT * FROM products",
     pool_size=10,          # Max connections in pool
-    pool_recycle=3600,     # Recycle connections after 1 hour
 )
 ```
 
@@ -419,39 +418,36 @@ For programmatic configuration, use `DataSourceConfig` to define data source pro
 from whoosh_modern.data_sources.config import DataSourceConfig
 
 config = DataSourceConfig(
-    source_type="sql",
-    connection="sqlite:///mydb.db",
+    type="sql",
+    connection=conn,
     query="SELECT * FROM products",
     id_field="id",
     incremental_field="updated_at",
-    mapping={"db_title": "title"},     # field remapping
-    exclude=["description_long"],      # fields to exclude
 )
 
-source = config.create_source()
+source = config.create()
 schema = source.discover_schema()
 ```
 
 ### Config File Support
 
-Data source configurations can be loaded from YAML, JSON, or Python dict:
+Data source configurations can be loaded from dictionaries:
 
 ```python
 from whoosh_modern.data_sources.config import DataSourceConfig
 
 # From dict
 config = DataSourceConfig.from_dict({
-    "source_type": "rest",
+    "type": "rest",
     "url": "https://api.example.com/v2/products",
     "pagination": "page",
     "page_size": 50,
 })
-source = config.create_source()
-
-# From file
-config = DataSourceConfig.from_file("my_config.json")
-source = config.create_source()
+source = config.create()
 ```
+
+Supported `type` values: `sql`, `sqlalchemy`, `rest`, `csv`, `json`, `graphql`,
+`pydantic`, `pandas`, `polars`, `parquet`, `peewee`, `tortoise`.
 
 ### Available Data Sources
 
