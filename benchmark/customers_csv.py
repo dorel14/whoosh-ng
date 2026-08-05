@@ -17,9 +17,7 @@ class CustomersCSV(WhooshLikeSpec):
 
     def __init__(self, options, args):
         super().__init__(options, args)
-        csv_path = os.path.join(
-            self.options.dir, "Datas", "customers-2000000.csv"
-        )
+        csv_path = os.path.join(self.options.dir, "Datas", "customers-2000000.csv")
         self._source = FastCSVSource(
             path=csv_path,
             incremental_field=None,

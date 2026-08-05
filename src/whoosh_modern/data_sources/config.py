@@ -140,9 +140,7 @@ class DataSourceConfig:
             try:
                 from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
             except ImportError as e:
-                raise ValueError(
-                    "SQLAlchemySource requires sqlalchemy to be installed"
-                ) from e
+                raise ValueError("SQLAlchemySource requires sqlalchemy to be installed") from e
             return SQLAlchemySource(
                 engine=self.connection,
                 query=self.query or "",
@@ -157,9 +155,7 @@ class DataSourceConfig:
             try:
                 from whoosh_modern.data_sources.pandas_ds import PandasSource
             except ImportError as e:
-                raise ValueError(
-                    "PandasSource requires pandas to be installed"
-                ) from e
+                raise ValueError("PandasSource requires pandas to be installed") from e
             return PandasSource(
                 dataframe=self.dataframe,
                 incremental_field=self.incremental_field,
@@ -173,9 +169,7 @@ class DataSourceConfig:
             try:
                 from whoosh_modern.data_sources.polars_ds import PolarsSource
             except ImportError as e:
-                raise ValueError(
-                    "PolarsSource requires polars to be installed"
-                ) from e
+                raise ValueError("PolarsSource requires polars to be installed") from e
             return PolarsSource(
                 dataframe=self.dataframe,
                 incremental_field=self.incremental_field,
@@ -206,9 +200,7 @@ class DataSourceConfig:
             try:
                 from whoosh_modern.data_sources.peewee_ds import PeeweeSource
             except ImportError as e:
-                raise ValueError(
-                    "PeeweeSource requires peewee to be installed"
-                ) from e
+                raise ValueError("PeeweeSource requires peewee to be installed") from e
             return PeeweeSource(
                 model=self.model,
                 query=self.query,
@@ -224,9 +216,7 @@ class DataSourceConfig:
             try:
                 from whoosh_modern.data_sources.tortoise_ds import TortoiseSource
             except ImportError as e:
-                raise ValueError(
-                    "TortoiseSource requires tortoise-orm to be installed"
-                ) from e
+                raise ValueError("TortoiseSource requires tortoise-orm to be installed") from e
             return TortoiseSource(
                 model=self.model,
                 incremental_field=self.incremental_field,

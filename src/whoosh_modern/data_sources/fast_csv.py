@@ -80,10 +80,7 @@ class FastCSVSource:
 
     def _build_column_map(self, headers: list[str]) -> list[tuple[int, str]]:
         """Build a list of (column_index, sanitized_field_name) pairs."""
-        return [
-            (i, _sanitize_field_name(name))
-            for i, name in enumerate(headers)
-        ]
+        return [(i, _sanitize_field_name(name)) for i, name in enumerate(headers)]
 
     def _row_to_doc(self, row: list[str]) -> dict[str, Any]:
         """Convert a csv.reader row to a document dict using the column map."""
@@ -91,9 +88,7 @@ class FastCSVSource:
         if column_map is None:
             return {}
         return {
-            field_name: row[col_idx]
-            for col_idx, field_name in column_map
-            if col_idx < len(row)
+            field_name: row[col_idx] for col_idx, field_name in column_map if col_idx < len(row)
         }
 
     def discover_schema(self) -> Schema:

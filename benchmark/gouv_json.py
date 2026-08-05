@@ -18,8 +18,7 @@ class GouvJSON(WhooshLikeSpec):
     def __init__(self, options, args):
         super().__init__(options, args)
         json_path = os.path.join(
-            self.options.dir, "Datas", "all_latest",
-            "2026-07-31_053230-data.gouv_local.json"
+            self.options.dir, "Datas", "all_latest", "2026-07-31_053230-data.gouv_local.json"
         )
         self._source = JSONSource(
             path=json_path,
@@ -39,13 +38,15 @@ class GouvJSON(WhooshLikeSpec):
             )
         }
         from whoosh.fields import Schema
+
         return Schema(**filtered)
 
     def documents(self):
         schema_fields = set(self.whoosh_schema().names())
         for doc in self._source.iter_documents():
             filtered = {
-                k: v for k, v in doc.items()
+                k: v
+                for k, v in doc.items()
                 if k in schema_fields and not isinstance(v, (dict, list))
             }
             if filtered:

@@ -58,7 +58,9 @@ class BatchMemoryProfiler:
         gc.collect()
         self._gc_counts.append(gc.get_count())
 
-    def set_batch_metrics(self, *, batch_size: int | None = None, terms: int = 0, postings: int = 0, blocks: int = 0) -> None:
+    def set_batch_metrics(
+        self, *, batch_size: int | None = None, terms: int = 0, postings: int = 0, blocks: int = 0
+    ) -> None:
         self._batch_size = batch_size
         self._terms = terms
         self._postings = postings

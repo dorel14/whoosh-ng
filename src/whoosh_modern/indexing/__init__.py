@@ -12,9 +12,7 @@ from whoosh_modern.indexing.merge_policies import (
     TieredMergePolicy,
 )
 from whoosh_modern.indexing.modern_builder import ModernIndexBuilder
-from whoosh_modern.indexing.parallel_builder import (
-    ParallelIndexBuilder,
-)
+from whoosh_modern.indexing.parallel_builder import ParallelIndexBuilder
 
 __all__ = [
     "BatchAnalyzer",

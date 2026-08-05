@@ -13,20 +13,26 @@ from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
 def _setup_db():
     engine = create_engine("sqlite:///:memory:", echo=False)
     with engine.connect() as conn:
-        conn.execute(text("""
+        conn.execute(
+            text("""
             CREATE TABLE articles (
                 id INTEGER PRIMARY KEY,
                 title TEXT,
                 body TEXT,
                 created_at TEXT
             )
-        """))
-        conn.execute(text("""
+        """)
+        )
+        conn.execute(
+            text("""
             INSERT INTO articles VALUES (1, 'Hello', 'World', '2024-01-01')
-        """))
-        conn.execute(text("""
+        """)
+        )
+        conn.execute(
+            text("""
             INSERT INTO articles VALUES (2, 'Python', 'Tips', '2024-01-02')
-        """))
+        """)
+        )
         conn.commit()
     return engine
 

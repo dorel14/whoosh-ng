@@ -13,7 +13,7 @@ Key optimizations:
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from typing import Any
 
 from whoosh.index import Index
@@ -50,6 +50,8 @@ class BatchIndexWriter:
         limitmb: int = 512,
         commit_every: int | None = None,
         multisegment: bool = True,
+        callback: Callable[[str, int], None] | None = None,
+        commit_profiler: Any = None,
         **writer_kwargs: Any,
     ) -> None:
         self._index = index
@@ -57,6 +59,8 @@ class BatchIndexWriter:
         self._limitmb = limitmb
         self._commit_every = commit_every
         self._multisegment = multisegment
+        self._callback = callback
+        self._commit_profiler = commit_profiler
         self._writer_kwargs = writer_kwargs
         self._writer: SegmentWriter | None = None
         self._doc_count = 0
@@ -114,9 +118,13 @@ class BatchIndexWriter:
         self._batch_count += 1
 
         if self._commit_every is not None and self._batch_count % self._commit_every == 0:
-            writer.commit(merge=False)
-            self._writer = None
-            self._schema_fields = None
+            if self._writer is not None:
+                if self._commit_profiler is not None:
+                    self._commit_profiler.profile(self._writer)
+                else:
+                    self._writer.commit(merge=False, callback=self._callback)
+                self._writer = None
+                self._schema_fields = None
 
         return count
 
@@ -134,7 +142,10 @@ class BatchIndexWriter:
     def close(self) -> int:
         """Close the writer and return total documents added."""
         if self._writer is not None:
-            self._writer.commit(merge=False)
+            if self._commit_profiler is not None:
+                self._commit_profiler.profile(self._writer)
+            else:
+                self._writer.commit(merge=False, callback=self._callback)
             self._writer = None
         total = self._doc_count
         self._doc_count = 0

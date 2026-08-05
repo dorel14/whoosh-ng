@@ -1346,11 +1346,7 @@ class W3TermInfo(TermInfo):
             )
         elif self.is_compact_inline():
             id_, weight, value = self._compact_inline
-            postbytes = (
-                struct.pack("!If", id_, weight)
-                + struct.pack("!H", len(value))
-                + value
-            )
+            postbytes = struct.pack("!If", id_, weight) + struct.pack("!H", len(value)) + value
         elif self._inlined is not None:
             postbytes = dumps(self._inlined)
         else:
@@ -1382,13 +1378,9 @@ class W3TermInfo(TermInfo):
             pos += 1
             ids = list(struct.unpack("!" + "I" * count, s[pos : pos + 4 * count]))
             pos += 4 * count
-            weights = list(
-                struct.unpack("!" + "f" * count, s[pos : pos + 4 * count])
-            )
+            weights = list(struct.unpack("!" + "f" * count, s[pos : pos + 4 * count]))
             pos += 4 * count
-            lengths = list(
-                struct.unpack("!" + "H" * count, s[pos : pos + 2 * count])
-            )
+            lengths = list(struct.unpack("!" + "H" * count, s[pos : pos + 2 * count]))
             pos += 2 * count
             values = []
             for length in lengths:

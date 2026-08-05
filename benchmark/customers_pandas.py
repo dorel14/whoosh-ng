@@ -24,9 +24,7 @@ class CustomersPandas(WhooshLikeSpec):
 
     def __init__(self, options, args):
         super().__init__(options, args)
-        csv_path = os.path.join(
-            self.options.dir, "Datas", "customers-2000000.csv"
-        )
+        csv_path = os.path.join(self.options.dir, "Datas", "customers-2000000.csv")
         df = pd.read_csv(csv_path)
         df.columns = [_sanitize(col) for col in df.columns]
         self._source = PandasSource(

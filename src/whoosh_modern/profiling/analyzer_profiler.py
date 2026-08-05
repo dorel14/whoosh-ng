@@ -1,109 +1,149 @@
-"""Analyzer profiling for Whoosh-NG.
+"""Analyzer step-by-step profiler.
 
-Measures the cost of:
-- tokenizer
-- stemming
-- token filters
-on representative text samples.
+Measures time and token counts per pipeline step:
+- Tokenizer
+- LowercaseFilter
+- StopFilter
+- StemFilter
+- CharsetFilter
+- Custom Filters
+
+Usage:
+    from whoosh_modern.profiling import AnalyzerStepProfiler
+    profiler = AnalyzerStepProfiler(analyzer)
+    for doc in docs:
+        tokens = profiler.profile_text(text)
+    print(profiler.report())
 """
 
 from __future__ import annotations
 
 import time
-from collections import OrderedDict
-from typing import Any, Callable, Iterator
+from collections import defaultdict
+from typing import Any
 
 
-class AnalyzerProfiler:
-    """Profiler for analyzer components.
+class _TimedStep:
+    """Wrapper around a pipeline step that measures execution time and token counts."""
 
-    Example::
+    __slots__ = ("name", "_step", "_timings", "_counts")
 
-        profiler = AnalyzerProfiler()
-        for text in texts:
-            profiler.profile(text, analyzer)
-        print(profiler.report())
-    """
+    def __init__(
+        self, name: str, step: Any, timings: dict[str, list[float]], counts: dict[str, int]
+    ) -> None:
+        self.name = name
+        self._step = step
+        self._timings = timings
+        self._counts = counts
 
-    def __init__(self) -> None:
-        self._steps: OrderedDict[str, AnalyzerStepTimer] = OrderedDict()
-        self._texts: int = 0
+    def __call__(self, tokens: Any) -> Any:
+        t0 = time.perf_counter()
+        result = list(self._step(tokens))
+        elapsed = time.perf_counter() - t0
+        self._timings[self.name].append(elapsed)
+        self._counts[self.name] += len(result)
+        return iter(result)
 
-    def profile(self, text: str, analyzer: Callable[[str], Iterator[Any]]) -> None:
-        """Profile one text through the analyzer."""
-        self._texts += 1
-        tokens = list(analyzer(text))
-        self._steps.setdefault("tokenizer", AnalyzerStepTimer("tokenizer"))
-        self._steps["tokenizer"].record_tokens(len(tokens))
 
-    @property
-    def total_time(self) -> float:
-        return sum(s.elapsed for s in self._steps.values())
+class AnalyzerStepProfiler:
+    """Profile each step of an analyzer pipeline."""
 
-    @property
-    def total_tokens(self) -> int:
-        return sum(s.tokens for s in self._steps.values())
+    def __init__(self, analyzer: Any) -> None:
+        self._analyzer = analyzer
+        self._step_timings: dict[str, list[float]] = defaultdict(list)
+        self._step_counts: dict[str, int] = defaultdict(int)
+        self._text_count: int = 0
+        self._token_count: int = 0
+        self._instrumented: bool = False
+        self._timed_steps: list[_TimedStep] = []
+
+    def _instrument(self) -> None:
+        if self._instrumented:
+            return
+        self._instrumented = True
+        self._timed_steps = []
+        items = getattr(self._analyzer, "items", None)
+        if items is None:
+            return
+        if getattr(self, "_original_items", None) is None:
+            self._original_items = list(items)
+        items[:] = self._original_items
+        for i, step in enumerate(items):
+            name = type(step).__name__
+            timed = _TimedStep(name, step, self._step_timings, self._step_counts)
+            self._timed_steps.append(timed)
+            items[i] = timed
+
+    def _reset(self) -> None:
+        if getattr(self, "_original_items", None) is not None:
+            items = getattr(self._analyzer, "items", None)
+            if items is not None:
+                items[:] = self._original_items
+        self._instrumented = False
+        self._timed_steps = []
+        self._step_timings.clear()
+        self._step_counts.clear()
+        self._text_count = 0
+        self._token_count = 0
+
+    def profile_text(self, text: str) -> list[Any]:
+        """Profile analysis of a single text and return tokens."""
+        self._instrument()
+        self._text_count += 1
+        t0 = time.perf_counter()
+        tokens = list(self._analyzer(text))
+        total = time.perf_counter() - t0
+        self._step_timings["__total__"].append(total)
+        self._step_counts["__total__"] += len(tokens)
+        self._token_count += len(tokens)
+        return tokens
 
     def report(self) -> str:
-        lines = ["Analyzer Profiling", "=" * 50, ""]
-        for step in self._steps.values():
-            pct = (step.elapsed / self.total_time * 100) if self.total_time > 0 else 0.0
-            lines.append(
-                f"  {step.name:<20} ... {step.elapsed:>8.3f}s  "
-                f"({pct:5.1f}%) tokens={step.tokens}"
-            )
-        lines.append("-" * 50)
-        lines.append(f"  texts={self._texts} tokens={self.total_tokens}")
+        lines = ["Analyzer Step Profiling", "=" * 50, ""]
+        lines.append(f"Texts analyzed: {self._text_count}")
+        lines.append(f"Total tokens: {self._token_count}")
+        lines.append("")
+
+        total_times = self._step_timings.get("__total__", [])
+        if total_times:
+            total_time = sum(total_times)
+            avg = total_time / len(total_times) if total_times else 0.0
+            lines.append(f"Total analysis time: {total_time:.3f}s")
+            lines.append(f"Avg per text: {avg * 1000:.2f}ms")
+            lines.append(f"Throughput: {len(total_times) / total_time:.0f} texts/s")
+            lines.append("")
+
+        lines.append("Per-step breakdown:")
+        lines.append(f"{'Etape':<20} {'Temps (s)':<12} {'Tokens':<12} {'%':<8}")
+        lines.append("-" * 54)
+
+        total_time = sum(total_times)
+        seen = set()
+        for timed in self._timed_steps:
+            name = timed.name
+            if name in seen:
+                continue
+            seen.add(name)
+            times = self._step_timings.get(name, [])
+            tokens = self._step_counts.get(name, 0)
+            step_total = sum(times)
+            pct = (step_total / total_time * 100) if total_time > 0 else 0.0
+            lines.append(f"{name:<20} {step_total:<12.4f} {tokens:<12} {pct:<8.1f}")
+
         return "\n".join(lines)
 
     def to_dict(self) -> dict[str, Any]:
+        total_time = sum(self._step_timings.get("__total__", []))
         return {
-            "texts": self._texts,
-            "total_tokens": self.total_tokens,
+            "text_count": self._text_count,
+            "token_count": self._token_count,
+            "total_time": total_time,
             "steps": {
                 name: {
-                    "elapsed": round(s.elapsed, 3),
-                    "tokens": s.tokens,
+                    "time": sum(times),
+                    "tokens": self._step_counts.get(name, 0),
                 }
-                for name, s in self._steps.items()
+                for name, times in self._step_timings.items()
+                if name != "__total__"
             },
         }
-
-
-class AnalyzerStepTimer:
-    """Measures elapsed time for a single analyzer substep."""
-
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self._start: float | None = None
-        self._elapsed: float = 0.0
-        self._count: int = 0
-        self._tokens: int = 0
-
-    def start(self) -> None:
-        if self._start is None:
-            self._start = time.perf_counter()
-
-    def stop(self) -> float:
-        if self._start is not None:
-            delta = time.perf_counter() - self._start
-            self._elapsed += delta
-            self._count += 1
-            self._start = None
-            return delta
-        return 0.0
-
-    def record_tokens(self, count: int) -> None:
-        self._tokens += count
-
-    @property
-    def elapsed(self) -> float:
-        return self._elapsed
-
-    @property
-    def count(self) -> int:
-        return self._count
-
-    @property
-    def tokens(self) -> int:
-        return self._tokens

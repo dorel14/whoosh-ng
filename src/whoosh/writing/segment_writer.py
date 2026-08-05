@@ -405,8 +405,7 @@ class SegmentWriter(IndexWriter):
                         analyzer = field.analyzer
                         vitems = vformat.word_values(value, analyzer, mode="index")
                         vitems = sorted(
-                            (text, weight, vbytes)
-                            for text, _, weight, vbytes in vitems
+                            (text, weight, vbytes) for text, _, weight, vbytes in vitems
                         )
                         perdocwriter.add_vector_items(fieldname, field, vitems)
 

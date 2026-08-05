@@ -41,9 +41,7 @@ class SegmentCommitBenchmark(WhooshLikeSpec):
 
     def __init__(self, options, args):
         super().__init__(options, args)
-        csv_path = os.path.join(
-            self.options.dir, "Datas", "customers-2000000.csv"
-        )
+        csv_path = os.path.join(self.options.dir, "Datas", "customers-2000000.csv")
         try:
             from whoosh_modern.data_sources.fast_csv import FastCSVSource
 

@@ -61,9 +61,11 @@ class TestBatchIndexWriter:
         with tempfile.TemporaryDirectory() as tmpdir:
             ix = _create_index(tmpdir)
             with BatchIndexWriter(ix, batch_size=100) as writer:
-                writer.add_batch([
-                    {"id": "1", "title": "Hello", "body": "World"},
-                ])
+                writer.add_batch(
+                    [
+                        {"id": "1", "title": "Hello", "body": "World"},
+                    ]
+                )
             assert ix.doc_count() == 1
 
     def test_doc_count_property(self):

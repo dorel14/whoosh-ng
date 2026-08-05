@@ -11,9 +11,7 @@ def _get_process_memory_mb() -> float:
     try:
         import psutil  # type: ignore[import-untyped]
 
-        return float(
-            psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024)
-        )
+        return float(psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024))
     except ImportError:
         pass
 
@@ -22,6 +20,7 @@ def _get_process_memory_mb() -> float:
             import ctypes
 
             kernel32 = ctypes.windll.kernel32
+
             class MEMORYSTATUSEX(ctypes.Structure):
                 _fields_ = [
                     ("dwLength", ctypes.c_ulong),
@@ -34,12 +33,11 @@ def _get_process_memory_mb() -> float:
                     ("ullAvailVirtual", ctypes.c_ulonglong),
                     ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
                 ]
+
             mem = MEMORYSTATUSEX()
             mem.dwLength = ctypes.sizeof(mem)
             if kernel32.GlobalMemoryStatusEx(ctypes.byref(mem)):
-                return float(
-                    mem.ullTotalPhys / (1024 * 1024) - mem.ullAvailPhys / (1024 * 1024)
-                )
+                return float(mem.ullTotalPhys / (1024 * 1024) - mem.ullAvailPhys / (1024 * 1024))
         except Exception:
             pass
 

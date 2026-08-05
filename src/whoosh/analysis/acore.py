@@ -99,17 +99,9 @@ class Token:
     ...or, call token.copy() to get a copy of the token object.
     """
 
-    text: str = ""
-    pos: int = 0
-    startchar: int = 0
-    endchar: int = 0
-    original: str | None = None
-    positions: bool = False
-    chars: bool = False
-    stopped: bool = False
-    boost: float = 1.0
-    removestops: bool = True
-    mode: str = ""
+    __slots__ = ("text", "pos", "startchar", "endchar", "original",
+                 "positions", "chars", "stopped", "boost", "removestops", "mode", "boosts", "tokenize",
+                 "matched", "fieldname")
 
     def __init__(self, positions=False, chars=False, removestops=True, mode="", **kwargs):
         """
@@ -129,15 +121,31 @@ class Token:
         self.boost = 1.0
         self.removestops = removestops
         self.mode = mode
-        self.__dict__.update(kwargs)
+        self.text = ""
+        self.pos = 0
+        self.startchar = 0
+        self.endchar = 0
+        self.original = None
+        self.boosts = None
+        self.tokenize = None
+        self.matched = None
+        self.fieldname = None
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def __repr__(self):
-        parms = ", ".join(f"{name}={value!r}" for name, value in self.__dict__.items())
+        parms = ", ".join(
+            f"{name}={getattr(self, name)!r}"
+            for name in self.__slots__
+        )
         return f"{self.__class__.__name__}({parms})"
 
     def copy(self):
         # This is faster than using the copy module
-        return Token(**self.__dict__)
+        new = Token()
+        for name in self.__slots__:
+            setattr(new, name, getattr(self, name))
+        return new
 
 
 # Composition support

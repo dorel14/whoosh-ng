@@ -36,10 +36,12 @@ class TestFastCSVSource:
         assert source.health_check() is False
 
     def test_discover_schema(self):
-        path = _create_csv_file([
-            {"id": "1", "title": "Hello", "body": "World"},
-            {"id": "2", "title": "Python", "body": "Tips"},
-        ])
+        path = _create_csv_file(
+            [
+                {"id": "1", "title": "Hello", "body": "World"},
+                {"id": "2", "title": "Python", "body": "Tips"},
+            ]
+        )
         try:
             source = FastCSVSource(path=path)
             schema = source.discover_schema()
@@ -50,10 +52,12 @@ class TestFastCSVSource:
             os.remove(path)
 
     def test_iter_documents(self):
-        path = _create_csv_file([
-            {"id": "1", "title": "Hello"},
-            {"id": "2", "title": "World"},
-        ])
+        path = _create_csv_file(
+            [
+                {"id": "1", "title": "Hello"},
+                {"id": "2", "title": "World"},
+            ]
+        )
         try:
             source = FastCSVSource(path=path)
             docs = list(source.iter_documents())
@@ -64,10 +68,12 @@ class TestFastCSVSource:
             os.remove(path)
 
     def test_document_count(self):
-        path = _create_csv_file([
-            {"id": "1", "title": "Hello"},
-            {"id": "2", "title": "World"},
-        ])
+        path = _create_csv_file(
+            [
+                {"id": "1", "title": "Hello"},
+                {"id": "2", "title": "World"},
+            ]
+        )
         try:
             source = FastCSVSource(path=path)
             assert source.document_count() == 2
@@ -130,9 +136,7 @@ class TestFastCSVSource:
             os.remove(path)
 
     def test_stream_batches(self):
-        path = _create_csv_file([
-            {"id": str(i), "title": f"Doc {i}"} for i in range(25)
-        ])
+        path = _create_csv_file([{"id": str(i), "title": f"Doc {i}"} for i in range(25)])
         try:
             source = FastCSVSource(path=path)
             batches = list(source.stream_batches(batch_size=10))

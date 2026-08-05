@@ -164,9 +164,7 @@ class BatchSizeOptimizer:
         lines: list[str] = []
         lines.append("Batch Size Optimization")
         lines.append("=" * 60)
-        lines.append(
-            f"  {'Batch Size':<12} {'Docs':<8} {'Time':<10} {'Docs/s':<10}"
-        )
+        lines.append(f"  {'Batch Size':<12} {'Docs':<8} {'Time':<10} {'Docs/s':<10}")
         lines.append("  " + "-" * 40)
         for result in self._results:
             lines.append(
@@ -179,8 +177,7 @@ class BatchSizeOptimizer:
             best = max(self._results, key=lambda x: x["docs_per_sec"])
             lines.append("-" * 60)
             lines.append(
-                f"  Optimal batch size: {best['batch_size']} "
-                f"({best['docs_per_sec']:.1f} docs/s)"
+                f"  Optimal batch size: {best['batch_size']} ({best['docs_per_sec']:.1f} docs/s)"
             )
         return "\n".join(lines)
 

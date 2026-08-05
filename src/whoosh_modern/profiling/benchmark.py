@@ -57,10 +57,7 @@ def _profile_analyzer_substeps(schema: fields.Schema, docs: list[dict[str, Any]]
     print("=" * 60)
 
     profiler = AnalyzerProfiler()
-    text_fields = [
-        name for name, field in schema.items()
-        if isinstance(field, fields.TEXT)
-    ]
+    text_fields = [name for name, field in schema.items() if isinstance(field, fields.TEXT)]
 
     for doc in docs:
         for field_name in text_fields:
@@ -81,6 +78,7 @@ def _profile_analyzer_substeps(schema: fields.Schema, docs: list[dict[str, Any]]
 
             with profiler.step("stopwords"):
                 from whoosh.analysis.filters import STOP_WORDS
+
                 stopped = [t for t in tokens if t.text not in STOP_WORDS]
 
             with profiler.step("stemming"):
@@ -269,9 +267,7 @@ def _analyze_cache(schema: fields.Schema, docs: list[dict[str, Any]]) -> dict[st
     return cache_analysis
 
 
-def _test_analyzer_cache(
-    schema: fields.Schema, docs: list[dict[str, Any]]
-) -> dict[str, Any]:
+def _test_analyzer_cache(schema: fields.Schema, docs: list[dict[str, Any]]) -> dict[str, Any]:
     """Phase 6b: Test AnalyzerCache with recommended fields."""
     print("\n" + "=" * 60)
     print("Phase 6b: AnalyzerCache Performance Test")
@@ -295,7 +291,8 @@ def _test_analyzer_cache(
         return {"skipped": True, "reason": "no_repeated_fields"}
 
     text_fields = [
-        name for name, field in schema.items()
+        name
+        for name, field in schema.items()
         if isinstance(field, fields.TEXT) and name in recommended_fields
     ]
 
@@ -441,9 +438,7 @@ def run_full_profiling(spec_path: str, upto: int = 10000) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Comprehensive Whoosh-NG performance profiler"
-    )
+    parser = argparse.ArgumentParser(description="Comprehensive Whoosh-NG performance profiler")
     parser.add_argument(
         "--spec",
         choices=["customers_csv"],

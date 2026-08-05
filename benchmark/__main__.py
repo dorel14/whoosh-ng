@@ -188,11 +188,13 @@ def _run_indexing(spec, options) -> tuple[int, float]:
 
     use_profiling = getattr(options, "profile", False)
     profiler: IndexProfiler | None = None
+    commit_profiler = None
     if use_profiling:
-        from whoosh_modern.profiling import IndexProfiler
+        from whoosh_modern.profiling import CommitProfilerV2, IndexProfiler
 
         profiler = IndexProfiler()
         profiler.__enter__()
+        commit_profiler = CommitProfilerV2(collect_term_stats=True)
 
     ix = index.create_in(idx_dir, schema)
 
@@ -215,6 +217,8 @@ def _run_indexing(spec, options) -> tuple[int, float]:
                 limitmb=options.limitmb,
                 commit_every=options.every if options.every else None,
                 multisegment=options.merge == 0,
+                callback=commit_profiler.callback if commit_profiler else None,
+                commit_profiler=commit_profiler,
             )
             with profiler.step("analyzing"):
                 for batch in batches:
@@ -252,7 +256,10 @@ def _run_indexing(spec, options) -> tuple[int, float]:
                     if upto and count >= upto:
                         break
             with profiler.step("committing"):
-                writer2.commit(merge=options.merge == 1)
+                writer2.commit(
+                    merge=options.merge == 1,
+                    callback=commit_profiler.callback if commit_profiler else None,
+                )
     elif batch_size > 0:
         from whoosh_modern.indexing import BatchIndexWriter
 
@@ -309,6 +316,9 @@ def _run_indexing(spec, options) -> tuple[int, float]:
         profiler.add_documents(count)
         profiler.__exit__(None, None, None)
         print(profiler.report())
+
+    if commit_profiler is not None:
+        print(commit_profiler.report())
 
     print(f"Indexed {count} docs in {elapsed:.3f}s ({count / elapsed:.1f} docs/s)")
     return count, elapsed

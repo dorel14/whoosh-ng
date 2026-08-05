@@ -210,9 +210,7 @@ class SearchView:
         try:
             ix = open_dir(self._index_path)
             with ix.searcher() as searcher:
-                _ = searcher.search(
-                    self._index.schema[_SCHEMA_VERSION_FIELD].exists()
-                )
+                _ = searcher.search(self._index.schema[_SCHEMA_VERSION_FIELD].exists())
                 return True
         except Exception:
             return True

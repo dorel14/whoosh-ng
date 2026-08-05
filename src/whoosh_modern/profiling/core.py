@@ -149,9 +149,7 @@ class IndexProfiler:
             pct = (s.elapsed / self.total_time * 100) if self.total_time > 0 else 0.0
             bar = "#" * int(pct / 2)
             lines.append(
-                f"{s.name:<{max_name_len}} ... "
-                f"{s.elapsed:>{max_time_len}.1f}s  "
-                f"({pct:5.1f}%) {bar}"
+                f"{s.name:<{max_name_len}} ... {s.elapsed:>{max_time_len}.1f}s  ({pct:5.1f}%) {bar}"
             )
 
         lines.append("")

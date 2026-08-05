@@ -16,6 +16,7 @@ from whoosh_modern.data_sources.pydantic import PydanticSource  # noqa: E402
 
 class Article(pydantic.BaseModel):  # type: ignore[name-defined]
     """Test Pydantic model."""
+
     id: int
     title: str
     body: str

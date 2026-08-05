@@ -236,6 +236,17 @@ class CommitProfilerV2:
         self._segment_count += 1
         self._bytes_written += size_bytes
 
+    def profile(self, writer: Any) -> None:
+        """Profile a commit on the given writer.
+
+        Uses ``_TimedSegmentWriter`` to instrument internal methods
+        and the writer ``callback`` hook.
+        """
+        ctx = _TimedSegmentWriter(writer, self)
+        with ctx:
+            writer.commit(callback=self.callback)
+        self.stop_active()
+
     def stop_active(self) -> None:
         if self._active is not None:
             self._active.stop()
@@ -285,10 +296,7 @@ class CommitProfilerV2:
             pct = (step.elapsed / total_time * 100) if total_time > 0 else 0.0
             bar = "#" * int(pct / 2)
             suffix = f" x{step.count}" if step.count > 1 else ""
-            lines.append(
-                f"  {name:<20} ... {step.elapsed:>8.3f}s  "
-                f"({pct:5.1f}%){suffix} {bar}"
-            )
+            lines.append(f"  {name:<20} ... {step.elapsed:>8.3f}s  ({pct:5.1f}%){suffix} {bar}")
 
         lines.append("-" * 55)
         lines.append(f"  {'Total':<20} ... {total_time:>8.3f}s")

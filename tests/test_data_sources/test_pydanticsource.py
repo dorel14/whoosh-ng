@@ -12,6 +12,7 @@ from whoosh_modern.exceptions import DataSourceError
 
 class Article(pydantic.BaseModel):  # type: ignore[name-defined]
     """Test Pydantic model."""
+
     id: int
     title: str
     body: str

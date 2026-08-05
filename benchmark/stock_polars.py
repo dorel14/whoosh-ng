@@ -20,8 +20,7 @@ class StockPolars(WhooshLikeSpec):
     def __init__(self, options, args):
         super().__init__(options, args)
         parquet_path = os.path.join(
-            self.options.dir, "Datas",
-            "stock-stockunitelegale-parquet.parquet"
+            self.options.dir, "Datas", "stock-stockunitelegale-parquet.parquet"
         )
         df = pl.read_parquet(parquet_path)
         self._source = PolarsSource(

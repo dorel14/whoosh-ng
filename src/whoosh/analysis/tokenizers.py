@@ -30,6 +30,9 @@ from whoosh.util.text import rcompile
 
 default_pattern = rcompile(r"[\w\*]+(\.?[\w\*]+)*")
 
+_DEFAULT_PATTERN_STR = r"[\w\*]+(\.?[\w\*]+)*"
+_DEFAULT_COMPILED = rcompile(_DEFAULT_PATTERN_STR)
+
 
 # Tokenizers
 
@@ -95,7 +98,12 @@ class RegexTokenizer(Tokenizer):
             than matching on the expression.
         """
 
-        self.expression = rcompile(expression)
+        if expression is default_pattern or expression == _DEFAULT_PATTERN_STR:
+            self.expression = _DEFAULT_COMPILED
+            self._uses_global = True
+        else:
+            self.expression = rcompile(expression)
+            self._uses_global = False
         self.gaps = gaps
 
     def __eq__(self, other):
@@ -389,9 +397,19 @@ class CachedRegexTokenizer(Tokenizer):
     def __repr__(self):
         return f"{self.__class__.__name__}({self._inner!r})"
 
-    def __call__(self, value, positions=False, chars=False, keeporiginal=False,
-                 removestops=True, start_pos=0, start_char=0,
-                 tokenize=True, mode="", **kwargs):
+    def __call__(
+        self,
+        value,
+        positions=False,
+        chars=False,
+        keeporiginal=False,
+        removestops=True,
+        start_pos=0,
+        start_char=0,
+        tokenize=True,
+        mode="",
+        **kwargs,
+    ):
         assert isinstance(value, str), f"{value!r} is not unicode"
 
         if not tokenize:

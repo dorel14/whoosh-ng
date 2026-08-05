@@ -115,10 +115,7 @@ class TestStreamBatches:
 class TestDataSourceStreamBatches:
     def test_csv_stream_batches(self):
         csv_path = (
-            Path(__file__).parent.parent.parent
-            / "benchmark"
-            / "Datas"
-            / "customers-2000000.csv"
+            Path(__file__).parent.parent.parent / "benchmark" / "Datas" / "customers-2000000.csv"
         )
         if not csv_path.exists():
             pytest.skip("CSV benchmark file not available")

@@ -38,9 +38,7 @@ class SchemaOptimizationReport:
                         "current": current,
                         "suggested": suggested,
                         "confidence": confidence,
-                        "reason": self._reason(
-                            fieldname, fieldobj, usage, suggested
-                        ),
+                        "reason": self._reason(fieldname, fieldobj, usage, suggested),
                     }
                 )
         self._suggestions = suggestions

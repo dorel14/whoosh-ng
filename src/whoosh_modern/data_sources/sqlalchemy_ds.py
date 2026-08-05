@@ -88,17 +88,13 @@ class SQLAlchemySource:
         self._schema = Schema(**type_map)
         return self._schema
 
-    def _build_type_map(
-        self, inspector: Any, dialect: Any, columns: list[str]
-    ) -> dict[str, Any]:
+    def _build_type_map(self, inspector: Any, dialect: Any, columns: list[str]) -> dict[str, Any]:
         """Build Whoosh field types from SQLAlchemy column types."""
         type_map: dict[str, Any] = {}
         for col_name in columns:
             try:
                 col_info = inspector.get_columns(self._get_table_name())
-                col_type = next(
-                    (c["type"] for c in col_info if c["name"] == col_name), None
-                )
+                col_type = next((c["type"] for c in col_info if c["name"] == col_name), None)
                 if col_type is not None:
                     type_map[col_name] = self._map_sqlalchemy_type(col_type, dialect)
                 else:

@@ -117,9 +117,7 @@ class GraphQLSource:
         result = dict(self.headers)
         if isinstance(self.auth, dict):
             if self.auth.get("type") == "bearer":
-                result["Authorization"] = (
-                    f"Bearer {self.auth.get('token')}"
-                )
+                result["Authorization"] = f"Bearer {self.auth.get('token')}"
             elif self.auth.get("api_key"):
                 result["X-API-Key"] = self.auth["api_key"]
         return result

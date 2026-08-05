@@ -95,7 +95,6 @@ class AutoCacheAdvisor:
             )
         lines.append("")
         lines.append(
-            "Recommended fields: "
-            + ", ".join(recommendations.get("recommended_fields", []))
+            "Recommended fields: " + ", ".join(recommendations.get("recommended_fields", []))
         )
         return "\n".join(lines)

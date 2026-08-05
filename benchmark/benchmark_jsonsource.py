@@ -11,9 +11,7 @@ pytest.importorskip("pytest_benchmark")
 from whoosh_modern.data_sources.json import JSONSource
 
 BENCHMARK_DIR = Path(__file__).parent
-JSON_PATH = (
-    BENCHMARK_DIR / "Datas" / "all_latest" / "2026-07-31_053230-data.gouv_local.json"
-)
+JSON_PATH = BENCHMARK_DIR / "Datas" / "all_latest" / "2026-07-31_053230-data.gouv_local.json"
 
 
 class BenchmarkJSONSource:

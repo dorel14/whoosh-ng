@@ -90,13 +90,8 @@ class FieldProfiler:
             pct = (elapsed / total_time * 100) if total_time > 0 else 0.0
             bar = "#" * int(pct / 2)
             avg_us = (elapsed / count * 1_000_000) if count > 0 else 0.0
-            lines.append(
-                f"  {field_name:<20} ... {elapsed:>8.3f}s  "
-                f"({pct:5.1f}%) {bar}"
-            )
-            lines.append(
-                f"    docs={count}, tokens={tokens}, avg={avg_us:.1f}us/doc"
-            )
+            lines.append(f"  {field_name:<20} ... {elapsed:>8.3f}s  ({pct:5.1f}%) {bar}")
+            lines.append(f"    docs={count}, tokens={tokens}, avg={avg_us:.1f}us/doc")
 
         lines.append("-" * 60)
         lines.append(f"  Total fields: {len(self._field_times)}")

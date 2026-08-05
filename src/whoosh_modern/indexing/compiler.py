@@ -68,9 +68,7 @@ class CompiledDataSource:
 
         return mapper
 
-    def stream_batches(
-        self, batch_size: int = 1000
-    ) -> Any:
+    def stream_batches(self, batch_size: int = 1000) -> Any:
         """Return an optimized batch iterator.
 
         Uses the data source's native stream_batches if available,
@@ -80,9 +78,7 @@ class CompiledDataSource:
             return self._source.stream_batches(batch_size=batch_size)
         return self._default_stream_batches(batch_size)
 
-    def _default_stream_batches(
-        self, batch_size: int
-    ) -> Any:
+    def _default_stream_batches(self, batch_size: int) -> Any:
         """Default batch streaming using iter_documents."""
         batch: list[dict[str, Any]] = []
         for doc in self._source.iter_documents():
