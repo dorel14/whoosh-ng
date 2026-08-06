@@ -70,7 +70,7 @@ class InternalStemmerProvider:
             return porter.stem
         except ImportError:
             try:
-                from whoosh.analysis import stem
+                from whoosh.analysis import stem  # type: ignore[attr-defined]
 
                 return cast(Callable[[str], str], stem)
             except ImportError:
@@ -189,6 +189,7 @@ def _auto_detect(language: str = "english") -> StemmerProvider:
     try:
         import Stemmer
 
+        _ = Stemmer  # mark as used for type checkers
         logger.info(f"Auto-detected PyStemmer for {language}")
         return PyStemmerProvider(language)
     except ImportError:
@@ -214,6 +215,7 @@ def _is_pystemmer_available() -> bool:
     try:
         import Stemmer
 
+        _ = Stemmer  # mark as used for type checkers
         return True
     except ImportError:
         return False

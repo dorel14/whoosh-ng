@@ -14,7 +14,6 @@ from collections.abc import Iterable
 from typing import Any
 
 from whoosh.analysis.acore import Token
-from whoosh.analysis.tokenizers import RegexTokenizer
 
 
 class FastAnalyzerPipeline:
@@ -39,7 +38,7 @@ class FastAnalyzerPipeline:
         if self._last_token is None:
             self._last_token = Token()
         for token in self._tokenizer(value, **kwargs):
-            reuse = self._last_token
+            reuse: Token = self._last_token
             reuse.text = token.text
             reuse.boost = token.boost
             reuse.original = getattr(token, "original", token.text)

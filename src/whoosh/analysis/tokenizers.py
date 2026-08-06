@@ -176,17 +176,17 @@ class RegexTokenizer(Tokenizer):
                 if text:
                     t.text = text
                     t.boost = 1.0
-                    if keeporiginal:
-                        t.original = t.text
-                    t.stopped = False
-                    if positions:
-                        t.pos = pos
-                        pos += 1
-                    if chars:
-                        t.startchar = start_char + start
-                        t.endchar = start_char + end
+                if keeporiginal:
+                    t.original = t.text
+                t.stopped = False
+                if positions:
+                    t.pos = pos
+                    pos += 1
+                if chars:
+                    t.startchar = start_char + start
+                    t.endchar = start_char + end
 
-                    yield t
+                yield t
 
                 prevend = match.end()
 
@@ -460,7 +460,7 @@ class CachedRegexTokenizer(Tokenizer):
             cached = cache[value]
 
         for idx, item in enumerate(cached):
-            text, boost, original, pos, startchar, endchar = item
+            text, boost, original, _pos, startchar, endchar = item
             t = Token(positions, chars, removestops=removestops, mode=mode, **kwargs)
             t.text = text
             t.boost = boost

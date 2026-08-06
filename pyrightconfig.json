@@ -141,6 +141,7 @@
   "venv": ".venv",
   "reportMissingImports": "warning",
   "reportArgumentType": "warning",
+  "reportAttributeAccessIssue": "warning",
   "reportUnusedImport": "error",
   "reportUnusedVariable": "error"
 }

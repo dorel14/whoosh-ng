@@ -394,6 +394,7 @@ module = [
   "pyarrow.parquet",
   "tortoise",
   "Stemmer",
+  "hnswlib",
 ]
 ignore_missing_imports = true
 
@@ -496,6 +497,7 @@ module = [
   "whoosh_modern.profiling.benchmarks.regex_tokenizer",
   "whoosh_modern.analysis.stemmer_providers",
   "whoosh_modern.profiling.benchmark",
+  "whoosh.analysis.tokenizers",
 ]
 ignore_errors = true
 

@@ -41,7 +41,6 @@ from whoosh_modern.middleware import (
 )
 from whoosh_modern.profiling import (
     AnalyzerCache,
-    AnalyzerComparator,
     AnalyzerStepProfiler,
     AutoCacheAdvisor,
     BatchSizeOptimizer,
