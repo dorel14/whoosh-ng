@@ -392,9 +392,6 @@ module = [
   "psutil",
   "re2",
   "Stemmer",
-  "setuptools",
-  "sphinx_rtd_theme",
-  "hnswlib",
 ]
 ignore_missing_imports = true
 
@@ -493,6 +490,10 @@ module = [
   "whoosh_modern.facets",
   "whoosh_modern.validation",
   "whoosh_modern.models",
+  "whoosh_modern.profiling.memory",
+  "whoosh_modern.profiling.benchmarks.regex_tokenizer",
+  "whoosh_modern.analysis.stemmer_providers",
+  "whoosh_modern.profiling.benchmark",
 ]
 ignore_errors = true
 

@@ -6,7 +6,6 @@ from typing import Any
 
 from whoosh.fields import Schema
 from whoosh_modern.exceptions import DataSourceError
-from whoosh_modern.schema_discovery import SchemaDiscovery
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +59,7 @@ class SQLAlchemySource:
 
     def discover_schema(self) -> Schema:
         """Discover schema from query result metadata using SQLAlchemy."""
-        from sqlalchemy import inspect, text
+        from sqlalchemy import inspect, text  # type: ignore[import-not-found]
 
         if self._schema is not None:
             return self._schema
@@ -116,7 +115,7 @@ class SQLAlchemySource:
         """Map SQLAlchemy type to Whoosh field."""
         from sqlalchemy import BigInteger, Boolean, Date, DateTime, Float, Integer, String
 
-        from whoosh.fields import BOOLEAN, DATETIME, ID, NUMERIC, TEXT
+        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
 
         type_name = type(col_type).__name__.lower()
 
@@ -125,7 +124,7 @@ class SQLAlchemySource:
         if isinstance(col_type, (Integer, BigInteger)):
             return NUMERIC(int, stored=True)
         if isinstance(col_type, Float):
-            return NUMERIC(float, stored=True)
+            return NUMERIC(float, stored=True)  # type: ignore[arg-type]
         if isinstance(col_type, Boolean):
             return BOOLEAN(stored=True)
         if isinstance(col_type, (Date, DateTime)):
@@ -135,7 +134,7 @@ class SQLAlchemySource:
 
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the SQLAlchemy query."""
-        from sqlalchemy import text
+        from sqlalchemy import text  # type: ignore[import-not-found]
 
         with self._engine.connect() as conn:
             stmt = text(self.query)
@@ -148,7 +147,7 @@ class SQLAlchemySource:
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp using SQLAlchemy."""
-        from sqlalchemy import text
+        from sqlalchemy import text  # type: ignore[import-not-found]
 
         if not self.incremental_field:
             return
@@ -170,7 +169,7 @@ class SQLAlchemySource:
 
     def document_count(self) -> int:
         """Return total document count using SQLAlchemy."""
-        from sqlalchemy import text
+        from sqlalchemy import text  # type: ignore[import-not-found]
 
         count_query = f"SELECT COUNT(*) FROM ({self.query}) AS count_query"
         with self._engine.connect() as conn:

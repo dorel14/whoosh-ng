@@ -131,7 +131,7 @@ class AnalyzerCache:
         :returns: configured AnalyzerCache instance
         """
         fields_data = cache_analysis.get("fields", {})
-        total_unique = cache_analysis.get("total_unique_values", 0)
+        _total_unique = cache_analysis.get("total_unique_values", 0)
 
         if not fields_data:
             return cls(maxsize=maxsize)

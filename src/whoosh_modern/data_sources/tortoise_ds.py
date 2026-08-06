@@ -4,8 +4,6 @@ import logging
 from collections.abc import Iterator, Mapping
 from typing import Any
 
-from whoosh_modern.exceptions import DataSourceError
-
 logger = logging.getLogger(__name__)
 
 Document = Mapping[str, Any]
@@ -47,7 +45,7 @@ class TortoiseSource:
         try:
             from tortoise import Tortoise
 
-            return Tortoise.is_inited()
+            return Tortoise.is_inited()  # type: ignore[no-any-return]
         except Exception:
             return False
 
@@ -67,7 +65,7 @@ class TortoiseSource:
 
     def _map_tortoise_field(self, field: Any) -> Any:
         """Map Tortoise ORM field to Whoosh field."""
-        from whoosh.fields import BOOLEAN, DATETIME, ID, NUMERIC, TEXT
+        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
 
         field_type = type(field).__name__.lower()
 
@@ -76,7 +74,7 @@ class TortoiseSource:
         if "int" in field_type or "bigint" in field_type:
             return NUMERIC(int, stored=True)
         if "float" in field_type or "decimal" in field_type:
-            return NUMERIC(float, stored=True)
+            return NUMERIC(float, stored=True)  # type: ignore[arg-type]
         if "bool" in field_type:
             return BOOLEAN(stored=True)
         if "date" in field_type or "time" in field_type or "datetime" in field_type:
@@ -95,7 +93,7 @@ class TortoiseSource:
 
         coro = self._fetch_all()
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
         except RuntimeError:
             docs = asyncio.run(coro)
         else:
@@ -119,7 +117,7 @@ class TortoiseSource:
 
         coro = _count()
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
         except RuntimeError:
             return asyncio.run(coro)
         else:

@@ -28,7 +28,7 @@ def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -
     :param args: tuple of (temp_dir, schema, docs, docbase)
     :returns: path to the written segment directory
     """
-    temp_dir, schema, docs, docbase = args
+    temp_dir, schema, docs, _docbase = args
     ix = create_in(temp_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
     try:

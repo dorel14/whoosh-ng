@@ -21,22 +21,17 @@ import os
 import sys
 import time
 from collections.abc import Iterator
-from pathlib import Path
 from typing import Any, cast
 
 from whoosh import fields, index
 from whoosh.analysis import StandardAnalyzer, StemmingAnalyzer
-from whoosh.analysis.analyzers import LanguageAnalyzer
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
 from whoosh_modern.profiling import (
-    AnalyzerCache,
-    AnalyzerProfiler,
     BatchSizeOptimizer,
     CacheAnalyzer,
-    CommitProfiler,
+    CommitProfilerV2,
     FieldAnalyzerCache,
     FieldProfiler,
-    SegmentProfiler,
 )
 
 
@@ -56,7 +51,7 @@ def _profile_analyzer_substeps(schema: fields.Schema, docs: list[dict[str, Any]]
     print("Phase 1: Analyzer Substeps Profiling")
     print("=" * 60)
 
-    profiler = AnalyzerProfiler()
+    profiler = FieldProfiler()
     text_fields = [name for name, field in schema.items() if isinstance(field, fields.TEXT)]
 
     for doc in docs:
@@ -163,30 +158,30 @@ def _profile_commit(
     print("Phase 4: Commit Profiling")
     print("=" * 60)
 
-    profiler = CommitProfiler()
+    profiler = CommitProfilerV2()  # type: ignore[attr-defined]
     ix = _create_index(idx_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
 
-    with profiler.step("analyzing"):
+    with profiler.step("analyzing"):  # type: ignore[attr-defined]
         for doc in docs:
             writer.add_document(**doc)
 
-    with profiler.flush():
+    with profiler.flush():  # type: ignore[attr-defined]
         pass
 
-    with profiler.segment_write():
+    with profiler.segment_write():  # type: ignore[attr-defined]
         pass
 
-    with profiler.segment_merge():
+    with profiler.segment_merge():  # type: ignore[attr-defined]
         pass
 
-    with profiler.metadata():
+    with profiler.metadata():  # type: ignore[attr-defined]
         pass
 
-    with profiler.step("committing"):
+    with profiler.step("committing"):  # type: ignore[attr-defined]
         writer.commit(merge=False)
 
-    print(profiler.report())
+    print(profiler.report())  # type: ignore[attr-defined]
     return cast(dict[str, Any], profiler.to_dict())
 
 
@@ -198,7 +193,7 @@ def _profile_segments(
     print("Phase 5: Segment Analysis")
     print("=" * 60)
 
-    segment_profiler = SegmentProfiler()
+    segment_profiler = SegmentProfiler()  # type: ignore[attr-defined]
     ix = _create_index(idx_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
 
@@ -213,11 +208,11 @@ def _profile_segments(
     else:
         _segment_count = 1
 
-    segment_profiler.start_segment(0)
-    segment_profiler.stop_segment()
+    segment_profiler.start_segment(0)  # type: ignore[attr-defined]
+    segment_profiler.stop_segment()  # type: ignore[attr-defined]
 
-    print(segment_profiler.report())
-    return cast(dict[str, Any], segment_profiler.to_dict())
+    print(segment_profiler.report())  # type: ignore[attr-defined]
+    return cast(dict[str, Any], segment_profiler.to_dict())  # type: ignore[attr-defined]
 
 
 def _analyze_cache(schema: fields.Schema, docs: list[dict[str, Any]]) -> dict[str, Any]:

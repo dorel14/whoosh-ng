@@ -100,7 +100,7 @@ class PyStemmerProvider:
     def _load_stemmer(self, language: str):
         """Load PyStemmer for the given language."""
         try:
-            import Stemmer  # type: ignore[import-not-found]
+            import Stemmer
 
             return Stemmer.Stemmer(language)
         except ImportError:

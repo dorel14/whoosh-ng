@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from whoosh.index import Index
@@ -47,7 +47,7 @@ class LogMergePolicy(MergePolicy):
         segments = getattr(index, "_segments", None)
         if callable(segments):
             segments = segments()
-        return len(segments or []) >= self.max_segments
+        return len(cast(list[Any], segments or [])) >= self.max_segments
 
     def merge_kwargs(self, index: Index, **kwargs: object) -> dict[str, object]:
         return {"merge": True}
@@ -73,7 +73,7 @@ class TieredMergePolicy(MergePolicy):
         segments = getattr(index, "_segments", None)
         if callable(segments):
             segments = segments()
-        return len(segments or []) >= self.max_segments
+        return len(cast(list[Any], segments or [])) >= self.max_segments
 
     def merge_kwargs(self, index: Index, **kwargs: object) -> dict[str, object]:
         return {"merge": True}

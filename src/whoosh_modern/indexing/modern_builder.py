@@ -25,7 +25,6 @@ Example::
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
 from concurrent.futures import Future, ProcessPoolExecutor
 from typing import Any
 
@@ -161,7 +160,7 @@ def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -
     """Worker function that builds a single segment in a separate process."""
     from whoosh.index import create_in
 
-    temp_dir, schema, docs, docbase = args
+    temp_dir, schema, docs, _docbase = args
     ix = create_in(temp_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
     try:

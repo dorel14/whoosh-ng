@@ -57,7 +57,7 @@ class CompiledDataSource:
 
     def _default_mapper(self) -> DocumentMapper:
         """Return a default mapper that passes through dicts."""
-        source = self._source
+        _source = self._source
 
         def mapper(row: Any) -> dict[str, Any]:
             if hasattr(row, "to_dict"):
