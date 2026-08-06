@@ -404,12 +404,7 @@ module = [
   "pyarrow.parquet",
   "tortoise",
   "Stemmer",
-  "pytest",
-  "peewee",
-  "httpx",
   "lmdb",
-  "re2",
-  "psutil",
 ]
 ignore_missing_imports = true
 
