@@ -405,6 +405,11 @@ module = [
   "tortoise",
   "Stemmer",
   "lmdb",
+  "pytest",
+  "peewee",
+  "httpx",
+  "re2",
+  "psutil",
 ]
 ignore_missing_imports = true
 
