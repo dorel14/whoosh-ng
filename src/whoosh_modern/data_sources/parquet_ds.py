@@ -65,8 +65,8 @@ class ParquetSource:
             import pandas as pd
 
             if sample:
-                return pd.read_parquet(self.path, engine=self.engine).head(self.sample_size)  # type: ignore[call-overload]
-            return pd.read_parquet(self.path, engine=self.engine)  # type: ignore[call-overload]
+                return pd.read_parquet(self.path, engine=self.engine).head(self.sample_size)
+            return pd.read_parquet(self.path, engine=self.engine)
         except ImportError:
             pass
 

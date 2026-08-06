@@ -394,7 +394,6 @@ module = [
   "pyarrow.parquet",
   "tortoise",
   "Stemmer",
-  "hnswlib",
 ]
 ignore_missing_imports = true
 
