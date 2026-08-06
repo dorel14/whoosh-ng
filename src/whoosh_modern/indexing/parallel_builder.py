@@ -113,7 +113,7 @@ class ParallelIndexBuilder:
             writer.cancel()
             raise
 
-        total = sum(len(batch) for batch in batches if False)
+        return sum(len(batch) for batch in batches)
         return total
 
     def build_from_source(self, source: DataSource) -> int:
