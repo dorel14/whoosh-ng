@@ -568,7 +568,7 @@ exclude_lines = [
 
 [tool.semantic_release]
 commit_parser = "conventional"
-commit_parser_options = { ignore_merge_commits = true }
+commit_parser_options = { }
 commit_message = """\
 chore(release): v{version} [skip ci]
 
