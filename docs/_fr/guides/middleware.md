@@ -152,3 +152,7 @@ class ResilientMiddleware(Middleware):
 3. **L'ordre compte**: Placez le cache avant les métriques, l'auth avant le routage
 4. **Performance**: Gardez les hooks légers; utilisez async pour les I/O
 5. **Testabilité**: Mockez le contexte pour tester le middleware isolément
+
+## Middleware Moderne (Whoosh-NG 2.0)
+
+Whoosh-NG 2.0 ajoute un package middleware moderne (`whoosh_modern.middleware`) avec un middleware de résilience de type wrapper (réessaissance, cache, journalisation) et un middleware basé sur des hooks pour le stockage, la recherche et l'analyse. Pour plus de détails sur l'architecture moderne du middleware, l'intégration de plugins et le déploiement, consultez le [Guide Middleware & Pipeline de Plugins](middleware-sprint-c.md).

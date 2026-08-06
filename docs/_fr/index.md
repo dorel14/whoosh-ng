@@ -43,11 +43,17 @@ with ix.searcher() as s:
 - **[Indexation]({{ '/fr/guides/indexing/' | relative_url }})** — Ajouter, mettre à jour et supprimer des documents
 - **[Recherche]({{ '/fr/guides/searching/' | relative_url }})** — Analyse de requêtes, surbrillance et facettes
 - **[Conception de schéma]({{ '/fr/guides/schema/' | relative_url }})** — Types de champs, stockage et options d'indexation
-- **[Middleware]({{ '/fr/guides/middleware/' | relative_url }})** — Hooks de pipeline et middleware personnalisé
-- **[Plugins]({{ '/fr/guides/plugins/' | relative_url }})** — Étendre Whoosh-NG avec des plugins
+    - **[Middleware]({{ '/fr/guides/middleware/' | relative_url }})** — Hooks de pipeline et middleware personnalisé
+    - **[Middleware & Pipeline de Plugins]({{ '/fr/guides/middleware-sprint-c/' | relative_url }})** — Hooks de middleware et intégration PluginManager
+    - **[Plugins]({{ '/fr/guides/plugins/' | relative_url }})** — Étendre Whoosh-NG avec des plugins
+    - **[Système de Plugins]({{ '/fr/guides/plugins-sprint-c/' | relative_url }})** — API PluginManager, entry points et déploiement
+    - **[Autocomplétion]({{ '/fr/guides/autocomplete/' | relative_url }})** — Fournisseurs d'autocomplétion
+    - **[Fournisseurs d'Autocomplétion]({{ '/fr/guides/autocomplete-sprint-d/' | relative_url }})** — NGramProvider, FuzzySuggestProvider, InvertedIndexAutocomplete
     - **[Recherche vectorielle]({{ '/fr/guides/vector/' | relative_url }})** — Intégration NumPy, HNSW et Faiss
     - **[Performance]({{ '/fr/guides/performance/' | relative_url }})** — Outils de benchmarking et résultats d'optimisation
     - **[Indexation moderne]({{ '/fr/guides/modern-indexing/' | relative_url }})** — BatchIndexWriter, AnalyzerCache, FieldAnalyzerCache
+    - **[Synonymes & Linguistique]({{ '/fr/guides/linguistics-sprint-d/' | relative_url }})** — SynonymManager, fournisseurs, middleware
+    - **[Fournisseurs de Stemmers]({{ '/fr/guides/stemming-sprint-d/' | relative_url }})** — Backends de stemmers, PyStemmer, analyseurs linguistiques
 
 ### API Reference
 

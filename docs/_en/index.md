@@ -34,15 +34,16 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[Schema Design]({{ '/en/guides/schema/' | relative_url }})** — Field types, storage, and indexing options
 - **[Query Language]({{ '/en/guides/query/' | relative_url }})** — Lucene-like query syntax
 - **[Middleware]({{ '/en/guides/middleware/' | relative_url }})** — Pipeline hooks and custom middleware
+- **[Middleware & Plugin Pipeline]({{ '/en/guides/middleware-sprint-c/' | relative_url }})** — Hook-based middleware and PluginManager integration
 - **[Backends]({{ '/en/guides/backends/' | relative_url }})** — File, SQLite, and memory storage
 - **[Plugins]({{ '/en/guides/plugins/' | relative_url }})** — Extending Whoosh-NG with plugins
+- **[Plugin System]({{ '/en/guides/plugins-sprint-c/' | relative_url }})** — PluginManager API, entry points, and deployment
 - **[Autocomplete]({{ '/en/guides/autocomplete/' | relative_url }})** — Autocomplete providers
+- **[Autocomplete Providers]({{ '/en/guides/autocomplete-sprint-d/' | relative_url }})** — NGramProvider, FuzzySuggestProvider, InvertedIndexAutocomplete
 - **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, and Faiss integration
 - **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
-- **[Performance Benchmarking]({{ '/en/guides/performance/' | relative_url }})** — Benchmark tools and optimization results
-- **[Modern Indexing API]({{ '/en/guides/modern-indexing/' | relative_url }})** — BatchIndexWriter, AnalyzerCache, FieldAnalyzerCache
-- **[Dates and Numeric Ranges]({{ '/en/guides/dates/' | relative_url }})** — Date and numeric range queries
-- **[Nested Documents]({{ '/en/guides/nested/' | relative_url }})** — Parent-child document relationships
+- **[Linguistics & Synonyms]({{ '/en/guides/linguistics-sprint-d/' | relative_url }})** — SynonymManager, providers, middleware
+- **[Stemmer Providers]({{ '/en/guides/stemming-sprint-d/' | relative_url }})** — Stemmer backends, PyStemmer, language analyzers
 - **[Stemming and Stop Words]({{ '/en/guides/stemming/' | relative_url }})** — Language stemmers and stop-word lists
 - **[N-grams]({{ '/en/guides/ngrams/' | relative_url }})** — N-gram tokenization and substring search
 - **[Glossary]({{ '/en/guides/glossary/' | relative_url }})** — Key terms and definitions
