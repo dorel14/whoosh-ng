@@ -367,6 +367,7 @@ cache_dir = ".mypy_cache"
 reportMissingImports = "warning"
 reportArgumentType = "warning"
 reportAttributeAccessIssue = "warning"
+reportAssignmentType = "warning"
 
 [[tool.mypy.overrides]]
 module = [
