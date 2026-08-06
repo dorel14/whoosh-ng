@@ -4,7 +4,7 @@ import logging
 import os
 from collections.abc import Iterator, Mapping
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Literal
 
 from whoosh.fields import Schema
 from whoosh_modern.exceptions import DataSourceError
@@ -40,7 +40,7 @@ class ParquetSource:
         incremental_field: str | None = None,
         id_field: str | None = None,
         sample_size: int = 5,
-        engine: str = "auto",
+        engine: Literal["auto", "fastparquet", "pyarrow"] = "auto",
     ) -> None:
         self.path = path
         self.incremental_field = incremental_field

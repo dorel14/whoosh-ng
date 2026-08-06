@@ -1,7 +1,7 @@
 """DataSource configuration DSL and factory."""
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
 from whoosh_modern.data_sources.graphql import GraphQLSource
@@ -44,7 +44,7 @@ class DataSourceConfig:
     page_size: int = 100
     timeout: int = 30
     sample_size: int = 5
-    engine: str = "auto"
+    engine: Literal["auto", "fastparquet", "pyarrow"] = "auto"
 
     def create(self) -> Any:
         """Create a DataSource instance from this configuration.

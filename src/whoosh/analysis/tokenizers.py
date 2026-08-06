@@ -348,7 +348,7 @@ def CommaSeparatedTokenizer():
 
 class PathTokenizer(Tokenizer):
     """A simple tokenizer that given a string ``"/a/b/c"`` yields tokens
-    ``["/a", "/a/b", "/a/c"]``.
+    ``["/a", "/a/b", "/a/b/c"]``.
     """
 
     def __init__(self, expression="[^/]+"):
