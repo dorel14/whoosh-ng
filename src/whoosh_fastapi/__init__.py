@@ -1,8 +1,8 @@
 """FastAPI plugin for Whoosh-NG.
 
-Provides HTTP endpoints for search, autocomplete, and health checks. All blocking
-core calls are executed off the event loop via :func:`whoosh.utils.async_utils.run_sync`
-so the async server stays responsive.
+Provides HTTP endpoints for search, autocomplete, suggest, health, and metrics.
+All blocking core calls are executed off the event loop via
+:func:`whoosh.utils.async_utils.run_sync` so the async server stays responsive.
 """
 
 from __future__ import annotations
@@ -15,6 +15,32 @@ from whoosh.utils.async_utils import run_sync
 try:
     from fastapi import FastAPI  # pyright: ignore[reportMissingImports]
     from fastapi.responses import JSONResponse  # pyright: ignore[reportMissingImports]
+    from pydantic import BaseModel  # pyright: ignore[reportMissingImports]
+
+    class SearchRequest(BaseModel):
+        """Request model for search endpoint."""
+
+        q: str
+        limit: int = 10
+        offset: int = 0
+
+    class SearchResponse(BaseModel):
+        """Response model for search endpoint."""
+
+        hits: list[dict[str, Any]]
+        total: int
+        limit: int
+        offset: int
+
+    class AutocompleteResponse(BaseModel):
+        """Response model for autocomplete endpoint."""
+
+        suggestions: list[str]
+
+    class HealthResponse(BaseModel):
+        """Response model for health endpoint."""
+
+        status: str
 
     def _run_search(index: Index, query: str, **kwargs: Any) -> tuple[list[dict[str, Any]], int]:
         from whoosh.qparser import QueryParser
@@ -44,25 +70,45 @@ try:
         """
         app = FastAPI(title="Whoosh-NG API", version="4.0.0")
 
-        @app.get(f"{prefix}/health")
+        @app.get(f"{prefix}/health", response_model=HealthResponse)
         async def health_check() -> dict[str, str]:
             return {"status": "ok"}
 
-        @app.post(f"{prefix}/search")
-        async def search_endpoint(query: dict[str, Any]) -> JSONResponse:
-            q = query.get("q", "")
-            kwargs = {k: v for k, v in query.items() if k != "q"}
-            hits, total = await run_sync(_run_search, index, q, **kwargs)
-            return JSONResponse({"hits": hits, "total": total})
+        @app.post(f"{prefix}/search", response_model=SearchResponse)
+        async def search_endpoint(request: SearchRequest) -> dict[str, Any]:
+            kwargs: dict[str, Any] = {"limit": request.limit}
+            hits, total = await run_sync(_run_search, index, request.q, **kwargs)
+            return {"hits": hits, "total": total, "limit": request.limit, "offset": request.offset}
 
-        @app.get(f"{prefix}/autocomplete")
+        @app.get(f"{prefix}/autocomplete", response_model=AutocompleteResponse)
         async def autocomplete_endpoint(q: str) -> dict[str, Any]:
             if autocomplete is None:
                 return {"suggestions": []}
             hits = autocomplete.search(q, limit=10)
             return {"suggestions": [hit.text for hit in hits]}
 
+        @app.get(f"{prefix}/suggest")
+        async def suggest_endpoint(q: str) -> dict[str, Any]:
+            try:
+                from whoosh.spelling import suggest  # noqa: F401
+
+                with index.searcher() as searcher:
+                    suggestions = searcher.suggest(q)
+                    return {"suggestions": suggestions}
+            except Exception:
+                return {"suggestions": []}
+
         return app
+
+    def mount(app: FastAPI, index: Index, *, prefix: str = "/api/v1") -> None:
+        """Mount Whoosh-NG API routes onto an existing FastAPI application.
+
+        :param app: Existing FastAPI application
+        :param index: Index instance to expose
+        :param prefix: API endpoint prefix (default: /api/v1)
+        """
+        api_app = create_app(index, prefix=prefix)
+        app.mount(prefix, api_app)
 
 except ImportError as exc:
     raise ImportError(
@@ -70,4 +116,4 @@ except ImportError as exc:
     ) from exc
 
 
-__all__ = ["create_app"]
+__all__ = ["create_app", "mount", "SearchRequest", "SearchResponse", "AutocompleteResponse", "HealthResponse"]
