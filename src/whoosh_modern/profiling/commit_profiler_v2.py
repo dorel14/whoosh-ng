@@ -187,6 +187,18 @@ class _CommitStep:
     def count(self) -> int:
         return self._count
 
+    def __enter__(self) -> _CommitStep:
+        self.start()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
+        self.stop()
+
 
 class CommitProfilerV2:
     """Detailed commit profiler using the writer ``callback`` hook.
@@ -217,6 +229,59 @@ class CommitProfilerV2:
         self._active = self._steps[name]
         self._active.start()
         return self._active
+
+    def step(self, name: str) -> _CommitStep:
+        """Start (and return) a named profiling step as a context manager.
+
+        Usage::
+
+            with profiler.step("analyzing"):
+                ...
+        """
+        return self._step(name)
+
+    def flush(self) -> _CommitStep:
+        """Context manager for the segment ``flush`` step.
+
+        Usage::
+
+            with profiler.flush():
+                ...
+        """
+        return self._step("flush")
+
+    def segment_write(self) -> _CommitStep:
+        """Context manager for the segment write step.
+
+        Measures the time spent physically writing a segment to disk
+        (postings, terms, vectors, etc.) as part of a commit.
+
+        Usage::
+
+            with profiler.segment_write():
+                ...
+        """
+        return self._step("segment_write")
+
+    def segment_merge(self) -> _CommitStep:
+        """Context manager for the ``segment_merge`` step.
+
+        Usage::
+
+            with profiler.segment_merge():
+                ...
+        """
+        return self._step("segment_merge")
+
+    def metadata(self) -> _CommitStep:
+        """Context manager for the TOC/metadata update step.
+
+        Usage::
+
+            with profiler.metadata():
+                ...
+        """
+        return self._step("metadata")
 
     def callback(self, stage: str, **kwargs: Any) -> None:
         """Callback compatible with ``SegmentWriter.commit(callback=...)``."""

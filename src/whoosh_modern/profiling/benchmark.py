@@ -158,30 +158,30 @@ def _profile_commit(
     print("Phase 4: Commit Profiling")
     print("=" * 60)
 
-    profiler = CommitProfilerV2()  # type: ignore[attr-defined]  # noqa: F821
+    profiler = CommitProfilerV2()
     ix = _create_index(idx_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
 
-    with profiler.step("analyzing"):  # type: ignore[attr-defined]
+    with profiler.step("analyzing"):
         for doc in docs:
             writer.add_document(**doc)
 
-    with profiler.flush():  # type: ignore[attr-defined]
+    with profiler.flush():
         pass
 
-    with profiler.segment_write():  # type: ignore[attr-defined]
+    with profiler.segment_write():
         pass
 
-    with profiler.segment_merge():  # type: ignore[attr-defined]
+    with profiler.segment_merge():
         pass
 
-    with profiler.metadata():  # type: ignore[attr-defined]
+    with profiler.metadata():
         pass
 
-    with profiler.step("committing"):  # type: ignore[attr-defined]
+    with profiler.step("committing"):
         writer.commit(merge=False)
 
-    print(profiler.report())  # type: ignore[attr-defined]
+    print(profiler.report())
     return cast(dict[str, Any], profiler.to_dict())
 
 
