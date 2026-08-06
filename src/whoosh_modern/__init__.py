@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from whoosh_modern.autocomplete import FuzzySuggestProvider, NGramProvider, create_autocomplete
 from whoosh_modern.data_sources import DataSource, ObservableDataSource
 from whoosh_modern.data_sources.config import DataSourceConfig
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
@@ -32,6 +33,22 @@ from whoosh_modern.indexing import (
     NoMergePolicy,
     ParallelIndexBuilder,
     TieredMergePolicy,
+)
+from whoosh_modern.linguistics import (
+    EnglishAnalyzer,
+    FrenchAnalyzer,
+    GermanAnalyzer,
+    ItalianAnalyzer,
+    JSONSynonymProvider,
+    LANG_SYNONYMS,
+    SQLiteSynonymStore,
+    StaticSynonymProvider,
+    SynonymCompiler,
+    SynonymExpansionMiddleware,
+    SynonymManager,
+    SynonymProvider,
+    SpanishAnalyzer,
+    YAMLSynonymProvider,
 )
 from whoosh_modern.middleware import (
     AnalyzerMiddleware,
@@ -102,11 +119,27 @@ __all__ = [
     "AnalyzerMiddleware",
     "StemmingMiddleware",
     "SynonymMiddleware",
+    "SynonymProvider",
+    "StaticSynonymProvider",
+    "YAMLSynonymProvider",
+    "JSONSynonymProvider",
+    "SQLiteSynonymStore",
+    "SynonymCompiler",
+    "SynonymManager",
+    "SynonymExpansionMiddleware",
+    "LANG_SYNONYMS",
+    "FrenchAnalyzer",
+    "EnglishAnalyzer",
+    "GermanAnalyzer",
+    "SpanishAnalyzer",
+    "ItalianAnalyzer",
+    "FuzzySuggestProvider",
+    "NGramProvider",
+    "create_autocomplete",
     "DataSourceError",
     "SchemaDiscoveryError",
     "DocumentIterationError",
     "ValidationError",
-    "DataSourceNotFoundError",
     "ModernIndex",
     "ModernIndexWriter",
     "BatchIndexWriter",
