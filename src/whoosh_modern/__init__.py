@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from whoosh_modern.application import FileStorage, SearchApplication
 from whoosh_modern.autocomplete import FuzzySuggestProvider, NGramProvider, create_autocomplete
 from whoosh_modern.data_sources import DataSource, ObservableDataSource
 from whoosh_modern.data_sources.config import DataSourceConfig
@@ -86,6 +87,8 @@ from whoosh_modern.views import SearchView
 from whoosh_modern.writer import ModernIndex, ModernIndexWriter
 
 __all__ = [
+    "SearchApplication",
+    "FileStorage",
     "DataSource",
     "ObservableDataSource",
     "SQLSource",
