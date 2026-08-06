@@ -35,10 +35,12 @@ class FastAnalyzerPipeline:
         self._last_token: Token | None = None
 
     def __call__(self, value: str, **kwargs: Any) -> Iterable[Token]:
-        if self._last_token is None:
-            self._last_token = Token()
+        last_token = self._last_token
+        if last_token is None:
+            last_token = Token()
+            self._last_token = last_token
         for token in self._tokenizer(value, **kwargs):
-            reuse: Token = self._last_token
+            reuse: Token = last_token
             reuse.text = token.text
             reuse.boost = token.boost
             reuse.original = getattr(token, "original", token.text)

@@ -139,6 +139,7 @@ class ParallelIndexBuilder:
                 # into a single index.
                 segment_ix = open_dir(segment_dir)
                 segment_reader = segment_ix.reader()
+                assert segment_reader is not None
                 try:
                     writer.add_reader(segment_reader)
                 finally:

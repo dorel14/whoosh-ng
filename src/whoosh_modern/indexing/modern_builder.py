@@ -151,6 +151,7 @@ class ModernIndexBuilder:
                 segment_ix = open_dir(segment_dir)
                 try:
                     segment_reader = segment_ix.reader()
+                    assert segment_reader is not None
                     try:
                         writer.add_reader(segment_reader)
                     finally:
