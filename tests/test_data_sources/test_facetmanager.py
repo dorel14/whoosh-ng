@@ -3,12 +3,7 @@
 import pytest
 
 from whoosh.fields import BOOLEAN, DATETIME, KEYWORD, NUMERIC, TEXT, Schema
-from whoosh_modern.facets import (
-    DateRangeFacet,
-    FacetManager,
-    RangeFacet,
-    TermsFacet,
-)
+from whoosh_modern.facets import DateRangeFacet, FacetManager, RangeFacet, TermsFacet
 
 
 class TestFacetManager:

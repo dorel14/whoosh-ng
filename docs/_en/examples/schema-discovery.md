@@ -48,6 +48,18 @@ id_field = SchemaDiscovery.detect_id_field(dict(schema))
 # Returns "id" if an ID field is found, otherwise None
 ```
 
+### Optimized Schema Discovery
+
+```python
+# Infer schema with optimization rules applied
+# - drops non-searchable TEXT fields
+# - converts TEXT fields ending in "id" to ID
+# - converts boolean-like TEXT fields to BOOLEAN
+schema = SchemaDiscovery.from_sample_optimized(
+    docs, searchable_text=["title", "content"]
+)
+```
+
 ## SQL Type Mapping
 
 | SQL Type | Whoosh Field |

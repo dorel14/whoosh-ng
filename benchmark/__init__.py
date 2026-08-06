@@ -24,6 +24,9 @@ See each spec file for details on what it benchmarks.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from typing import Any
+
 from whoosh.support.bench import Spec
 
 
@@ -63,3 +66,25 @@ class WhooshLikeSpec(Spec):
         Must be overridden by subclasses.
         """
         raise NotImplementedError("subclasses must implement documents()")
+
+    def batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield batches of document dicts for efficient bulk indexing.
+
+        Default implementation groups :meth:`documents` into lists of
+        ``batch_size``. Subclasses should override this when they can
+        read batches natively (e.g. from a DataSource with
+        ``stream_batches()``).
+        """
+        source = getattr(self, "_source", None)
+        if source is not None and hasattr(source, "stream_batches"):
+            yield from source.stream_batches(batch_size=batch_size)
+            return
+
+        batch: list[dict[str, Any]] = []
+        for doc in self.documents():
+            batch.append(doc)
+            if len(batch) >= batch_size:
+                yield batch
+                batch = []
+        if batch:
+            yield batch

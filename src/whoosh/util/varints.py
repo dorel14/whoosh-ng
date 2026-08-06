@@ -101,3 +101,21 @@ def read_varint(readfn: Callable[[int], bytes]) -> int:
         i |= (b & 0x7F) << shift
         shift += 7
     return i
+
+
+def read_varint_at(data: bytes, pos: int) -> tuple[int, int]:
+    """Read a varint from ``data`` starting at ``pos``.
+
+    Returns a tuple ``(value, new_pos)`` where ``new_pos`` is the position
+    immediately after the decoded varint.
+    """
+    b = data[pos]
+    p = pos + 1
+    i = b & 0x7F
+    shift = 7
+    while b & 0x80 != 0:
+        b = data[p]
+        p += 1
+        i |= (b & 0x7F) << shift
+        shift += 7
+    return i, p

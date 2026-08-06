@@ -39,6 +39,13 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[Autocomplete]({{ '/en/guides/autocomplete/' | relative_url }})** — Autocomplete providers
 - **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, and Faiss integration
 - **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
+- **[Performance Benchmarking]({{ '/en/guides/performance/' | relative_url }})** — Benchmark tools and optimization results
+- **[Modern Indexing API]({{ '/en/guides/modern-indexing/' | relative_url }})** — BatchIndexWriter, AnalyzerCache, FieldAnalyzerCache
+- **[Dates and Numeric Ranges]({{ '/en/guides/dates/' | relative_url }})** — Date and numeric range queries
+- **[Nested Documents]({{ '/en/guides/nested/' | relative_url }})** — Parent-child document relationships
+- **[Stemming and Stop Words]({{ '/en/guides/stemming/' | relative_url }})** — Language stemmers and stop-word lists
+- **[N-grams]({{ '/en/guides/ngrams/' | relative_url }})** — N-gram tokenization and substring search
+- **[Glossary]({{ '/en/guides/glossary/' | relative_url }})** — Key terms and definitions
 - **[Migration]({{ '/en/guides/migration/' | relative_url }})** — Migrating from classic Whoosh
 
 ### API Reference
@@ -46,6 +53,21 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[API Overview]({{ '/en/api/overview/' | relative_url }})** — Complete module reference
 - **[Core API]({{ '/en/api/core/' | relative_url }})** — Index creation and management
 - **[Fields]({{ '/en/api/fields/' | relative_url }})** — Schema and field type definitions
+- **[Analysis]({{ '/en/api/analysis/' | relative_url }})** — Tokenizers, filters, and analyzers
+- **[Highlight]({{ '/en/api/highlight/' | relative_url }})** — Formatters, fragmenters, scorers
+- **[Spelling]({{ '/en/api/spelling/' | relative_url }})** — Spell checking and query correction
+- **[Sorting]({{ '/en/api/sorting/' | relative_url }})** — Facets and sort key computation
+- **[Collectors]({{ '/en/api/collectors/' | relative_url }})** — Result collection strategies
+- **[Reading]({{ '/en/api/reading/' | relative_url }})** — Index readers and term vectors
+- **[Matching]({{ '/en/api/matching/' | relative_url }})** — Matcher classes and utilities
+- **[Codecs]({{ '/en/api/codecs/' | relative_url }})** — Index format codecs and segment management
+- **[Formats]({{ '/en/api/formats/' | relative_url }})** — Posting format encoders/decoders
+- **[Columns]({{ '/en/api/columns/' | relative_url }})** — Per-document column storage
+- **[Idsets]({{ '/en/api/idsets/' | relative_url }})** — Document ID set implementations
+- **[Automata]({{ '/en/api/automata/' | relative_url }})** — Finite state automata and FSTs
+- **[Classify]({{ '/en/api/classify/' | relative_url }})** — Query expansion and clustering
+- **[Language]({{ '/en/api/lang/' | relative_url }})** — Stemmers, stop words, and language utilities
+- **[File DB / Storage]({{ '/en/api/filedb_storage/' | relative_url }})** — Storage and file I/O
 - **[Writing API]({{ '/en/api/writing/' | relative_url }})** — IndexWriter interface
 - **[Searching API]({{ '/en/api/searching/' | relative_url }})** — Searcher and Results
 - **[Query API]({{ '/en/api/query/' | relative_url }})** — Query classes and parsers
@@ -62,7 +84,7 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[FastAPI Integration]({{ '/en/examples/fastapi/' | relative_url }})** — REST API with FastAPI
 - **[Middleware Examples]({{ '/en/examples/middleware/' | relative_url }})** — Custom middleware patterns
 - **[Plugin Development]({{ '/en/examples/plugin-dev/' | relative_url }})** — Building plugins
-- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, DataSource Protocol
+- **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, GraphQLSource, FastCSVSource, JSONSource, ParquetSource, PandasSource, PolarsSource, SQLAlchemySource, PeeweeSource, TortoiseSource
 - **[Schema Discovery]({{ '/en/examples/schema-discovery/' | relative_url }})** — Result-set introspection
 - **[Facet Manager]({{ '/en/examples/facets/' | relative_url }})** — Auto-discovery and manual overrides
 - **[Validation Framework]({{ '/en/examples/validation/' | relative_url }})** — 4-level validation

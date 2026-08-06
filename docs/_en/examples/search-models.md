@@ -12,7 +12,7 @@ Examples for auto-mapping Python models to Whoosh schemas.
 ```python
 from dataclasses import dataclass
 from whoosh.fields import Schema, TEXT, NUMERIC
-from whoosh_modern.models import ModelIndex
+from whoosh_modern.models import register_dataclass_model
 import tempfile
 import shutil
 
@@ -22,7 +22,7 @@ class Book:
     year: int
     tags: list[str] | None = None
 
-idx = ModelIndex(Book)
+idx = register_dataclass_model(Book)
 print(idx.schema)
 ```
 
@@ -30,14 +30,14 @@ print(idx.schema)
 
 ```python
 from pydantic import BaseModel
-from whoosh_modern.models import register_model
+from whoosh_modern.models import register_pydantic_model
 
 class BookModel(BaseModel):
     title: str
     year: int
     tags: list[str] | None = None
 
-idx = register_model(BookModel)
+idx = register_pydantic_model(BookModel)
 schema = idx.schema
 ```
 
@@ -45,14 +45,14 @@ schema = idx.schema
 
 ```python
 from sqlalchemy import Column, Integer, String
-from whoosh_modern.models import register_model
+from whoosh_modern.models import register_sqlalchemy_model
 
 class BookSQL:
     __tablename__ = "book"
     title = Column(String, info={"search": {"fulltext": True, "stored": True}})
     year = Column(Integer, info={"search": {"sortable": True}})
 
-idx = register_model(BookSQL)
+idx = register_sqlalchemy_model(BookSQL)
 schema = idx.schema
 ```
 
@@ -60,14 +60,14 @@ schema = idx.schema
 
 ```python
 from sqlmodel import SQLModel, Field
-from whoosh_modern.models import register_model
+from whoosh_modern.models import register_sqlmodel_model
 
 class Book(SQLModel, table=True):
     id: int = Field(primary_key=True)
     title: str = Field(sa_column_kwargs={"info": {"search": {"fulltext": True}}})
     year: int
 
-idx = register_model(Book)
+idx = register_sqlmodel_model(Book)
 schema = idx.schema
 ```
 
@@ -75,13 +75,13 @@ schema = idx.schema
 
 ```python
 import msgspec
-from whoosh_modern.models import register_model
+from whoosh_modern.models import register_msgspec_model
 
 class Book(msgspec.Struct):
     title: str = msgspec.field(metadata={"search": {"fulltext": True}})
     year: int
 
-idx = register_model(Book)
+idx = register_msgspec_model(Book)
 schema = idx.schema
 ```
 

@@ -1,6 +1,16 @@
-"""DataSource protocol and capability interfaces."""
+"""DataSource protocol and capability interfaces.
 
-from collections.abc import AsyncIterator, Iterator, Mapping
+Data sources implement ``discover_schema()`` either by:
+
+* **Using ``SchemaDiscovery``** — for raw/untyped records (JSON, CSV,
+  REST, GraphQL, Pydantic models, SQL result sets) where schema must be
+  inferred from actual values or DB metadata.
+* **Implementing custom logic** — for strongly-typed backends
+  (Pandas, Polars, PyArrow, SQLAlchemy, Peewee, Tortoise ORM) where the
+  native type system provides a direct mapping to Whoosh fields.
+"""
+
+from collections.abc import AsyncIterator, Callable, Iterator, Mapping
 from typing import Any, Protocol, runtime_checkable
 
 from whoosh.fields import Schema
@@ -24,6 +34,27 @@ class DataSource(Protocol):
 
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from source as dict-like mappings."""
+        ...
+
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents in batches for efficient bulk indexing.
+
+        Default implementation groups :meth:`iter_documents` into lists of
+        ``batch_size``. DataSource implementations should override this when
+        they can read batches natively (e.g. SQL cursor fetchmany, Parquet
+        row-group reads, JSONL line buffering).
+        """
+        batch: list[dict[str, Any]] = []
+        for doc in self.iter_documents():
+            batch.append(dict(doc))
+            if len(batch) >= batch_size:
+                yield batch
+                batch = []
+        if batch:
+            yield batch
+
+    def health_check(self) -> bool:
+        """Return True if the data source is reachable and healthy."""
         ...
 
 
@@ -69,4 +100,17 @@ class MetadataDataSource(Protocol):
 
     def metadata(self) -> Mapping[str, Any]:
         """Return source metadata."""
+        ...
+
+
+@runtime_checkable
+class ObservableDataSource(Protocol):
+    """Protocol for data sources that emit change events."""
+
+    def add_observer(self, callback: Callable[[str, Document], None]) -> None:
+        """Register an observer callback for document events."""
+        ...
+
+    def remove_observer(self, callback: Callable[[str, Document], None]) -> None:
+        """Unregister an observer callback."""
         ...
