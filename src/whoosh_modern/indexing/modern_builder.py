@@ -24,8 +24,11 @@ Example::
 
 from __future__ import annotations
 
+import gc
 import logging
+import os
 import shutil
+import time
 from concurrent.futures import Future, ProcessPoolExecutor
 from typing import Any
 
@@ -35,6 +38,22 @@ from whoosh_modern.indexing.batch_writer import BatchIndexWriter
 from whoosh_modern.indexing.compiler import BatchAnalyzer, CompiledDataSource
 
 logger = logging.getLogger(__name__)
+
+
+def _rmtree_retry(path: str, retries: int = 20, delay: float = 0.5) -> None:
+    """Remove a directory tree, retrying on Windows permission errors.
+
+    On Windows, files created by worker processes can remain briefly
+    locked after the process pool shuts down. Retrying with small
+    delays avoids spurious failures in tests and cleanup paths.
+    """
+    for attempt in range(retries):
+        try:
+            shutil.rmtree(path)
+            return
+        except PermissionError:
+            if attempt < retries - 1:
+                time.sleep(delay)
 
 
 class ModernIndexBuilder:
@@ -124,12 +143,16 @@ class ModernIndexBuilder:
         segments: list[str] = []
         batches = list(compiled.stream_batches(batch_size=self.batch_size))
 
+        # Worker segments are created underneath the index path, so the
+        # directory must exist before submitting tasks.
+        os.makedirs(self.index_path, exist_ok=True)
+
         with ProcessPoolExecutor(max_workers=self.workers) as executor:
             futures: list[Future[str]] = []
             for i, batch in enumerate(batches):
                 if not batch:
                     continue
-                temp_dir = f"{self.index_path}_segment_{i}"
+                temp_dir = os.path.join(self.index_path, f"_segment_{i}")
                 future = executor.submit(
                     _build_segment_worker,
                     (temp_dir, self.schema, batch, 0),
@@ -163,14 +186,20 @@ class ModernIndexBuilder:
             writer.cancel()
             raise
         finally:
+            # Explicitly drop references and collect garbage so Windows
+            # can release file handles before we attempt cleanup.
+            writer = None
+            ix = None
+            gc.collect()
             for segment_dir in segments:
-                shutil.rmtree(segment_dir, ignore_errors=True)
+                _rmtree_retry(segment_dir)
 
         return sum(len(batch) for batch in batches)
 
 
 def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -> str:
     """Worker function that builds a single segment in a separate process."""
+    import gc
     import os
 
     from whoosh.index import create_in
@@ -186,4 +215,13 @@ def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -
     except Exception:
         writer.cancel()
         raise
+    finally:
+        # Break reference cycles before dropping references so the cyclic
+        # GC can reclaim the writer and its open file handles on Windows.
+        if writer._searcher is not None:
+            writer._searcher._ix = None
+            writer._searcher = None
+        del writer
+        del ix
+        gc.collect()
     return temp_dir

@@ -7,9 +7,11 @@ multi-core machines for CPU-bound indexing workloads.
 
 from __future__ import annotations
 
+import gc
 import logging
 import os
 import shutil
+import time
 from collections.abc import Iterator
 from concurrent.futures import Future, ProcessPoolExecutor
 from typing import TYPE_CHECKING, Any
@@ -24,12 +26,30 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _rmtree_retry(path: str, retries: int = 20, delay: float = 0.5) -> None:
+    """Remove a directory tree, retrying on Windows permission errors.
+
+    On Windows, files created by worker processes can remain briefly
+    locked after the process pool shuts down. Retrying with small
+    delays avoids spurious failures in tests and cleanup paths.
+    """
+    for attempt in range(retries):
+        try:
+            shutil.rmtree(path)
+            return
+        except PermissionError:
+            if attempt < retries - 1:
+                time.sleep(delay)
+
+
 def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -> str:
     """Worker function that builds a single segment in a separate process.
 
     :param args: tuple of (temp_dir, schema, docs, docbase)
     :returns: path to the written segment directory
     """
+    import gc
+
     temp_dir, schema, docs, _docbase = args
     # ``create_in`` does not create the target directory itself, so it must
     # exist before the segment's on-disk index is created.
@@ -43,6 +63,15 @@ def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -
     except Exception:
         writer.cancel()
         raise
+    finally:
+        # Break reference cycles before dropping references so the cyclic
+        # GC can reclaim the writer and its open file handles on Windows.
+        if writer._searcher is not None:
+            writer._searcher._ix = None
+            writer._searcher = None
+        del writer
+        del ix
+        gc.collect()
     return temp_dir
 
 
@@ -104,12 +133,17 @@ class ParallelIndexBuilder:
         segments: list[str] = []
         total = 0
 
+        # ``create_in`` requires the target directory to already exist, and
+        # worker segments are created underneath it so the directory must
+        # exist before submitting tasks.
+        os.makedirs(self.index_path, exist_ok=True)
+
         with ProcessPoolExecutor(max_workers=self.workers) as executor:
             futures: list[Future[str]] = []
             for batch in batches:
                 if not batch:
                     continue
-                temp_dir = f"{self.index_path}_segment_{len(futures)}"
+                temp_dir = os.path.join(self.index_path, f"_segment_{len(futures)}")
                 future = executor.submit(
                     _build_segment_worker,
                     (temp_dir, self.schema, batch, 0),
@@ -125,8 +159,6 @@ class ParallelIndexBuilder:
                     logger.error("Worker failed: %s", exc)
                     raise
 
-        # ``create_in`` requires the target directory to already exist.
-        os.makedirs(self.index_path, exist_ok=True)
         ix = create_in(self.index_path, self.schema)
         writer = ix.writer(limitmb=self.limitmb)
         try:
@@ -152,10 +184,15 @@ class ParallelIndexBuilder:
             writer.cancel()
             raise
         finally:
+            # Explicitly drop references and collect garbage so Windows
+            # can release file handles before we attempt cleanup.
+            writer = None
+            ix = None
+            gc.collect()
             # Clean up the worker temp directories now that their segments
             # have been folded into the main index (or discarded on error).
             for segment_dir in segments:
-                shutil.rmtree(segment_dir, ignore_errors=True)
+                _rmtree_retry(segment_dir)
 
         return total
 

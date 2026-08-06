@@ -7,8 +7,10 @@ than silently discarded, which was the cause of a critical bug where
 parallel indexing produced an empty index.
 """
 
+import gc
 import os
 import tempfile
+import time
 
 import pytest
 
@@ -46,7 +48,7 @@ def _schema():
 class TestParallelIndexBuilder:
     def test_build_indexes_all_documents(self):
         _require_multiprocessing()
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
             index_path = os.path.join(tmpdir, "idx")
             schema = _schema()
             builder = ParallelIndexBuilder(
@@ -85,10 +87,15 @@ class TestParallelIndexBuilder:
                     assert len(results_all) >= 1
             finally:
                 ix.close()
+                del ix
+                del builder
+                gc.collect()
+                time.sleep(1)
+                gc.collect()
 
     def test_build_cleans_up_worker_temp_dirs(self):
         _require_multiprocessing()
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
             index_path = os.path.join(tmpdir, "idx")
             schema = _schema()
             builder = ParallelIndexBuilder(

@@ -116,7 +116,8 @@ class FileIndex(SegmentDeletionMixin, Index):
         ]
 
     def _release_readlocks(self):
-        (f.close() for f in self._readlocks)
+        for f in self._readlocks:
+            f.close()
         self._readlocks = []
 
     def close(self):
