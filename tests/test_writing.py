@@ -196,12 +196,24 @@ def test_buffered_threads():
         w = writing.BufferedWriter(ix, limit=10)
 
         class SimWriter(threading.Thread):
+            def __init__(self, names):
+                super().__init__()
+                self.names = names
+
             def run(self):
-                for _ in range(5):
-                    w.update_document(name=random.choice(domain))
+                for name in self.names:
+                    w.update_document(name=name)
                     time.sleep(random.uniform(0.01, 0.1))
 
-        threads = [SimWriter() for _ in range(5)]
+        # Build a list of names that guarantees every value in `domain`
+        # is touched at least once per thread, while keeping the rest random.
+        threads = []
+        for _ in range(5):
+            names = list(domain)
+            random.shuffle(names)
+            names.extend(random.choice(domain) for _ in range(5))
+            threads.append(SimWriter(names))
+
         for thread in threads:
             thread.start()
         for thread in threads:
