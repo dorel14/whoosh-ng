@@ -114,7 +114,6 @@ class ParallelIndexBuilder:
             raise
 
         return sum(len(batch) for batch in batches)
-        return total
 
     def build_from_source(self, source: DataSource) -> int:
         """Build the index directly from a DataSource.
