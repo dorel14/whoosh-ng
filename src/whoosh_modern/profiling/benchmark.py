@@ -158,7 +158,7 @@ def _profile_commit(
     print("Phase 4: Commit Profiling")
     print("=" * 60)
 
-    profiler = CommitProfilerV2()  # type: ignore[attr-defined]
+    profiler = CommitProfilerV2()  # type: ignore[attr-defined]  # noqa: F821
     ix = _create_index(idx_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
 
@@ -193,7 +193,7 @@ def _profile_segments(
     print("Phase 5: Segment Analysis")
     print("=" * 60)
 
-    segment_profiler = SegmentProfiler()  # type: ignore[attr-defined]
+    segment_profiler = SegmentProfiler()  # type: ignore[attr-defined]  # noqa: F821
     ix = _create_index(idx_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
 
