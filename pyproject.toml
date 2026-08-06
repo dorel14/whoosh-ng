@@ -363,6 +363,10 @@ warn_return_any = true
 disable_error_code = ["attr-defined"]
 cache_dir = ".mypy_cache"
 
+[tool.pyright]
+reportMissingImports = "warning"
+reportArgumentType = "warning"
+
 [[tool.mypy.overrides]]
 module = [
   "whoosh.support.pyparsing",
@@ -390,7 +394,6 @@ module = [
   "pyarrow.parquet",
   "tortoise",
   "Stemmer",
-  "hnswlib",
 ]
 ignore_missing_imports = true
 

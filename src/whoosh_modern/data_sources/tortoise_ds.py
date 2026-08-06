@@ -50,7 +50,7 @@ class TortoiseSource:
         try:
             from tortoise import Tortoise
 
-            return Tortoise.is_inited()
+            return Tortoise.is_inited()  # type: ignore[no-any-return]
         except Exception:
             return False
 

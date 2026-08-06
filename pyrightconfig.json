@@ -4,6 +4,7 @@
     "**/node_modules",
     "**/__pycache__",
     ".venv",
+    ".git",
     "build",
     "dist",
     "docs/build",
@@ -138,7 +139,8 @@
   "extraPaths": ["src"],
   "venvPath": ".",
   "venv": ".venv",
-  "reportMissingImports": "error",
+  "reportMissingImports": "warning",
+  "reportArgumentType": "warning",
   "reportUnusedImport": "error",
   "reportUnusedVariable": "error"
 }

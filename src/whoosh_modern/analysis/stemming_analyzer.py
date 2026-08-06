@@ -23,8 +23,6 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Union
-
 from whoosh.analysis import StemmingAnalyzer as WhooshStemmingAnalyzer
 from whoosh_modern.analysis.stemmer_providers import (
     StemmerProvider,
