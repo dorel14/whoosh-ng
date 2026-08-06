@@ -176,17 +176,17 @@ class RegexTokenizer(Tokenizer):
                 if text:
                     t.text = text
                     t.boost = 1.0
-                if keeporiginal:
-                    t.original = t.text
-                t.stopped = False
-                if positions:
-                    t.pos = pos
-                    pos += 1
-                if chars:
-                    t.startchar = start_char + start
-                    t.endchar = start_char + end
+                    if keeporiginal:
+                        t.original = t.text
+                    t.stopped = False
+                    if positions:
+                        t.pos = pos
+                        pos += 1
+                    if chars:
+                        t.startchar = start_char + start
+                        t.endchar = start_char + end
 
-                yield t
+                    yield t
 
                 prevend = match.end()
 
