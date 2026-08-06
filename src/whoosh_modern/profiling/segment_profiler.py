@@ -107,7 +107,7 @@ class SegmentProfiler:
             :func:`whoosh.index.open_dir` / :func:`whoosh.index.create_in`).
         """
         with ix.reader() as reader:
-            storage = reader.storage()
+            storage = reader.storage() if reader.is_atomic() else reader.readers[0].storage()
             for segment in reader.segments():
                 segment_id = segment.segment_id()
                 self.start_segment(segment_id)
