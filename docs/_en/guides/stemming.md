@@ -121,7 +121,7 @@ from whoosh.analysis import StemmingAnalyzer
 analyzer = StemmingAnalyzer("en")
 
 # You can override defaults
-analyzer = StemmingAnalyzer("en", 
+analyzer = StemmingAnalyzer("en",
                             use_stopwords=True,
                             use_stems=True)
 ```

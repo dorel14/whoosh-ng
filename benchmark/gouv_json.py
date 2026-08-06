@@ -34,7 +34,7 @@ class GouvJSON(WhooshLikeSpec):
             for name, field in schema.items()
             if isinstance(
                 field,
-                (fields.TEXT, fields.ID, fields.NUMERIC, fields.BOOLEAN, fields.DATETIME),
+                fields.TEXT | fields.ID | fields.NUMERIC | fields.BOOLEAN | fields.DATETIME,
             )
         }
         from whoosh.fields import Schema
@@ -47,7 +47,7 @@ class GouvJSON(WhooshLikeSpec):
             filtered = {
                 k: v
                 for k, v in doc.items()
-                if k in schema_fields and not isinstance(v, (dict, list))
+                if k in schema_fields and not isinstance(v, dict | list)
             }
             if filtered:
                 yield filtered

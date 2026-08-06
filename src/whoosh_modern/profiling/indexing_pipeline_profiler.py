@@ -113,7 +113,7 @@ class IndexingPipelineProfiler:
         converted: dict[str, Any] = {}
         for fieldname, value in field_values.items():
             field = self._schema[fieldname]
-            if isinstance(field, (TEXT, KEYWORD)):
+            if isinstance(field, TEXT | KEYWORD):
                 if isinstance(value, list):
                     converted[fieldname] = " ".join(str(v) for v in value)
                 else:

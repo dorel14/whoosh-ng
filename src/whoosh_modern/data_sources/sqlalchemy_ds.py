@@ -134,15 +134,15 @@ class SQLAlchemySource:
 
         from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
 
-        if isinstance(col_type, (String,)):
+        if isinstance(col_type, String):
             return TEXT(stored=True)
-        if isinstance(col_type, (Integer, BigInteger)):
+        if isinstance(col_type, Integer | BigInteger):
             return NUMERIC(int, stored=True)
         if isinstance(col_type, Float):
             return NUMERIC(float, stored=True)
         if isinstance(col_type, Boolean):
             return BOOLEAN(stored=True)
-        if isinstance(col_type, (Date, DateTime)):
+        if isinstance(col_type, Date | DateTime):
             return DATETIME(stored=True)
 
         return TEXT(stored=True)
