@@ -40,6 +40,7 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, and Faiss integration
 - **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
 - **[Performance Benchmarking]({{ '/en/guides/performance/' | relative_url }})** — Benchmark tools and optimization results
+- **[Modern Indexing API]({{ '/en/guides/modern-indexing/' | relative_url }})** — BatchIndexWriter, AnalyzerCache, FieldAnalyzerCache
 - **[Dates and Numeric Ranges]({{ '/en/guides/dates/' | relative_url }})** — Date and numeric range queries
 - **[Nested Documents]({{ '/en/guides/nested/' | relative_url }})** — Parent-child document relationships
 - **[Stemming and Stop Words]({{ '/en/guides/stemming/' | relative_url }})** — Language stemmers and stop-word lists
