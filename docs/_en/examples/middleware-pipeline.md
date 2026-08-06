@@ -29,10 +29,12 @@ from whoosh_modern.middleware import RetryMiddleware
 
 retry = RetryMiddleware(attempts=3, backoff="exponential")
 
-@retry.wrap
 def flaky_operation():
     # Will retry up to 3 times on exception
     return fetch_data()
+
+wrapped_op = retry.wrap(flaky_operation)
+result = wrapped_op()
 ```
 
 Backoff strategies:
@@ -46,13 +48,27 @@ from whoosh_modern.middleware import LoggingMiddleware
 import logging
 
 logger = logging.getLogger("benchmark")
-logging_mw = LoggingMiddleware(logger=logger)
+logging_mw = LoggingMiddleware(logger=logger, level=logging.INFO)
 
-@logging_mw.wrap
-def tracked_operation():
-    return fetch_data()
-# Logs: "Operation tracked_operation completed in 0.123s"
-# On error: "Operation tracked_operation failed after 0.123s: <error>"
+tracked_op = logging_mw.wrap(lambda: fetch_data())
+result = tracked_op()
+# Logs: "Operation wrapped completed in 0.123s"
+# On error: "Operation wrapped failed after 0.123s: <error>"
+```
+
+## CacheMiddleware
+
+```python
+from whoosh_modern.middleware import CacheMiddleware
+
+cache = CacheMiddleware(maxsize=128)
+
+cached_op = cache.wrap(expensive_query)
+result1 = cached_op(args)  # cache miss
+result2 = cached_op(args)  # cache hit
+
+print(cache.stats)  # {"hits": 1, "misses": 1, "size": 1}
+cache.clear()
 ```
 
 ## Custom Middleware

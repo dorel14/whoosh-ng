@@ -9,10 +9,7 @@ import pytest
 
 from whoosh.fields import ID, KEYWORD, NUMERIC, STORED, TEXT, Schema
 from whoosh_modern.data_sources.sql import SQLSource
-from whoosh_modern.validation import (
-    ValidationFramework,
-    ValidationResult,
-)
+from whoosh_modern.validation import ValidationFramework, ValidationResult
 
 
 def _create_test_source():

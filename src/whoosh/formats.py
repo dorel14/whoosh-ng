@@ -45,6 +45,7 @@ from whoosh.system import (
     unpack_float,
     unpack_uint,
 )
+from whoosh.util.varints import read_varint_at, varint
 
 # Format base class
 
@@ -217,13 +218,13 @@ class Positions(Format):
 
     def word_values(self, value, analyzer, **kwargs):
         fb = self.field_boost
-        poses = defaultdict(list)
-        weights = defaultdict(float)
+        poses = {}
+        weights = {}
         kwargs["positions"] = True
         kwargs["boosts"] = True
         for t in tokens(value, analyzer, kwargs):
-            poses[t.text].append(t.pos)
-            weights[t.text] += t.boost
+            poses.setdefault(t.text, []).append(t.pos)
+            weights[t.text] = weights.get(t.text, 0.0) + t.boost
 
         for w, poslist in poses.items():
             value = self.encode(poslist)
@@ -235,11 +236,44 @@ class Positions(Format):
         for pos in poslist:
             deltas.append(pos - base)
             base = pos
-        return pack_uint(len(deltas)) + dumps(deltas)
+        buf = bytearray(len(deltas) * 5 + _INT_SIZE)
+        buf[:_INT_SIZE] = pack_uint(len(deltas))
+        pos = _INT_SIZE
+        for d in deltas:
+            while d & ~0x7F:
+                buf[pos] = (d & 0x7F) | 0x80
+                pos += 1
+                d = d >> 7
+            buf[pos] = d
+            pos += 1
+        return bytes(buf[:pos])
 
     def decode_positions(self, valuestring):
-        if not valuestring.endswith(b"."):
-            valuestring += b"."
+        if valuestring.endswith(b"."):
+            return self._decode_positions_legacy(valuestring)
+        n = unpack_uint(valuestring[:_INT_SIZE])[0]
+        codes = []
+        pos = _INT_SIZE
+        for _ in range(n):
+            b = valuestring[pos]
+            p = pos + 1
+            i = b & 0x7F
+            shift = 7
+            while b & 0x80:
+                b = valuestring[p]
+                p += 1
+                i |= (b & 0x7F) << shift
+                shift += 7
+            codes.append(i)
+            pos = p
+        position = 0
+        positions = []
+        for code in codes:
+            position += code
+            positions.append(position)
+        return positions
+
+    def _decode_positions_legacy(self, valuestring):
         codes = loads(valuestring[_INT_SIZE:])
         position = 0
         positions = []
@@ -274,15 +308,15 @@ class Characters(Positions):
 
     def word_values(self, value, analyzer, **kwargs):
         fb = self.field_boost
-        seen = defaultdict(list)
-        weights = defaultdict(float)
+        seen = {}
+        weights = {}
 
         kwargs["positions"] = True
         kwargs["chars"] = True
         kwargs["boosts"] = True
         for t in tokens(value, analyzer, kwargs):
-            seen[t.text].append((t.pos, t.startchar, t.endchar))
-            weights[t.text] += t.boost
+            seen.setdefault(t.text, []).append((t.pos, t.startchar, t.endchar))
+            weights[t.text] = weights.get(t.text, 0.0) + t.boost
 
         for w, poslist in seen.items():
             value = self.encode(poslist)
@@ -296,9 +330,51 @@ class Characters(Positions):
             deltas.append((pos - posbase, startchar - charbase, endchar - startchar))
             posbase = pos
             charbase = endchar
-        return pack_uint(len(deltas)) + dumps(deltas)
+        buf = bytearray(len(deltas) * 15 + _INT_SIZE)
+        buf[:_INT_SIZE] = pack_uint(len(deltas))
+        pos = _INT_SIZE
+        for pos_delta, startchar_delta, endchar_delta in deltas:
+            for v in (pos_delta, startchar_delta, endchar_delta):
+                while v & ~0x7F:
+                    buf[pos] = (v & 0x7F) | 0x80
+                    pos += 1
+                    v = v >> 7
+                buf[pos] = v
+                pos += 1
+        return bytes(buf[:pos])
 
     def decode_characters(self, valuestring):
+        if valuestring.endswith(b"."):
+            return self._decode_characters_legacy(valuestring)
+        n = unpack_uint(valuestring[:_INT_SIZE])[0]
+        codes = []
+        pos = _INT_SIZE
+        for _ in range(n):
+            vals = []
+            for _ in range(3):
+                b = valuestring[pos]
+                p = pos + 1
+                i = b & 0x7F
+                shift = 7
+                while b & 0x80:
+                    b = valuestring[p]
+                    p += 1
+                    i |= (b & 0x7F) << shift
+                    shift += 7
+                vals.append(i)
+                pos = p
+            codes.append(tuple(vals))
+        position = 0
+        endchar = 0
+        posns_chars = []
+        for pos_delta, startchar_delta, endchar_delta in codes:
+            position = pos_delta + position
+            startchar = startchar_delta + endchar
+            endchar = endchar_delta + startchar
+            posns_chars.append((position, startchar, endchar))
+        return posns_chars
+
+    def _decode_characters_legacy(self, valuestring):
         if not valuestring.endswith(b"."):
             valuestring += b"."
         codes = loads(valuestring[_INT_SIZE:])
@@ -313,15 +389,43 @@ class Characters(Positions):
         return posns_chars
 
     def decode_positions(self, valuestring):
+        if valuestring.endswith(b"."):
+            return self._decode_positions_legacy(valuestring)
+        n = unpack_uint(valuestring[:_INT_SIZE])[0]
+        codes = []
+        pos = _INT_SIZE
+        for _ in range(n):
+            vals = []
+            for _ in range(3):
+                b = valuestring[pos]
+                p = pos + 1
+                i = b & 0x7F
+                shift = 7
+                while b & 0x80:
+                    b = valuestring[p]
+                    p += 1
+                    i |= (b & 0x7F) << shift
+                    shift += 7
+                vals.append(i)
+                pos = p
+            codes.append(tuple(vals))
+        position = 0
+        positions = []
+        for pos_delta, _startchar_delta, _endchar_delta in codes:
+            position = pos_delta + position
+            positions.append(position)
+        return positions
+
+    def _decode_positions_legacy(self, valuestring):
         if not valuestring.endswith(b"."):
             valuestring += b"."
         codes = loads(valuestring[_INT_SIZE:])
         position = 0
-        posns = []
+        positions = []
         for code in codes:
             position = code[0] + position
-            posns.append(position)
-        return posns
+            positions.append(position)
+        return positions
 
     def combine(self, vs):
         s = {}

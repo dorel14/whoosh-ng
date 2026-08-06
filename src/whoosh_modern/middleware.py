@@ -98,6 +98,46 @@ class LoggingMiddleware(Middleware):
         return wrapped
 
 
+class CacheMiddleware(Middleware):
+    """Cache operation results to avoid redundant computation."""
+
+    def __init__(self, maxsize: int = 128) -> None:
+        self._cache: dict[str, Any] = {}
+        self._maxsize = maxsize
+        self._hits = 0
+        self._misses = 0
+
+    def wrap(self, operation: Callable[..., Any]) -> Callable[..., Any]:
+        cache = self._cache
+        maxsize = self._maxsize
+
+        def wrapped(*args: Any, **kwargs: Any) -> Any:
+            key = f"{operation.__module__}.{operation.__qualname__}:{args!r}:{kwargs!r}"
+            if key in cache:
+                self._hits += 1
+                return cache[key]
+            result = operation(*args, **kwargs)
+            self._misses += 1
+            if len(cache) >= maxsize:
+                oldest = next(iter(cache))
+                del cache[oldest]
+            cache[key] = result
+            return result
+
+        return wrapped
+
+    @property
+    def stats(self) -> dict[str, int]:
+        """Return cache statistics."""
+        return {"hits": self._hits, "misses": self._misses, "size": len(self._cache)}
+
+    def clear(self) -> None:
+        """Clear all cached entries."""
+        self._cache.clear()
+        self._hits = 0
+        self._misses = 0
+
+
 class MiddlewarePipeline:
     """Chain multiple middlewares together."""
 

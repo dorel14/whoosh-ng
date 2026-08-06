@@ -28,7 +28,7 @@
 """The :class:`SegmentWriter` codec-based writer."""
 
 from bisect import bisect_right
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 
 from whoosh import columns
 from whoosh.fields import UnknownFieldError
@@ -111,6 +111,21 @@ class SegmentWriter(IndexWriter):
         # newsegment might not be set due to LockError
         # so use getattr to be safe
         return f"<{self.__class__.__name__} {getattr(self, 'newsegment', None)!r}>"
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type:
+            with suppress(Exception):
+                self.cancel()
+            return False
+        try:
+            self.commit()
+        except Exception:
+            with suppress(Exception):
+                self.cancel()
+            raise
 
     def _check_state(self):
         if self.is_closed:
@@ -299,15 +314,9 @@ class SegmentWriter(IndexWriter):
 
                 length = 0
                 if field.indexed:
-                    # TODO: Method for adding progressive field values, ie
-                    # setting start_pos/start_char?
                     fieldboost = self._field_boost(fields, fieldname, docboost)
-                    # Ask the field to return a list of (text, weight, vbytes)
-                    # tuples
                     items = field.index(value)
-                    # Only store the length if the field is marked scorable
                     scorable = field.scorable
-                    # Add the terms to the pool
                     for tbytes, freq, weight, vbytes in items:
                         weight *= fieldboost
                         if scorable:
@@ -324,17 +333,12 @@ class SegmentWriter(IndexWriter):
                 vformat = field.vector
                 if vformat:
                     analyzer = field.analyzer
-                    # Call the format's word_values method to get posting values
                     vitems = vformat.word_values(value, analyzer, mode="index")
-                    # Remove unused frequency field from the tuple
                     vitems = sorted((text, weight, vbytes) for text, _, weight, vbytes in vitems)
                     perdocwriter.add_vector_items(fieldname, field, vitems)
 
-                # Allow a custom value for stored field/column
                 customval = fields.get(f"_stored_{fieldname}", value)
 
-                # Add the stored value and length for this field to the per-
-                # document writer
                 sv = customval if field.stored else None
                 perdocwriter.add_field(fieldname, field, sv, length)
 
@@ -349,6 +353,80 @@ class SegmentWriter(IndexWriter):
         perdocwriter.finish_doc()
         self._added = True
         self.docnum += 1
+
+    def _add_batch(self, docs):
+        """Optimized batch document addition.
+
+        Reduces Python overhead by caching attribute lookups and pre-
+        validating the schema once per batch instead of per document.
+        """
+        if not docs:
+            return
+
+        self._check_state()
+        perdocwriter = self.perdocwriter
+        schema = self.schema
+        pool_add = self.pool.add
+        docnum = self.docnum
+        docbase = self.docbase
+
+        for fields in docs:
+            docboost = self._doc_boost(fields)
+            fieldnames = sorted(name for name in fields if not name.startswith("_"))
+            self._check_fields(schema, fieldnames)
+
+            perdocwriter.start_doc(docnum)
+            try:
+                for fieldname in fieldnames:
+                    value = fields.get(fieldname)
+                    if value is None:
+                        continue
+                    field = schema[fieldname]
+
+                    length = 0
+                    if field.indexed:
+                        fieldboost = self._field_boost(fields, fieldname, docboost)
+                        items = field.index(value)
+                        scorable = field.scorable
+                        for tbytes, freq, weight, vbytes in items:
+                            weight *= fieldboost
+                            if scorable:
+                                length += freq
+                            pool_add((fieldname, tbytes, docnum, weight, vbytes))
+
+                    if field.separate_spelling():
+                        spellfield = field.spelling_fieldname(fieldname)
+                        for word in field.spellable_words(value):
+                            word = utf8encode(word)[0]
+                            pool_add((spellfield, word, 0, 1, vbytes))
+
+                    vformat = field.vector
+                    if vformat:
+                        analyzer = field.analyzer
+                        vitems = vformat.word_values(value, analyzer, mode="index")
+                        vitems = sorted(
+                            (text, weight, vbytes) for text, _, weight, vbytes in vitems
+                        )
+                        perdocwriter.add_vector_items(fieldname, field, vitems)
+
+                    customval = fields.get(f"_stored_{fieldname}", value)
+
+                    sv = customval if field.stored else None
+                    perdocwriter.add_field(fieldname, field, sv, length)
+
+                    column = field.column_type
+                    if column and customval is not None:
+                        cv = field.to_column_value(customval)
+                        perdocwriter.add_column_value(fieldname, column, cv)
+            except ValueError:
+                perdocwriter.cancel_doc()
+                raise
+
+            perdocwriter.finish_doc()
+            self._added = True
+            docnum += 1
+
+        self.docnum = docnum
 
     def doc_count(self):
         return self.docnum - self.docbase

@@ -486,15 +486,14 @@ class ListMatcher(Matcher):
         return self._scorer is not None and self._scorer.supports_block_quality()
 
     def max_quality(self) -> float:
-        # This matcher treats all postings in the list as one "block", so the
-        # block quality is the same as the quality of the entire list
-        if self._scorer:
-            return self._scorer.block_quality(self)  # type: ignore[union-attr]
-        else:
-            return self.block_max_weight()
+        if self._scorer and self._scorer.supports_block_quality():
+            return self._scorer.block_quality(self)
+        return self.block_max_weight()
 
     def block_quality(self) -> float:
-        return self._scorer.block_quality(self)  # type: ignore[union-attr]
+        if self._scorer and self._scorer.supports_block_quality():
+            return self._scorer.block_quality(self)
+        return self.block_max_weight()
 
     def skip_to_quality(self, minquality):
         while self._i < len(self._ids) and self.block_quality() <= minquality:

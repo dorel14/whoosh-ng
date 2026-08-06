@@ -29,15 +29,14 @@ FacetManager automatically identifies facetable fields:
 
 | Whoosh Field Type | Facet Type |
 |-------------------|------------|
-| `KEYWORD`, `BOOLEAN`, `ID` | `TermsFacet` |
+| `TEXT`, `KEYWORD`, `BOOLEAN`, `ID` | `TermsFacet` |
 | `NUMERIC` | `RangeFacet` |
 | `DATETIME` | `DateRangeFacet` |
-| `TEXT` | None (not facetable) |
 
 ```python
 # Auto-discovered facets
 facets = manager.get_facets()
-# {"category": TermsFacet(limit=100), "price": RangeFacet()}
+# {"title": TermsFacet(limit=100), "category": TermsFacet(limit=100), "price": RangeFacet(), "active": TermsFacet(limit=100)}
 ```
 
 ## Manual Override

@@ -25,6 +25,7 @@ from whoosh.system import _FLOAT_SIZE, _INT_SIZE
 from whoosh.util.numeric import byte_to_length, length_to_byte
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.writing import PostingWriter
+from whoosh.writing._base import IndexingError
 
 
 class BlockInfo:
@@ -268,6 +269,168 @@ class FilePostingWriter(PostingWriter):
         self.posttotal += postcount
         self._reset_block()
         self.blockcount += 1
+
+
+class BufferedPostingWriter(PostingWriter):
+    """Wrapper around :class:`FilePostingWriter` that batches block writes in
+    memory and flushes them in a single sequential pass.
+
+    This reduces the number of ``seek``/``flush`` round-trips during posting
+    list construction, which is the main I/O bottleneck for large field
+    postings.
+
+    Usage
+    -----
+    Wrap a ``FilePostingWriter`` and use it through the standard
+    ``start/write/finish`` interface. Call :meth:`flush` explicitly at any
+    time to force buffered blocks to disk (this is done automatically on
+    :meth:`finish`).
+
+    The wrapped writer is kept in sync so its ``posttotal``/``blockcount``
+    values are always up-to-date, making it safe to interleave reads from
+    the underlying writer during long indexing runs.
+    """
+
+    def __init__(self, writer, buffer_size=32):
+        if buffer_size < 1:
+            raise ValueError("buffer_size must be >= 1")
+        self._writer = writer
+        self._buffer_size = buffer_size
+        self._block_buffer = []
+        self._buffered_posttotal = 0
+        self._current_ids = None
+        self._current_values = None
+        self._current_weights = None
+
+    def start(self, fieldnum):
+        self._writer.start(fieldnum)
+        self._block_buffer = []
+        self._buffered_posttotal = 0
+        self._current_ids = None
+        self._current_values = None
+        self._current_weights = None
+        return self._writer.startoffset
+
+    def write(self, id, valuestring):
+        w = self._writer
+        stringids = w.stringids
+        if self._current_ids is None:
+            self._current_ids = [] if stringids else array("I")
+            self._current_values = []
+            self._current_weights = array("f")
+
+        self._current_ids.append(id)
+        self._current_values.append(valuestring)
+        self._current_weights.append(w.format.decode_weight(valuestring))
+
+        if len(self._current_ids) >= w.blocklimit:
+            self._buffer_block()
+
+    def finish(self):
+        self._buffer_block()
+        self.flush()
+        return self._writer.finish()
+
+    def close(self):
+        self._writer.close()
+
+    def _buffer_block(self):
+        if self._current_ids is None:
+            return
+        ids = self._current_ids
+        values = self._current_values
+        weights = self._current_weights
+        postcount = len(ids)
+        self._block_buffer.append((ids, values, weights, postcount))
+        self._buffered_posttotal += postcount
+        self._current_ids = None
+        self._current_values = None
+        self._current_weights = None
+        if len(self._block_buffer) >= self._buffer_size:
+            self.flush()
+
+    def flush(self):
+        """Force any buffered blocks to be written to the underlying writer.
+
+        Safe to call multiple times; no-op when the buffer is empty.
+        """
+        if not self._block_buffer:
+            return
+
+        pf = self._writer.postfile
+        stringids = self._writer.stringids
+        format = self._writer.format
+        posting_size = format.posting_size
+        dfl_fn = self._writer.dfl_fn
+        schema = self._writer.schema
+        fieldnum = self._writer.fieldnum
+
+        block_infos = []
+        for _ids, _values, weights, _postcount in self._block_buffer:
+            maxid = _ids[-1]
+            maxweight = max(weights)
+            maxwol = 0.0
+            minlength = 0
+            if dfl_fn and schema[fieldnum].scorable:
+                lens = [dfl_fn(did, fieldnum) for did in _ids]
+                minlength = min(lens)
+                assert minlength > 0
+                maxwol = max(w / l for w, l in zip(weights, lens))
+
+            blockinfo = BlockInfo(
+                nextoffset=0,
+                maxweight=maxweight,
+                maxwol=maxwol,
+                minlength=minlength,
+                postcount=len(_ids),
+                maxid=maxid,
+            )
+            block_infos.append(blockinfo)
+
+        offsets = []
+        for blockinfo in block_infos:
+            offsets.append(pf.tell())
+            blockinfo.to_file(pf)
+
+        for _idx, (_ids, _values, _weights, _postcount) in enumerate(self._block_buffer):
+            if stringids:
+                for did in _ids:
+                    pf.write_string(utf8encode(did)[0])  # type: ignore[arg-type]
+            else:
+                pf.write_array(_ids)
+
+            pf.write_array(_weights)
+
+            if posting_size < 0:
+                lengths = array("I")
+                for v in _values:
+                    lengths.append(len(v))
+                pf.write_array(lengths)
+
+            if posting_size != 0:
+                pf.write(b"".join(_values))
+
+        end = pf.tell()
+        pf.flush()
+
+        for bi_idx, _blockinfo in enumerate(block_infos):
+            if bi_idx < len(block_infos) - 1:
+                next_off = offsets[bi_idx + 1]
+            else:
+                next_off = 0
+            pf.seek(offsets[bi_idx])
+            pf.write_ulong(next_off)
+
+        pf.seek(end)
+
+        self._writer.posttotal += self._buffered_posttotal
+        self._writer.blockcount += len(self._block_buffer)
+        self._block_buffer = []
+        self._buffered_posttotal = 0
+
+    def _check_state(self):
+        if self._writer.postfile.closed:
+            raise IndexingError("Posting writer is closed")
 
 
 class FilePostingReader(Matcher):

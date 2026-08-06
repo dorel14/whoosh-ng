@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import re
 
-__version__ = (1, 0, 1)
+__version__ = (2, 0, 0)
 __version_string__ = "2.0.0"
 
 

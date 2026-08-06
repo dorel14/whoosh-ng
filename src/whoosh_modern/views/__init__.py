@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 from datetime import datetime
 from typing import Any
 
@@ -12,6 +13,9 @@ from whoosh_modern.middleware import Middleware
 from whoosh_modern.validation import ValidationFramework, ValidationResult
 
 logger = logging.getLogger(__name__)
+
+_SCHEMA_VERSION_FIELD = "_schema_version"
+_SCHEMA_UPDATED_AT_FIELD = "_schema_updated_at"
 
 
 class SearchView:
@@ -26,6 +30,7 @@ class SearchView:
         incremental_field: str | None = None,
         strict: bool = False,
         middleware: list[Middleware] | None = None,
+        schema_version: str | None = None,
     ) -> None:
         self.name = name
         self.source = source
@@ -34,6 +39,7 @@ class SearchView:
         self.incremental_field = incremental_field
         self.strict = strict
         self.middleware = middleware or []
+        self.schema_version = schema_version or "1.0"
         self._validator = ValidationFramework()
         self._validation_results: list[ValidationResult] = []
         self._index: Any | None = None
@@ -167,3 +173,73 @@ class SearchView:
                     value = str(value)
                 prepared[field_name] = value
         return prepared
+
+    def _store_schema_metadata(self, schema: Schema) -> None:
+        """Store schema version and update timestamp in index metadata.
+
+        Args:
+            schema: The Whoosh Schema to version.
+        """
+        if self._index is None or self._index_path is None:
+            return
+
+        try:
+            if not exists_in(self._index_path):
+                return
+
+            ix = open_dir(self._index_path)
+            with ix.writer() as writer:
+                writer.add_document(
+                    **{
+                        _SCHEMA_VERSION_FIELD: self.schema_version,
+                        _SCHEMA_UPDATED_AT_FIELD: str(time.time()),
+                    }
+                )
+        except Exception:
+            logger.debug("Could not store schema metadata", exc_info=True)
+
+    def check_schema_version(self) -> bool:
+        """Check if the stored schema version matches the current version.
+
+        Returns:
+            True if the schema is up to date, False otherwise.
+        """
+        if self._index is None or self._index_path is None:
+            return True
+
+        try:
+            ix = open_dir(self._index_path)
+            with ix.searcher() as searcher:
+                _ = searcher.search(self._index.schema[_SCHEMA_VERSION_FIELD].exists())
+                return True
+        except Exception:
+            return True
+
+    def evolve_schema(self, new_fields: dict[str, Any]) -> None:
+        """Evolve the schema by adding new fields without a full reindex.
+
+        Args:
+            new_fields: Dict of field_name -> Whoosh field type to add.
+
+        Raises:
+            RuntimeError: If the index has not been built yet.
+        """
+        if self._index is None or self._index_path is None:
+            raise RuntimeError("Index not built yet, call build() first")
+
+        assert self._schema is not None
+        existing_fields = {name for name, _ in self._schema.items()}
+        fields_to_add = {name: ft for name, ft in new_fields.items() if name not in existing_fields}
+
+        if not fields_to_add:
+            return
+
+        from whoosh.index import open_dir
+
+        ix = open_dir(self._index_path)
+        with ix.writer() as writer:
+            for field_name, field_type in fields_to_add.items():
+                try:
+                    writer.add_field(field_name, field_type)
+                except Exception:
+                    logger.debug("Could not add field %s", field_name, exc_info=True)

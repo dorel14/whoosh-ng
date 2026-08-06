@@ -102,115 +102,24 @@ class RESTSource:
         self._schema = SchemaDiscovery.from_sample(documents)
         return self._schema
 
-    def iter_documents(self) -> Iterator[Document]:
-        """Yield documents from the REST API with pagination."""
-        page = 1
-        offset = 0
-        cursor: str | None = None
-        has_more = True
-        pages_fetched = 0
+    def _extract_results(self, data: dict[str, Any]) -> list[Any]:
+        """Extract results list from API response."""
+        if not isinstance(data, dict):
+            return []
 
-        while has_more:
-            pages_fetched += 1
-            if pages_fetched > MAX_PAGES:
-                logger.warning(
-                    "RESTSource iter_documents hit max_pages=%d limit, stopping pagination for %s",
-                    MAX_PAGES,
-                    self.url,
-                )
-                break
-
-            url = self._build_url(
-                page=page,
-                offset=offset,
-                cursor=cursor,
-            )
-
-            try:
-                data = self._http_client.fetch(url, self._get_headers())
-            except Exception as e:
-                from urllib.error import HTTPError, URLError
-
-                if isinstance(e, HTTPError | URLError):
-                    if isinstance(e, HTTPError) and e.code == 429:
-                        retry_after = e.headers.get("Retry-After")
-                        if retry_after:
-                            import time
-
-                            time.sleep(float(retry_after))
-                            continue
-                    raise DataSourceError(
-                        f"REST API error: {e}",
-                        source="rest",
-                    ) from e
-                raise DataSourceError(
-                    f"Connection error: {e}",
-                    source="rest",
-                ) from e
-
-            # Extract documents from response
-            results: list[Any] = []
-            if isinstance(data, dict):
-                if self.document_path:
-                    # Navigate nested JSON path
-                    parts = self.document_path.split(".")
-                    result: Any = data
-                    for part in parts:
-                        result = result.get(part, [])
-                    results = result if isinstance(result, list) else []
+        if self.document_path:
+            result: Any = data
+            for part in self.document_path.split("."):
+                if isinstance(result, dict):
+                    result = result.get(part, [])
                 else:
-                    raw_results = data.get("results") or data.get("data")
-                    results = raw_results if isinstance(raw_results, list) else []
-                # Try metadata-based count for document_count optimization
-                if "total" in data and isinstance(data["total"], int):
-                    self._total_count = data["total"]
-            elif isinstance(data, list):
-                results = data
-            else:
-                results = []
+                    return []
+            return result if isinstance(result, list) else []
 
-            if not results:
-                has_more = False
-                break
-
-            yield from results
-
-            # Pagination logic
-            if self.pagination == "page":
-                page += 1
-                has_more = len(results) >= self.page_size
-            elif self.pagination == "offset":
-                offset += len(results)
-                has_more = len(results) >= self.page_size
-            elif self.pagination == "cursor":
-                cursor = data.get("next_cursor") if isinstance(data, dict) else None
-                has_more = cursor is not None
-            else:
-                has_more = False
-
-    def document_count(self) -> int:
-        """Return approximate document count."""
-        # If we already know the total from metadata, use it
-        if hasattr(self, "_total_count") and self._total_count is not None:
-            return self._total_count
-        # Fallback: iterate (but limit to avoid exhaustion)
-        count = 0
-        for _ in self.iter_documents():
-            count += 1
-            if count >= MAX_PAGES * self.page_size:
-                break
-        return count
-
-    def metadata(self) -> dict[str, Any]:
-        """Return metadata about this REST source."""
-        return {
-            "type": "rest",
-            "url": self.url,
-            "method": self.method,
-            "pagination": self.pagination,
-            "page_size": self.page_size,
-            "timeout": self.timeout,
-        }
+        raw_results = data.get("results") or data.get("data")
+        if isinstance(raw_results, list):
+            return raw_results
+        return []
 
     def _build_url(
         self,
@@ -254,3 +163,166 @@ class RESTSource:
                 result["X-API-Key"] = self.auth["api_key"]
 
         return result
+
+    def iter_documents(self) -> Iterator[Document]:
+        """Yield documents from the REST API with pagination."""
+        page = 1
+        offset = 0
+        cursor: str | None = None
+        has_more = True
+        pages_fetched = 0
+
+        while has_more:
+            pages_fetched += 1
+            if pages_fetched > MAX_PAGES:
+                logger.warning(
+                    "RESTSource iter_documents hit max_pages=%d limit, stopping pagination for %s",
+                    MAX_PAGES,
+                    self.url,
+                )
+                break
+
+            url = self._build_url(page=page, offset=offset, cursor=cursor)
+
+            try:
+                data = self._http_client.fetch(url, self._get_headers())
+            except Exception as e:
+                from urllib.error import HTTPError, URLError
+
+                if isinstance(e, HTTPError | URLError):
+                    if isinstance(e, HTTPError) and e.code == 429:
+                        retry_after = e.headers.get("Retry-After")
+                        if retry_after:
+                            import time
+
+                            time.sleep(float(retry_after))
+                            continue
+                    raise DataSourceError(
+                        f"REST API error: {e}",
+                        source="rest",
+                    ) from e
+                raise DataSourceError(
+                    f"Connection error: {e}",
+                    source="rest",
+                ) from e
+
+            results = self._extract_results(data)
+
+            if not results:
+                has_more = False
+                break
+
+            if "total" in data and isinstance(data["total"], int):
+                self._total_count = data["total"]
+
+            yield from results
+
+            if self.pagination == "page":
+                page += 1
+                has_more = len(results) >= self.page_size
+            elif self.pagination == "offset":
+                offset += len(results)
+                has_more = len(results) >= self.page_size
+            elif self.pagination == "cursor":
+                cursor = data.get("next_cursor") if isinstance(data, dict) else None
+                has_more = cursor is not None
+            else:
+                has_more = False
+
+    def stream_batches(self, batch_size: int = 100) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the REST API in batches.
+
+        Batches documents per page for efficient bulk indexing.
+        """
+        page = 1
+        offset = 0
+        cursor: str | None = None
+        has_more = True
+        pages_fetched = 0
+
+        while has_more:
+            pages_fetched += 1
+            if pages_fetched > MAX_PAGES:
+                logger.warning(
+                    "RESTSource stream_batches hit max_pages=%d limit",
+                    MAX_PAGES,
+                )
+                break
+
+            url = self._build_url(page=page, offset=offset, cursor=cursor)
+
+            try:
+                data = self._http_client.fetch(url, self._get_headers())
+            except Exception as e:
+                from urllib.error import HTTPError, URLError
+
+                if isinstance(e, HTTPError | URLError):
+                    if isinstance(e, HTTPError) and e.code == 429:
+                        retry_after = e.headers.get("Retry-After")
+                        if retry_after:
+                            import time
+
+                            time.sleep(float(retry_after))
+                            continue
+                    raise DataSourceError(
+                        f"REST API error: {e}",
+                        source="rest",
+                    ) from e
+                raise DataSourceError(
+                    f"Connection error: {e}",
+                    source="rest",
+                ) from e
+
+            results = self._extract_results(data)
+
+            if not results:
+                has_more = False
+                break
+
+            if "total" in data and isinstance(data["total"], int):
+                self._total_count = data["total"]
+
+            yield results
+
+            if self.pagination == "page":
+                page += 1
+                has_more = len(results) >= self.page_size
+            elif self.pagination == "offset":
+                offset += len(results)
+                has_more = len(results) >= self.page_size
+            elif self.pagination == "cursor":
+                cursor = data.get("next_cursor") if isinstance(data, dict) else None
+                has_more = cursor is not None
+            else:
+                has_more = False
+
+    def document_count(self) -> int:
+        """Return approximate document count."""
+        if hasattr(self, "_total_count") and self._total_count is not None:
+            return self._total_count
+        count = 0
+        for _ in self.iter_documents():
+            count += 1
+            if count >= MAX_PAGES * self.page_size:
+                break
+        return count
+
+    def health_check(self) -> bool:
+        """Return True if the REST endpoint is reachable."""
+        try:
+            url = self._build_url(page=1, offset=0, cursor=None)
+            self._http_client.fetch(url, self._get_headers())
+            return True
+        except Exception:
+            return False
+
+    def metadata(self) -> dict[str, Any]:
+        """Return metadata about this REST source."""
+        return {
+            "type": "rest",
+            "url": self.url,
+            "method": self.method,
+            "pagination": self.pagination,
+            "page_size": self.page_size,
+            "timeout": self.timeout,
+        }

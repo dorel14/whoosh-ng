@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import sys
 import time
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from pathlib import Path
+from typing import Any
 
 from whoosh import index, qparser, query, scoring
 from whoosh.support.bench import Spec
@@ -163,7 +165,6 @@ def _run_pytest_spec(
         else:
             report_obj.to_json(out)
         print(f"Report written to {out}")
-
     return result
 
 
@@ -173,24 +174,154 @@ def _run_indexing(spec, options) -> tuple[int, float]:
     bench_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(bench_dir)
     idx_dir = os.path.join(project_root, "benchmark", "indexes", f"{spec.name}_index")
-    if os.path.exists(idx_dir):
-        import shutil
 
+    if os.path.exists(idx_dir):
         shutil.rmtree(idx_dir)
     os.makedirs(idx_dir, exist_ok=True)
 
+    use_profiling = getattr(options, "profile", False)
+    batch_size = int(getattr(options, "batch_size", 0) or 0)
+    skip = int(options.skip)
+    upto = int(options.upto) if options.upto else 0
+
+    if use_profiling:
+        from whoosh_modern.profiling import CommitProfilerV2, IndexProfiler
+
+        profiler = IndexProfiler()
+        profiler.__enter__()
+        commit_profiler = CommitProfilerV2(collect_term_stats=True)
+
     ix = index.create_in(idx_dir, schema)
+    start = time.perf_counter()
+    count = 0
+
+    if use_profiling:
+        if batch_size > 0:
+            count = _run_batch_indexing_with_profiling(
+                ix, spec, options, profiler, commit_profiler, batch_size, skip, upto
+            )
+        else:
+            count = _run_single_doc_indexing_with_profiling(
+                ix, spec, options, profiler, commit_profiler, skip, upto
+            )
+
+        profiler.add_documents(count)
+        profiler.__exit__(None, None, None)
+        print(profiler.report())
+        if commit_profiler is not None:
+            print(commit_profiler.report())
+    elif batch_size > 0:
+        count = _run_batch_indexing(ix, spec, options, batch_size, skip, upto)
+    else:
+        count = _run_single_doc_indexing(ix, spec, options, skip, upto)
+
+    elapsed = time.perf_counter() - start
+    print(f"Indexed {count} docs in {elapsed:.3f}s ({count / elapsed:.1f} docs/s)")
+    return count, elapsed
+
+
+def _run_batch_indexing_with_profiling(
+    ix, spec, options, profiler, commit_profiler, batch_size, skip, upto
+) -> int:
+    from whoosh_modern.indexing import BatchIndexWriter
+
+    count = 0
+    with profiler.step("reading"):
+        batches = list(spec.batches(batch_size))
+
+    writer = BatchIndexWriter(
+        ix,
+        batch_size=batch_size,
+        limitmb=options.limitmb,
+        commit_every=options.progress_every if options.progress_every else None,
+        multisegment=options.merge == 0,
+        callback=commit_profiler.callback if commit_profiler else None,
+        commit_profiler=commit_profiler,
+    )
+    with profiler.step("analyzing"):
+        for batch in batches:
+            if skip > 0:
+                skip -= len(batch)
+                if skip < 0:
+                    batch = batch[-skip:]
+                    skip = 0
+                if not batch:
+                    continue
+            if upto and count >= upto:
+                break
+            added = writer.add_batch(batch)
+            count += added
+            if options.progress_every and count % int(options.progress_every) == 0:
+                print(f"  ... {count} docs indexed")
+    with profiler.step("committing"):
+        writer.close()
+    return count
+
+
+def _run_single_doc_indexing_with_profiling(
+    ix, spec, options, profiler, commit_profiler, skip, upto
+) -> int:
+    count = 0
+    with profiler.step("reading"):
+        docs = list(spec.documents())
+
     writer = ix.writer(
         limitmb=options.limitmb,
         procs=options.procs,
         multisegment=options.merge == 0,
     )
+    with profiler.step("analyzing"):
+        for doc in docs:
+            if skip > 0:
+                skip -= 1
+                continue
+            writer.add_document(**doc)
+            count += 1
+            if upto and count >= upto:
+                break
+    with profiler.step("committing"):
+        writer.commit(
+            merge=options.merge == 1,
+            callback=commit_profiler.callback if commit_profiler else None,
+        )
+    return count
+
+
+def _run_batch_indexing(ix, spec, options, batch_size, skip, upto) -> int:
+    from whoosh_modern.indexing import BatchIndexWriter
 
     count = 0
-    skip = int(options.skip)
-    upto = int(options.upto) if options.upto else 0
-    start = time.perf_counter()
+    with BatchIndexWriter(
+        ix,
+        batch_size=batch_size,
+        limitmb=options.limitmb,
+        commit_every=options.progress_every if options.progress_every else None,
+        multisegment=options.merge == 0,
+    ) as writer:
+        for batch in spec.batches(batch_size):
+            if skip > 0:
+                skip -= len(batch)
+                if skip < 0:
+                    batch = batch[-skip:]
+                    skip = 0
+                if not batch:
+                    continue
+            if upto and count >= upto:
+                break
+            added = writer.add_batch(batch)
+            count += added
+            if options.progress_every and count % int(options.progress_every) == 0:
+                print(f"  ... {count} docs indexed")
+    return count
 
+
+def _run_single_doc_indexing(ix, spec, options, skip, upto) -> int:
+    count = 0
+    writer = ix.writer(
+        limitmb=options.limitmb,
+        procs=options.procs,
+        multisegment=options.merge == 0,
+    )
     for doc in spec.documents():
         if skip > 0:
             skip -= 1
@@ -199,13 +330,10 @@ def _run_indexing(spec, options) -> tuple[int, float]:
         count += 1
         if upto and count >= upto:
             break
-        if options.every and count % int(options.every) == 0:
+        if options.progress_every and count % int(options.progress_every) == 0:
             print(f"  ... {count} docs indexed")
-
     writer.commit(merge=options.merge == 1)
-    elapsed = time.perf_counter() - start
-    print(f"Indexed {count} docs in {elapsed:.3f}s ({count / elapsed:.1f} docs/s)")
-    return count, elapsed
+    return count
 
 
 def _run_searching(spec, options) -> tuple[int, float]:
@@ -286,11 +414,27 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--limitmb", type=int, default=128, help="Max memory usage per writer in MB"
     )
-    parser.add_argument("--every", default=None, help="Report progress every N docs")
+    parser.add_argument(
+        "--progress-every",
+        type=int,
+        default=0,
+        help="Print progress message every N docs (0=disable)",
+    )
     parser.add_argument("--merge", default=1, help="Merge policy (1=SMALL, 0=none)")
     parser.add_argument("--chunk", default=0, help="Chunk size for indexing progress")
     parser.add_argument("--skip", default="1", help="Initial docs to skip (default: 1)")
     parser.add_argument("--upto", default=0, help="Maximum docs to index (0=unlimited)")
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=0,
+        help="Commit writer every N docs (0=disable batch commits)",
+    )
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Enable IndexProfiler to measure each indexing step",
+    )
     parser.add_argument(
         "--pytest-args",
         default="",
@@ -353,11 +497,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         procs=args.procs,
         limitmb=args.limitmb,
         indexname=f"{str(args.spec)}_index",
-        every=args.every,
+        progress_every=args.progress_every,
         merge=args.merge,
         chunk=args.chunk,
         skip=args.skip,
         upto=args.upto,
+        batch_size=args.batch_size,
+        profile=args.profile,
         termfile=None,
     )
 

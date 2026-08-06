@@ -1,4 +1,14 @@
-"""Schema discovery logic for result sets from various data sources."""
+"""Schema discovery logic for result sets from various data sources.
+
+``SchemaDiscovery`` is used by data sources that consume **raw/untyped**
+records (JSON, CSV, REST, GraphQL, Pydantic models, SQL result sets).
+It infers a Whoosh ``Schema`` from actual data values or DB metadata.
+
+Data sources backed by **strongly-typed systems** (Pandas, Polars,
+PyArrow, SQLAlchemy, Peewee, Tortoise ORM) implement their own
+``discover_schema()`` directly from the native type system and do not
+need ``SchemaDiscovery``.
+"""
 
 from collections import Counter
 from collections.abc import Sequence
@@ -102,6 +112,45 @@ class SchemaDiscovery:
         return Schema(**fields)
 
     @staticmethod
+    def from_sample_optimized(
+        documents: Sequence[Any],
+        sample_size: int = 5,
+        searchable_text: Sequence[str] | None = None,
+    ) -> Schema:
+        """Infer an optimized Schema from sample documents.
+
+        Applies post-processing rules to reduce index size:
+        - drop TEXT fields not listed in ``searchable_text``
+        - downgrade obviously unique identifiers from TEXT to ID
+        - downgrade low-cardinality boolean-like TEXT to BOOLEAN
+
+        Args:
+            documents: List of document mappings to infer types from.
+            sample_size: Number of documents to sample for type inference.
+            searchable_text: field names that should remain TEXT. All other
+                TEXT-like fields are dropped unless their inferred type is
+                already more specific than TEXT.
+
+        Returns:
+            Optimized Whoosh Schema.
+        """
+        base = SchemaDiscovery.from_sample(documents, sample_size=sample_size)
+        searchable = set(searchable_text or [])
+        optimized: dict[str, Any] = {}
+        for name, field in base.items():
+            current = type(field).__name__
+            if current == "TEXT" and name not in searchable:
+                continue
+            if current == "TEXT" and SchemaDiscovery._looks_like_id(name):
+                optimized[name] = ID(stored=True)
+                continue
+            if current == "TEXT" and SchemaDiscovery._looks_like_bool(documents, name):
+                optimized[name] = BOOLEAN(stored=True)
+                continue
+            optimized[name] = field
+        return Schema(**optimized)
+
+    @staticmethod
     def detect_id_field(fields: dict[str, Any]) -> str | None:
         """Detect ID field from schema fields.
 
@@ -136,3 +185,16 @@ class SchemaDiscovery:
         if isinstance(value, list):
             return KEYWORD
         return TEXT
+
+    @staticmethod
+    def _looks_like_id(name: str) -> bool:
+        lower = name.lower()
+        return lower.endswith("id") or lower == "id"
+
+    @staticmethod
+    def _looks_like_bool(documents: Sequence[Any], field: str, sample_size: int = 20) -> bool:
+        sample = [doc.get(field) for doc in documents[:sample_size] if field in doc]
+        if not sample:
+            return False
+        lowered = {str(v).lower() for v in sample}
+        return lowered.issubset({"true", "false", "1", "0", "yes", "no", "oui", "non"})
