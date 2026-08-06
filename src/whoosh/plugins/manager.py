@@ -14,6 +14,17 @@ from whoosh.utils.async_utils import is_async_callable, run_async_from_sync  # t
 
 logger = logging.getLogger(__name__)
 
+#: Entry-point groups discovered by :meth:`PluginManager.load_plugins`.
+STANDARD_GROUPS: tuple[str, ...] = (
+    "whoosh.plugins",
+    "whoosh.datasources",
+    "whoosh.vector.providers",
+    "whoosh.middlewares",
+    "whoosh.embeddings",
+    "whoosh.language",
+    "whoosh.apps",
+)
+
 
 @dataclass
 class PluginMetadata:
@@ -73,12 +84,20 @@ class PluginManager:
         self._enabled: set[str] = set()
         self._analyzers: dict[str, Any] = {}
         self._query_rewriters: dict[str, QueryRewritePlugin] = {}
+        self._datasources: dict[str, Any] = {}
+        self._vector_providers: dict[str, Any] = {}
+        self._middlewares: dict[str, Any] = {}
+        self._embeddings: dict[str, Any] = {}
 
     @classmethod
-    def load_plugins(cls, group: str = "whoosh.plugins") -> None:
+    def load_plugins(cls, group: str | None = None) -> None:
         if cls._default is None:
             cls._default = cls()
-        cls._default._load(group)
+        if group is None:
+            for standard in STANDARD_GROUPS:
+                cls._default._load(standard)
+        else:
+            cls._default._load(group)
 
     def _load(self, group: str) -> None:
         from importlib.metadata import entry_points
@@ -190,3 +209,63 @@ class PluginManager:
     def list_query_rewriters(self) -> list[str]:
         """Return the names of all registered query rewriters."""
         return list(self._query_rewriters.keys())
+
+    # --- Datasource registry -------------------------------------------------
+    def register_datasource(self, name: str, datasource: Any) -> None:
+        """Register a named datasource provider."""
+        self._datasources[name] = datasource
+
+    def get_datasource(self, name: str) -> Any:
+        """Return a registered datasource by name."""
+        if name not in self._datasources:
+            raise KeyError(f"Datasource '{name}' is not registered")
+        return self._datasources[name]
+
+    def list_datasources(self) -> list[str]:
+        """Return the names of all registered datasources."""
+        return list(self._datasources.keys())
+
+    # --- Vector provider registry -------------------------------------------
+    def register_vector_provider(self, name: str, provider: Any) -> None:
+        """Register a named vector provider."""
+        self._vector_providers[name] = provider
+
+    def get_vector_provider(self, name: str) -> Any:
+        """Return a registered vector provider by name."""
+        if name not in self._vector_providers:
+            raise KeyError(f"Vector provider '{name}' is not registered")
+        return self._vector_providers[name]
+
+    def list_vector_providers(self) -> list[str]:
+        """Return the names of all registered vector providers."""
+        return list(self._vector_providers.keys())
+
+    # --- Middleware registry -------------------------------------------------
+    def register_middleware(self, name: str, middleware: Any) -> None:
+        """Register a named middleware instance/type."""
+        self._middlewares[name] = middleware
+
+    def get_middleware(self, name: str) -> Any:
+        """Return a registered middleware by name."""
+        if name not in self._middlewares:
+            raise KeyError(f"Middleware '{name}' is not registered")
+        return self._middlewares[name]
+
+    def list_middlewares(self) -> list[str]:
+        """Return the names of all registered middlewares."""
+        return list(self._middlewares.keys())
+
+    # --- Embedding registry --------------------------------------------------
+    def register_embedding(self, name: str, embedding: Any) -> None:
+        """Register a named embedding provider."""
+        self._embeddings[name] = embedding
+
+    def get_embedding(self, name: str) -> Any:
+        """Return a registered embedding provider by name."""
+        if name not in self._embeddings:
+            raise KeyError(f"Embedding '{name}' is not registered")
+        return self._embeddings[name]
+
+    def list_embeddings(self) -> list[str]:
+        """Return the names of all registered embedding providers."""
+        return list(self._embeddings.keys())

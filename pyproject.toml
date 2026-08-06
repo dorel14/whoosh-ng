@@ -389,6 +389,10 @@ module = "hnswlib"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+module = "boto3"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = [
   "pydantic",
   "msgspec",

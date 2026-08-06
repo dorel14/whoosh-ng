@@ -1,4 +1,10 @@
-"""Middleware pipeline for resilience: retry, caching, logging."""
+"""Middleware pipeline for resilience: retry, caching, logging.
+
+This module is imported as ``whoosh_modern.middleware`` (the package
+``__init__`` re-exports these names) so legacy imports keep working while the
+package also hosts the hook-based middleware (storage/search/analyzer) that
+subclass :class:`whoosh.middleware.base.Middleware`.
+"""
 
 import logging
 import random
@@ -11,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class Middleware(ABC):
-    """Base middleware class."""
+    """Base middleware class for the resilience pipeline (wrap-style)."""
 
     @abstractmethod
     def wrap(self, operation: Callable[..., Any]) -> Callable[..., Any]:
@@ -150,3 +156,12 @@ class MiddlewarePipeline:
         for mw in reversed(self._middlewares):
             wrapped = mw.wrap(wrapped)
         return wrapped()
+
+
+__all__ = [
+    "Middleware",
+    "RetryMiddleware",
+    "LoggingMiddleware",
+    "CacheMiddleware",
+    "MiddlewarePipeline",
+]
