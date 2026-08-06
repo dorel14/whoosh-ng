@@ -25,6 +25,8 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
 
+from typing import Any
+
 # Exceptions
 
 
@@ -116,6 +118,22 @@ class Token:
         "matched",
         "fieldname",
     )
+
+    text: str
+    pos: int
+    startchar: int
+    endchar: int
+    original: str | None
+    positions: bool
+    chars: bool
+    stopped: bool
+    boost: float
+    removestops: bool
+    mode: str
+    boosts: list[tuple[float, float]] | None
+    tokenize: bool | None
+    matched: Any | None
+    fieldname: str | None
 
     def __init__(self, positions=False, chars=False, removestops=True, mode="", **kwargs):
         """
