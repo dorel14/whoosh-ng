@@ -8,12 +8,14 @@ multi-core machines for CPU-bound indexing workloads.
 from __future__ import annotations
 
 import logging
+import os
+import shutil
 from collections.abc import Iterator
 from concurrent.futures import Future, ProcessPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 from whoosh.fields import Schema
-from whoosh.index import create_in
+from whoosh.index import create_in, open_dir
 from whoosh_modern.data_sources import DataSource
 
 if TYPE_CHECKING:
@@ -29,6 +31,9 @@ def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -
     :returns: path to the written segment directory
     """
     temp_dir, schema, docs, _docbase = args
+    # ``create_in`` does not create the target directory itself, so it must
+    # exist before the segment's on-disk index is created.
+    os.makedirs(temp_dir, exist_ok=True)
     ix = create_in(temp_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
     try:
@@ -77,11 +82,27 @@ class ParallelIndexBuilder:
     def build(self, batches: Iterator[list[dict[str, Any]]]) -> int:
         """Build the index from an iterable of document batches.
 
+        Each batch is handed off to a worker process that builds its own
+        segment(s) in an isolated temporary index directory (see
+        ``_build_segment_worker``). Once every worker has finished, each
+        worker-built segment is merged into the main index: a reader is
+        opened on the worker's temporary index and its documents are added
+        to the main writer via :meth:`~whoosh.writing.IndexWriter.add_reader`.
+        This re-indexes the already-tokenized documents into the main
+        index's segment pool without re-running any user-supplied field
+        analysis, which is what allows ``writer.commit(merge=True)`` to
+        subsequently see and merge all the data produced by the workers.
+
+        Without this merge step the segments built by the workers would
+        remain isolated in their own temp directories and the main index
+        would end up empty after commit.
+
         :param batches: iterable of document lists (e.g. from
             ``source.stream_batches()``).
         :returns: total number of documents indexed.
         """
         segments: list[str] = []
+        total = 0
 
         with ProcessPoolExecutor(max_workers=self.workers) as executor:
             futures: list[Future[str]] = []
@@ -94,6 +115,7 @@ class ParallelIndexBuilder:
                     (temp_dir, self.schema, batch, 0),
                 )
                 futures.append(future)
+                total += len(batch)
 
             for future in futures:
                 try:
@@ -103,17 +125,35 @@ class ParallelIndexBuilder:
                     logger.error("Worker failed: %s", exc)
                     raise
 
+        # ``create_in`` requires the target directory to already exist.
+        os.makedirs(self.index_path, exist_ok=True)
         ix = create_in(self.index_path, self.schema)
         writer = ix.writer(limitmb=self.limitmb)
         try:
-            for _segment_dir in segments:
-                pass
+            for segment_dir in segments:
+                # Open the worker's isolated index and merge its documents
+                # into the main writer's segment pool. ``add_reader`` copies
+                # the stored fields and postings for every document in the
+                # reader into the current segment being built by ``writer``,
+                # which is how independently-built segments get combined
+                # into a single index.
+                segment_ix = open_dir(segment_dir)
+                segment_reader = segment_ix.reader()
+                try:
+                    writer.add_reader(segment_reader)
+                finally:
+                    segment_reader.close()
             writer.commit(merge=True)
         except Exception:
             writer.cancel()
             raise
+        finally:
+            # Clean up the worker temp directories now that their segments
+            # have been folded into the main index (or discarded on error).
+            for segment_dir in segments:
+                shutil.rmtree(segment_dir, ignore_errors=True)
 
-        return sum(len(batch) for batch in batches)
+        return total
 
     def build_from_source(self, source: DataSource) -> int:
         """Build the index directly from a DataSource.
