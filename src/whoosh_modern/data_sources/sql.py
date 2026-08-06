@@ -1,9 +1,10 @@
 """SQL DataSource implementation with GROUP BY, JOIN, incremental support,
 and connection pooling."""
 
+import asyncio
 import logging
 import re
-from collections.abc import Iterator, Mapping
+from collections.abc import AsyncIterator, Iterator, Mapping
 from datetime import datetime
 from typing import Any
 
@@ -229,6 +230,15 @@ class SQLSource:
         cursor.execute(f"SELECT COUNT(*) FROM ({self.query})")
         result = cursor.fetchone()
         return result[0] if result else 0
+
+    async def adiscover_schema(self) -> Schema:
+        """Async equivalent of :meth:`discover_schema` via ``asyncio.to_thread``."""
+        return await asyncio.to_thread(self.discover_schema)
+
+    async def aiter_documents(self) -> AsyncIterator[Document]:
+        """Async document streaming via ``asyncio.to_thread``."""
+        for doc in await asyncio.to_thread(list, self.iter_documents()):
+            yield doc
 
     def metadata(self) -> dict[str, Any]:
         """Return metadata about this source."""
