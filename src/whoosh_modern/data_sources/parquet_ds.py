@@ -64,9 +64,13 @@ class ParquetSource:
         try:
             import pandas as pd
 
+            engine = self.engine
+            if engine == "pyarrow":
+                engine = "auto"
+
             if sample:
-                return pd.read_parquet(self.path, engine=self.engine).head(self.sample_size)
-            return pd.read_parquet(self.path, engine=self.engine)
+                return pd.read_parquet(self.path, engine=engine).head(self.sample_size)
+            return pd.read_parquet(self.path, engine=engine)
         except ImportError:
             pass
 

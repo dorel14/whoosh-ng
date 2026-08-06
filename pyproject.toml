@@ -362,6 +362,10 @@ disallow_untyped_decorators = true
 warn_return_any = true
 disable_error_code = ["attr-defined"]
 cache_dir = ".mypy_cache"
+exclude = [
+    "tests/",
+    "benchmark/",
+]
 
 [tool.pyright]
 reportMissingImports = "warning"
@@ -381,6 +385,10 @@ module = "requests"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+module = "hnswlib"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = [
   "pydantic",
   "msgspec",
@@ -396,6 +404,12 @@ module = [
   "pyarrow.parquet",
   "tortoise",
   "Stemmer",
+  "pytest",
+  "peewee",
+  "httpx",
+  "lmdb",
+  "re2",
+  "psutil",
 ]
 ignore_missing_imports = true
 
