@@ -142,6 +142,7 @@
   "reportMissingImports": "warning",
   "reportArgumentType": "warning",
   "reportAttributeAccessIssue": "warning",
+  "reportAssignmentType": "warning",
   "reportUnusedImport": "error",
   "reportUnusedVariable": "error"
 }
