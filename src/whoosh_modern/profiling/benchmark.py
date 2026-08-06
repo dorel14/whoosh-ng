@@ -32,6 +32,7 @@ from whoosh_modern.profiling import (
     CommitProfilerV2,
     FieldAnalyzerCache,
     FieldProfiler,
+    SegmentProfiler,
 )
 
 
@@ -193,7 +194,7 @@ def _profile_segments(
     print("Phase 5: Segment Analysis")
     print("=" * 60)
 
-    segment_profiler = SegmentProfiler()  # type: ignore[attr-defined]  # noqa: F821
+    segment_profiler = SegmentProfiler()
     ix = _create_index(idx_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
 
@@ -202,17 +203,10 @@ def _profile_segments(
 
     writer.commit(merge=False)
 
-    if os.path.exists(os.path.join(idx_dir, "segments")):
-        with open(os.path.join(idx_dir, "segments")) as f:
-            _segment_count = len([line for line in f if line.strip()])
-    else:
-        _segment_count = 1
+    segment_profiler.analyze_index(ix)
 
-    segment_profiler.start_segment(0)  # type: ignore[attr-defined]
-    segment_profiler.stop_segment()  # type: ignore[attr-defined]
-
-    print(segment_profiler.report())  # type: ignore[attr-defined]
-    return cast(dict[str, Any], segment_profiler.to_dict())  # type: ignore[attr-defined]
+    print(segment_profiler.report())
+    return cast(dict[str, Any], segment_profiler.to_dict())
 
 
 def _analyze_cache(schema: fields.Schema, docs: list[dict[str, Any]]) -> dict[str, Any]:

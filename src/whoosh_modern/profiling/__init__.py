@@ -18,6 +18,7 @@ from whoosh_modern.profiling.metrics import MetricsCollector
 from whoosh_modern.profiling.perdocwriter_profiler import PerDocWriterProfiler
 from whoosh_modern.profiling.pipeline_reconciler_v2 import PipelineReconcilerV2
 from whoosh_modern.profiling.posting_pool_profiler import PostingPoolProfiler
+from whoosh_modern.profiling.segment_profiler import SegmentProfiler
 from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
 from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
 from whoosh_modern.profiling.unified_pipeline_profiler import UnifiedPipelineProfiler
@@ -43,6 +44,7 @@ __all__ = [
     "PerDocWriterProfiler",
     "PipelineReconcilerV2",
     "PostingPoolProfiler",
+    "SegmentProfiler",
     "StemmerBenchmark",
     "SyntheticDatasetGenerator",
     "UnifiedPipelineProfiler",
