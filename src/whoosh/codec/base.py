@@ -205,9 +205,7 @@ class FieldWriter:
 
             if btext != lasttext:
                 if fieldname == lastfn and lasttext and btext < lasttext:
-                    raise OutOfOrderError(
-                        f"Term {lastfn}:{lasttext!r} .. {fieldname}:{btext!r}"
-                    )
+                    raise OutOfOrderError(f"Term {lastfn}:{lasttext!r} .. {fieldname}:{btext!r}")
                 if lasttext is not None:
                     finish_term()
                 start_term(btext)

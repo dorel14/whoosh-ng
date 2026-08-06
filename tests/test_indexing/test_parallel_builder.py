@@ -123,9 +123,7 @@ class TestParallelIndexBuilder:
 
             class _Source:
                 def stream_batches(self, batch_size):
-                    docs = [
-                        {"id": str(i), "title": f"doc {i}", "body": "text"} for i in range(6)
-                    ]
+                    docs = [{"id": str(i), "title": f"doc {i}", "body": "text"} for i in range(6)]
                     for i in range(0, len(docs), batch_size):
                         yield docs[i : i + batch_size]
 
