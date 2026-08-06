@@ -7,7 +7,6 @@ from typing import Any
 
 from whoosh.fields import Schema
 from whoosh_modern.exceptions import DataSourceError
-from whoosh_modern.schema_discovery import SchemaDiscovery
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,11 @@ def _to_datetime(value: Any) -> Any:
 
 
 class PolarsSource:
-    """Polars DataFrame data source implementing the DataSource protocol."""
+    """Polars DataFrame data source implementing the DataSource protocol.
+
+    Uses Polars dtypes to infer the Whoosh schema directly, so
+    ``SchemaDiscovery`` is not needed here.
+    """
 
     def __init__(
         self,
@@ -55,18 +58,32 @@ class PolarsSource:
         if self._schema is not None:
             return self._schema
 
-        columns: dict[str, Any] = {}
+        try:
+            columns = list(self._dataframe.columns)
+        except Exception:
+            raise DataSourceError(
+                "DataFrame is not initialized or has no columns",
+                source="polars",
+            ) from None
+
+        if not columns:
+            raise DataSourceError(
+                "DataFrame has no columns to infer schema",
+                source="polars",
+            )
+
+        column_types: dict[str, Any] = {}
         for col_name, dtype in zip(self._dataframe.columns, self._dataframe.dtypes, strict=True):
-            columns[str(col_name)] = self._map_polars_dtype(dtype)
+            column_types[str(col_name)] = self._map_polars_dtype(dtype)
 
         from whoosh.fields import Schema
 
-        self._schema = Schema(**columns)
+        self._schema = Schema(**column_types)
         return self._schema
 
     def _map_polars_dtype(self, dtype: Any) -> Any:
         """Map Polars dtype to Whoosh field."""
-        from whoosh.fields import BOOLEAN, DATETIME, ID, NUMERIC, TEXT
+        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
 
         dtype_str = str(dtype).lower()
 
@@ -101,6 +118,11 @@ class PolarsSource:
 
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the DataFrame."""
+        if self._dataframe is None:
+            raise DataSourceError(
+                "DataFrame is not initialized",
+                source="polars",
+            )
         for row in self._dataframe.iter_rows(named=True):
             yield {k: _to_datetime(v) for k, v in row.items()}
 
@@ -109,6 +131,12 @@ class PolarsSource:
 
         Uses slice-based batching for efficient batch extraction.
         """
+        if self._dataframe is None:
+            raise DataSourceError(
+                "DataFrame is not initialized",
+                source="polars",
+            )
+
         df = self._dataframe
         length = len(df)
 
@@ -126,6 +154,11 @@ class PolarsSource:
 
     def document_count(self) -> int:
         """Return total row count."""
+        if self._dataframe is None:
+            raise DataSourceError(
+                "DataFrame is not initialized",
+                source="polars",
+            )
         return len(self._dataframe)
 
     def metadata(self) -> dict[str, Any]:

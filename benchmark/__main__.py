@@ -171,7 +171,9 @@ def _run_pytest_spec(
 def _run_indexing(spec, options) -> tuple[int, float]:
     """Run indexing benchmark and return (doc_count, elapsed_seconds)."""
     schema = spec.whoosh_schema()
-    idx_dir = spec.index_dir()
+    bench_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(bench_dir)
+    idx_dir = os.path.join(project_root, "benchmark", "indexes", f"{spec.name}_index")
 
     if os.path.exists(idx_dir):
         shutil.rmtree(idx_dir)

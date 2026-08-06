@@ -8,7 +8,6 @@ from typing import Any, Literal
 
 from whoosh.fields import Schema
 from whoosh_modern.exceptions import DataSourceError
-from whoosh_modern.schema_discovery import SchemaDiscovery
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +29,9 @@ class ParquetSource:
     Supports reading Parquet files using pyarrow, pandas, or polars.
     Prefers PyArrow streaming for large files to avoid loading the entire
     dataset into memory.
+
+    Uses PyArrow schema / pandas dtypes / Polars dtypes to infer the
+    Whoosh schema directly, so ``SchemaDiscovery`` is not needed here.
     """
 
     def __init__(
@@ -63,8 +65,8 @@ class ParquetSource:
             import pandas as pd
 
             if sample:
-                return pd.read_parquet(self.path, engine=self.engine).head(self.sample_size)
-            return pd.read_parquet(self.path, engine=self.engine)
+                return pd.read_parquet(self.path, engine=self.engine).head(self.sample_size)  # type: ignore[arg-type]
+            return pd.read_parquet(self.path, engine=self.engine)  # type: ignore[arg-type]
         except ImportError:
             pass
 

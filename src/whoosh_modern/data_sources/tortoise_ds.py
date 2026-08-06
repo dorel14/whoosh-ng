@@ -4,6 +4,8 @@ import logging
 from collections.abc import Iterator, Mapping
 from typing import Any
 
+from whoosh_modern.exceptions import DataSourceError
+
 logger = logging.getLogger(__name__)
 
 Document = Mapping[str, Any]
@@ -13,6 +15,9 @@ class TortoiseSource:
     """Tortoise ORM data source implementing the DataSource protocol.
 
     Supports selecting from a Tortoise ORM model.
+
+    Uses Tortoise field metadata to infer the Whoosh schema directly, so
+    ``SchemaDiscovery`` is not needed here.
 
     Example:
         from tortoise import Tortoise
@@ -45,7 +50,7 @@ class TortoiseSource:
         try:
             from tortoise import Tortoise
 
-            return Tortoise.is_inited()  # type: ignore[no-any-return]
+            return Tortoise.is_inited()
         except Exception:
             return False
 
@@ -53,6 +58,12 @@ class TortoiseSource:
         """Discover schema from Tortoise ORM model fields."""
         if self._schema is not None:
             return self._schema
+
+        if self._model is None:
+            raise DataSourceError(
+                "TortoiseSource requires a 'model' to discover schema",
+                source="tortoise",
+            )
 
         columns: dict[str, Any] = {}
         for field_name, field in self._model._meta.fields_map.items():
@@ -74,7 +85,7 @@ class TortoiseSource:
         if "int" in field_type or "bigint" in field_type:
             return NUMERIC(int, stored=True)
         if "float" in field_type or "decimal" in field_type:
-            return NUMERIC(float, stored=True)  # type: ignore[arg-type]
+            return NUMERIC(float, stored=True)
         if "bool" in field_type:
             return BOOLEAN(stored=True)
         if "date" in field_type or "time" in field_type or "datetime" in field_type:
@@ -84,6 +95,11 @@ class TortoiseSource:
 
     async def _fetch_all(self) -> list[dict[str, Any]]:
         """Fetch all records from the Tortoise model."""
+        if self._model is None:
+            raise DataSourceError(
+                "TortoiseSource requires a 'model' to fetch documents",
+                source="tortoise",
+            )
         queryset = self._model.all()
         return list(await queryset.values())
 
@@ -111,6 +127,12 @@ class TortoiseSource:
     def document_count(self) -> int:
         """Return total document count."""
         import asyncio
+
+        if self._model is None:
+            raise DataSourceError(
+                "TortoiseSource requires a 'model' to count documents",
+                source="tortoise",
+            )
 
         async def _count() -> int:
             return int(await self._model.all().count())

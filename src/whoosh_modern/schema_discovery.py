@@ -1,4 +1,14 @@
-"""Schema discovery logic for result sets from various data sources."""
+"""Schema discovery logic for result sets from various data sources.
+
+``SchemaDiscovery`` is used by data sources that consume **raw/untyped**
+records (JSON, CSV, REST, GraphQL, Pydantic models, SQL result sets).
+It infers a Whoosh ``Schema`` from actual data values or DB metadata.
+
+Data sources backed by **strongly-typed systems** (Pandas, Polars,
+PyArrow, SQLAlchemy, Peewee, Tortoise ORM) implement their own
+``discover_schema()`` directly from the native type system and do not
+need ``SchemaDiscovery``.
+"""
 
 from collections import Counter
 from collections.abc import Sequence

@@ -18,6 +18,9 @@ class SQLAlchemySource:
     Supports any SQLAlchemy dialect (PostgreSQL, MySQL, SQLite, Oracle, etc.)
     with proper type mapping and connection pooling via SQLAlchemy's pool.
 
+    Uses the SQLAlchemy inspector and column types to infer the Whoosh
+    schema directly, so ``SchemaDiscovery`` is not needed here.
+
     Example:
         from sqlalchemy import create_engine
         from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
@@ -59,10 +62,16 @@ class SQLAlchemySource:
 
     def discover_schema(self) -> Schema:
         """Discover schema from query result metadata using SQLAlchemy."""
-        from sqlalchemy import inspect, text  # type: ignore[import-not-found]
+        from sqlalchemy import inspect, text
 
         if self._schema is not None:
             return self._schema
+
+        if not self.query or self._engine is None:
+            raise DataSourceError(
+                "SQLAlchemySource requires a 'query' and 'engine' to discover schema",
+                source="sqlalchemy",
+            )
 
         with self._engine.connect() as conn:
             stmt = text(self.query)
@@ -113,18 +122,24 @@ class SQLAlchemySource:
 
     def _map_sqlalchemy_type(self, col_type: Any, dialect: Any) -> Any:
         """Map SQLAlchemy type to Whoosh field."""
-        from sqlalchemy import BigInteger, Boolean, Date, DateTime, Float, Integer, String
+        from sqlalchemy import (
+            BigInteger,
+            Boolean,
+            Date,
+            DateTime,
+            Float,
+            Integer,
+            String,
+        )
 
         from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
-
-        type_name = type(col_type).__name__.lower()
 
         if isinstance(col_type, (String,)):
             return TEXT(stored=True)
         if isinstance(col_type, (Integer, BigInteger)):
             return NUMERIC(int, stored=True)
         if isinstance(col_type, Float):
-            return NUMERIC(float, stored=True)  # type: ignore[arg-type]
+            return NUMERIC(float, stored=True)
         if isinstance(col_type, Boolean):
             return BOOLEAN(stored=True)
         if isinstance(col_type, (Date, DateTime)):
@@ -134,7 +149,13 @@ class SQLAlchemySource:
 
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the SQLAlchemy query."""
-        from sqlalchemy import text  # type: ignore[import-not-found]
+        from sqlalchemy import text
+
+        if self._engine is None or not self.query:
+            raise DataSourceError(
+                "SQLAlchemySource requires a 'query' and 'engine' to iterate documents",
+                source="sqlalchemy",
+            )
 
         with self._engine.connect() as conn:
             stmt = text(self.query)
@@ -147,10 +168,16 @@ class SQLAlchemySource:
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp using SQLAlchemy."""
-        from sqlalchemy import text  # type: ignore[import-not-found]
+        from sqlalchemy import text
 
         if not self.incremental_field:
             return
+
+        if self._engine is None or not self.query:
+            raise DataSourceError(
+                "SQLAlchemySource requires a 'query' and 'engine' to iterate changes",
+                source="sqlalchemy",
+            )
 
         query = (
             f"{self.query} AND {self.incremental_field} > :since"
@@ -169,7 +196,13 @@ class SQLAlchemySource:
 
     def document_count(self) -> int:
         """Return total document count using SQLAlchemy."""
-        from sqlalchemy import text  # type: ignore[import-not-found]
+        from sqlalchemy import text
+
+        if self._engine is None or not self.query:
+            raise DataSourceError(
+                "SQLAlchemySource requires a 'query' and 'engine' to count documents",
+                source="sqlalchemy",
+            )
 
         count_query = f"SELECT COUNT(*) FROM ({self.query}) AS count_query"
         with self._engine.connect() as conn:

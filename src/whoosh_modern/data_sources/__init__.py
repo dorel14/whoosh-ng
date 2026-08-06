@@ -1,4 +1,14 @@
-"""DataSource protocol and capability interfaces."""
+"""DataSource protocol and capability interfaces.
+
+Data sources implement ``discover_schema()`` either by:
+
+* **Using ``SchemaDiscovery``** — for raw/untyped records (JSON, CSV,
+  REST, GraphQL, Pydantic models, SQL result sets) where schema must be
+  inferred from actual values or DB metadata.
+* **Implementing custom logic** — for strongly-typed backends
+  (Pandas, Polars, PyArrow, SQLAlchemy, Peewee, Tortoise ORM) where the
+  native type system provides a direct mapping to Whoosh fields.
+"""
 
 from collections.abc import AsyncIterator, Callable, Iterator, Mapping
 from typing import Any, Protocol, runtime_checkable

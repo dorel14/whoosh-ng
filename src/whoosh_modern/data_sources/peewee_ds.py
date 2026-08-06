@@ -6,7 +6,6 @@ from typing import Any
 
 from whoosh.fields import Schema
 from whoosh_modern.exceptions import DataSourceError
-from whoosh_modern.schema_discovery import SchemaDiscovery
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +16,9 @@ class PeeweeSource:
     """Peewee ORM data source implementing the DataSource protocol.
 
     Supports selecting from a Peewee model or raw query.
+
+    Uses Peewee field metadata to infer the Whoosh schema directly, so
+    ``SchemaDiscovery`` is not needed here.
 
     Example:
         from peewee import SqliteDatabase, Model, CharField
@@ -107,7 +109,7 @@ class PeeweeSource:
 
     def _map_peewee_field(self, field: Any) -> Any:
         """Map Peewee field to Whoosh field."""
-        from whoosh.fields import BOOLEAN, DATETIME, ID, NUMERIC, TEXT
+        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
 
         field_type = type(field).__name__.lower()
 

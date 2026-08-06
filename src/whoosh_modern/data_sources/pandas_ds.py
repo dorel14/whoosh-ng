@@ -6,7 +6,6 @@ from typing import Any
 
 from whoosh.fields import Schema
 from whoosh_modern.exceptions import DataSourceError
-from whoosh_modern.schema_discovery import SchemaDiscovery
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +13,11 @@ Document = Mapping[str, Any]
 
 
 class PandasSource:
-    """Pandas DataFrame data source implementing the DataSource protocol."""
+    """Pandas DataFrame data source implementing the DataSource protocol.
+
+    Uses pandas dtypes to infer the Whoosh schema directly, so
+    ``SchemaDiscovery`` is not needed here.
+    """
 
     def __init__(
         self,
@@ -47,18 +50,32 @@ class PandasSource:
         if self._schema is not None:
             return self._schema
 
-        columns: dict[str, Any] = {}
+        try:
+            columns = list(self._dataframe.columns)
+        except Exception:
+            raise DataSourceError(
+                "DataFrame is not initialized or has no columns",
+                source="pandas",
+            ) from None
+
+        if not columns:
+            raise DataSourceError(
+                "DataFrame has no columns to infer schema",
+                source="pandas",
+            )
+
+        column_types: dict[str, Any] = {}
         for col_name, dtype in self._dataframe.dtypes.items():
-            columns[str(col_name)] = self._map_pandas_dtype(dtype)
+            column_types[str(col_name)] = self._map_pandas_dtype(dtype)
 
         from whoosh.fields import Schema
 
-        self._schema = Schema(**columns)
+        self._schema = Schema(**column_types)
         return self._schema
 
     def _map_pandas_dtype(self, dtype: Any) -> Any:
         """Map pandas dtype to Whoosh field."""
-        from whoosh.fields import BOOLEAN, DATETIME, ID, NUMERIC, TEXT
+        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
 
         dtype_str = str(dtype).lower()
 
@@ -94,6 +111,11 @@ class PandasSource:
 
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the DataFrame."""
+        if self._dataframe is None:
+            raise DataSourceError(
+                "DataFrame is not initialized",
+                source="pandas",
+            )
         for _, row in self._dataframe.iterrows():
             yield row.to_dict()
 
@@ -102,6 +124,12 @@ class PandasSource:
 
         Uses to_dict(orient='records') for efficient batch extraction.
         """
+        if self._dataframe is None:
+            raise DataSourceError(
+                "DataFrame is not initialized",
+                source="pandas",
+            )
+
         df = self._dataframe
         length = len(df)
         columns = list(df.columns)
@@ -117,6 +145,11 @@ class PandasSource:
 
     def document_count(self) -> int:
         """Return total row count."""
+        if self._dataframe is None:
+            raise DataSourceError(
+                "DataFrame is not initialized",
+                source="pandas",
+            )
         return len(self._dataframe)
 
     def metadata(self) -> dict[str, Any]:
