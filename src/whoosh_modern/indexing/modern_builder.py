@@ -25,11 +25,12 @@ Example::
 from __future__ import annotations
 
 import logging
+import shutil
 from concurrent.futures import Future, ProcessPoolExecutor
 from typing import Any
 
 from whoosh.fields import Schema
-from whoosh.index import create_in
+from whoosh.index import create_in, open_dir
 from whoosh_modern.indexing.batch_writer import BatchIndexWriter
 from whoosh_modern.indexing.compiler import BatchAnalyzer, CompiledDataSource
 
@@ -146,21 +147,35 @@ class ModernIndexBuilder:
         ix = create_in(self.index_path, self.schema)
         writer = ix.writer(limitmb=self.limitmb)
         try:
-            for _segment_dir in segments:
-                pass
+            for segment_dir in segments:
+                segment_ix = open_dir(segment_dir)
+                try:
+                    segment_reader = segment_ix.reader()
+                    try:
+                        writer.add_reader(segment_reader)
+                    finally:
+                        segment_reader.close()
+                finally:
+                    segment_ix.close()
             writer.commit(merge=True)
         except Exception:
             writer.cancel()
             raise
+        finally:
+            for segment_dir in segments:
+                shutil.rmtree(segment_dir, ignore_errors=True)
 
         return sum(len(batch) for batch in batches)
 
 
 def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -> str:
     """Worker function that builds a single segment in a separate process."""
+    import os
+
     from whoosh.index import create_in
 
     temp_dir, schema, docs, _docbase = args
+    os.makedirs(temp_dir, exist_ok=True)
     ix = create_in(temp_dir, schema)
     writer = ix.writer(limitmb=128, multisegment=True)
     try:
