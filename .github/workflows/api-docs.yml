@@ -37,7 +37,8 @@ jobs:
           npm run build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: api-docs-build
           path: ./website/build
           include-hidden-files: true

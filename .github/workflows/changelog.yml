@@ -42,7 +42,7 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git add website/docs/core/changelog.md website/i18l/fr/docusaurus-plugin-content-docs/current/core/changelog.md
-          git add website/docs/api/reference.md website/i18l/fr/docusaurus-plugin-content-docs/current/api/reference.md
+          git add website/docs/core/changelog.md website/i18n/fr/docusaurus-plugin-content-docs/current/core/changelog.md
+          git add website/docs/api/reference.md website/i18n/fr/docusaurus-plugin-content-docs/current/api/reference.md
           git add website/static/llms.txt website/static/llms-full.txt
           git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update changelog and API docs" && git push)
