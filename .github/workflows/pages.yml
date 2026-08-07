@@ -1,11 +1,11 @@
 name: Deploy GitHub Pages
 
-# Build and deploy the Jekyll site (source: docs/) on every push to master
+# Build and deploy the Docusaurus site (source: website/) on every push to master
 on:
   push:
     branches:
       - master
-  workflow_dispatch: # Manual trigger for re-runs / debugging
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,15 +16,6 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
-env:
-  JEKYLL_ENV: production
-  # Project Pages are served at https://dorel14.github.io/whoosh-ng
-  BASE_URL: /whoosh-ng
-  # The Gemfile lives in docs/, not the repo root. Point Bundler at it so
-  # `bundle install` (setup-ruby caching) and `bundle exec jekyll build`
-  # can locate it when run from the repository root.
-  BUNDLE_GEMFILE: ${{ github.workspace }}/docs/Gemfile
-
 jobs:
   build:
     name: Build
@@ -33,25 +24,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          ruby-version: '3.3'
-          bundler-cache: true # Caches gems between runs (uses docs/Gemfile.lock)
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          base_url: ${{ env.BASE_URL }}
+          python-version: "3.11"
 
-      - name: Build with Jekyll
-        run: bundle exec jekyll build --source docs --destination _site
+      - name: Install pydoctor
+        run: pip install pydoctor
+
+      - name: Generate changelog from GitHub releases
+        run: python scripts/generate_changelog.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate API docs
+        run: python scripts/generate_api_docs.py
+
+      - name: Generate llms.txt
+        run: python scripts/generate_llm_docs.py
+
+      - name: Install dependencies
+        working-directory: ./website
+        run: npm ci
+
+      - name: Build
+        working-directory: ./website
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
-          # Include hidden files like .nojekyll for Jekyll-built sites without one
+          path: ./website/build
           include-hidden-files: true
 
   deploy:

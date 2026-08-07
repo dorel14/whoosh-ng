@@ -5,6 +5,8 @@ on:
     branches: [ dev ]
     paths:
       - 'docs/**'
+      - 'website/docs/**'
+      - 'website/i18n/**'
       - 'README.md'
       - 'src/**'
       - '.github/workflows/llms-doc.yml'

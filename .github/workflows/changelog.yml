@@ -1,0 +1,40 @@
+name: Generate Changelog
+
+on:
+  release:
+    types:
+      - published
+      - edited
+  workflow_dispatch:
+
+jobs:
+  changelog:
+    name: Generate Changelog from GitHub Releases
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate changelog from releases and commits
+        run: python scripts/generate_changelog.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docusaurus site
+        working-directory: ./website
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./website/build
+          include-hidden-files: true
