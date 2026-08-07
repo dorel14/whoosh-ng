@@ -28,6 +28,18 @@ class HybridStorage(SyncStorageProvider):
 
     ``list_keys`` uses the remote as source of truth; ``include_cache=True``
     returns the union of remote and cache keys.
+
+    Example::
+
+        from whoosh_modern.storage import HybridStorage, S3Storage
+
+        remote = S3Storage(bucket="my-index-bucket", prefix="segments")
+        storage = HybridStorage(local_cache="./cache", remote=remote)
+
+        storage.write("segment_1.dat", b"binary-segment-data")
+        data = storage.read("segment_1.dat")  # cached after first read
+        storage.invalidate("segment_1.dat")   # force refresh from remote
+        storage.prefetch(["segment_2.dat"])   # warm cache
     """
 
     def __init__(
@@ -140,6 +152,21 @@ class AsyncHybridStorage(AsyncStorageProvider):
 
     Remote operations are executed on a worker thread via ``asyncio.to_thread``
     so the event loop is never blocked.
+
+    Example::
+
+        import asyncio
+        from whoosh_modern.storage import AsyncHybridStorage, S3Storage
+
+        remote = S3Storage(bucket="my-index-bucket", prefix="segments")
+        storage = AsyncHybridStorage(local_cache="./cache", remote=remote)
+
+        async def main() -> None:
+            await storage.awrite("segment_1.dat", b"data")
+            data = await storage.aread("segment_1.dat")
+            await storage.adelete("segment_1.dat")
+
+        asyncio.run(main())
     """
 
     def __init__(self, local_cache: str, remote: SyncStorageProvider) -> None:
