@@ -30,6 +30,7 @@
 an index.
 """
 
+import asyncio
 import os.path
 import pickle
 import re
@@ -327,6 +328,40 @@ class Index:
         from whoosh.searching import Searcher
 
         return Searcher(self.reader(), fromindex=self, **kwargs)
+
+    async def asearch(self, query: Any, *args: Any, **kwargs: Any) -> Any:
+        """Async equivalent of searching via ``searcher`` using ``asyncio.to_thread``.
+
+        :param query: a :class:`whoosh.query.Query` object or a query string.
+            If a string is provided, it is parsed using the index schema's first
+            ``TEXT`` field as the default field.
+        :returns: search results.
+        """
+        searcher = await asyncio.to_thread(self.searcher, *args, **kwargs)
+        try:
+            if isinstance(query, str):
+                from whoosh.fields import TEXT
+                from whoosh.qparser import QueryParser
+
+                default_field = next(
+                    (name for name, field in searcher.schema.items() if isinstance(field, TEXT)),
+                    None,
+                )
+                if default_field is None:
+                    raise ValueError("Schema has no TEXT field to parse query string")
+                parser = QueryParser(default_field, schema=searcher.schema)
+                query = parser.parse(query)
+            return await asyncio.to_thread(searcher.search, query, **kwargs)
+        finally:
+            searcher.close()
+
+    async def awriter(self, *args: Any, **kwargs: Any) -> "AsyncWriterContext":
+        """Async context manager wrapper around :meth:`writer`.
+
+        The underlying writer is obtained on a worker thread via
+        ``asyncio.to_thread`` so the event loop is never blocked.
+        """
+        return AsyncWriterContext(self, args, kwargs)
 
     def field_length(self, fieldname):
         """Returns the total length of the field across all documents."""
@@ -761,3 +796,28 @@ class TOC:
 
         # Rename temporary file to the proper filename
         storage.rename_file(tempfilename, tocfilename, safe=True)
+
+
+class AsyncWriterContext:
+    """Async context manager wrapper around an :class:`whoosh.index.Index` writer.
+
+    Bridges the synchronous :meth:`Index.writer` to an async ``with`` block
+    using ``asyncio.to_thread`` so the event loop is never blocked.
+    """
+
+    def __init__(self, index: Index, args: tuple[Any, ...], kwargs: dict[str, Any]) -> None:
+        self._index = index
+        self._args = args
+        self._kwargs = kwargs
+        self._writer: Any = None
+
+    async def __aenter__(self) -> Any:
+        self._writer = await asyncio.to_thread(self._index.writer, *self._args, **self._kwargs)
+        return self._writer
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        if self._writer is not None:
+            if exc_type is None:
+                await asyncio.to_thread(self._writer.commit)
+            else:
+                await asyncio.to_thread(self._writer.cancel)

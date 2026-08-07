@@ -1,0 +1,8 @@
+# Jekyll build output (never commit generated site)
+/_site/
+
+# Local Ruby gem install path (created by `bundle config set --local path vendor/bundle`)
+/vendor/
+
+# Bundler config
+/.bundle/

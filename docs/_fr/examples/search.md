@@ -6,76 +6,114 @@ lang: fr
 
 # Recherche
 
-Exemples d’interrogation de l’index avec Whoosh‑NG.
+Exemples concrets d'interrogation d'un index Whoosh-NG.
 
-## 1. Recherche basique
+> **Scénario** : Vous avez indexé un catalogue de livres (voir `basic-indexing.md`).
+> Les exemples ci-dessous montrent les patterns de recherche produit.
+
+## Prérequis
+
+L'index `book_index/` contient ce schéma :
+
+```python
+from whoosh.fields import Schema, TEXT, ID, KEYWORD, NUMERIC
+
+schema = Schema(
+    isbn=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    author=TEXT(stored=True),
+    content=TEXT,
+    genre=KEYWORD(stored=True, commas=True),
+    published_year=NUMERIC(int, stored=True, sortable=True),
+    rating=NUMERIC(float, stored=True, sortable=True),
+)
+```
+
+## 1. Recherche basique — « Livres sur Python »
 
 ```python
 from whoosh import index
 from whoosh.qparser import QueryParser
 
-ix = index.open_dir("indexdir")
+ix = index.open_dir("book_index")
 
 with ix.searcher() as s:
     qp = QueryParser("content", ix.schema)
-    q = qp.parse("python recherche")
+    q = qp.parse("python")
 
     results = s.search(q, limit=10)
     for hit in results:
-        print(f"{hit['title']}: {hit.score:.2f}")
+        print(f"{hit['title']} par {hit['author']} — score={hit.score:.2f}")
 ```
 
-## 2. Recherche multi-champs
+## 2. Recherche multi-champs avec boosts
 
 ```python
 from whoosh.qparser import MultifieldParser
 
-ix = index.open_dir("indexdir")
+ix = index.open_dir("book_index")
 qp = MultifieldParser(
-    ["title", "content", "tags"],
+    ["title", "author", "content"],
     ix.schema,
-    fieldboosts={"title": 2.0, "tags": 1.5}
+    fieldboosts={"title": 3.0, "author": 2.0, "content": 1.0},
 )
 
-q = qp.parse("fastapi")
-results = s.search(q)
+q = qp.parse("clean code")
+
+with ix.searcher() as s:
+    results = s.search(q, limit=10)
+    for hit in results:
+        print(f"{hit['title']} — {hit['author']}")
 ```
 
-## 3. Pagination
+## 3. Pagination — « Page 3 des résultats »
 
 ```python
-with ix.searcher() as s:
-    page = s.search_page(q, 2, pagelen=10)  # Page 2, 10 results/page
+ix = index.open_dir("book_index")
+qp = QueryParser("content", ix.schema)
+q = qp.parse("machine learning")
 
-    print(f"Page {page.number} / {page.pagecount}")
+with ix.searcher() as s:
+    page = s.search_page(q, 3, pagelen=15)
+
+    print(f"Page {page.number} / {page.pagecount} ({page.total} résultats)")
     for hit in page:
-        print(hit["title"])
+        print(f"  {hit['title']}")
 ```
 
-## 4. Tri et filtres
+## 4. Tri et filtres — « Sci-fi noté ≥4 après 2010 »
 
 ```python
 from whoosh.query import Term, And, NumericRange
-from whoosh.sorting import FieldFacet, ScoreFacet
+from whoosh.sorting import FieldFacet
+
+ix = index.open_dir("book_index")
+qp = QueryParser("content", ix.schema)
+q = qp.parse("space")
 
 with ix.searcher() as s:
-    # Filtrer par tags et année
     filters = And([
-        Term("tags", "python"),
-        NumericRange("year", 2020, None),
+        Term("genre", "sci-fi"),
+        NumericRange("published_year", 2010, None),
     ])
 
     results = s.search(
         q,
         filter=filters,
-        sortedby=[FieldFacet("year", reverse=True), ScoreFacet()],
-        limit=20
+        sortedby=FieldFacet("rating", reverse=True),
+        limit=20,
     )
+    for hit in results:
+        print(f"{hit['title']} ({hit['published_year']}) — note: {hit['rating']}")
 ```
 
-## 5. Mise en évidence (highlighting)
+## 5. Mise en évidence — « Où la requête correspond »
 
 ```python
+ix = index.open_dir("book_index")
+qp = QueryParser("content", ix.schema)
+q = qp.parse("réseaux de neurones")
+
 with ix.searcher() as s:
     results = s.search(q, limit=5)
 
@@ -85,35 +123,54 @@ with ix.searcher() as s:
         print(f"  {snippet}")
 ```
 
-## 6. Recherche avec plage de dates
+## 6. Recherche par plage — « Livres publiés en 2023 »
 
 ```python
-from whoosh.query import DateRange
-from datetime import datetime, timedelta
+from whoosh.query import NumericRange
 
-ix = index.open_dir("indexdir")
+ix = index.open_dir("book_index")
+
 with ix.searcher() as s:
-    start = datetime(2024, 1, 1)
-    end = datetime(2024, 12, 31)
-    q = DateRange("published", start, end)
-
+    q = NumericRange("published_year", 2023, 2023)
     results = s.search(q)
+    print(f"{results.total} livres publiés en 2023")
 ```
 
-## 7. Recherche par préfixe
+## 7. Recherche par préfixe — « Titres commençant par "Deep" »
 
 ```python
 from whoosh.query import Prefix
 
+ix = index.open_dir("book_index")
+
 with ix.searcher() as s:
-    q = Prefix("title", "Py")  # Tous les titres commençant par "Py"
+    q = Prefix("title", "Deep")
     results = s.search(q)
+    for hit in results:
+        print(hit["title"])
+```
+
+## 8. Recherche facetée — « Grouper par genre »
+
+```python
+from whoosh.sorting import FieldFacet
+
+ix = index.open_dir("book_index")
+qp = QueryParser("content", ix.schema)
+q = qp.parse("programming")
+
+with ix.searcher() as s:
+    results = s.search(q, groupedby=FieldFacet("genre"))
+
+    for genre, group in results.groups("genre").items():
+        print(f"{genre}: {len(group)} résultats")
 ```
 
 ## Points clés
 
-- `QueryParser` analyse la chaîne de requête en objet `Query`.
-- `MultifieldParser` recherche sur plusieurs champs avec des boosts.
-- `search_page()` pour la pagination.
-- `filter` pour les filtres (ne pas inclure dans le score).
-- `sortedby` pour trier par champ ou score.
+- `QueryParser` analyse une chaîne en objet `Query`.
+- `MultifieldParser` recherche plusieurs champs avec des boosts.
+- `search_page()` gère la pagination.
+- `filter` restreint les résultats sans affecter le score.
+- `sortedby` trie par valeur de champ ou par score de pertinence.
+- `hit.highlights()` renvoie des extraits mis en surbrillance.

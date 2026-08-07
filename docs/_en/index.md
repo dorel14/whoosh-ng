@@ -6,7 +6,7 @@ permalink: /en/
 
 # Whoosh-NG Documentation
 
-> **Version**: Latest | Last updated: 2026-07-12
+> **Latest release**: v3.0.0 | [View releases on GitHub](https://github.com/dorel14/whoosh-ng/releases) | Next: v4.0.0.dev0 (in development) | Last updated: 2026-08-07
 
 Welcome to the official documentation for **Whoosh-NG**, a pure-Python full-text indexing and search library modernized for 2025+.
 
@@ -34,15 +34,16 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[Schema Design]({{ '/en/guides/schema/' | relative_url }})** — Field types, storage, and indexing options
 - **[Query Language]({{ '/en/guides/query/' | relative_url }})** — Lucene-like query syntax
 - **[Middleware]({{ '/en/guides/middleware/' | relative_url }})** — Pipeline hooks and custom middleware
+- **[Middleware & Plugin Pipeline]({{ '/en/guides/middleware-sprint-c/' | relative_url }})** — Hook-based middleware and PluginManager integration
 - **[Backends]({{ '/en/guides/backends/' | relative_url }})** — File, SQLite, and memory storage
 - **[Plugins]({{ '/en/guides/plugins/' | relative_url }})** — Extending Whoosh-NG with plugins
+- **[Plugin System]({{ '/en/guides/plugins-sprint-c/' | relative_url }})** — PluginManager API, entry points, and deployment
 - **[Autocomplete]({{ '/en/guides/autocomplete/' | relative_url }})** — Autocomplete providers
+- **[Autocomplete Providers]({{ '/en/guides/autocomplete-sprint-d/' | relative_url }})** — NGramProvider, FuzzySuggestProvider, InvertedIndexAutocomplete
 - **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, and Faiss integration
 - **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
-- **[Performance Benchmarking]({{ '/en/guides/performance/' | relative_url }})** — Benchmark tools and optimization results
-- **[Modern Indexing API]({{ '/en/guides/modern-indexing/' | relative_url }})** — BatchIndexWriter, AnalyzerCache, FieldAnalyzerCache
-- **[Dates and Numeric Ranges]({{ '/en/guides/dates/' | relative_url }})** — Date and numeric range queries
-- **[Nested Documents]({{ '/en/guides/nested/' | relative_url }})** — Parent-child document relationships
+- **[Linguistics & Synonyms]({{ '/en/guides/linguistics-sprint-d/' | relative_url }})** — SynonymManager, providers, middleware
+- **[Stemmer Providers]({{ '/en/guides/stemming-sprint-d/' | relative_url }})** — Stemmer backends, PyStemmer, language analyzers
 - **[Stemming and Stop Words]({{ '/en/guides/stemming/' | relative_url }})** — Language stemmers and stop-word lists
 - **[N-grams]({{ '/en/guides/ngrams/' | relative_url }})** — N-gram tokenization and substring search
 - **[Glossary]({{ '/en/guides/glossary/' | relative_url }})** — Key terms and definitions
@@ -81,15 +82,19 @@ Both versions are kept synchronized, with code examples remaining in English for
 
 - **[Basic Indexing]({{ '/en/examples/basic-indexing/' | relative_url }})** — Document indexing examples
 - **[Search Examples]({{ '/en/examples/search/' | relative_url }})** — Querying and retrieving results
-- **[FastAPI Integration]({{ '/en/examples/fastapi/' | relative_url }})** — REST API with FastAPI
+- **[Search Models]({{ '/en/examples/search-models/' | relative_url }})** — Auto-mapping Python models to Whoosh schemas
+- **[FastAPI Integration]({{ '/en/examples/fastapi-search/' | relative_url }})** — REST API with FastAPI
 - **[Middleware Examples]({{ '/en/examples/middleware/' | relative_url }})** — Custom middleware patterns
+- **[Middleware Pipeline]({{ '/en/examples/middleware-pipeline/' | relative_url }})** — Retry, cache, logging
+- **[Movie Search App]({{ '/en/examples/movie-search/' | relative_url }})** — Complete movie search application
 - **[Plugin Development]({{ '/en/examples/plugin-dev/' | relative_url }})** — Building plugins
 - **[Data Sources]({{ '/en/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, GraphQLSource, FastCSVSource, JSONSource, ParquetSource, PandasSource, PolarsSource, SQLAlchemySource, PeeweeSource, TortoiseSource
 - **[Schema Discovery]({{ '/en/examples/schema-discovery/' | relative_url }})** — Result-set introspection
 - **[Facet Manager]({{ '/en/examples/facets/' | relative_url }})** — Auto-discovery and manual overrides
 - **[Validation Framework]({{ '/en/examples/validation/' | relative_url }})** — 4-level validation
 - **[SearchView]({{ '/en/examples/search-view/' | relative_url }})** — Full pipeline integration
-- **[Middleware Pipeline]({{ '/en/examples/middleware-pipeline/' | relative_url }})** — Retry, cache, logging
+- **[Autocomplete]({{ '/en/examples/autocomplete/' | relative_url }})** — Autocomplete provider examples
+- **[Vector Search]({{ '/en/examples/vector-search/' | relative_url }})** — NumPy, HNSW, and Faiss integrations
 
 ## Quick Overview
 
@@ -107,6 +112,9 @@ Whoosh-NG combines classic Whoosh's pure-Python full-text search with modern fea
 - **Project Repository**: [GitHub - whoosh-ng](https://github.com/dorel14/whoosh-ng)
 - **PyPI Package**: [whoosh-ng](https://pypi.org/project/whoosh-ng/)
 - **Issue Tracker**: [GitHub Issues](https://github.com/dorel14/whoosh-ng/issues)
+- **LLM-Friendly Docs**:
+  - [`llms.txt`]({{ '/llms.txt' | relative_url }}) — Index of all documentation pages
+  - [`llms-full.txt`]({{ '/llms-full.txt' | relative_url }}) — Complete API documentation concatenated
 
 ## Contributing
 

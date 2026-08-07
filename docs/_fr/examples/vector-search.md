@@ -1,6 +1,6 @@
 ---
 title: "Recherche Vectorielle"
-nav_order: 270
+nav_order: 257
 lang: fr
 ---
 

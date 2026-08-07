@@ -1,9 +1,10 @@
 """REST DataSource implementation with pagination and authentication."""
 
+import asyncio
 import json
 import logging
 import urllib.request
-from collections.abc import Iterator, Mapping
+from collections.abc import AsyncIterator, Iterator, Mapping
 from typing import Any
 
 from whoosh.fields import Schema
@@ -315,6 +316,15 @@ class RESTSource:
             return True
         except Exception:
             return False
+
+    async def adiscover_schema(self) -> Schema:
+        """Async equivalent of :meth:`discover_schema` via ``asyncio.to_thread``."""
+        return await asyncio.to_thread(self.discover_schema)
+
+    async def aiter_documents(self) -> AsyncIterator[Document]:
+        """Async document streaming via ``asyncio.to_thread``."""
+        for doc in await asyncio.to_thread(list, self.iter_documents()):
+            yield doc
 
     def metadata(self) -> dict[str, Any]:
         """Return metadata about this REST source."""

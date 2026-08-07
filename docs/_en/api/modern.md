@@ -380,3 +380,113 @@ from whoosh_modern.exceptions import (
 
 All exceptions inherit from `DataSourceError`, which carries optional
 `source` and `field` context attributes.
+
+## Storage Providers
+
+```python
+from whoosh_modern.storage import (
+    FileStorage,
+    AsyncFileStorage,
+    S3Storage,
+    HybridStorage,
+    AsyncHybridStorage,
+)
+```
+
+### FileStorage
+
+Local filesystem storage. Keys are relative paths under ``root``.
+
+```python
+from whoosh_modern.storage import FileStorage
+
+storage = FileStorage("indexdir")
+storage.write("segment_1.dat", b"data")
+assert storage.read("segment_1.dat") == b"data"
+assert storage.exists("segment_1.dat") is True
+storage.delete("segment_1.dat")
+keys = storage.list_keys()
+```
+
+### AsyncFileStorage
+
+Async variant of ``FileStorage``. All operations run on a worker thread
+via ``asyncio.to_thread``.
+
+```python
+import asyncio
+from whoosh_modern.storage import AsyncFileStorage
+
+storage = AsyncFileStorage("indexdir")
+
+async def main() -> None:
+    await storage.awrite("segment_1.dat", b"data")
+    data = await storage.aread("segment_1.dat")
+    await storage.adelete("segment_1.dat")
+
+asyncio.run(main())
+```
+
+### S3Storage
+
+S3-compatible blob storage. ``boto3`` is required only when this provider
+is used; it is imported lazily so the rest of Whoosh-NG does not depend on
+it. A ``client`` may be injected for testing.
+
+```python
+from whoosh_modern.storage import S3Storage
+
+storage = S3Storage(bucket="my-index-bucket", prefix="segments")
+storage.write("segment_1.dat", b"data")
+data = storage.read("segment_1.dat")
+keys = storage.list_keys()
+```
+
+### HybridStorage
+
+Compose a local cache with a remote backend for cloud-native indexes.
+The remote is the source of truth; the local cache is a write-through
+performance layer.
+
+```python
+from whoosh_modern.storage import HybridStorage, S3Storage
+
+remote = S3Storage(bucket="my-index-bucket", prefix="segments")
+storage = HybridStorage(local_cache="./cache", remote=remote)
+
+storage.write("segment_1.dat", b"data")
+data = storage.read("segment_1.dat")  # served from cache after first read
+storage.invalidate("segment_1.dat")   # force refresh from remote
+storage.prefetch(["segment_2.dat"])   # warm cache proactively
+```
+
+Read path:
+
+1. local cache hit → return immediately
+2. cache miss → read from remote, write-through into cache, return
+
+Write path:
+
+- ``remote.write(key, data)`` (source of truth)
+- on success → ``local_cache.write(key, data)``
+- on failure → raise before polluting cache
+
+### AsyncHybridStorage
+
+Async variant of ``HybridStorage``. Remote operations are executed on a
+worker thread via ``asyncio.to_thread`` so the event loop is never blocked.
+
+```python
+import asyncio
+from whoosh_modern.storage import AsyncHybridStorage, S3Storage
+
+remote = S3Storage(bucket="my-index-bucket", prefix="segments")
+storage = AsyncHybridStorage(local_cache="./cache", remote=remote)
+
+async def main() -> None:
+    await storage.awrite("segment_1.dat", b"data")
+    data = await storage.aread("segment_1.dat")
+    await storage.adelete("segment_1.dat")
+
+asyncio.run(main())
+```

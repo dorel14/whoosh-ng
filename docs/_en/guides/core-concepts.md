@@ -11,21 +11,7 @@ Whoosh-NG is a pure-Python search engine library. This guide explains the main c
 
 Whoosh-NG follows a layered architecture:
 
-```mermaid
-graph TD
-    A["Application"] --> B["Whoosh Core"]
-    B --> C["Plugin Manager"]
-    B --> D["Registry System"]
-    B --> E["Middleware Pipeline"]
-    B --> F["Event Bus"]
-    B --> G["Hook System"]
-    C --> H["Plugins"]
-    H --> I["FastAPI"]
-    H --> J["Vector Search"]
-    H --> K["Autocomplete"]
-    H --> L["Observability"]
-    H --> M["Admin UI"]
-```
+![Architecture diagram: Application → Whoosh-NG Core (Search Engine, Schema, Plugin Manager, Registry, Middleware, Event Bus, Hooks) → Plugins (FastAPI, Vector Search, Autocomplete, PostgreSQL, S3, Monitoring, Admin UI)](/assets/architecture.svg)
 
 ## Key Components
 

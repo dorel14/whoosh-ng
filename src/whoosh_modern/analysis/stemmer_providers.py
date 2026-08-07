@@ -110,7 +110,7 @@ class PyStemmerProvider:
 
     def stem(self, word: str) -> str:
         """Stem a word using PyStemmer."""
-        return cast(str, self._stemmer.stem(word))
+        return cast(str, self._stemmer.stemWord(word))
 
     @property
     def name(self) -> str:

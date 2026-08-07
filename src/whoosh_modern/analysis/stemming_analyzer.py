@@ -43,6 +43,7 @@ def stemming_analyzer(
     maxsize=None,
     gaps=False,
     stemmer: str | StemmerProvider = "auto",
+    language: str = "english",
     ignore=None,
     cachesize=50000,
 ):
@@ -54,13 +55,14 @@ def stemming_analyzer(
     :param maxsize: Maximum word size
     :param gaps: If True, split on expression instead of matching
     :param stemmer: Stemmer backend: "auto", "internal", "pystemmer", or provider
+    :param language: Language code for the stemmer (default: "english")
     :param ignore: Set of words to not stem
     :param cachesize: Maximum number of stemmed words to cache
     :returns: Composed analyzer pipeline
     """
     # Resolve stemmer parameter to a callable
     if isinstance(stemmer, str):
-        stemfn = get_stemmer(stemmer, "english").stem
+        stemfn = get_stemmer(stemmer, language).stem
     elif hasattr(stemmer, "stem"):
         stemfn = stemmer.stem
     else:

@@ -6,7 +6,8 @@ lang: fr
 
 # Guide de migration
 
-Ce guide vous aide à migrer depuis Whoosh legacy ou Whoosh-Reloaded 3.x vers Whoosh-NG 4.0.
+Ce guide vous aide à migrer depuis Whoosh legacy ou Whoosh-Reloaded 3.x vers Whoosh-NG v3.0.0.
+> **Prochaine version** : v4.0.0.dev0 (en développement) ajoute `SchemaBuilder`, la hiérarchie d'exceptions middleware, et plus encore — voir le [CHANGELOG]({{ '/changelog/' | relative_url }}).
 
 ## Depuis Whoosh 1.x/2.x (Legacy)
 
@@ -37,7 +38,7 @@ from whoosh.registry import VectorRegistry
 VectorRegistry.register("numpy", NumpyProvider(), "mon_app")
 ```
 
-### SchemaBuilder (nouveau en 4.0)
+### SchemaBuilder (nouveau dans v4.0.0.dev0)
 
 ```python
 # Ancien
@@ -54,7 +55,7 @@ schema = (
 )
 ```
 
-## Méthode de migration middleware (nouveau 4.0)
+## Méthode de migration middleware (nouveau dans v4.0.0.dev0)
 
 ```python
 from whoosh.middleware import Middleware, MiddlewareContext
@@ -97,4 +98,4 @@ writer = apply_middleware_to_writer(ix.writer(), [LoggingMiddleware()])
 
 ## Compatibilité
 
-Whoosh-NG 4.0 maintient la compatibilité ascendante. Si vous trouvez un changement cassant, signalez-le comme une issue.
+Whoosh-NG maintient la compatibilité ascendante. Si vous trouvez un changement cassant, signalez-le comme une issue.

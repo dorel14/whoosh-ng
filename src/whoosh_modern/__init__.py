@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from whoosh_modern.application import FileStorage, SearchApplication
+from whoosh_modern.autocomplete import FuzzySuggestProvider, NGramProvider, create_autocomplete
 from whoosh_modern.data_sources import DataSource, ObservableDataSource
 from whoosh_modern.data_sources.config import DataSourceConfig
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
@@ -16,7 +18,6 @@ from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
 from whoosh_modern.data_sources.tortoise_ds import TortoiseSource
 from whoosh_modern.exceptions import (
     DataSourceError,
-    DataSourceNotFoundError,
     DocumentIterationError,
     SchemaDiscoveryError,
     ValidationError,
@@ -33,11 +34,37 @@ from whoosh_modern.indexing import (
     ParallelIndexBuilder,
     TieredMergePolicy,
 )
+from whoosh_modern.linguistics import (
+    LANG_SYNONYMS,
+    EnglishAnalyzer,
+    FrenchAnalyzer,
+    GermanAnalyzer,
+    ItalianAnalyzer,
+    JSONSynonymProvider,
+    SpanishAnalyzer,
+    SQLiteSynonymStore,
+    StaticSynonymProvider,
+    SynonymCompiler,
+    SynonymExpansionMiddleware,
+    SynonymManager,
+    SynonymProvider,
+    YAMLSynonymProvider,
+)
 from whoosh_modern.middleware import (
+    AnalyzerMiddleware,
     CacheMiddleware,
+    FileStorageProvider,
     LoggingMiddleware,
     MiddlewarePipeline,
+    QueryRewriteMiddleware,
+    RankingMiddleware,
     RetryMiddleware,
+    S3StorageProvider,
+    SearchMiddleware,
+    SQLiteStorageProvider,
+    StemmingMiddleware,
+    StorageMiddleware,
+    SynonymMiddleware,
 )
 from whoosh_modern.profiling import (
     AnalyzerCache,
@@ -54,11 +81,27 @@ from whoosh_modern.profiling import (
     profile_commit,
 )
 from whoosh_modern.schema_discovery import SchemaDiscovery
+from whoosh_modern.storage import (
+    AsyncFileStorage,
+    AsyncHybridStorage,
+    CachedObjectStorage,
+    HybridStorage,
+    S3Storage,
+    SnapshotStorage,
+)
 from whoosh_modern.validation import ValidationFramework
 from whoosh_modern.views import SearchView
 from whoosh_modern.writer import ModernIndex, ModernIndexWriter
 
 __all__ = [
+    "SearchApplication",
+    "FileStorage",
+    "S3Storage",
+    "SnapshotStorage",
+    "CachedObjectStorage",
+    "HybridStorage",
+    "AsyncHybridStorage",
+    "AsyncFileStorage",
     "DataSource",
     "ObservableDataSource",
     "SQLSource",
@@ -82,11 +125,37 @@ __all__ = [
     "RetryMiddleware",
     "LoggingMiddleware",
     "CacheMiddleware",
+    "StorageMiddleware",
+    "FileStorageProvider",
+    "SQLiteStorageProvider",
+    "S3StorageProvider",
+    "SearchMiddleware",
+    "QueryRewriteMiddleware",
+    "RankingMiddleware",
+    "AnalyzerMiddleware",
+    "StemmingMiddleware",
+    "SynonymMiddleware",
+    "SynonymProvider",
+    "StaticSynonymProvider",
+    "YAMLSynonymProvider",
+    "JSONSynonymProvider",
+    "SQLiteSynonymStore",
+    "SynonymCompiler",
+    "SynonymManager",
+    "SynonymExpansionMiddleware",
+    "LANG_SYNONYMS",
+    "FrenchAnalyzer",
+    "EnglishAnalyzer",
+    "GermanAnalyzer",
+    "SpanishAnalyzer",
+    "ItalianAnalyzer",
+    "FuzzySuggestProvider",
+    "NGramProvider",
+    "create_autocomplete",
     "DataSourceError",
     "SchemaDiscoveryError",
     "DocumentIterationError",
     "ValidationError",
-    "DataSourceNotFoundError",
     "ModernIndex",
     "ModernIndexWriter",
     "BatchIndexWriter",

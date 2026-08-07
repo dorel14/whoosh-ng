@@ -36,7 +36,7 @@ just_the_docs:
     fr:
       name: Français
       nav_fold: true
-  footer_content: "Whoosh-NG Documentation | Last updated: 2026-08-05"
+  footer_content: "Whoosh-NG Documentation v3.0.0 | Last updated: 2026-08-07"
 
 # Collections for organized content
 collections:
@@ -69,9 +69,11 @@ defaults:
     values:
       layout: default
 
-# Include additional files
+# Include additional files (served as static, not processed as posts/pages)
 include:
   - README.md
+  - llms.txt
+  - llms-full.txt
 
 # Exclude from build
 exclude:
@@ -93,12 +95,14 @@ exclude:
   - Gemfile
   - Gemfile.lock
 
-# Plugins
+# Plugins (only GitHub Pages whitelisted plugins are available on github.io)
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
   - jekyll-sitemap
   - jekyll-feed
+  # jekyll-mermaid is NOT available on GitHub Pages (not in the whitelist).
+  # Use SVG images or ASCII art for diagrams in the documentation.
 
 # SEO and social
 github_username: dorel14
