@@ -21,7 +21,6 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/',
-          editUrl: 'https://github.com/dorel14/whoosh-ng/tree/master/website/docs',
         },
         blog: false,
       },
@@ -92,6 +91,13 @@ const config: Config = {
     prism: {
       theme: prismThemes.oneLight,
       darkTheme: prismThemes.oneDark,
+    },
+    // Force dark theme as default — visitors start in dark mode.
+    // They can still toggle to light mode via the navbar button.
+    colorMode: {
+      defaultMode: 'dark',
+      disableSwitch: false,
+      respectPrefersColorScheme: false,
     },
   },
 
