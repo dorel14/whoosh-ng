@@ -97,7 +97,11 @@ const config: Config = {
 
   onBrokenLinks: 'warn',
   onBrokenAnchors: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
+  },
 };
 
 export default config;

@@ -11,6 +11,8 @@ jobs:
   changelog:
     name: Generate Changelog from GitHub Releases
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,19 +24,25 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install pydoctor
+        run: pip install pydoctor
+
       - name: Generate changelog from releases and commits
         run: python scripts/generate_changelog.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docusaurus site
-        working-directory: ./website
-        run: |
-          npm ci
-          npm run build
+      - name: Generate API docs
+        run: python scripts/generate_api_docs.py
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./website/build
-          include-hidden-files: true
+      - name: Generate llms.txt
+        run: python scripts/generate_llm_docs.py
+
+      - name: Commit and push changelog updates
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add website/docs/core/changelog.md website/i18l/fr/docusaurus-plugin-content-docs/current/core/changelog.md
+          git add website/docs/api/reference.md website/i18l/fr/docusaurus-plugin-content-docs/current/api/reference.md
+          git add website/static/llms.txt website/static/llms-full.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update changelog and API docs" && git push)

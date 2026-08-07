@@ -79,15 +79,15 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
 
           # Mise à jour du README et des Markdown
-          find docs/ -name "*.md" -exec sed -i -E \
-            "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" {} \;
+           find docs/ -name "*.md" -not -path "docs/archive_jekyll/*" -exec sed -i -E \
+             "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" {} \;
 
           sed -i -E "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" README.md
 
           # Mise à jour de docs/_config.yml (clé 'version:')
-          if [ -f docs/_config.yml ]; then
-            sed -i -E "s/^(v|V)ersion: .*/version: $VERSION/" docs/_config.yml
-          fi
+           if [ -f docs/archive_jekyll/_config.yml ]; then
+             sed -i -E "s/^(v|V)ersion: .*/version: $VERSION/" docs/archive_jekyll/_config.yml
+           fi
 
           # Configurer git et commiter les changements
           git config user.name "github-actions[bot]"

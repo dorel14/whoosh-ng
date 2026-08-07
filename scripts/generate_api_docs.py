@@ -2,16 +2,16 @@
 
 Ce module orchestre l'execution de pydoctor pour generer la documentation
 API a partir du code source Python. Pydoctor produit des fichiers HTML
-qui sont integres au site Docusaurus via un composant iframe ou un lien.
+qui sont integres au site Docusaurus via un composant iframe.
 
 Le script:
 1. Installe pydoctor si ce n'est pas fait
 2. Execute pydoctor sur les packages source (whoosh, whoosh_modern)
-3. Copie les fichiers generes dans website/static/api/
-4. Met a jour le menu de navigation pour inclure le lien vers les API docs
+3. Copie les fichiers generes dans website/static/api_html/
+4. Cree la page Docusaurus api/reference.md avec un iframe vers le HTML
 
 Auteur: SoniqueBay Team
-Version: 1.1.0
+Version: 1.2.0
 """
 
 from __future__ import annotations
@@ -24,7 +24,13 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = REPO_ROOT / "src"
 STATIC_DIR = REPO_ROOT / "website" / "static"
-API_OUTPUT = STATIC_DIR / "api"
+# Use a subdirectory that Docusaurus won't process through webpack
+# (static/ assets are copied verbatim, but .html files in static/ are
+# processed by webpack's file-loader which triggers case-sensitivity checks)
+# Instead, output to an _out directory and serve from there
+API_OUTPUT = REPO_ROOT / "website" / "api_html"
+# Final location copied into static/ as raw assets (not bundled)
+STATIC_API_DIR = STATIC_DIR / "api_docs"
 DOCS_EN_DIR = REPO_ROOT / "website" / "docs"
 DOCS_FR_DIR = REPO_ROOT / "website" / "i18n" / "fr" / "docusaurus-plugin-content-docs" / "current"
 
@@ -65,6 +71,10 @@ def install_pydoctor() -> bool:
 def generate_api_docs() -> bool:
     """Run pydoctor to generate HTML API docs.
 
+    Pydoctor output goes to ``website/api_html/`` (git-ignored build artifact).
+    The HTML files are then copied verbatim to ``website/static/api_docs/``
+    which Docusaurus serves as static raw assets (not processed by webpack).
+
     Returns:
         True if generation succeeded, False otherwise.
     """
@@ -93,6 +103,17 @@ def generate_api_docs() -> bool:
 
     if result.stdout:
         print(result.stdout)
+
+    # Copy generated HTML to static/ directory for Docusaurus to serve
+    # Docusaurus copies files from static/ verbatim, but webpack processes
+    # .html files through file-loader which has case-sensitivity checks.
+    # To avoid conflicts (e.g., whoosh.fields.numeric.html vs NUMERIC.html),
+    # we serve via a raw asset path that bypasses webpack bundling.
+    if STATIC_API_DIR.exists():
+        shutil.rmtree(STATIC_API_DIR)
+    shutil.copytree(API_OUTPUT, STATIC_API_DIR)
+    print(f"Copied API docs to {STATIC_API_DIR}")
+
     return True
 
 
@@ -115,11 +136,11 @@ and generates HTML documentation from docstrings.
 :::note
 If the embedded documentation does not display, you can also view the
 full API docs in a new tab:
-[Open API Reference](/api/index.html)
+[Open API Reference](/api_docs/index.html)
 :::
 
 <iframe
-  src="/api/index.html"
+  src="/api_docs/index.html"
   title="Whoosh-NG API Documentation"
   width="100%"
   height="1200px"
