@@ -67,7 +67,7 @@ try:
         :param autocomplete: Optional AutocompleteProvider for the autocomplete endpoint
         :returns: Configured FastAPI application
         """
-        app = FastAPI(title="Whoosh-NG API", version="4.1.0")
+        app = FastAPI(title="Whoosh-NG API", version="4.2.0")
 
         @app.get(f"{prefix}/health", response_model=HealthResponse)
         async def health_check() -> dict[str, str]:

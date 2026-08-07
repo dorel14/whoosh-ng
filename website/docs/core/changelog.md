@@ -7,6 +7,43 @@ sidebar_position: 80
 
 Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
 
+## v4.2.0 (2026-08-07)
+**Tag**: `v4.2.0`
+
+## v4.2.0 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix changelog workflow typo and pages.yml checkout depth ([`d88b82b`](https://github.com/dorel14/whoosh-ng/commit/d88b82b68f7ea2ed28c4530cbda1ecad77308acf))
+
+### Features
+
+- **docs**: Enable dark theme by default and remove edit button ([`2c3d98b`](https://github.com/dorel14/whoosh-ng/commit/2c3d98b27087125073729505cba156d1c2578d66))
+
+---
+
+**Detailed Changes**: [v4.1.0...v4.2.0](https://github.com/dorel14/whoosh-ng/compare/v4.1.0...v4.2.0)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.0 [skip ci]
+
+### Features
+
+- enable dark theme by default and remove edit button
+
+### Bug Fixes
+
+- fix changelog workflow typo and pages.yml checkout depth
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.0)
+
 ## v4.1.0 (2026-08-07)
 **Tag**: `v4.1.0`
 
