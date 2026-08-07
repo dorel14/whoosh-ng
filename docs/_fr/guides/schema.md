@@ -75,7 +75,7 @@ tags = KEYWORD(
 
 ## SchemaBuilder
 
-Whoosh-NG 4.0 introduit `SchemaBuilder` pour une API fluide :
+Whoosh-NG v4.0.0.dev0 (en développement) introduit `SchemaBuilder` pour une API fluide :
 
 ```python
 from whoosh.fields import SchemaBuilder, TEXT, ID, NUMERIC

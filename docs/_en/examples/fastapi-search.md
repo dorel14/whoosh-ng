@@ -1,6 +1,6 @@
 ---
 title: "FastAPI Integration"
-nav_order: 225
+nav_order: 255
 ---
 
 # FastAPI Integration

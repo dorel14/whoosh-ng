@@ -1,6 +1,6 @@
 ---
 title: "Gestionnaire de facettes"
-nav_order: 242
+nav_order: 248
 lang: fr
 ---
 

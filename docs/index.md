@@ -22,3 +22,6 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **Project Repository**: [GitHub - whoosh-ng](https://github.com/dorel14/whoosh-ng)
 - **PyPI Package**: [whoosh-ng](https://pypi.org/project/whoosh-ng/)
 - **Issue Tracker**: [GitHub Issues](https://github.com/dorel14/whoosh-ng/issues)
+- **LLM-Friendly Docs**:
+  - [`llms.txt`]({{ '/llms.txt' | relative_url }}) — Index of all documentation pages
+  - [`llms-full.txt`]({{ '/llms-full.txt' | relative_url }}) — Complete API documentation

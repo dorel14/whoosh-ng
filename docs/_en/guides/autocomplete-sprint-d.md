@@ -188,7 +188,7 @@ whoosh_autocomplete = "whoosh_modern.autocomplete.plugin:AutocompletePlugin"
 ```python
 class AutocompletePlugin(Plugin):
     name = "whoosh_autocomplete"
-    version = "4.0.0"
+    version = "3.0.0"
 
     def register(self, manager):
         # Registers InvertedIndexAutocomplete as "inverted"

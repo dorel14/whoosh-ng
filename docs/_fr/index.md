@@ -8,7 +8,7 @@ lang: fr
 
 Bibliothèque d'indexation et de recherche full-text purement Python, modernisée pour 2025+.
 
-## Démarrage rapide
+## Vitesse de démarrage
 
 ```bash
 pip install whoosh-ng
@@ -28,6 +28,8 @@ with ix.searcher() as s:
     results = s.search("world")
     print(results[0])
 ```
+
+> **Dernière version publiée**: v3.0.0 (6 août 2026) | [Voir les releases sur GitHub](https://github.com/dorel14/whoosh-ng/releases) | Prochaine: v4.0.0.dev0 (en développement)
 
 ## Documentation
 
@@ -61,13 +63,27 @@ with ix.searcher() as s:
 
 ### Exemples
 
-- **[Indexation basique]({{ '/fr/examples/basic-indexing/' | relative_url }})** — Exemples d'indexation de documents
+- **[Indexation de base]({{ '/fr/examples/basic-indexing/' | relative_url }})** — Exemples d'indexation de documents
 - **[Recherche]({{ '/fr/examples/search/' | relative_url }})** — Interrogation et récupération de résultats
-- **[FastAPI]({{ '/fr/examples/fastapi/' | relative_url }})** — API REST avec FastAPI
+- **[Modèles de recherche]({{ '/fr/examples/search-models/' | relative_url }})** — Auto-mapping des modèles Python vers Whoosh
+- **[FastAPI]({{ '/fr/examples/fastapi-search/' | relative_url }})** — API REST avec FastAPI
 - **[Middleware]({{ '/fr/examples/middleware/' | relative_url }})** — Patterns de middleware personnalisés
+- **[Pipeline de middleware]({{ '/fr/examples/middleware-pipeline/' | relative_url }})** — Nouvelle tentative, cache, journalisation
+- **[Application de recherche cinéma]({{ '/fr/examples/movie-search/' | relative_url }})** — Application de recherche complète
+- **[Développement de plugins]({{ '/fr/examples/plugin-dev/' | relative_url }})** — Créer des plugins
 - **[Sources de données]({{ '/fr/examples/data-sources/' | relative_url }})** — SQLSource, RESTSource, GraphQLSource, FastCSVSource, JSONSource, ParquetSource, PandasSource, PolarsSource, SQLAlchemySource, PeeweeSource, TortoiseSource
 - **[Découverte de schéma]({{ '/fr/examples/schema-discovery/' | relative_url }})** — Inspection des jeux de résultats
 - **[Gestionnaire de facettes]({{ '/fr/examples/facets/' | relative_url }})** — Auto-découverte et remplacements manuels
 - **[Framework de validation]({{ '/fr/examples/validation/' | relative_url }})** — Validation 4 niveaux
 - **[SearchView]({{ '/fr/examples/search-view/' | relative_url }})** — Intégration du pipeline complet
-- **[Pipeline de middleware]({{ '/fr/examples/middleware-pipeline/' | relative_url }})** — Nouvelle tentative, cache, journalisation
+- **[Autocomplétion]({{ '/fr/examples/autocomplete/' | relative_url }})** — Exemples de fournisseurs d'autocomplétion
+- **[Recherche vectorielle]({{ '/fr/examples/vector-search/' | relative_url }})** — Intégration NumPy, HNSW et Faiss
+
+## Liens rapides
+
+- **Dépôt GitHub**: [whoosh-ng](https://github.com/dorel14/whoosh-ng)
+- **Paquet PyPI**: [whoosh-ng](https://pypi.org/project/whoosh-ng/)
+- **Signalements de bugs**: [GitHub Issues](https://github.com/dorel14/whoosh-ng/issues)
+- **Documentation pour LLM**:
+  - [`llms.txt`]({{ '/llms.txt' | relative_url }}) — Index de toutes les pages de documentation
+  - [`llms-full.txt`]({{ '/llms-full.txt' | relative_url }}) — Documentation API complète

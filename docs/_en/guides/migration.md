@@ -5,7 +5,8 @@ nav_order: 70
 
 # Migration Guide
 
-This guide helps you migrate from Whoosh legacy or Whoosh-Reloaded 3.x to Whoosh-NG 4.0.
+This guide helps you migrate from Whoosh legacy or Whoosh-Reloaded 3.x to Whoosh-NG v3.0.0.  
+> **Next release**: v4.0.0.dev0 (in development) will add SchemaBuilder, enhanced middleware exception hierarchy, and more — see the [CHANGELOG]({{ '/changelog/' | relative_url }}) for details.
 
 ## From Whoosh 1.x/2.x (Legacy)
 
@@ -61,7 +62,7 @@ from whoosh.registry import VectorRegistry
 VectorRegistry.register("numpy", NumpyProvider(), "my_app")
 ```
 
-### Middleware (New in 4.0)
+### Middleware (New in v4.0.0.dev0)
 
 ```python
 # Optional migration: add middleware to existing code
@@ -77,7 +78,7 @@ class LoggingMiddleware(Middleware):
 writer = apply_middleware_to_writer(ix.writer(), [LoggingMiddleware()])
 ```
 
-### SchemaBuilder (New in 4.0)
+### SchemaBuilder (New in v4.0.0.dev0)
 
 ```python
 # Old
@@ -125,11 +126,11 @@ schema = (
 
 ## Breaking Changes
 
-Whoosh-NG 4.0 maintains backward compatibility. If you find a breaking change, please report it as an issue.
+Whoosh-NG maintains backward compatibility. If you find a breaking change, please report it as an issue.
 
 ### Exception Hierarchy
 
-New in 4.0: `MiddlewareError` and `StopOperation` in middleware:
+New in v4.0.0.dev0: `MiddlewareError` and `StopOperation` in middleware:
 
 ```python
 from whoosh.middleware.exceptions import MiddlewareError, StopOperation
