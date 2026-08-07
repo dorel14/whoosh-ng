@@ -20,6 +20,10 @@ env:
   JEKYLL_ENV: production
   # Project Pages are served at https://dorel14.github.io/whoosh-ng
   BASE_URL: /whoosh-ng
+  # The Gemfile lives in docs/, not the repo root. Point Bundler at it so
+  # `bundle install` (setup-ruby caching) and `bundle exec jekyll build`
+  # can locate it when run from the repository root.
+  BUNDLE_GEMFILE: ${{ github.workspace }}/docs/Gemfile
 
 jobs:
   build:
