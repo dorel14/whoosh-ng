@@ -5,7 +5,7 @@ nav_order: 70
 
 # Migration Guide
 
-This guide helps you migrate from Whoosh legacy or Whoosh-Reloaded 3.x to Whoosh-NG v3.0.0.  
+This guide helps you migrate from Whoosh legacy or Whoosh-Reloaded 3.x to Whoosh-NG v3.0.0.
 > **Next release**: v4.0.0.dev0 (in development) will add SchemaBuilder, enhanced middleware exception hierarchy, and more — see the [CHANGELOG]({{ '/changelog/' | relative_url }}) for details.
 
 ## From Whoosh 1.x/2.x (Legacy)

@@ -73,9 +73,7 @@ class SQLiteStorageProvider(SyncStorageProvider):
         self._path = path
         self._table = table
         self._conn = sqlite3.connect(path, check_same_thread=False)
-        self._conn.execute(
-            f"CREATE TABLE IF NOT EXISTS {table} (key TEXT PRIMARY KEY, data BLOB)"
-        )
+        self._conn.execute(f"CREATE TABLE IF NOT EXISTS {table} (key TEXT PRIMARY KEY, data BLOB)")
         self._conn.commit()
 
     def _execute(self, sql: str, params: tuple[Any, ...] = ()) -> sqlite3.Cursor:
@@ -90,9 +88,7 @@ class SQLiteStorageProvider(SyncStorageProvider):
         )
 
     def read(self, key: str) -> bytes:
-        cur = self._conn.execute(
-            f"SELECT data FROM {self._table} WHERE key = ?", (key,)
-        )
+        cur = self._conn.execute(f"SELECT data FROM {self._table} WHERE key = ?", (key,))
         row = cur.fetchone()
         if row is None:
             raise KeyError(f"Key '{key}' not found")
@@ -102,9 +98,7 @@ class SQLiteStorageProvider(SyncStorageProvider):
         self._execute(f"DELETE FROM {self._table} WHERE key = ?", (key,))
 
     def exists(self, key: str) -> bool:
-        cur = self._conn.execute(
-            f"SELECT 1 FROM {self._table} WHERE key = ? LIMIT 1", (key,)
-        )
+        cur = self._conn.execute(f"SELECT 1 FROM {self._table} WHERE key = ? LIMIT 1", (key,))
         return cur.fetchone() is not None
 
     def list_keys(self) -> list[str]:
@@ -169,7 +163,7 @@ class S3StorageProvider(SyncStorageProvider):
         for page in paginator.paginate(Bucket=self._bucket, Prefix=prefix):
             for obj in page.get("Contents", []):
                 k = obj["Key"]
-                keys.append(k[len(prefix):] if prefix and k.startswith(prefix) else k)
+                keys.append(k[len(prefix) :] if prefix and k.startswith(prefix) else k)
         return sorted(keys)
 
 

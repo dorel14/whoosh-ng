@@ -19,8 +19,8 @@ def _build_analyzer(language: str) -> Any:
     stemmer = get_stemmer("auto", language)
     stoplist: list[str] = []
     with suppress(Exception):
-        stoplist = stopwords_for_language(language)  # type: ignore[no-untyped-call]
-    return WhooshStemmingAnalyzer(stemfn=stemmer.stem, stoplist=stoplist)  # type: ignore[no-untyped-call]
+        stoplist = stopwords_for_language(language)
+    return WhooshStemmingAnalyzer(stemfn=stemmer.stem, stoplist=stoplist)
 
 
 class FrenchAnalyzer:

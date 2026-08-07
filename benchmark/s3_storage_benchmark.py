@@ -59,8 +59,8 @@ class SegmentData:
         """Serialize as a single segment file."""
         buf = io.BytesIO()
         buf.write(self.metadata)
-        for field, data in self.posting_lists.items():
-            buf.write(field.encode("utf-8").ljust(32, b"\x00"))
+        for field_name, data in self.posting_lists.items():
+            buf.write(field_name.encode("utf-8").ljust(32, b"\x00"))
             buf.write(len(data).to_bytes(4, "big"))
             buf.write(data)
         return buf.getvalue()
@@ -73,22 +73,24 @@ class SegmentData:
         offset = 256
         posting_lists: dict[str, bytes] = {}
         while offset < len(data):
-            field = data[offset : offset + 32].rstrip(b"\x00").decode("utf-8")
+            field_name = data[offset : offset + 32].rstrip(b"\x00").decode("utf-8")
             offset += 32
             size = int.from_bytes(data[offset : offset + 4], "big")
             offset += 4
-            posting_lists[field] = data[offset : offset + size]
+            posting_lists[field_name] = data[offset : offset + size]
             offset += size
         return cls(segment_id=0, posting_lists=posting_lists, metadata=metadata)
 
 
-def generate_synthetic_segment(segment_id: int, num_fields: int = 5, size_kb: int = 64) -> SegmentData:
+def generate_synthetic_segment(
+    segment_id: int, num_fields: int = 5, size_kb: int = 64
+) -> SegmentData:
     """Generate a synthetic Whoosh segment with random posting lists."""
     posting_lists: dict[str, bytes] = {}
     field_names = [f"field_{i}" for i in range(num_fields)]
     bytes_per_field = (size_kb * 1024 - 256) // num_fields
-    for field in field_names:
-        posting_lists[field] = random.randbytes(bytes_per_field)
+    for field_name in field_names:
+        posting_lists[field_name] = random.randbytes(bytes_per_field)
     metadata = segment_id.to_bytes(8, "big") + random.randbytes(248)
     return SegmentData(segment_id=segment_id, posting_lists=posting_lists, metadata=metadata)
 
@@ -128,7 +130,11 @@ class OneObjectPerSegment(S3StorageStrategy):
         client = get_s3_client()
         start = time.perf_counter()
         for seg in segments:
-            client.put_object(Bucket=BUCKET, Key=f"segments/seg_{seg.segment_id:06d}.dat", Body=seg.as_file())
+            client.put_object(
+                Bucket=BUCKET,
+                Key=f"segments/seg_{seg.segment_id:06d}.dat",
+                Body=seg.as_file(),
+            )
         return time.perf_counter() - start
 
     def read_segments(self, segment_ids: list[int]) -> float:
@@ -142,7 +148,9 @@ class OneObjectPerSegment(S3StorageStrategy):
         client = get_s3_client()
         keys = client.list_objects_v2(Bucket=BUCKET, Prefix="segments/").get("Contents", [])
         if keys:
-            client.delete_objects(Bucket=BUCKET, Delete={"Objects": [{"Key": k["Key"]} for k in keys]})
+            client.delete_objects(
+                Bucket=BUCKET, Delete={"Objects": [{"Key": k["Key"]} for k in keys]}
+            )
 
 
 class OneObjectPerPostingList(S3StorageStrategy):
@@ -154,10 +162,10 @@ class OneObjectPerPostingList(S3StorageStrategy):
         client = get_s3_client()
         start = time.perf_counter()
         for seg in segments:
-            for field, data in seg.posting_lists.items():
+            for field_name, data in seg.posting_lists.items():
                 client.put_object(
                     Bucket=BUCKET,
-                    Key=f"postings/seg_{seg.segment_id:06d}/{field}.bin",
+                    Key=f"postings/seg_{seg.segment_id:06d}/{field_name}.bin",
                     Body=data,
                 )
             client.put_object(
@@ -182,7 +190,9 @@ class OneObjectPerPostingList(S3StorageStrategy):
         for prefix in ["postings/"]:
             keys = client.list_objects_v2(Bucket=BUCKET, Prefix=prefix).get("Contents", [])
             if keys:
-                client.delete_objects(Bucket=BUCKET, Delete={"Objects": [{"Key": k["Key"]} for k in keys]})
+                client.delete_objects(
+                    Bucket=BUCKET, Delete={"Objects": [{"Key": k["Key"]} for k in keys]}
+                )
 
 
 class CompressedSegments(S3StorageStrategy):
@@ -196,7 +206,11 @@ class CompressedSegments(S3StorageStrategy):
         start = time.perf_counter()
         for seg in segments:
             compressed = cctx.compress(seg.as_file())
-            client.put_object(Bucket=BUCKET, Key=f"compressed/seg_{seg.segment_id:06d}.zst", Body=compressed)
+            client.put_object(
+                Bucket=BUCKET,
+                Key=f"compressed/seg_{seg.segment_id:06d}.zst",
+                Body=compressed,
+            )
         return time.perf_counter() - start
 
     def read_segments(self, segment_ids: list[int]) -> float:
@@ -212,7 +226,9 @@ class CompressedSegments(S3StorageStrategy):
         client = get_s3_client()
         keys = client.list_objects_v2(Bucket=BUCKET, Prefix="compressed/").get("Contents", [])
         if keys:
-            client.delete_objects(Bucket=BUCKET, Delete={"Objects": [{"Key": k["Key"]} for k in keys]})
+            client.delete_objects(
+                Bucket=BUCKET, Delete={"Objects": [{"Key": k["Key"]} for k in keys]}
+            )
 
 
 class HybridCacheS3(S3StorageStrategy):
@@ -250,7 +266,9 @@ class HybridCacheS3(S3StorageStrategy):
         client = get_s3_client()
         keys = client.list_objects_v2(Bucket=BUCKET, Prefix="hybrid/").get("Contents", [])
         if keys:
-            client.delete_objects(Bucket=BUCKET, Delete={"Objects": [{"Key": k["Key"]} for k in keys]})
+            client.delete_objects(
+                Bucket=BUCKET, Delete={"Objects": [{"Key": k["Key"]} for k in keys]}
+            )
 
 
 async def run_benchmark() -> None:
@@ -260,7 +278,10 @@ async def run_benchmark() -> None:
     read_sample_size = 20
 
     print(f"Generating {num_segments} synthetic segments ({size_kb_per_segment}KB each)...")
-    segments = [generate_synthetic_segment(i, num_fields=5, size_kb=size_kb_per_segment) for i in range(num_segments)]
+    segments = [
+        generate_synthetic_segment(i, num_fields=5, size_kb=size_kb_per_segment)
+        for i in range(num_segments)
+    ]
     total_size_mb = sum(s.total_size for s in segments) / (1024 * 1024)
     print(f"Total generated data: {total_size_mb:.2f} MB")
 
@@ -284,13 +305,23 @@ async def run_benchmark() -> None:
             # Write benchmark
             write_time = strategy.write_segments(segments)
             write_mbps = total_size_mb / write_time if write_time > 0 else 0.0
-            print(f"  Write: {write_time:.3f}s ({write_mbps:.2f} MB/s, {num_segments / write_time:.1f} obj/s)")
+            print(
+                f"  Write: {write_time:.3f}s "
+                f"({write_mbps:.2f} MB/s, {num_segments / write_time:.1f} obj/s)"
+            )
 
             # Read benchmark
             sample_ids = random.sample(range(num_segments), min(read_sample_size, num_segments))
             read_time = strategy.read_segments(sample_ids)
-            read_mbps = (total_size_mb * read_sample_size / num_segments) / read_time if read_time > 0 else 0.0
-            print(f"  Read:  {read_time:.3f}s ({read_mbps:.2f} MB/s, {read_sample_size / read_time:.1f} obj/s)")
+            read_mbps = (
+                (total_size_mb * read_sample_size / num_segments) / read_time
+                if read_time > 0
+                else 0.0
+            )
+            print(
+                f"  Read:  {read_time:.3f}s "
+                f"({read_mbps:.2f} MB/s, {read_sample_size / read_time:.1f} obj/s)"
+            )
 
             result = BenchmarkResult(
                 name=strategy.name,
@@ -317,7 +348,10 @@ async def run_benchmark() -> None:
         if res.errors:
             print(f"{res.name:<30} ERROR: {res.errors[0]}")
         else:
-            print(f"{res.name:<30} {res.write_throughput_mbps:<15.2f} {res.read_throughput_mbps:<15.2f}")
+            print(
+                f"{res.name:<30} "
+                f"{res.write_throughput_mbps:<15.2f} {res.read_throughput_mbps:<15.2f}"
+            )
 
     # Recommendations
     print(f"\n{'=' * 60}")

@@ -394,6 +394,10 @@ module = "boto3"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+module = "rapidfuzz"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = [
   "pydantic",
   "msgspec",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from whoosh_modern.analysis.stemming_analyzer import stemming_analyzer
 from whoosh_modern.linguistics.stemmers import (
     EnglishAnalyzer,
     FrenchAnalyzer,
@@ -11,12 +12,11 @@ from whoosh_modern.linguistics.stemmers import (
     ItalianAnalyzer,
     SpanishAnalyzer,
 )
-from whoosh_modern.analysis.stemming_analyzer import stemming_analyzer
 
 
 class TestLanguageAnalyzers:
     @pytest.mark.parametrize(
-        "analyzer_cls,language",
+        ("analyzer_cls", "language"),
         [
             (FrenchAnalyzer, "fr"),
             (EnglishAnalyzer, "en"),

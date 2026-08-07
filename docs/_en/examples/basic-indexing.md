@@ -140,4 +140,3 @@ with ix.searcher() as s:
         print(f"Score: {hit.score:.3f}")
         print(f"Snippet: {hit.highlights('body')}")
         print("---")
-

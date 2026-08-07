@@ -67,9 +67,7 @@ def discovered_manager(monkeypatch: pytest.MonkeyPatch) -> PluginManager:
         "whoosh.language": [],
         "whoosh.apps": [],
     }
-    monkeypatch.setattr(
-        "importlib.metadata.entry_points", lambda: _make_eps(plugins)
-    )
+    monkeypatch.setattr("importlib.metadata.entry_points", lambda: _make_eps(plugins))
     manager = PluginManager()
     for group in STANDARD_GROUPS:
         manager._load(group)

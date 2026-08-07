@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
-from whoosh_modern.linguistics.synonyms.provider import SynonymProvider
-
 
 class SynonymCompiler:
     """Precompile raw synonym data into a fast lookup format.

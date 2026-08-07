@@ -27,7 +27,7 @@ class FuzzySuggestProvider(AutocompleteProvider):
         if not self._phrases:
             return []
         try:
-            from rapidfuzz import fuzz, process  # type: ignore[import-not-found]
+            from rapidfuzz import fuzz, process
         except ImportError as exc:
             raise ImportError(
                 "rapidfuzz is required for FuzzySuggestProvider. "

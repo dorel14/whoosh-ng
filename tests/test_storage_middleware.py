@@ -82,9 +82,9 @@ class TestS3StorageProvider:
         client.get_object.side_effect = get_object
         client.delete_object.side_effect = delete_object
         client.head_object.side_effect = head_object
-        client.get_paginator.return_value.paginate.side_effect = (
-            lambda **kw: [{"Contents": [{"Key": k} for k in store]}]
-        )
+        client.get_paginator.return_value.paginate.side_effect = lambda **kw: [
+            {"Contents": [{"Key": k} for k in store]}
+        ]
         return client, store
 
     def test_round_trip_with_injected_client(self) -> None:

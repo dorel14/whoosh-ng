@@ -73,4 +73,3 @@ class TestFuzzySuggestProvider:
         ac = create_autocomplete("fuzzy")
         hits = ac.search("hello")
         assert hits == []
-

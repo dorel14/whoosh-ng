@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import sys
 import tomllib
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -72,7 +72,7 @@ def update_readme(version: str) -> bool:
 def update_docs_config(version: str) -> bool:
     """Update the footer version and date in docs/_config.yml."""
     content = CONFIG_YML.read_text()
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
 
     new_content = re.sub(
         r"footer_content: \"Whoosh-NG Documentation [^\"]*\"",
@@ -91,11 +91,15 @@ def update_docs_index_en(version: str) -> bool:
     if not INDEX_EN.exists():
         return False
     content = INDEX_EN.read_text()
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
 
     new_content = re.sub(
         r"> \*\*Latest release\*\*: v[\d.]+.*\n",
-        f"> **Latest release**: v{version} | [View releases on GitHub](https://github.com/dorel14/whoosh-ng/releases) | Next: v4.0.0.dev0 (in development) | Last updated: {today}\n",
+        (
+            f"> **Latest release**: v{version} | "
+            "[View releases on GitHub](https://github.com/dorel14/whoosh-ng/releases) | "
+            f"Next: v4.0.0.dev0 (in development) | Last updated: {today}\n"
+        ),
         content,
     )
 
@@ -110,11 +114,15 @@ def update_docs_index_fr(version: str) -> bool:
     if not INDEX_FR.exists():
         return False
     content = INDEX_FR.read_text()
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
 
     new_content = re.sub(
         r"> \*\*Dernière version publiée\*\*: v[\d.]+.*\n",
-        f"> **Dernière version publiée**: v{version} | [Voir les releases sur GitHub](https://github.com/dorel14/whoosh-ng/releases) | Prochaine: v4.0.0.dev0 (en développement)\n",
+        (
+            f"> **Dernière version publiée**: v{version} | "
+            "[Voir les releases sur GitHub](https://github.com/dorel14/whoosh-ng/releases) | "
+            "Prochaine: v4.0.0.dev0 (en développement)\n"
+        ),
         content,
     )
 

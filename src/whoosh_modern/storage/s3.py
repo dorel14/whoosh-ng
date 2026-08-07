@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from whoosh_modern.middleware.storage import S3StorageProvider
 
 

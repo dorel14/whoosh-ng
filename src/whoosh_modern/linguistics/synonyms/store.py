@@ -3,9 +3,6 @@
 from __future__ import annotations
 
 import sqlite3
-from typing import Any
-
-from whoosh_modern.linguistics.synonyms.provider import SynonymProvider
 
 
 class SQLiteSynonymStore:
@@ -33,9 +30,7 @@ class SQLiteSynonymStore:
         self._conn.commit()
 
     def get_synonyms(self, word: str) -> list[str]:
-        cur = self._conn.execute(
-            "SELECT synonym FROM synonyms WHERE word = ?", (word,)
-        )
+        cur = self._conn.execute("SELECT synonym FROM synonyms WHERE word = ?", (word,))
         return [row["synonym"] for row in cur.fetchall()]
 
     def add_synonym(self, word: str, synonyms: list[str]) -> None:

@@ -50,8 +50,7 @@ try:
         async def schema_explorer() -> dict[str, Any]:
             return {
                 "fields": [
-                    {"name": name, "type": str(field)}
-                    for name, field in index.schema.items()
+                    {"name": name, "type": str(field)} for name, field in index.schema.items()
                 ]
             }
 

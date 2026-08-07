@@ -20,6 +20,7 @@ Metrics:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import io
 import os
 import random
@@ -38,9 +39,7 @@ from whoosh import fields
 from whoosh.filedb.filestore import FileStorage
 from whoosh.index import create_in
 from whoosh.writing import IndexWriter
-
 from whoosh_modern.storage import HybridStorage, S3Storage
-
 
 # ---------------------------------------------------------------------------
 # Config
@@ -58,6 +57,7 @@ CUSTOMERS_CSV = Path(__file__).parent / "Datas" / "customers-2000000.csv"
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def get_s3_client() -> Any:
     return boto3.client(
         "s3",
@@ -70,10 +70,8 @@ def get_s3_client() -> Any:
 
 def ensure_bucket() -> None:
     client = get_s3_client()
-    try:
+    with contextlib.suppress(client.exceptions.BucketAlreadyOwnedByYou):
         client.create_bucket(Bucket=BUCKET)
-    except client.exceptions.BucketAlreadyOwnedByYou:
-        pass
 
 
 def clear_prefix(prefix: str) -> None:
@@ -102,6 +100,7 @@ class BenchmarkResult:
 # ---------------------------------------------------------------------------
 # Index creation
 # ---------------------------------------------------------------------------
+
 
 def create_test_index(index_dir: Path, max_rows: int = 100_000) -> Path:
     """Create a Whoosh index from customers_csv (or synthetic data if not available)."""
@@ -175,6 +174,7 @@ def list_segment_files(index_dir: Path) -> list[Path]:
 # ---------------------------------------------------------------------------
 # Strategies
 # ---------------------------------------------------------------------------
+
 
 class SegmentFileStrategy:
     name: str = "base"
@@ -347,6 +347,7 @@ class OneObjectPerPostingListStrategy(SegmentFileStrategy):
 # Benchmark runner
 # ---------------------------------------------------------------------------
 
+
 async def run_benchmark() -> None:
     ensure_bucket()
 
@@ -415,7 +416,10 @@ async def run_benchmark() -> None:
         if res.errors:
             print(f"{res.name:<30} ERROR: {res.errors[0]}")
         else:
-            print(f"{res.name:<30} {res.backup_throughput_mbps:<15.2f} {res.restore_throughput_mbps:<15.2f}")
+            print(
+                f"{res.name:<30} "
+                f"{res.backup_throughput_mbps:<15.2f} {res.restore_throughput_mbps:<15.2f}"
+            )
 
     # Recommendations
     print(f"\n{'=' * 60}")
@@ -429,14 +433,23 @@ async def run_benchmark() -> None:
 
     best_backup = max(valid_results, key=lambda r: r.backup_throughput_mbps)
     best_restore = max(valid_results, key=lambda r: r.restore_throughput_mbps)
-    print(f"Best backup throughput:  {best_backup.name} ({best_backup.backup_throughput_mbps:.2f} MB/s)")
-    print(f"Best restore throughput: {best_restore.name} ({best_restore.restore_throughput_mbps:.2f} MB/s)")
+    print(
+        f"Best backup throughput:  {best_backup.name} "
+        f"({best_backup.backup_throughput_mbps:.2f} MB/s)"
+    )
+    print(
+        f"Best restore throughput: {best_restore.name} "
+        f"({best_restore.restore_throughput_mbps:.2f} MB/s)"
+    )
 
     hybrid = next((r for r in valid_results if r.name == "hybrid_cache_s3"), None)
     if hybrid:
         print("\nHybridStorage observation:")
         print(f"  - Backup: {hybrid.backup_throughput_mbps:.2f} MB/s (writes to S3)")
-        print(f"  - Restore: {hybrid.restore_throughput_mbps:.2f} MB/s (reads from local cache after first backup)")
+        print(
+            f"  - Restore: {hybrid.restore_throughput_mbps:.2f} MB/s "
+            "(reads from local cache after first backup)"
+        )
         print("  - For repeated access patterns, HybridStorage dominates after cold cache warm-up.")
 
 

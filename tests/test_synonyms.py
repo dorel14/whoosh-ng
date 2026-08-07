@@ -8,6 +8,7 @@ import tempfile
 
 import pytest
 
+from whoosh.middleware.context import MiddlewareContext
 from whoosh_modern.linguistics import (
     LANG_SYNONYMS,
     JSONSynonymProvider,
@@ -18,7 +19,6 @@ from whoosh_modern.linguistics import (
     SynonymManager,
     YAMLSynonymProvider,
 )
-from whoosh.middleware.context import MiddlewareContext
 
 
 class TestStaticSynonymProvider:
@@ -57,7 +57,9 @@ class TestStaticSynonymProvider:
 class TestYAMLSynonymProvider:
     def test_load_yaml(self):
         content = "car:\n  - automobile\n  - vehicle\nbike:\n  - bicycle\n"
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".yaml", delete=False, encoding="utf-8"
+        ) as f:
             f.write(content)
             path = f.name
         try:
@@ -72,7 +74,9 @@ class TestYAMLSynonymProvider:
         # PyYAML is installed in the test environment, so we just verify
         # the provider loads successfully.
         content = "car:\n  - automobile\n"
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".yaml", delete=False, encoding="utf-8"
+        ) as f:
             f.write(content)
             path = f.name
         try:
@@ -85,7 +89,9 @@ class TestYAMLSynonymProvider:
 class TestJSONSynonymProvider:
     def test_load_json(self):
         data = {"car": ["automobile"], "bike": ["bicycle"]}
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False, encoding="utf-8"
+        ) as f:
             json.dump(data, f)
             path = f.name
         try:
@@ -154,7 +160,9 @@ class TestSynonymManager:
         assert manager.get_synonyms("car") == ["vehicle"]
 
     def test_import_export_json(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False, encoding="utf-8"
+        ) as f:
             json.dump({"car": ["automobile"]}, f)
             path = f.name
         try:
@@ -163,7 +171,7 @@ class TestSynonymManager:
             assert manager.get_synonyms("car") == ["automobile"]
             out_path = path + ".out"
             manager.export_json(out_path)
-            with open(out_path, "r", encoding="utf-8") as f:
+            with open(out_path, encoding="utf-8") as f:
                 data = json.load(f)
             assert data["car"] == ["automobile"]
             os.unlink(out_path)
