@@ -29,7 +29,7 @@ with ix.searcher() as s:
     print(results[0])
 ```
 
-> **Dernière version publiée**: v3.0.0 (6 août 2026) | [Voir les releases sur GitHub](https://github.com/dorel14/whoosh-ng/releases) | Prochaine: v4.0.0.dev0 (en développement)
+> **Dernière version publiée**: v3.0.0 | [Voir les releases sur GitHub](https://github.com/dorel14/whoosh-ng/releases) | Prochaine: v4.0.0.dev0 (en développement)
 
 ## Documentation
 
