@@ -1,109 +1,69 @@
 ---
-title: "API Moderne"
-nav_order: 190
+title: "Fournisseurs de stockage"
+nav_order: 210
 lang: fr
 ---
 
-# API Moderne
+# Fournisseurs de stockage
 
-Sources de données, découverte de schéma, facettes, validation, middleware et SearchView.
+Whoosh-NG fournit des backends de stockage pluggables via les contrats
+`SyncStorageProvider` / `AsyncStorageProvider`. Cela permet de persister
+l'index sur disque local, SQLite, S3, ou une configuration hybride cache +
+distant sans modifier le writer ni l'index.
 
-## DataSource Protocol
+## Vue d'ensemble de l'architecture
 
-```python
-from whoosh_modern.data_sources import DataSource, SQLSource, RESTSource
+### Niveau 1 : SnapshotStorage (Simple)
+
+```
+Writer → FS local → Commit → Upload Segment → S3
+Reader → Download Segment → Open local
 ```
 
-### SQLSource
+Très simple à maintenir. Utilisez `SnapshotStorage` quand vous voulez S3
+comme cible de sauvegarde/restauration simple sans la complexité d'un cache
+local.
 
-```python
-source = SQLSource(
-    connection=conn,
-    query="SELECT * FROM reuters_articles",
-    incremental_field="article_date",
-    id_field="id",
-)
-schema = source.discover_schema()
-docs = list(source.iter_documents())
+### Niveau 2 : CachedObjectStorage (Recommandé pour la production)
+
+```
++----------+
+|  MinIO   |
++----------+
+     ^
+     |
+ Sync |
+     v
++-----------+   Couche Cache   +-----------+
+| Searcher  |<--------------->| Writer    |
++-----------+                 +-----------+
+        |
+        v
+ Local SSD
 ```
 
-### RESTSource
+- L'index vit sur SSD
+- S3 sert de réplication
+- Les segments sont poussés après commit
+- Restauration possible à tout moment
 
-```python
-source = RESTSource(
-    url="https://api.example.com/v2/products",
-    pagination="page",
-    page_size=50,
-)
-schema = source.discover_schema()
-docs = list(source.iter_documents())
-```
+C'est exactement ce que font beaucoup de systèmes de recherche distribués
+modernes.
 
-## SchemaDiscovery
+## Fournisseurs disponibles
 
-```python
-from whoosh_modern.schema_discovery import SchemaDiscovery
+| Fournisseur | Type | Backend | Cas d'usage |
+|-------------|------|---------|-------------|
+| `FileStorage` | sync | système de fichiers local | Single-node, pas de cloud |
+| `AsyncFileStorage` | async | système de fichiers local | Single-node async |
+| `S3Storage` | sync | compatible S3 | Accès S3 direct |
+| `SnapshotStorage` | sync | compatible S3 | Sauvegarde/restauration simple |
+| `HybridStorage` | sync | cache local + distant | **Production** (alias : `CachedObjectStorage`) |
+| `AsyncHybridStorage` | async | cache local + distant | Production async |
 
-schema = SchemaDiscovery.from_result_set(columns)
-schema = SchemaDiscovery.from_sample(docs)
-id_field = SchemaDiscovery.detect_id_field(dict(schema))
-```
+Tous les fournisseurs sont importables depuis `whoosh_modern.storage`.
 
-## FacetManager
-
-```python
-from whoosh_modern.facets import FacetManager
-
-manager = FacetManager(schema)
-facets = manager.get_facets()
-manager.set_manual_override("price", {"type": "range"})
-```
-
-## ValidationFramework
-
-```python
-from whoosh_modern.validation import ValidationFramework, ValidationResult
-
-validator = ValidationFramework()
-results = validator.validate(source)
-```
-
-## Middleware Pipeline
-
-```python
-from whoosh_modern.middleware import MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
-
-pipeline = MiddlewarePipeline(
-    RetryMiddleware(attempts=3, backoff="exponential"),
-    LoggingMiddleware(),
-)
-result = pipeline.execute(operation)
-```
-
-## SearchView
-
-```python
-from whoosh_modern.views import SearchView
-
-view = SearchView(name="reuters", source=source)
-ix = view.build("indexdir")
-count = view.reindex()
-results = view.validate()
-```
-
-## Fournisseurs de stockage
-
-```python
-from whoosh_modern.storage import (
-    FileStorage,
-    AsyncFileStorage,
-    S3Storage,
-    HybridStorage,
-    AsyncHybridStorage,
-)
-```
-
-### FileStorage
+## FileStorage
 
 Stockage local sur système de fichiers. Les clés sont des chemins relatifs
 sous ``root``.
@@ -119,7 +79,7 @@ storage.delete("segment_1.dat")
 keys = storage.list_keys()
 ```
 
-### AsyncFileStorage
+## AsyncFileStorage
 
 Variante async de ``FileStorage``. Toutes les opérations s'exécutent dans
 un thread de travail via ``asyncio.to_thread``.
@@ -138,7 +98,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-### S3Storage
+## S3Storage
 
 Stockage blobs compatible S3. ``boto3`` est requis uniquement lorsque ce
 fournisseur est utilisé ; il est importé paresseusement pour que le reste
@@ -153,11 +113,47 @@ data = storage.read("segment_1.dat")
 keys = storage.list_keys()
 ```
 
-### HybridStorage
+Installer la dépendance optionnelle :
 
-Compose un cache local avec un backend distant pour des indexes cloud-native.
-Le distant est la source de vérité ; le cache local est une couche de
-performance write-through.
+```bash
+pip install whoosh-ng[s3]
+```
+
+## SnapshotStorage
+
+Stockage snapshot S3 simple sans cache local. C'est la stratégie la plus
+simple :
+
+- Écriture : upload du segment directement vers S3
+- Lecture : download du segment depuis S3 vers un fichier temporaire local
+
+Utilisez ceci quand vous voulez S3 comme cible de sauvegarde/restauration
+simple sans la complexité d'un cache local.
+
+```python
+from whoosh_modern.storage import SnapshotStorage
+
+storage = SnapshotStorage(
+    local_path="./index",
+    bucket="mon-bucket",
+    prefix="snapshots",
+)
+
+storage.write("segment_1.dat", b"data")
+data = storage.read("segment_1.dat")
+```
+
+## HybridStorage / CachedObjectStorage
+
+`HybridStorage` compose un cache local avec un backend distant. Le distant
+est la source de vérité ; le cache local est une couche de performance
+write-through.
+
+`CachedObjectStorage` est un alias de `HybridStorage` qui exprime mieux
+l'intention : un cache d'objets local synchronisé avec S3.
+
+C'est l'architecture recommandée pour les déploiements production avec des
+motifs de lecture répétés.
 
 ```python
 from whoosh_modern.storage import HybridStorage, S3Storage
@@ -165,24 +161,46 @@ from whoosh_modern.storage import HybridStorage, S3Storage
 distant = S3Storage(bucket="mon-bucket", prefix="segments")
 stockage = HybridStorage(local_cache="./cache", remote=distant)
 
+# Write-through : le distant est la source de vérité, le cache est mis à jour
 stockage.write("segment_1.dat", b"data")
-data = stockage.read("segment_1.dat")  # servi depuis le cache après le premier accès
-stockage.invalidate("segment_1.dat")   # forcer le rafraîchissement depuis le distant
-stockage.prefetch(["segment_2.dat"])   # préchauffer le cache
+
+# Première lecture : miss cache → fetch depuis S3, write-through dans le cache
+data = stockage.read("segment_1.dat")
+
+# Deuxième lecture : hit cache → servi depuis le disque local, zéro réseau
+data = stockage.read("segment_1.dat")
+
+# Forcer le rafraîchissement depuis le distant
+stockage.invalidate("segment_1.dat")
+
+# Pré-chauffer le cache
+stockage.prefetch(["segment_2.dat", "segment_3.dat"])
 ```
 
-Chemin de lecture :
+### Chemin de lecture
 
 1. hit cache local → retour immédiat
 2. miss → lecture depuis le distant, write-through dans le cache, retour
 
-Chemin d'écriture :
+### Chemin d'écriture
 
 - ``distant.write(key, data)`` (source de vérité)
 - en cas de succès → ``local_cache.write(key, data)``
 - en cas d'échec → lever l'erreur avant de polluer le cache
 
-### AsyncHybridStorage
+### Éviction du cache
+
+Le cache local est limité par `max_cache_size_mb` (défaut 1024 Mo). Quand
+la limite est atteinte, les entrées les plus anciennes sont évincées selon
+une politique LRU.
+
+### `list_keys`
+
+`list_keys()` utilise le distant comme source de vérité car le cache n'est
+que partiel. Passez `include_cache=True` pour retourner l'union des clés
+distant et cache.
+
+## AsyncHybridStorage
 
 Variante async de ``HybridStorage``. Les opérations distantes s'exécutent
 dans un thread de travail via ``asyncio.to_thread`` pour ne jamais bloquer
@@ -199,8 +217,26 @@ async def main() -> None:
     await stockage.awrite("segment_1.dat", b"data")
     data = await stockage.aread("segment_1.dat")
     await stockage.adelete("segment_1.dat")
+    cles = await stockage.alist_keys()
 
 asyncio.run(main())
+```
+
+## Utilisation avec SearchApplication
+
+```python
+from whoosh_modern import SearchApplication, SQLSource
+from whoosh_modern.storage import HybridStorage, S3Storage
+
+distant = S3Storage(bucket="mon-bucket", prefix="segments")
+stockage = HybridStorage(local_cache="./cache", remote=distant)
+
+app = SearchApplication(
+    source=SQLSource(query="SELECT * FROM produits", connection=engine),
+    storage=stockage,
+)
+app.build()
+resultats = app.index.search("laptop")
 ```
 
 ## Benchmarks de performance

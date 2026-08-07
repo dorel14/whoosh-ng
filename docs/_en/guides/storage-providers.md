@@ -10,15 +10,53 @@ Whoosh-NG provides pluggable storage backends through the
 index to be persisted on local disk, SQLite, S3, or a hybrid cache + remote
 setup without changing the writer or the index.
 
+## Architecture Overview
+
+### Level 1: SnapshotStorage (Simple)
+
+```
+Writer → Local FS → Commit → Upload Segment → S3
+Reader → Download Segment → Open locally
+```
+
+Very simple to maintain. Use `SnapshotStorage` when you want S3 as a simple
+backup/restore target without the complexity of a local cache.
+
+### Level 2: CachedObjectStorage (Recommended for Production)
+
+```
++----------+
+|  MinIO   |
++----------+
+     ^
+     |
+ Sync |
+     v
++-----------+   Cache Layer   +-----------+
+| Searcher  |<--------------->| Writer    |
++-----------+                 +-----------+
+        |
+        v
+ Local SSD
+```
+
+- Index lives on SSD
+- S3 serves as replication
+- Segments are pushed after commit
+- Restoration possible at any moment
+
+This is what many modern distributed search systems do.
+
 ## Available providers
 
-| Provider | Type | Backend |
-|----------|------|---------|
-| `FileStorage` | sync | local filesystem |
-| `AsyncFileStorage` | async | local filesystem |
-| `S3Storage` | sync | S3-compatible object storage |
-| `HybridStorage` | sync | local cache + any remote backend |
-| `AsyncHybridStorage` | async | local cache + any remote backend |
+| Provider | Type | Backend | Use Case |
+|----------|------|---------|----------|
+| `FileStorage` | sync | local filesystem | Single-node, no cloud |
+| `AsyncFileStorage` | async | local filesystem | Single-node async |
+| `S3Storage` | sync | S3-compatible | Direct S3 access |
+| `SnapshotStorage` | sync | S3-compatible | Simple backup/restore |
+| `HybridStorage` | sync | local cache + remote | **Production** (alias: `CachedObjectStorage`) |
+| `AsyncHybridStorage` | async | local cache + remote | Production async |
 
 All providers are importable from `whoosh_modern.storage`.
 
@@ -30,8 +68,8 @@ Local filesystem storage. Keys are relative paths under `root`.
 from whoosh_modern.storage import FileStorage
 
 storage = FileStorage("indexdir")
-storage.write("segment_1.dat", b"binary-data")
-assert storage.read("segment_1.dat") == b"binary-data"
+storage.write("segment_1.dat", b"data")
+assert storage.read("segment_1.dat") == b"data"
 assert storage.exists("segment_1.dat") is True
 storage.delete("segment_1.dat")
 keys = storage.list_keys()
@@ -85,12 +123,40 @@ Install the optional dependency:
 pip install whoosh-ng[s3]
 ```
 
-## HybridStorage
+## SnapshotStorage
+
+Simple S3 snapshot storage without local cache. This is the simplest
+S3-backed storage strategy:
+
+- Write: upload segment directly to S3
+- Read: download segment from S3 to local temporary file
+
+Use this when you want S3 as a simple backup/restore target without the
+complexity of a local cache.
+
+```python
+from whoosh_modern.storage import SnapshotStorage
+
+storage = SnapshotStorage(
+    local_path="./index",
+    bucket="my-index-bucket",
+    prefix="snapshots",
+)
+
+storage.write("segment_1.dat", b"data")
+data = storage.read("segment_1.dat")
+```
+
+## HybridStorage / CachedObjectStorage
 
 `HybridStorage` composes a local cache and a remote backend. The remote is
 the source of truth; the local cache is a write-through performance layer.
 
-This is the key differentiator of Whoosh-NG for large, cloud-native indexes.
+`CachedObjectStorage` is an alias for `HybridStorage` that better conveys
+the intent: a local object cache synchronized with S3.
+
+This is the recommended architecture for production deployments with repeated
+read patterns.
 
 ```python
 from whoosh_modern.storage import HybridStorage, S3Storage

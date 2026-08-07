@@ -84,8 +84,10 @@ from whoosh_modern.schema_discovery import SchemaDiscovery
 from whoosh_modern.storage import (
     AsyncFileStorage,
     AsyncHybridStorage,
+    CachedObjectStorage,
     HybridStorage,
     S3Storage,
+    SnapshotStorage,
 )
 from whoosh_modern.validation import ValidationFramework
 from whoosh_modern.views import SearchView
@@ -95,6 +97,8 @@ __all__ = [
     "SearchApplication",
     "FileStorage",
     "S3Storage",
+    "SnapshotStorage",
+    "CachedObjectStorage",
     "HybridStorage",
     "AsyncHybridStorage",
     "AsyncFileStorage",
