@@ -1,74 +1,70 @@
 ---
-title: 'Storage Providers'
+title: 'Fournisseurs de stockage'
 sidebar_position: 100
 ---
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# Fournisseurs de stockage
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Whoosh-NG fournit des backends de stockage modulaires via les contrats
+`SyncStorageProvider` / `AsyncStorageProvider`. Cela permet de persister
+l'index sur le disque local, SQLite, S3, ou une configuration hybride
+(cache local + distant) sans modifier l'écrivain ou l'index.
 
+## Aperçu de l'architecture
 
-# Storage Providers
-
-Whoosh-NG provides pluggable storage backends through the
-`SyncStorageProvider` / `AsyncStorageProvider` contracts. This allows the
-index to be persisted on local disk, SQLite, S3, or a hybrid cache + remote
-setup without changing the writer or the index.
-
-## Architecture Overview
-
-### Level 1: SnapshotStorage (Simple)
+### Niveau 1 : SnapshotStorage (Simple)
 
 ```
 Writer → Local FS → Commit → Upload Segment → S3
 Reader → Download Segment → Open locally
 ```
 
-Very simple to maintain. Use `SnapshotStorage` when you want S3 as a simple
-backup/restore target without the complexity of a local cache.
+Très simple à maintenir. Utilisez `SnapshotStorage` quand vous voulez
+utiliser S3 comme cible de sauvegarde/restauration simple sans la
+complexité d'un cache local.
 
-### Level 2: CachedObjectStorage (Recommended for Production)
+### Niveau 2 : CachedObjectStorage (Recommandé pour la production)
 
 ```
 +----------+
 |  MinIO   |
 +----------+
-     ^
-     |
- Sync |
-     v
+    ^
+    |
+Sync |
+    v
 +-----------+   Cache Layer   +-----------+
 | Searcher  |<--------------->| Writer    |
 +-----------+                 +-----------+
-        |
-        v
- Local SSD
+         |
+         v
+  Local SSD
 ```
 
-- Index lives on SSD
-- S3 serves as replication
-- Segments are pushed after commit
-- Restoration possible at any moment
+- L'index réside sur un SSD
+- S3 sert de réplication
+- Les segments sont poussés après le commit
+- La restauration est possible à tout moment
 
-This is what many modern distributed search systems do.
+C'est ce que font de nombreux systèmes de recherche distribués modernes.
 
-## Available providers
+## Fournisseurs disponibles
 
-| Provider | Type | Backend | Use Case |
-|----------|------|---------|----------|
-| `FileStorage` | sync | local filesystem | Single-node, no cloud |
-| `AsyncFileStorage` | async | local filesystem | Single-node async |
-| `S3Storage` | sync | S3-compatible | Direct S3 access |
-| `SnapshotStorage` | sync | S3-compatible | Simple backup/restore |
-| `HybridStorage` | sync | local cache + remote | **Production** (alias: `CachedObjectStorage`) |
-| `AsyncHybridStorage` | async | local cache + remote | Production async |
+| Fournisseur | Type | Backend | Cas d'utilisation |
+|-------------|------|---------|--------------------|
+| `FileStorage` | sync | système de fichiers local | Nœud unique, pas de cloud |
+| `AsyncFileStorage` | async | système de fichiers local | Nœud unique async |
+| `S3Storage` | sync | compatible S3 | Accès direct S3 |
+| `SnapshotStorage` | sync | compatible S3 | Sauvegarde/restauration simple |
+| `HybridStorage` | sync | cache local + distant | **Production** (alias : `CachedObjectStorage`) |
+| `AsyncHybridStorage` | async | cache local + distant | Production async |
 
-All providers are importable from `whoosh_modern.storage`.
+Tous les fournisseurs sont importables depuis `whoosh_modern.storage`.
 
 ## FileStorage
 
-Local filesystem storage. Keys are relative paths under `root`.
+Stockage sur le système de fichiers local. Les clés sont des chemins
+relatifs sous `root`.
 
 ```python
 from whoosh_modern.storage import FileStorage
@@ -83,8 +79,9 @@ keys = storage.list_keys()
 
 ## AsyncFileStorage
 
-Async variant of `FileStorage`. All operations run on a worker thread via
-`asyncio.to_thread` so the event loop is never blocked.
+ Variante asynce de `FileStorage`. Toutes les opérations s'exécutent sur
+un thread de travail via `asyncio.to_thread` afin de ne jamais bloquer
+la boucle d'événements.
 
 ```python
 import asyncio
@@ -102,16 +99,17 @@ asyncio.run(main())
 
 ## S3Storage
 
-S3-compatible blob storage. `boto3` is imported lazily, so it is an optional
-dependency. A `client` can be injected for testing.
+Stockage d'objets compatible S3. `boto3` est importé de manière paresseuse,
+il s'agit donc d'une dépendance optionnelle. Un `client` peut être injecté
+pour les tests.
 
 ```python
 from whoosh_modern.storage import S3Storage
 
-# Default client (requires boto3 installed and configured)
+# Client par défaut (nécessite boto3 installé et configuré)
 storage = S3Storage(bucket="my-index-bucket", prefix="segments")
 
-# Or inject a client for testing / custom configuration
+# Ou injecter un client pour tests / configuration personnalisée
 storage = S3Storage(
     bucket="my-index-bucket",
     prefix="segments",
@@ -123,7 +121,7 @@ data = storage.read("segment_1.dat")
 keys = storage.list_keys()
 ```
 
-Install the optional dependency:
+Installez la dépendance optionnelle :
 
 ```bash
 pip install whoosh-ng[s3]
@@ -131,14 +129,14 @@ pip install whoosh-ng[s3]
 
 ## SnapshotStorage
 
-Simple S3 snapshot storage without local cache. This is the simplest
-S3-backed storage strategy:
+Stockage d'instantané S3 simple sans cache local. C'est la stratégie de
+stockage S3 la plus simple :
 
-- Write: upload segment directly to S3
-- Read: download segment from S3 to local temporary file
+- Écriture : téléverse le segment directement vers S3
+- Lecture : télécharge le segment depuis S3 vers un fichier temporaire local
 
-Use this when you want S3 as a simple backup/restore target without the
-complexity of a local cache.
+Utilisez cela quand vous voulez utiliser S3 comme cible de
+sauvegarde/restauration simple sans la complexité d'un cache local.
 
 ```python
 from whoosh_modern.storage import SnapshotStorage
@@ -155,14 +153,15 @@ data = storage.read("segment_1.dat")
 
 ## HybridStorage / CachedObjectStorage
 
-`HybridStorage` composes a local cache and a remote backend. The remote is
-the source of truth; the local cache is a write-through performance layer.
+`HybridStorage` compose un cache local et un backend distant. Le backend
+distant est la source de vérité ; le cache local est un anneau de
+performance en écriture-transparente.
 
-`CachedObjectStorage` is an alias for `HybridStorage` that better conveys
-the intent: a local object cache synchronized with S3.
+`CachedObjectStorage` est un alias pour `HybridStorage` qui exprime
+mieux l'intention : un cache d'objets local synchronisé avec S3.
 
-This is the recommended architecture for production deployments with repeated
-read patterns.
+C'est l'architecture recommandée pour les déploiements de production
+avec des modèles de lecture répétés.
 
 ```python
 from whoosh_modern.storage import HybridStorage, S3Storage
@@ -170,48 +169,50 @@ from whoosh_modern.storage import HybridStorage, S3Storage
 remote = S3Storage(bucket="my-index-bucket", prefix="segments")
 storage = HybridStorage(local_cache="./cache", remote=remote)
 
-# Write-through: remote is source of truth, cache is updated on success
+# Write-through : le distant est la source de vérité, le cache est mis à jour en cas de succès
 storage.write("segment_1.dat", b"data")
 
-# First read: cache miss → fetch from S3, write-through into cache
+# Première lecture : cache manquant → récupère depuis S3, écrit dans le cache
 data = storage.read("segment_1.dat")
 
-# Second read: cache hit → served from local disk, zero network
+# Deuxième lecture : cache hit → servi depuis le disque local, zéro réseau
 data = storage.read("segment_1.dat")
 
-# Force refresh from remote
+# Forcer le rafraîchissement depuis le distant
 storage.invalidate("segment_1.dat")
 
-# Warm cache proactively
+# Préchauffer le cache de manière proactive
 storage.prefetch(["segment_2.dat", "segment_3.dat"])
 ```
 
-### Read path
+### Chemin de lecture
 
-1. local cache hit → return immediately
-2. cache miss → read from remote, write-through into cache, return
+1. cache local hit → retourne immédiatement
+2. cache manquant → lit depuis le distant, écrit dans le cache, retourne
 
-### Write path
+### Chemin d'écriture
 
-- `remote.write(key, data)` (source of truth)
-- on success → `local_cache.write(key, data)`
-- on failure → raise before polluting cache
+- `remote.write(key, data)` (source de vérité)
+- en cas de succès → `local_cache.write(key, data)`
+- en cas d'échec → lève l'erreur avant de polluer le cache
 
-### Cache eviction
+### Éviction du cache
 
-The local cache is bounded by `max_cache_size_mb` (default 1024 MB). When
-the limit is reached, the oldest entries are evicted using an LRU policy.
+Le cache local est borné par `max_cache_size_mb` (par défaut 1024 Mo).
+Lorsque la limite est atteinte, les entrées les plus anciennes sont
+évictées selon une politique LRU.
 
 ### `list_keys`
 
-`list_keys()` uses the remote as source of truth because the cache is only
-partial. Pass `include_cache=True` to return the union of remote and cache
-keys.
+`list_keys()` utilise le backend distant comme source de vérité car le
+cache n'est qu'partiel. Passez `include_cache=True` pour retourner
+l'union des clés distantes et du cache.
 
 ## AsyncHybridStorage
 
-Async variant of `HybridStorage`. Remote operations are executed on a worker
-thread via `asyncio.to_thread` so the event loop is never blocked.
+ Variante asynce de `HybridStorage`. Les opérations distantes sont
+exécutées sur un thread de travail via `asyncio.to_thread` afin de ne
+jamais bloquer la boucle d'événements.
 
 ```python
 import asyncio
@@ -229,7 +230,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## Using storage with SearchApplication
+## Utilisation du stockage avec SearchApplication
 
 ```python
 from whoosh_modern import SearchApplication, SQLSource
@@ -246,32 +247,34 @@ app.build()
 results = app.index.search("laptop")
 ```
 
-## Performance Benchmarks
+## Benchmarks de performance
 
-Benchmarks were run against a local MinIO instance using a 28.89 MB Whoosh
-index (2 segment files). Results are indicative of relative performance
-between strategies on S3-compatible storage.
+Les benchmarks ont été exécutés contre une instance MinIO locale en
+utilisant un index Whoosh de 28,89 Mo (2 fichiers de segment). Les
+résultats sont indicatives de la performance relative entre les
+stratégies sur du stockage compatible S3.
 
-| Strategy | Backup (MB/s) | Restore (MB/s) | Notes |
-|----------|---------------|----------------|-------|
-| `1_obj_per_segment` | 39.44 | 139.72 | Best restore throughput; simplest |
-| `compressed_zstd` | 31.56 | 133.74 | Lower bandwidth, CPU overhead |
-| `hybrid_cache_s3` | 44.97 | 133.61 | Best backup; excellent warm-cache reads |
-| `1_obj_per_posting_list` | 0.28 | 4.79 | **Avoid**: millions of small objects kill S3 |
+| Stratégie | Sauvegarde (Mo/s) | Restauration (Mo/s) | Notes |
+|-----------|-------------------|---------------------|-------|
+| `1_obj_per_segment` | 39.44 | 139.72 | Meilleur débit de restauration ; le plus simple |
+| `compressed_zstd` | 31.56 | 133.74 | Moins de bande passante, surcharge CPU |
+| `hybrid_cache_s3` | 44.97 | 133.61 | Meilleur sauvegarde ; lectures excellentes avec cache chaud |
+| `1_obj_per_posting_list` | 0.28 | 4.79 | **À éviter** : des millions de petits objets tuent S3 |
 
-### Recommendations
+### Recommandations
 
-- **Default**: `S3Storage` with 1 object per segment file. It offers the
-  best restore throughput and is the simplest to operate.
-- **Production with repeated reads**: `HybridStorage(local_cache, S3Storage)`.
-  After the first read, subsequent reads are served from local disk at
-  ~133 MB/s.
-- **Avoid**: 1 object per posting list. S3 is not optimized for millions of
-  tiny objects; latency and cost explode.
-- **Compression**: ZSTD reduces transfer size by ~20-30% at the cost of CPU.
-  Use it when network bandwidth is the bottleneck, not when CPU is.
+- **Par défaut** : `S3Storage` avec 1 objet par fichier de segment. Offre
+  le meilleur débit de restauration et est le plus simple à exploiter.
+- **Production avec lectures répétées** : `HybridStorage(local_cache, S3Storage)`.
+  Après la première lecture, les lectures suivantes sont servies depuis le
+  disque local à ~133 Mo/s.
+- **À éviter** : 1 objet par liste de postings. S3 n'est pas optimisé
+  pour des millions de petits objets ; la latence et les coûts explosent.
+- **Compression** : ZSTD réduit la taille de transfert d'environ 20-30%
+  au coût du CPU. Utilisez-le quand la bande passante réseau est le
+  goulot d'étranglement, pas quand c'est le CPU.
 
-### Running the benchmarks
+### Exécution des benchmarks
 
 ```bash
 # Start MinIO
@@ -285,4 +288,3 @@ python benchmark/s3_storage_benchmark.py
 # Run real Whoosh index benchmark (requires customers CSV)
 python benchmark/s3_storage_benchmark_real.py
 ```
-

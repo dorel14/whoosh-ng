@@ -1,24 +1,19 @@
 ---
-title: 'Nested Documents'
+title: 'Documents imbriqués (Nested)'
 sidebar_position: 100
 ---
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# Documents imbriqués (Nested)
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Ce guide couvre l'indexation et la recherche de structures de documents
+hiérarchiques imbriqués (par exemple, un document parent contenant plusieurs
+documents enfants) en utilisant les fonctionnalités de relation
+parent-enfant de Whoosh.
 
+## Définition des documents imbriqués
 
-# Nested Documents
-
-This guide covers indexing and searching hierarchical/nested document
-structures (e.g., a parent document with multiple child documents) using
-Whoosh's parent-child relationship features.
-
-## Defining Nested Documents
-
-You can index parent documents that contain child documents by using a
-parent field and child fields:
+Vous pouvez indexer des documents parents qui contiennent des documents
+enfants en utilisant un champ parent et des champs enfants :
 
 ```python
 from whoosh import fields, index
@@ -32,12 +27,12 @@ schema = fields.Schema(
 )
 ```
 
-The `type` field distinguishes parent documents from child documents.
+Le champ `type` distingue les documents parents des documents enfants.
 
-## Indexing Nested Documents
+## Indexation des documents imbriqués
 
-Use `IndexWriter.add_all()` with a generator that yields parent and child
-documents grouped together:
+Utilisez `IndexWriter.add_all()` avec un générateur qui produit les
+documents parents et enfants groupés ensemble :
 
 ```python
 writer = ix.writer()
@@ -50,74 +45,75 @@ writer.add_all([
 ])
 ```
 
-Parent documents have `type="parent"` and child documents have
+Les documents parents ont `type="parent"` et les documents enfants ont
 `type="child"`.
 
-## Searching Nested Documents
+## Recherche dans les documents imbriqués
 
-### Parent-Query Child-Search
+### Recherche-enfants, correspondance-parents
 
-Search within child documents and match their parents:
+Recherchez dans les documents enfants et faites correspondre leurs
+documents parents :
 
 ```python
 from whoosh.query import Every, Term
 from whoosh.sorting import NestedParent
 
-# Match all parent documents
+# Correspondre tous les documents parents
 parents = NestedParent(Term("type", "parent"))
 q = Every("section_content", "hello")
 results = searcher.search(q, sortedby=parents)
 ```
 
-### Child-Query Parent-Search
+### Recherche-parents, correspondance-enfants
 
-Search for parent documents whose children match:
+Recherchez les documents parents dont les enfants correspondent :
 
 ```python
 from whoosh.sorting import NestedChildren
 
-# Match parent documents that have children matching the query
+# Correspondre les documents parents qui ont des enfants correspondant à la requête
 parent_results = searcher.search(child_query, groupedby=NestedChildren(parent_matcher, child_matcher))
 ```
 
-## Parent-Child Relationships at Index Time
+## Relations parent-enfant lors de l'indexation
 
-When writing documents, use the `parent` parameter to link children to
-parents:
+Lors de l'écriture des documents, utilisez le paramètre `parent` pour
+lier les enfants aux parents :
 
 ```python
-writer.add_document(type="parent", title="Chapter 1", _key="chapter1")
+writer.add_document(type="parent", title="Chapitre 1", _key="chapter1")
 writer.add_document(type="child", section_name="Section 1.1",
                     section_content="...", parent="chapter1")
 writer.add_document(type="child", section_name="Section 1.2",
                     section_content="...", parent="chapter1")
 ```
 
-## Accessing Nested Results
+## Accès aux résultats imbriqués
 
-To retrieve child matches alongside parent results, use the `expand` method
-on the results:
+Pour récupérer les correspondances d'enfants aux côtés des résultats
+parents, utilisez la méthode `expand` sur les résultats :
 
 ```python
 results = searcher.search(parent_query)
 expanded = results.expand_child("section")
 ```
 
-## Nested Faceting
+## Facettisation imbriquée
 
-Combine parent-child relationships with faceting using `NestedParent` and
-`NestedChildren` as facets:
+Combinez les relations parent-enfant avec la facettisation en utilisant
+`NestedParent` et `NestedChildren` comme facets :
 
 ```python
 parent_facet = NestedParent(FieldFacet("type"))
 results = searcher.search(query, groupedby=parent_facet)
 ```
 
-## Performance Considerations
+## Considérations de performance
 
-- Parent-child joins are more expensive than flat document searches
-- Use `childperm` searcher option to limit the number of permutations
-  examined
-- Consider whether hierarchical structure is needed at query time, or
-  whether documents can be flattened during indexing
-
+- Les jointures parent-enfant sont plus coûteuses que les recherches
+  sur des documents plats.
+- Utilisez l'option `childperm` du chercheur pour limiter le nombre de
+  permutations examinées.
+- Considérez si la structure hiérarchique est nécessaire lors de la
+  requête, ou si les documents peuvent être aplatis lors de l'indexation.

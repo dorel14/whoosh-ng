@@ -1,32 +1,29 @@
 ---
-title: 'N-grams'
+title: 'N-grammes'
 sidebar_position: 100
 ---
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# N-grammes
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Ce guide couvre la tokenisation et l'analyse N-gramme pour la recherche
+de sous-chaînes, les requêtes par préfixe et la fonctionnalité
+d'autocomplétion.
 
+## Qu'est-ce que les N-grammes ?
 
-# N-grams
+Un N-gramme est une séquence continue de N caractères (ou de jetons)
+d'une chaîne. Par exemple, les 2-grammes de "hello" sont : "he", "el",
+"ll", "lo".
 
-This guide covers N-gram tokenization and analysis for substring matching,
-prefix queries, and autocomplete functionality.
-
-## What Are N-grams?
-
-An N-gram is a contiguous sequence of N characters (or tokens) from a string.
-For example, the 2-grams of "hello" are: "he", "el", "ll", "lo".
-
-N-gram analysis is useful for:
-- Substring search (finding "ell" within "hello")
-- Autocomplete / typeahead suggestions
-- Fuzzy matching without edit distance computation
+L'analyse N-gramme est utile pour :
+- Recherche de sous-chaînes (trouver "ell" dans "hello")
+- Autocomplétion / suggestions en temps réel
+- Correspondance floue sans calcul de distance d'édition
 
 ## NgramTokenizer
 
-The `NgramTokenizer` splits text into character-level N-grams:
+Le `NgramTokenizer` divise le texte en N-grammes au niveau des
+caractères :
 
 ```python
 from whoosh.analysis import NgramTokenizer
@@ -39,17 +36,18 @@ schema = fields.Schema(
 )
 ```
 
-### NgramTokenizer Parameters
+### Paramètres de NgramTokenizer
 
-- `minsize`: Minimum N-gram length (default `2`)
-- `maxsize`: Maximum N-gram length (default `4`)
+- `minsize` : Longueur minimale des N-grammes (par défaut `2`)
+- `maxsize` : Longueur maximale des N-grammes (par défaut `4`)
 
-With the example above, the text "hello" produces these 2-4-grams:
+Avec l'exemple ci-dessus, le texte "hello" produit ces 2-4-grammes :
 `he, hel, hell, el, ell, ello, l, ll, llo, l, lo, o`
 
 ## NgramFilter
 
-The `NgramFilter` creates word-level N-grams from tokenized text:
+Le `NgramFilter` crée des N-grammes au niveau des mots à partir du
+texte tokenisé :
 
 ```python
 from whoosh.analysis import RegexTokenizer, NgramFilter
@@ -57,12 +55,13 @@ from whoosh.analysis import RegexTokenizer, NgramFilter
 analyzer = RegexTokenizer() | NgramFilter(maxsize=2)
 ```
 
-This produces word-level grams: for "hello world", it produces ("hello",)
-and ("hello", "world").
+Cela produit des grammes au niveau des mots : pour "hello world", il
+produit ("hello",) et ("hello", "world").
 
 ## NgramWordAnalyzer
 
-A convenience analyzer that combines `NgramTokenizer` with `LowercaseFilter`:
+Un analyseur de commodité qui combine `NgramTokenizer` avec
+`LowercaseFilter` :
 
 ```python
 from whoosh.analysis import NgramWordAnalyzer
@@ -74,11 +73,11 @@ schema = fields.Schema(
 )
 ```
 
-## Use Cases
+## Cas d'utilisation
 
-### Substring Search
+### Recherche de sous-chaînes
 
-With N-gram analysis, you can match substrings:
+Avec l'analyse N-gramme, vous pouvez correspondre des sous-chaînes :
 
 ```python
 from whoosh.qparser import QueryParser
@@ -90,9 +89,10 @@ q = qp.parse("ell")
 results = searcher.search(q)
 ```
 
-### Prefix Matching
+### Correspondance par préfixe
 
-Set `maxsize` equal to a large value to effectively create prefix N-grams:
+Définissez `maxsize` à une grande valeur pour créer efficacement des
+N-grammes de préfixe :
 
 ```python
 from whoosh.analysis import NgramWordAnalyzer
@@ -102,10 +102,11 @@ from whoosh.analysis import NgramWordAnalyzer
 analyzer = NgramWordAnalyzer(minsize=1, maxsize=10)
 ```
 
-### Autocomplete
+### Autocomplétion
 
-N-gram indexes are commonly used for autocomplete/typeahead. For more
-advanced autocomplete with edge n-grams, consider:
+Les index N-gramme sont couramment utilisés pour l'autocomplétion.
+Pour une autocomplétion plus avancée avec des N-grammes de bord
+(edge n-grams), envisrez :
 
 ```python
 from whoosh.analysis import RegexTokenizer, NgramFilter
@@ -124,24 +125,27 @@ qp = QueryParser("title", schema=ix.schema)
 q = Prefix("title", "hel")  # Find documents where title starts with "hel"
 ```
 
-## Comparison with Edge N-grams
+## Comparaison avec les N-grammes de bord (Edge N-grams)
 
-Some search engines support "edge n-grams" (only generating N-grams from the
-beginning of words). This is more space-efficient for autocomplete:
+Certains moteurs de recherche prennent en charge les "N-grammes de bord"
+(uniquement la génération de N-grammes à partir du début des mots).
+C'est plus efficace en espace pour l'autocomplétion :
 
-- Full N-grams: "hello" → "he", "el", "ll", "lo", "hel", "ell", ...
-- Edge N-grams: "hello" → "h", "he", "hel", "hell", "hello"
+- N-grammes complets : "hello" → "he", "el", "ll", "lo", "hel", "ell", ...
+- N-grammes de bord : "hello" → "h", "he", "hel", "hell", "hello"
 
-Whoosh's `NgramTokenizer` generates full (bidirectional) N-grams. For
-edge-ngram-like behavior, use the `minsize` and `maxsize` parameters
-strategically, or use `Prefix` queries against a standard tokenized field.
+Le `NgramTokenizer` de Whoosh génère des N-grammes complets (bidirectionnels).
+Pour un comportement similaire aux N-grammes de bord, utilisez les
+paramètres `minsize` et `maxsize` stratégiquement, ou utilisez des
+requêtes `Prefix` sur un champ tokenisé standard.
 
-## Performance Considerations
+## Considérations de performance
 
-- N-gram indexes are typically much larger than standard indexes
-- Each original token produces multiple N-gram tokens, increasing index size
-- Choose `minsize` and `maxsize` carefully to balance search quality against
-  index size
-- For autocomplete, consider using `Prefix` queries with a
-  non-N-gram field for better performance
-
+- Les index N-gramme sont généralement beaucoup plus volumineux que les
+  index standard.
+- Chaque jeton original produit plusieurs jetons N-gramme, augmentant
+  la taille de l'index.
+- Choisissez `minsize` et `maxsize` avec soin pour équilibrer la qualité
+  de recherche et la taille de l'index.
+- Pour l'autocomplétion, envisenez d'utiliser des requêtes `Prefix` sur
+  un champ non-N-gramme pour de meilleures performances.

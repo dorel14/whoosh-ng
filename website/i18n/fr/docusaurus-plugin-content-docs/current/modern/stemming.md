@@ -1,26 +1,21 @@
 ---
-title: 'Stemming and Stop Words'
+title: 'Racinement (Stemming) et mots vides'
 sidebar_position: 100
 ---
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# Racinement (Stemming) et mots vides
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Ce guide couvre l'utilisation des racines (stemmers), des filtres de
+mots vides (stop words) et de l'analyse de texte spécifique à chaque
+langue avec Whoosh.
 
+## Racines (Stemmers)
 
-# Stemming and Stop Words
+Un racine (stemmer) réduit les mots à leur forme racine (par ex.,
+"running" → "run", "cats" → "cat"), afin que les différentes formes
+du même mot correspondent lors des recherches.
 
-This guide covers using stemmers, stop-word filters, and language-specific
-text analysis with Whoosh.
-
-## Stemmers
-
-A stemmer reduces words to their root form (e.g., "running" → "run",
-"cats" → "cat"), so that different forms of the same word match in
-searches.
-
-### Using StemmerFilter
+### Utilisation de StemmerFilter
 
 ```python
 from whoosh.analysis import RegexTokenizer, StemmerFilter
@@ -36,9 +31,9 @@ schema = fields.Schema(
 )
 ```
 
-### Snowball Stemmers
+### Racines Snowball
 
-Whoosh includes Snowball stemmers for multiple languages:
+Whoosh inclut des racines Snowball pour plusieurs langues :
 
 ```python
 from whoosh.analysis import StemmerFilter
@@ -47,7 +42,7 @@ from whoosh.lang.snowball import EnglishStemmer
 stem_analyzer = RegexTokenizer() | StemmerFilter(stemfn=EnglishStemmer().stem)
 ```
 
-### Language-Aware Stemmer Selection
+### Sélection de racine selon la langue
 
 ```python
 from whoosh.lang import stemmer_for_language, StemmerFilter
@@ -56,13 +51,13 @@ from whoosh.analysis import RegexTokenizer
 stem = stemmer_for_language("en")
 analyzer = RegexTokenizer() | StemmerFilter(stemfn=stem)
 
-# Or use the analysis StemmingAnalyzer:
+# Ou utilisez l'analyseur StemmingAnalyzer :
 from whoosh.analysis import StemmingAnalyzer
 
 analyzer = StemmingAnalyzer("en")
 ```
 
-### Available Languages
+### Langues disponibles
 
 ```python
 from whoosh.lang import languages, has_stemmer, has_stopwords
@@ -72,13 +67,13 @@ print(has_stemmer("en"))  # True
 print(has_stopwords("en"))  # True
 ```
 
-## Stop Words
+## Mots vides (Stop Words)
 
-Stop words are common words (like "the", "a", "and") that are typically
-filtered out during indexing since they appear in too many documents to be
-useful for ranking.
+Les mots vides sont des mots fréquents (comme "the", "a", "and") qui
+sont généralement filtrés lors de l'indexation car ils apparaissent
+dans trop de documents pour être utiles au classement.
 
-### Using StopFilter
+### Utilisation de StopFilter
 
 ```python
 from whoosh.analysis import RegexTokenizer, StopFilter
@@ -93,12 +88,12 @@ schema = fields.Schema(
 )
 ```
 
-### Combining Stemming and Stop Words
+### Combinaison de racinement et de mots vides
 
 ```python
 from whoosh.analysis import StemmingAnalyzer
 
-# StemmingAnalyzer automatically loads stemmer and stopwords for the language
+# StemmingAnalyzer charge automatiquement le racine et les mots vides pour la langue
 analyzer = StemmingAnalyzer("en")
 
 schema = fields.Schema(
@@ -106,43 +101,44 @@ schema = fields.Schema(
 )
 ```
 
-### Custom Stop Words
+### Mots vides personnalisés
 
 ```python
 from whoosh.analysis import RegexTokenizer, StopFilter
 
-# Custom stop words list
+# Liste personnalisée de mots vides
 custom_stops = frozenset(["the", "a", "an", "foo", "bar"])
 analyzer = RegexTokenizer() | StopFilter(stoplist=custom_stops)
 ```
 
-## StemmingAnalyzer (Recommended)
+## StemmingAnalyzer (Recommandé)
 
-The `StemmingAnalyzer` combines tokenizer, stemming, and stop word filtering:
+Le `StemmingAnalyzer` combine le tokeniseur, le racinement et le
+filtrage des mots vides :
 
 ```python
 from whoosh.analysis import StemmingAnalyzer
 
-# Automatically uses the correct stemmer and stop words for the language
+# Utilise automatiquement le bon racine et les mots vides pour la langue
 analyzer = StemmingAnalyzer("en")
 
-# You can override defaults
+# Vous pouvez remplacer les valeurs par défaut
 analyzer = StemmingAnalyzer("en",
                             use_stopwords=True,
                             use_stems=True)
 ```
 
-### StemmingAnalyzer Options
+### Options de StemmingAnalyzer
 
-- `lang`: Language code (e.g., `"en"`, `"fr"`, `"de"`)
-- `use_stopwords`: Whether to load and apply stop words (default `True`)
-- `use_stems`: Whether to apply stemming (default `True`)
-- `args`: Arguments passed to the tokenizer
-- `kwargs`: Keyword arguments for the stemmer or stopwords
+- `lang` : Code de langue (ex. : `"en"`, `"fr"`, `"de"`)
+- `use_stopwords` : Charge et applique les mots vides (par défaut `True`)
+- `use_stems` : Applique le racinement (par défaut `True`)
+- `args` : Arguments passés au tokeniseur
+- `kwargs` : Arguments du mot-clé pour le racine ou les mots vides
 
-## Language-Specific Considerations
+## Considérations spécifiques selon la langue
 
-### Arabic (ISRI Stemmer)
+### Arabe (ISRI Stemmer)
 
 ```python
 from whoosh.analysis import StemmerFilter
@@ -151,7 +147,7 @@ from whoosh.lang.isri import ISRIStemmer
 stem_analyzer = RegexTokenizer() | StemmerFilter(stemfn=ISRIStemmer().stem)
 ```
 
-### Double Metaphone for Phonetic Matching
+### Double Métaphone pour la correspondance phonétique
 
 ```python
 from whoosh.analysis import RegexTokenizer, DoubleMetaphoneFilter
@@ -159,22 +155,24 @@ from whoosh.analysis import RegexTokenizer, DoubleMetaphoneFilter
 analyzer = RegexTokenizer() | DoubleMetaphoneFilter()
 ```
 
-## Query-Side Stemming
+## Racinement côté requête
 
-The analyzer is applied at both index time and query time (via the query
-parser), so stemming is automatically applied to search terms:
+L'analyseur est appliqué à la fois lors de l'indexation et lors de la
+requête (via l'analyseur de requête), donc le racinement est automatiquement
+appliqué aux termes de recherche :
 
 ```python
 from whoosh.qparser import QueryParser
 
-# If the index uses stemming, queries are stemmed too
+# Si l'index utilise le racinement, les requêtes sont racinées aussi
 qp = QueryParser("content", schema=ix.schema)
-q = qp.parse("running cats")  # Will match "run", "cat", etc.
+q = qp.parse("running cats")  # Correspondra à "run", "cat", etc.
 ```
 
-## N-gram Analysis
+## Analyse N-gramme
 
-For substring and prefix matching, use N-gram analyzers:
+Pour la correspondance de sous-chaînes et les requêtes par préfixe,
+utilisez les analyseurs N-gramme :
 
 ```python
 from whoosh.analysis import NgramWordAnalyzer
@@ -183,9 +181,11 @@ analyzer = NgramWordAnalyzer(minsize=2, maxsize=4)
 schema = fields.Schema(content=fields.TEXT(analyzer=analyzer))
 ```
 
-See the [N-grams Guide](ngrams.md) for more details.
+Voir le [Guide N-grammes](ngrams.md) pour plus de détails.
 
-## Modern Stemmer Providers (Whoosh-NG 2.0)
+## Fournisseurs de racines modernes (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduces a plugin-style stemmer provider system with auto-detection, PyStemmer support, and language-specific analyzers. For full details, see the [Stemmer Providers Guide](stemming-sprint-d.md).
-
+Whoosh-NG 2.0 introduit un système de fournisseurs de racines de style
+plugin avec détection automatique, support de PyStemmer et d'analyseurs
+spécifiques à chaque langue. Pour plus de détails, voir le
+[Guide des fournisseurs de racines](stemming-sprint-d.md).

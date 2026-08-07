@@ -1,148 +1,154 @@
 ---
-title: 'Glossary'
+title: 'Glossaire'
 sidebar_position: 100
 ---
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# Glossaire
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Un glossaire des termes clés utilisés dans Whoosh.
 
+## Analyse
 
-# Glossary
+Le processus de conversion du texte en jetons (unités individuelles comme
+les mots ou les termes) pour l'indexation. Implique la tokenisation, la
+normalisation (mise en minuscules, racinement) et le filtrage (suppression
+des mots vides, etc.).
 
-A glossary of key terms used in Whoosh.
+## Analyseur
 
-## Analysis
+Une chaîne d'objets `Tokenizer` et `Filter` qui traite le texte en jetons.
+Exemples : `RegexTokenizer`, `NgramTokenizer`, `LowercaseFilter`,
+`StopFilter`, `StemmerFilter`.
 
-The process of converting text into tokens (individual units like words or
-terms) for indexing. Involves tokenization, normalization (lowercasing,
-stemming), and filtering (stop word removal, etc.).
+## Fichier composé
 
-## Analyzer
-
-A chain of `Tokenizer` and `Filter` objects that processes text into
-tokens. Examples include `RegexTokenizer`, `NgramTokenizer`, `LowercaseFilter`,
-`StopFilter`, and `StemmerFilter`.
-
-## Compound File
-
-A file format that combines multiple index segment files into a single
-`.seg` file. This can improve performance on some filesystems by reducing
-file handle usage. Configured via the codec's `should_assemble` setting.
+Un format de fichier qui combine plusieurs fichiers de segment d'index
+en un seul fichier `.seg`. Cela peut améliorer les performances sur
+certains systèmes de fichiers en réduisant l'utilisation des descripteurs
+de fichiers. Configuré via le paramètre `should_assemble` du codec.
 
 ## Document
 
-A single record in the index, similar to a row in a database. A document
-contains fields (analogous to columns).
+Un enregistrement unique dans l'index, similaire à une ligne dans une base
+de données. Un document contient des champs (analogues aux colonnes).
 
-## Field
+## Champ
 
-A named attribute of a document. Fields have a type (defined by `FieldType`)
-that determines how the field's value is indexed and stored.
+Un attribut nommé d'un document. Les champs ont un type (défini par
+`FieldType`) qui détermine comment la valeur du champ est indexée et
+stockée.
 
-## Field Type
+## Type de champ
 
-The class (e.g., `TEXT`, `ID`, `NUMERIC`, `DATETIME`, `BOOLEAN`) that
-defines how a field's value is tokenized, stored, indexed, and made
-sortable/facetable.
+La classe (ex. : `TEXT`, `ID`, `NUMERIC`, `DATETIME`, `BOOLEAN`) qui
+définit comment la valeur d'un champ est tokenisée, stockée, indexée, et
+rendue triable/facetable.
 
-## Filter
+## Filtre
 
-An `Analyzer` component that processes, transforms, or filters tokens
-after tokenization. Examples: `LowercaseFilter`, `StopFilter`,
+Un composant d'`Analyzer` qui traite, transforme ou filtre les jetons
+après la tokenisation. Exemples : `LowercaseFilter`, `StopFilter`,
 `StemmerFilter`.
 
 ## Format
 
-A `Format` object controls how posting information (term frequency, positions,
-character offsets) is encoded for each field in the inverted index.
-Examples: `Existence`, `Frequency`, `Positions`, `Characters`.
+Un objet `Format` contrôle comment les informations de posting (fréquence
+du terme, positions, décalages de caractères) sont encodées pour chaque
+champ dans l'index inversé.
+Exemples : `Existence`, `Frequency`, `Positions`, `Characters`.
 
 ## Fragmentation
 
-The process of selecting text spans around matched terms for highlighting.
+Le processus de sélection des fragments de texte autour des termes
+correspondants pour la mise en évidence.
 
-## Highlighter
+## Mise en évidence (Highlighter)
 
-The `whoosh.highlight` module, which provides formatters, fragmenters, and
-scorers for highlighting search terms in documents.
+Le module `whoosh.highlight`, qui fournit des formateurs, fragmenteurs
+et évaluateurs pour mettre en évidence les termes de recherche dans les
+documents.
 
 ## Index
 
-The collection of segment files that store the inverted index, document
-data, and metadata (the table of contents, or TOC).
+La collection de fichiers de segment qui stockent l'index inversé, les
+données de documents et les métadonnées (la table des matières, ou TOC).
 
 ## IndexWriter
 
-The `IndexWriter` class is used to create and modify the index. It buffers
-document additions and deletions and commits them to disk.
+La classe `IndexWriter` est utilisée pour créer et modifier l'index. Elle
+met en mémoire tampon les ajouts et suppressions de documents et les
+valide sur le disque.
 
-## Inverted Index
+## Index inversé (Inverted Index)
 
-The core data structure of a search engine: for each unique term, it stores a
-list of documents (and positions) where that term appears.
+La structure de données centrale d'un moteur de recherche : pour chaque
+terme unique, il stocke une liste de documents (et de positions) où ce
+terme apparaît.
 
-## Matcher
+## Correspondance (Matcher)
 
-An object that iterates over matching documents in the postings list for a
-query. Matchers can be combined (union, intersection, etc.) for compound
-queries.
+Un objet qui itère sur les documents correspondants dans la liste de
+postings pour une requête. Les correspondances peuvent être combinées
+(union, intersection, etc.) pour des requêtes composées.
 
 ## Posting
 
-A single entry in the inverted index: a (document ID, term frequency, value)
-tuple for a given term.
+Une entrée unique dans l'index inversé : un tuple
+(ID de document, fréquence du terme, valeur) pour un terme donné.
 
-## Schema
+## Schéma (Schema)
 
-Defines the fields, their types, and indexing options for an index. A schema
-is passed to `Storage.create_index()`.
+Définit les champs, leurs types et les options d'indexation. Un schéma
+est passé à `Storage.create_index()`.
 
-## Scorer
+## Évaluateur (Scorer)
 
-An object that computes a relevance score for a document given a query and
-term weights. Different weighting models (BM25, TF-IDF, etc.) use different
-scorers.
+Un objet qui calcule un score de pertinence pour un document donné une
+requête et des poids de termes. Les différents modèles de pondération
+(BM25, TF-IDF, etc.) utilisent des évaluateurs différents.
 
 ## Segment
 
-A self-contained portion of the inverted index. An index may consist of
-multiple segments. Segments are merged periodically (during optimize or
-merge operations) to improve performance.
+Une portion autonome de l'index inversé. Un index peut consiste en
+plusieurs segments. Les segments sont fusionnés périodiquement (lors de
+l'optimisation ou des opérations de fusion) pour améliorer les
+performances.
 
-## Sort Key
+## Clé de tri (Sort Key)
 
-A value computed per-document (via a `FacetType` and its `Categorizer`)
-used to order results during sorting and faceting.
+Une valeur calculée par document (via un `FacetType` et son
+`Categorizer`) utilisée pour ordonner les résultats lors du tri et de la
+facettisation.
 
-## Stemming
+## Racinement (Stemming)
 
-The process of reducing words to their root form (e.g., "running" → "run",
-"cats" → "cat") to improve recall by matching inflected forms.
+Le processus de réduction des mots à leur forme racine (par ex.,
+"running" → "run", "cats" → "cat") pour améliorer le rappel en
+correspondant les formes inflectées.
 
-## Stop Words
+## Mots vides (Stop Words)
 
-High-frequency, low-information words (e.g., "the", "a", "and") that are
-typically filtered out during indexing.
+Des mots à haute fréquence et faible information (ex. : "the", "a",
+"and") qui sont généralement filtrés lors de l'indexation.
 
-## Term
+## Terme
 
-A unique (field name, token text) pair in the inverted index.
+Un couple unique (nom de champ, texte du jeton) dans l'index inversé.
 
-## Term Vector
+## Vecteur de termes (Term Vector)
 
-Optional per-document data structure storing the terms (and optionally
-positions and character offsets) that appear in a document's field, enabling
-features like highlighting and pseudo-relevance feedback.
+Structure de données optionnelle par document stockant les termes (et
+optionnellement les positions et décalages de caractères) qui apparaissent
+dans le champ d'un document, permettant des fonctionnalités comme la mise
+en évidence et les retours de pertinence pseudo.
 
-## Tokenizer
+## Tokeniseur (Tokenizer)
 
-An `Analyzer` component that splits input text into tokens. Examples:
-`RegexTokenizer`, `PathTokenizer`, `NgramTokenizer`.
+Un composant d'`Analyzer` qui divise le texte d'entrée en jetons.
+Exemples : `RegexTokenizer`, `PathTokenizer`, `NgramTokenizer`.
 
-## Whoosh Query
+## Requête Whoosh
 
-Whoosh's own query syntax, parsed by `QueryParser`. Supports fielded
-search, phrase queries, wildcards, ranges, and more.
-
+La syntaxe de requête propre à Whoosh, analysée par `QueryParser`.
+Prend en charge la recherche sur champs, les requêtes de phrase, les
+jokers, les intervalles et plus encore.

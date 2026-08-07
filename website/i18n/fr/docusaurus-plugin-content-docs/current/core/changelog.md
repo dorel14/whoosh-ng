@@ -5,7 +5,13 @@ sidebar_position: 80
 
 # Historique des modifications
 
-Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
+Notes de version pour Whoosh-NG, générées automatiquement à partir des
+releases GitHub et des messages de commits.
+
+> **Note** : Le changelog détaillé des versions est automatiquement généré
+> à partir des releases GitHub, qui sont rédigées en anglais. Les
+> titres de versions (## v4.x.0) et les catégories (Bug Fixes, Features,
+> etc.) restent en anglais conformément aux [Conventional Commits](https://www.conventionalcommits.org/).
 
 ## v4.2.0 (2026-08-07)
 **Tag**: `v4.2.0`
