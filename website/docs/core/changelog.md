@@ -7,6 +7,37 @@ sidebar_position: 80
 
 Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
 
+## v4.2.1 (2026-08-07)
+**Tag**: `v4.2.1`
+
+## v4.2.1 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v4.2.0...v4.2.1](https://github.com/dorel14/whoosh-ng/compare/v4.2.0...v4.2.1)
+
+### Commits
+
+### Bug Fixes
+
+- fix sync-changelog.yml YAML syntax error
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+- i18n(fr): translate nested.md, storage-providers.md, stemming.md, ngrams.md, glossary.md
+
+### Chores
+
+- synchronize version to 4.2.0 [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.1 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.1)
+
 ## v4.2.0 (2026-08-07)
 **Tag**: `v4.2.0`
 

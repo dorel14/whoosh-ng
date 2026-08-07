@@ -5,13 +5,38 @@ sidebar_position: 80
 
 # Historique des modifications
 
-Notes de version pour Whoosh-NG, générées automatiquement à partir des
-releases GitHub et des messages de commits.
+Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
 
-> **Note** : Le changelog détaillé des versions est automatiquement généré
-> à partir des releases GitHub, qui sont rédigées en anglais. Les
-> titres de versions (## v4.x.0) et les catégories (Bug Fixes, Features,
-> etc.) restent en anglais conformément aux [Conventional Commits](https://www.conventionalcommits.org/).
+## v4.2.1 (2026-08-07)
+**Tag**: `v4.2.1`
+
+## v4.2.1 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v4.2.0...v4.2.1](https://github.com/dorel14/whoosh-ng/compare/v4.2.0...v4.2.1)
+
+### Commits
+
+### Bug Fixes
+
+- fix sync-changelog.yml YAML syntax error
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+- i18n(fr): translate nested.md, storage-providers.md, stemming.md, ngrams.md, glossary.md
+
+### Chores
+
+- synchronize version to 4.2.0 [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.1 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.1)
 
 ## v4.2.0 (2026-08-07)
 **Tag**: `v4.2.0`
