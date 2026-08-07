@@ -6,10 +6,9 @@ import asyncio
 
 import pytest
 
-from whoosh.fields import Schema, TEXT
+from whoosh.fields import TEXT, Schema
 from whoosh.index import create_in
 from whoosh.writing import IndexWriter
-
 
 pytestmark = pytest.mark.asyncio
 

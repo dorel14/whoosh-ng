@@ -14,7 +14,6 @@ from whoosh.utils.async_utils import run_sync
 
 try:
     from fastapi import FastAPI  # pyright: ignore[reportMissingImports]
-    from fastapi.responses import JSONResponse  # pyright: ignore[reportMissingImports]
     from pydantic import BaseModel  # pyright: ignore[reportMissingImports]
 
     class SearchRequest(BaseModel):
@@ -90,10 +89,9 @@ try:
         @app.get(f"{prefix}/suggest")
         async def suggest_endpoint(q: str) -> dict[str, Any]:
             try:
-                from whoosh.spelling import suggest  # noqa: F401
-
                 with index.searcher() as searcher:
-                    suggestions = searcher.suggest(q)
+                    fieldname = index.schema.names()[0] if index.schema.names() else "content"
+                    suggestions = searcher.suggest(fieldname, q)
                     return {"suggestions": suggestions}
             except Exception:
                 return {"suggestions": []}
@@ -116,4 +114,11 @@ except ImportError as exc:
     ) from exc
 
 
-__all__ = ["create_app", "mount", "SearchRequest", "SearchResponse", "AutocompleteResponse", "HealthResponse"]
+__all__ = [
+    "create_app",
+    "mount",
+    "SearchRequest",
+    "SearchResponse",
+    "AutocompleteResponse",
+    "HealthResponse",
+]

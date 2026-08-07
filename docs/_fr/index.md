@@ -31,10 +31,10 @@ with ix.searcher() as s:
 
 ## Documentation
 
-- **[API Reference](/whoosh-ng/fr/api/overview/)** — Documentation complète des modules
-- **[Guides](/whoosh-ng/fr/guides/)** — Tutoriels et bonnes pratiques
-- **[Exemples](/whoosh-ng/fr/examples/)** — Exemples de code exécutables
-- **[English Documentation](/whoosh-ng/en/)** — Documentation in English
+- **[API Reference]({{ '/fr/api/overview/' | relative_url }}))** — Documentation complète des modules
+- **[Guides]({{ '/fr/guides/' | relative_url })}** — Tutoriels et bonnes pratiques
+- **[Exemples]({{ '/fr/examples/' | relative_url })}** — Exemples de code exécutables
+- **[English Documentation]({{ '/en/' | relative_url })}** — Documentation in English
 
 ## Structure de la documentation
 

@@ -9,9 +9,7 @@ from typing import Any
 
 from whoosh.index import Index
 from whoosh.plugins.storage_base import SyncStorageProvider
-
 from whoosh_modern.data_sources import DataSource
-from whoosh_modern.schema_discovery import SchemaDiscovery
 
 
 class FileStorage(SyncStorageProvider):
@@ -87,21 +85,22 @@ class SearchApplication:
 
         if self._storage is not None:
             storage_path = getattr(self._storage, "_provider", self._storage)
-            if hasattr(storage_path, "_root"):
+            root = getattr(storage_path, "_root", None)
+            if root is not None:
                 from whoosh.index import create_in
 
-                self._index = create_in(storage_path._root, schema)
+                self._index = create_in(root, schema)
             else:
-                from whoosh.index import create_in
-
                 import tempfile
+
+                from whoosh.index import create_in
 
                 tmp = tempfile.mkdtemp()
                 self._index = create_in(tmp, schema)
         else:
-            from whoosh.index import create_in
-
             import tempfile
+
+            from whoosh.index import create_in
 
             tmp = tempfile.mkdtemp()
             self._index = create_in(tmp, schema)
@@ -120,6 +119,8 @@ class SearchApplication:
         :param query: query string or Query object
         :returns: search results
         """
+        if self._index is None:
+            raise RuntimeError("Call build() before searching")
         if isinstance(query, str):
             from whoosh.qparser import QueryParser
 

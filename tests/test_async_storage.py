@@ -8,7 +8,6 @@ import pytest
 
 from whoosh_modern.storage.async_file import AsyncFileStorage
 
-
 pytestmark = pytest.mark.asyncio
 
 

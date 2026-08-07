@@ -6,8 +6,7 @@ from typing import Any
 
 import pytest
 
-from whoosh.fields import Schema, TEXT
-
+from whoosh.fields import TEXT, Schema
 from whoosh_modern import SearchApplication
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
 from whoosh_modern.storage import FileStorage

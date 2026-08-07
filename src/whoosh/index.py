@@ -340,8 +340,8 @@ class Index:
         searcher = await asyncio.to_thread(self.searcher, *args, **kwargs)
         try:
             if isinstance(query, str):
-                from whoosh.qparser import QueryParser
                 from whoosh.fields import TEXT
+                from whoosh.qparser import QueryParser
 
                 default_field = next(
                     (name for name, field in searcher.schema.items() if isinstance(field, TEXT)),

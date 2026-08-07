@@ -7,9 +7,8 @@ from collections.abc import AsyncIterator
 
 import pytest
 
-from whoosh_modern.data_sources.sql import SQLSource
 from whoosh_modern.data_sources.rest import RESTSource
-
+from whoosh_modern.data_sources.sql import SQLSource
 
 pytestmark = pytest.mark.asyncio
 

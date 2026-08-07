@@ -18,7 +18,6 @@ from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
 from whoosh_modern.data_sources.tortoise_ds import TortoiseSource
 from whoosh_modern.exceptions import (
     DataSourceError,
-    DataSourceNotFoundError,
     DocumentIterationError,
     SchemaDiscoveryError,
     ValidationError,
@@ -36,19 +35,19 @@ from whoosh_modern.indexing import (
     TieredMergePolicy,
 )
 from whoosh_modern.linguistics import (
+    LANG_SYNONYMS,
     EnglishAnalyzer,
     FrenchAnalyzer,
     GermanAnalyzer,
     ItalianAnalyzer,
     JSONSynonymProvider,
-    LANG_SYNONYMS,
+    SpanishAnalyzer,
     SQLiteSynonymStore,
     StaticSynonymProvider,
     SynonymCompiler,
     SynonymExpansionMiddleware,
     SynonymManager,
     SynonymProvider,
-    SpanishAnalyzer,
     YAMLSynonymProvider,
 )
 from whoosh_modern.middleware import (

@@ -12,7 +12,7 @@ from whoosh.index import Index
 
 try:
     from fastapi import FastAPI  # pyright: ignore[reportMissingImports]
-    from fastapi.responses import HTMLResponse, JSONResponse  # pyright: ignore[reportMissingImports]
+    from fastapi.responses import HTMLResponse  # pyright: ignore[reportMissingImports]
 
     def create_admin_app(index: Index, *, prefix: str = "/admin") -> FastAPI:
         """Create admin UI FastAPI application.
@@ -29,13 +29,12 @@ try:
 
         @app.get(f"{prefix}/stats")
         async def stats() -> dict[str, Any]:
-            with index.searcher() as searcher:
-                return {
-                    "index_stats": {
-                        "doc_count": index.doc_count(),
-                        "schema": list(index.schema.names()),
-                    }
+            return {
+                "index_stats": {
+                    "doc_count": index.doc_count(),
+                    "schema": list(index.schema.names()),
                 }
+            }
 
         @app.get(f"{prefix}/explore")
         async def explore() -> dict[str, Any]:
@@ -61,12 +60,17 @@ try:
             from whoosh.qparser import QueryParser
 
             query_string = request.get("q", "")
-            field = request.get("field", index.schema.names()[0] if index.schema.names() else "content")
+            field = request.get(
+                "field", index.schema.names()[0] if index.schema.names() else "content"
+            )
             parser = QueryParser(field, index.schema)
             query = parser.parse(query_string)
             with index.searcher() as searcher:
                 results = searcher.search(query, limit=request.get("limit", 10))
-                hits = [{"docnum": hit.docnum, "score": hit.score, "fields": dict(hit)} for hit in results]
+                hits = [
+                    {"docnum": hit.docnum, "score": hit.score, "fields": dict(hit)}
+                    for hit in results
+                ]
                 return {"hits": hits, "total": len(results)}
 
         @app.get(f"{prefix}/synonyms")
