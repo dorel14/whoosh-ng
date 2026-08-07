@@ -7,6 +7,46 @@ sidebar_position: 80
 
 Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
 
+## v4.1.0 (2026-08-07)
+**Tag**: `v4.1.0`
+
+## v4.1.0 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix broken workflows and Docusaurus build errors after migration ([`0e86e6c`](https://github.com/dorel14/whoosh-ng/commit/0e86e6c51e3d41fec984f0f79a4457e9d5d0b1ef))
+
+- **ci**: Fix sync_version.py NameError and missing imports ([`f809f56`](https://github.com/dorel14/whoosh-ng/commit/f809f563851b102c7220cec0371c560191bdb217))
+
+### Features
+
+- **docs**: Migrate Jekyll/Just the Docs to Docusaurus v3 ([`7e70791`](https://github.com/dorel14/whoosh-ng/commit/7e70791d23fb0f3097e3603ba0ff3fa5c8d822c2))
+
+---
+
+**Detailed Changes**: [v4.0.1...v4.1.0](https://github.com/dorel14/whoosh-ng/compare/v4.0.1...v4.1.0)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.1.0 [skip ci]
+
+### Features
+
+- migrate Jekyll/Just the Docs to Docusaurus v3
+
+### Bug Fixes
+
+- fix broken workflows and Docusaurus build errors after migration
+- fix sync_version.py NameError and missing imports
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.1.0)
+
 ## v4.0.1 (2026-08-07)
 **Tag**: `v4.0.1`
 

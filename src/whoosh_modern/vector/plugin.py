@@ -9,7 +9,7 @@ from whoosh_modern.vector.numpy_provider import NumpyProvider
 
 class VectorPlugin(Plugin):
     name = "whoosh_vector"
-    version = "4.0.1"
+    version = "4.1.0"
 
     def register(self, manager: Any) -> None:
         VectorRegistry.register("numpy", NumpyProvider(), self.name)

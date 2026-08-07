@@ -36,7 +36,7 @@ just_the_docs:
     fr:
       name: Français
       nav_fold: true
-  footer_content: "Whoosh-NG Documentation v4.0.1 | Last updated: 2026-08-07"
+  footer_content: "Whoosh-NG Documentation v4.1.0 | Last updated: 2026-08-07"
 
 # Collections for organized content
 collections:
