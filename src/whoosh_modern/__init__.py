@@ -81,6 +81,12 @@ from whoosh_modern.profiling import (
     profile_commit,
 )
 from whoosh_modern.schema_discovery import SchemaDiscovery
+from whoosh_modern.storage import (
+    AsyncFileStorage,
+    AsyncHybridStorage,
+    HybridStorage,
+    S3Storage,
+)
 from whoosh_modern.validation import ValidationFramework
 from whoosh_modern.views import SearchView
 from whoosh_modern.writer import ModernIndex, ModernIndexWriter
@@ -88,6 +94,10 @@ from whoosh_modern.writer import ModernIndex, ModernIndexWriter
 __all__ = [
     "SearchApplication",
     "FileStorage",
+    "S3Storage",
+    "HybridStorage",
+    "AsyncHybridStorage",
+    "AsyncFileStorage",
     "DataSource",
     "ObservableDataSource",
     "SQLSource",
