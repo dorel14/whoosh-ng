@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import re
+import subprocess
 import sys
 import tomllib
 from datetime import UTC, datetime, timezone
@@ -18,6 +20,15 @@ INDEX_FR = ROOT / "docs" / "archive_jekyll" / "_fr" / "index.md"
 DOCS_DIR = ROOT / "website" / "docs"
 DOCS_FR_DIR = ROOT / "website" / "i18n" / "fr" / "docusaurus-plugin-content-docs" / "current"
 DOCUSAURUS_CONFIG_TS = ROOT / "website" / "docusaurus.config.ts"
+
+
+def get_github_token() -> str | None:
+    """Retrieve the GitHub token from environment variables.
+
+    Returns:
+        The GitHub token string or None if not set.
+    """
+    return os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
 
 
 def get_version_from_pyproject() -> str:
@@ -76,7 +87,7 @@ def update_readme(version: str) -> bool:
 
 def update_docs_config_yml(version: str) -> bool:
     """Update the footer version and date in docs/_config.yml (Jekyll legacy)."""
-    config_yml = REPO_ROOT / "docs" / "archive_jekyll" / "_config.yml"
+    config_yml = ROOT / "docs" / "archive_jekyll" / "_config.yml"
     if not config_yml.exists():
         return False
     content = config_yml.read_text()
@@ -320,7 +331,7 @@ def main() -> int:
         subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "generate_changelog.py")],
             check=False,
-            env={**__import__("os").environ, "GITHUB_TOKEN": get_github_token() or ""},
+            env={**os.environ, "GITHUB_TOKEN": get_github_token() or ""},
         )
         print("  Regenerated changelog from GitHub releases")
         changed = True
