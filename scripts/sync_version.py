@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import os
 import re
-import subprocess
 import sys
 import tomllib
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -20,15 +18,6 @@ INDEX_FR = ROOT / "docs" / "archive_jekyll" / "_fr" / "index.md"
 DOCS_DIR = ROOT / "website" / "docs"
 DOCS_FR_DIR = ROOT / "website" / "i18n" / "fr" / "docusaurus-plugin-content-docs" / "current"
 DOCUSAURUS_CONFIG_TS = ROOT / "website" / "docusaurus.config.ts"
-
-
-def get_github_token() -> str | None:
-    """Retrieve the GitHub token from environment variables.
-
-    Returns:
-        The GitHub token string or None if not set.
-    """
-    return os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
 
 
 def get_version_from_pyproject() -> str:
@@ -326,17 +315,11 @@ def main() -> int:
         print("  Updated plugin version attributes")
         changed = True
 
-    # Regenerate changelog from GitHub releases
-    try:
-        subprocess.run(
-            [sys.executable, str(ROOT / "scripts" / "generate_changelog.py")],
-            check=False,
-            env={**os.environ, "GITHUB_TOKEN": get_github_token() or ""},
-        )
-        print("  Regenerated changelog from GitHub releases")
-        changed = True
-    except Exception as e:
-        print(f"  Changelog generation skipped: {e}", file=sys.stderr)
+    # Note: Changelog generation is handled separately by the
+    # Generate Changelog workflow (changelog.yml) in CI, not by
+    # this pre-commit hook. This prevents rate-limit errors and
+    # unnecessary file modifications during local development.
+    # To regenerate changelogs: GITHUB_TOKEN=... python scripts/generate_changelog.py
 
     if changed:
         print(f"Version synchronized to {version}")

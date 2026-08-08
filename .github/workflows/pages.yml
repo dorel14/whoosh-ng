@@ -1,27 +1,29 @@
 name: Deploy GitHub Pages
 
-# Build and deploy the Docusaurus site (source: website/) as the LAST step
-# after Changelog Generation has completed. This ensures the deployed site
-# always has the latest version number (from Semantic Release + Sync Version)
-# and changelog entries (from Generate Changelog).
+# Build and deploy the Docusaurus site as the LAST step after changelog
+# generation has completed. Uses BOTH a workflow_run trigger (for the release
+# chain) and a push trigger (for docs-only changes).
 #
-# Workflow chain on master:
-#   1. Semantic Release  → version bump, commit, tag → pushes to master
-#   2. Sync Version       → syncs version strings → pushes to master
-#   3. Generate Changelog → generates changelog + API docs → pushes to master
-#   4. Deploy GitHub Pages  → builds & deploys (this workflow, runs LAST)
+# Workflow chain:
+#   1. Semantic Release → version bump + tag → pushes to master
+#   2. Sync Version → syncs version strings → pushes to master
+#   3. Generate Changelog → changelog + API docs → pushes to master
+#   4. Deploy GitHub Pages (this workflow) → builds & deploys LAST
 #
-# IMPORTANT: pages.yml does NOT trigger on push to master directly.
-# The ONLY automatic trigger is workflow_run after "Generate Changelog"
-# completes. This ensures Pages always deploys with the fully synced
-# version and latest changelog.
-#
-# For any other deployment (docs-only, manual, etc.), use workflow_dispatch.
+# To prevent race conditions with bot commits from steps 1-3, the push
+# trigger skips commits from github-actions[bot]. The workflow_run trigger
+# handles bot commits by waiting for Generate Changelog to finish.
 on:
   workflow_run:
     workflows: ["Generate Changelog"]
     types:
       - completed
+  push:
+    branches: [master]
+    paths-ignore:
+      - "src/**"
+      - "pyproject.toml"
+      - "docs/archive_jekyll/**"
   workflow_dispatch:
 
 permissions:
@@ -31,17 +33,20 @@ permissions:
 
 concurrency:
   group: pages
-  # Cancel in-progress deploys when a newer deploy is queued.
-  # This prevents stale builds from overwriting newer ones.
   cancel-in-progress: true
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # Only deploy if the triggering workflow succeeded.
-    # (workflow_dispatch always passes this check since event_name != 'workflow_run')
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # For workflow_run: only proceed if the triggering workflow succeeded.
+    # For push: skip if the last commit was from github-actions[bot]
+    #   (i.e., from sync-version.yml or changelog.yml — those are handled
+    #   by the workflow_run trigger which fires after Generate Changelog).
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'push' && github.actor != 'github-actions[bot]') ||
+      (github.event_name == 'workflow_dispatch')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
