@@ -6,7 +6,7 @@ permalink: /en/
 
 # Whoosh-NG Documentation
 
-> **Latest release**: v4.2.1 | [View releases on GitHub](https://github.com/dorel14/whoosh-ng/releases) | Next: v4.0.0.dev0 (in development) | Last updated: 2026-08-07
+> **Latest release**: v4.2.1 | [View releases on GitHub](https://github.com/dorel14/whoosh-ng/releases) | Next: v4.0.0.dev0 (in development) | Last updated: 2026-08-08
 
 Welcome to the official documentation for **Whoosh-NG**, a pure-Python full-text indexing and search library modernized for 2025+.
 
