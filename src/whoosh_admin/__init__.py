@@ -21,7 +21,7 @@ try:
         :param prefix: API endpoint prefix
         :returns: Configured FastAPI application
         """
-        app = FastAPI(title="Whoosh-NG Admin", version="4.2.2")
+        app = FastAPI(title="Whoosh-NG Admin", version="4.2.3")
 
         @app.get(f"{prefix}/", response_class=HTMLResponse)
         async def index_page() -> str:
