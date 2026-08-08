@@ -1,6 +1,7 @@
 ---
 title: "Changelog"
 sidebar_position: 80
+sidebars: coreSidebar
 ---
 
 # Changelog

@@ -1,6 +1,7 @@
 ---
 title: "Historique des modifications"
 sidebar_position: 80
+sidebars: coreSidebar
 ---
 
 # Historique des modifications

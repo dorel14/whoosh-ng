@@ -1,6 +1,7 @@
 ---
 title: "Documentation Whoosh-NG"
 sidebar_position: 1
+sidebars: docs
 ---
 
 # Documentation Whoosh-NG

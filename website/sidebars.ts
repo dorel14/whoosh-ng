@@ -3,6 +3,11 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   docs: {
     Core: [
+      {
+        type: 'doc',
+        id: 'index',
+        label: 'Overview',
+      },
       {type: 'doc', id: 'core/index', label: 'Core'},
       'core/quickstart',
       'core/installation',

@@ -120,34 +120,79 @@ def generate_api_docs() -> bool:
 
 
 def create_api_page() -> None:
-    """Create a Docusaurus page that embeds the pydoctor HTML output.
+    """Create a Docusaurus page with API module reference table.
 
-    The page uses an iframe to display the pydoctor HTML docs.
+    The page lists all API modules grouped by category. When pydoctor HTML
+    docs are available, users can also open them locally.
     """
-    md_content = """---
+    _pydoctor_url = "https://pydoctor.readthedocs.io/"
+    _github_url = "https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs"
+    md_content = f"""---
 title: "API Reference"
 sidebar_position: 60
+sidebars: apiSidebar
 ---
 
 # API Reference
 
 The Whoosh-NG API reference is auto-generated from source code using
-[pydoctor](https://pydoctor.readthedocs.io/), which parses Python modules
+[pydoctor]({_pydoctor_url}), which parses Python modules
 and generates HTML documentation from docstrings.
 
 :::note
-If the embedded documentation does not display, you can also view the
-full API docs in a new tab:
-[Open API Reference](/api_docs/index.html)
+If the embedded documentation does not display, the API docs may not have
+been generated yet in this deployment. [View on GitHub]({_github_url})
+for the full API documentation, or check the
+[API modules list](#api-modules) below.
 :::
 
-<iframe
-  src="/api_docs/index.html"
-  title="Whoosh-NG API Documentation"
-  width="100%"
-  height="1200px"
-  style={{ border: "none" }}
-/>
+## API Modules
+
+### Core API
+
+| Module | Description |
+|--------|-------------|
+| `whoosh.index` | High-level index creation, opening, and management |
+| `whoosh.fields` | Schema and field type definitions |
+| `whoosh.writing` | Writer classes and merge policies |
+| `whoosh.searching` | Searcher, Results, and collectors |
+| `whoosh.query` | Query classes and parsers |
+| `whoosh.qparser` | Query parser implementation |
+| `whoosh.analysis` | Tokenizers, filters, and analyzers |
+| `whoosh.highlight` | Search result highlighting |
+| `whoosh.spelling` | Spelling correction |
+| `whoosh.sorting` | Facets and sorting |
+| `whoosh.event_bus` | Event system |
+| `whoosh.hooks` | Hook system |
+| `whoosh.middleware` | Middleware pipeline |
+| `whoosh.plugins` | Plugin system and registry |
+| `whoosh.backends` | Storage backends |
+
+### Modern API
+
+| Module | Description |
+|--------|-------------|
+| `whoosh_modern.data_sources` | Data source protocol and implementations |
+| `whoosh_modern.views` | SearchView unified interface |
+| `whoosh_modern.middleware` | Retry, cache, logging middleware |
+| `whoosh_modern.facets` | FacetManager for auto-discovery |
+| `whoosh_modern.validation` | 4-level validation framework |
+| `whoosh_modern.indexing` | BatchIndexWriter, AnalyzerCache |
+| `whoosh_modern.linguistics` | Linguistic engine (stemmers, synonyms) |
+| `whoosh_modern.storage` | Storage providers (HybridStorage, etc.) |
+| `whoosh_modern.vector` | NumpyProvider for vector similarity |
+| `whoosh_modern.autocomplete` | Autocomplete provider plugins |
+| `whoosh_fastapi` | FastAPI REST API endpoints |
+| `whoosh_admin` | Admin UI dashboard |
+
+:::info
+For the full interactive API documentation, run:
+```bash
+pip install pydoctor
+python scripts/generate_api_docs.py
+```
+Then open `website/static/api_docs/index.html` in your browser.
+:::
 """
 
     en_path = DOCS_EN_DIR / "api" / "reference.md"
