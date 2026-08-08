@@ -11,6 +11,9 @@ on:
       - 'pydoctor.ini'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   api-docs:
     name: Generate API Docs

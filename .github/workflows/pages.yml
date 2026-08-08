@@ -11,25 +11,17 @@ name: Deploy GitHub Pages
 #   3. Generate Changelog → generates changelog + API docs → pushes to master
 #   4. Deploy GitHub Pages  → builds & deploys (this workflow, runs LAST)
 #
-# For docs-only changes to master (not going through the release chain),
-# this also triggers on push to master paths: ['website/**', 'docs/*', '.gitignore'].
+# NOTE: pages.yml does NOT trigger on push to master directly.
+# It only deploys via workflow_run after "Generate Changelog" completes.
+# This prevents race conditions where Pages deploys with stale content
+# (before version sync or changelog generation has finished).
+#
+# For docs-only changes (no release), use workflow_dispatch to deploy manually.
 on:
   workflow_run:
     workflows: ["Generate Changelog"]
     types:
       - completed
-  push:
-    branches: [master]
-    paths:
-      - "website/docs/**"
-      - "website/i18n/**"
-      - "website/static/**"
-      - "website/docusaurus.config.ts"
-      - "website/sidebars.ts"
-      - "docs/llms.txt"
-      - "docs/llms-full.txt"
-      - ".gitignore"
-      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
