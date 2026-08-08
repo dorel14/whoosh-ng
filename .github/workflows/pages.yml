@@ -11,17 +11,22 @@ name: Deploy GitHub Pages
 #   3. Generate Changelog → generates changelog + API docs → pushes to master
 #   4. Deploy GitHub Pages  → builds & deploys (this workflow, runs LAST)
 #
-# NOTE: pages.yml does NOT trigger on push to master directly.
-# It only deploys via workflow_run after "Generate Changelog" completes.
-# This prevents race conditions where Pages deploys with stale content
-# (before version sync or changelog generation has finished).
+# Primary trigger: workflow_run on "Generate Changelog" completion.
 #
-# For docs-only changes (no release), use workflow_dispatch to deploy manually.
+# Fallback: push to master for docs-only changes, but IGNORES commits from
+# github-actions[bot] to prevent race conditions with the release chain.
+# If a bot commit (from sync-version or changelog) is the latest, the
+# workflow_run trigger will handle deployment instead.
 on:
   workflow_run:
     workflows: ["Generate Changelog"]
     types:
       - completed
+  push:
+    branches: [master]
+    paths-ignore:
+      - "src/**"
+      - "pyproject.toml"
   workflow_dispatch:
 
 permissions:
@@ -39,8 +44,13 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # Only deploy if all triggering workflows succeeded
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # For workflow_run: only deploy if the triggering workflow succeeded.
+    # For push: skip if the push was from github-actions[bot] (i.e., from
+    # sync-version.yml or changelog.yml), since the workflow_run trigger
+    # already handles those cases.
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'push' && github.actor != 'github-actions[bot]')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
