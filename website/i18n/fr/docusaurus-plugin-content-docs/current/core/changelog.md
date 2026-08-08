@@ -7,6 +7,40 @@ sidebar_position: 80
 
 Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
 
+## v4.2.3 (2026-08-08)
+**Tag**: `v4.2.3`
+
+## v4.2.3 (2026-08-08)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Add concurrency groups to prevent workflow race conditions ([`76e38f0`](https://github.com/dorel14/whoosh-ng/commit/76e38f03045d19b8d8032f066432af4e9d17d133))
+
+---
+
+**Detailed Changes**: [v4.2.2...v4.2.3](https://github.com/dorel14/whoosh-ng/compare/v4.2.2...v4.2.3)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- sync version to 4.2.1 [skip ci]
+- v4.2.3 [skip ci]
+
+### Other
+
+- Merge: resolve sync-version conflicts (CI and local generated same changes)
+
+### Bug Fixes
+
+- add concurrency groups to prevent workflow race conditions
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.3)
+
 ## v4.2.2 (2026-08-08)
 **Tag**: `v4.2.2`
 
