@@ -7,6 +7,35 @@ sidebar_position: 80
 
 Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
 
+## v4.2.2 (2026-08-08)
+**Tag**: `v4.2.2`
+
+## v4.2.2 (2026-08-08)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix changelog workflow detached HEAD ([`db4b78e`](https://github.com/dorel14/whoosh-ng/commit/db4b78e6dc51a0e10fde48fd93eb2ce5d1dbecd0))
+
+---
+
+**Detailed Changes**: [v4.2.1...v4.2.2](https://github.com/dorel14/whoosh-ng/compare/v4.2.1...v4.2.2)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.2 [skip ci]
+
+### Bug Fixes
+
+- fix changelog workflow detached HEAD
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.2)
+
 ## v4.2.1 (2026-08-07)
 **Tag**: `v4.2.1`
 
