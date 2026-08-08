@@ -184,4 +184,3 @@ character offsets.
 - Supports: `frequency`, `weight`, `positions`, `position_boosts`,
   `characters`, `character_boosts`
 - `encode()` encodes `(position, startchar, endchar, boost)` tuples
-

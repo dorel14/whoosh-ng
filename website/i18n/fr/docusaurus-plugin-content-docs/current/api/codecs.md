@@ -595,4 +595,3 @@ class whoosh.codec.memory.MemSegment(codec, indexname)
 In-memory segment storing all data in Python dictionaries (inverted index,
 stored fields, lengths, vectors, term infos). Uses a `Lock` for thread-safe
 access.
-

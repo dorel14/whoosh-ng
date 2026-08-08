@@ -320,4 +320,3 @@ whoosh.reading.read_terminfo(reader, fieldname, text) -> TermInfo or None
 ```
 
 Returns a `TermInfo` for the given term, or `None` if not found.
-

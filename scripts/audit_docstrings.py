@@ -5,6 +5,7 @@ Scans all Python files in src/ and reports:
 - Files without any docstrings
 - Files with non-Google-style docstrings (e.g. reST-style with :param:, :return:)
 """
+
 from __future__ import annotations
 
 import re

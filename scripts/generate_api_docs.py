@@ -87,7 +87,9 @@ def generate_api_docs() -> bool:
     API_OUTPUT.mkdir(parents=True, exist_ok=True)
 
     cmd = [
-        sys.executable, "-m", "pydoctor",
+        sys.executable,
+        "-m",
+        "pydoctor",
         "--project-name=Whoosh-NG",
         "--project-url=https://github.com/dorel14/whoosh-ng",
         f"--html-output={API_OUTPUT}",
@@ -158,24 +160,31 @@ full API docs in a new tab:
     print(f"Created: {en_path}")
 
     # FR version with translated title
-    fr_content = md_content.replace(
-        'title: "API Reference"',
-        'title: "Référence API"',
-    ).replace(
-        "# API Reference",
-        "# Référence API",
-    ).replace(
-        "auto-generated from source code using",
-        "générée automatiquement à partir du code source avec",
-    ).replace(
-        "which parses Python modules",
-        "qui analyse les modules Python",
-    ).replace(
-        "and generates HTML documentation from docstrings.",
-        "et génère une documentation HTML à partir des docstrings.",
-    ).replace(
-        "Open API Reference",
-        "Ouvrir la référence API",
+    fr_content = (
+        md_content.replace(
+            'title: "API Reference"',
+            'title: "Référence API"',
+        )
+        .replace(
+            "# API Reference",
+            "# Référence API",
+        )
+        .replace(
+            "auto-generated from source code using",
+            "générée automatiquement à partir du code source avec",
+        )
+        .replace(
+            "which parses Python modules",
+            "qui analyse les modules Python",
+        )
+        .replace(
+            "and generates HTML documentation from docstrings.",
+            "et génère une documentation HTML à partir des docstrings.",
+        )
+        .replace(
+            "Open API Reference",
+            "Ouvrir la référence API",
+        )
     )
     fr_path.write_text(fr_content, encoding="utf-8")
     print(f"Created: {fr_path}")

@@ -331,4 +331,3 @@ from whoosh.searching import TimeLimit
 
 Raised by `TimeLimitCollector` when the search exceeds the time limit.
 Partial results are still available from the collector.
-

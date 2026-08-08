@@ -26,4 +26,3 @@ results = searcher.search(query, sortedby=sorting.FieldFacet("price", reverse=Tr
 ```
 
 For the full API reference, see [Sorting API](/api/sorting).
-

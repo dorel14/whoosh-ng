@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Audit FR documentation for untranslated content."""
+
 import re
 from pathlib import Path
 
@@ -8,8 +9,16 @@ en_dir = Path("website/docs")
 
 # English marker patterns that indicate untranslated content
 english_markers = [
-    r"\bthe\b", r"\band\b", r"\bis\b", r"\bare\b", r"\bto\b", r"\bof\b",
-    r"\bin\b", r"\bfor\b", r"\bwith\b", r"\bThis\b",
+    r"\bthe\b",
+    r"\band\b",
+    r"\bis\b",
+    r"\bare\b",
+    r"\bto\b",
+    r"\bof\b",
+    r"\bin\b",
+    r"\bfor\b",
+    r"\bwith\b",
+    r"\bThis\b",
     r"Whoosh-NG Documentation",
 ]
 
@@ -24,20 +33,20 @@ stubs = []
 for fr_file in fr_files:
     content = fr_file.read_text(encoding="utf-8")
     rel = fr_file.relative_to(fr_dir)
-    
+
     # Count English marker matches
     eng_count = sum(len(re.findall(p, content, re.IGNORECASE)) for p in english_markers)
-    
+
     # Check for stub translation notice
     is_stub = (
-        "TRADUCTION" in content 
-        or "Traduit automatiquement" in content 
+        "TRADUCTION" in content
+        or "Traduit automatiquement" in content
         or "EN COURS DE TRADUCTION" in content
     )
-    
+
     # Check if FR file has any French-specific characters
     has_french = bool(re.search(r"[àâäéèêëïîôöùûüÿç]", content))
-    
+
     if eng_count > 50:
         label = "STUB" if is_stub else "UNTRANSLATED"
         untranslated.append((label, eng_count, rel))

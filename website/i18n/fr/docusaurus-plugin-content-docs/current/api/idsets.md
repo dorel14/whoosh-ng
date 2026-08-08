@@ -210,4 +210,3 @@ automatically. Used for combining deletions across multiple segments.
 - `__contains__(i)`: Checks the appropriate sub-set based on offsets.
 - `__iter__()`: Iterates over all integers in all sub-sets.
 - `__len__()`: Returns the total count across all sub-sets.
-

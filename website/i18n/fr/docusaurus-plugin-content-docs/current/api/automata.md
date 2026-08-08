@@ -537,4 +537,3 @@ class whoosh.automata.InactiveCursor
 ```
 
 Raised when operating on a cursor that is not at a valid position.
-

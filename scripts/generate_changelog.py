@@ -262,8 +262,7 @@ def generate_changelog(locale: str = "en", token: str | None = None) -> str:
     if locale == "en":
         title = "Changelog"
         intro = (
-            "Release notes for Whoosh-NG, auto-generated from GitHub "
-            "releases and commit messages."
+            "Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages."
         )
     else:
         title = "Historique des modifications"

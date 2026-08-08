@@ -846,4 +846,3 @@ whoosh.analysis.NgramWordAnalyzer(
 Composes `RegexTokenizer`, `LowercaseFilter`, and `NgramFilter`. Use this
 when you want sub-word n-grams (without whitespace) rather than raw
 character n-grams.
-

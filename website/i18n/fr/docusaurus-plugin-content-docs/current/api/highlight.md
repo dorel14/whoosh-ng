@@ -378,4 +378,3 @@ Main highlighter object used by `Searcher.highlights()`.
   Returns the highlighted string for a single hit in a given field.
 - `can_load_chars(results, fieldname)`: Returns `True` if the field supports
   "pinpoint" highlighting using stored character offsets.
-

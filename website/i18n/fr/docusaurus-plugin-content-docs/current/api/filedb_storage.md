@@ -324,4 +324,3 @@ whoosh.filedb.filestore.copy_to_ram(storage)
 ```
 
 Reads all files from a storage into a `RamStorage` and returns it.
-

@@ -168,4 +168,3 @@ objects, and a list of `(fieldname, text)` tuples to correct.
 - `prefix`: Suggested replacement words must share this number of initial
   characters. Default `0`.
 - `maxdist`: Maximum edit distance for suggestions. Values > 2 may be slow.
-

@@ -316,4 +316,3 @@ Stems a word using the Paice-Husk algorithm.
 ```python
 whoosh.lang.paicehusk.stem = PaiceHuskStemmer(defaultrules).stem
 ```
-

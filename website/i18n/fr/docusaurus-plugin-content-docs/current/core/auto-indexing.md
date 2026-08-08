@@ -25,4 +25,3 @@ schema = discovery.discover()
 ```
 
 See [SearchView](/examples/search-view) and [Data Sources](/examples/data-sources) for usage examples.
-

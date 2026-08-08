@@ -610,4 +610,3 @@ class whoosh.matching.SpanAnd(l, r)
 ```
 
 Logical AND for span matchers.
-

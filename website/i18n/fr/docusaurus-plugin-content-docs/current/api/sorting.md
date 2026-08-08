@@ -437,4 +437,3 @@ with ix.writer() as w:
 - `facet`: A `FacetType` object to generate per-document values.
 - `column`: Optional `ColumnType` to store the values. If omitted, uses the
   field's default column type.
-

@@ -1,8 +1,8 @@
 # AGENTS.md — Instructions for AI Agents
 
-> **Repository**: [whoosh-ng](https://github.com/dorel14/whoosh-ng)  
-> **Current branch**: `master` (development: `dev`)  
-> **Python**: 3.11+ required  
+> **Repository**: [whoosh-ng](https://github.com/dorel14/whoosh-ng)
+> **Current branch**: `master` (development: `dev`)
+> **Python**: 3.11+ required
 > **Last updated**: 2026-08-08
 
 ---
@@ -390,7 +390,7 @@ test(scope): add edge case tests for facets
 chore(scope): update dependencies
 ```
 
-Format: `<type>(<scope>): <subject>`  
+Format: `<type>(<scope>): <subject>`
 Types: `feat`, `fix`, `refactor`, `style`, `perf`, `test`, `docs`, `chore`, `ci`, `build`
 
 ### Pull Requests

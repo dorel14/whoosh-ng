@@ -247,4 +247,3 @@ within a window of `size` is below a threshold. Uses variance for ranking.
 
 **Returns:** A list of `(left, right, count, variance)` tuples representing
 clusters, sorted by count descending then by variance ascending.
-

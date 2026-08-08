@@ -179,4 +179,3 @@ ix = index.open_dir("indexdir")
 with ix.writer() as w:
     sorting.add_sortable(w, "price", sorting.FieldFacet("price"))
 ```
-

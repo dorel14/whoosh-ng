@@ -321,4 +321,3 @@ class whoosh.columns.FixedBytesListColumn(blocksize)
 
 A `ListColumn` variant of `FixedBytesColumn` that stores lists of fixed-size
 byte strings.
-

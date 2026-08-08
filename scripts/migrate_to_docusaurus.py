@@ -83,6 +83,7 @@ def _resolve_guide(guide_name: str, locale: str) -> str:
 
 # ─── Build permalink -> Docusaurus URL map ─────────────────────────────────────
 
+
 def _build_permalink_map(locale: str) -> dict[str, str]:
     """Scan source files and build permalink -> Docusaurus URL map.
 
@@ -139,9 +140,7 @@ FR_PERMALINK_MAP = _build_permalink_map("fr")
 
 # ─── Link conversion ──────────────────────────────────────────────────────────
 
-LIQUID_URL_RE = re.compile(
-    r"\{\{\s*['\"]([^'\"]+)['\"]\s*\|\s*relative_url\s*\}\}"
-)
+LIQUID_URL_RE = re.compile(r"\{\{\s*['\"]([^'\"]+)['\"]\s*\|\s*relative_url\s*\}\}")
 
 
 def convert_links(content: str, locale: str, is_stub: bool = False) -> str:
@@ -166,8 +165,20 @@ def convert_links(content: str, locale: str, is_stub: bool = False) -> str:
         if path in ("/changelog/", "/changelog"):
             return "https://github.com/dorel14/whoosh-ng/blob/master/CHANGELOG.md"
         # Handle links to non-existent top-level indexes
-        if path in ("/en/examples/", "/fr/examples/", "/examples/", "/en/api/", "/fr/api/", "/api/",
-                     "/en/modern/", "/fr/modern/", "/modern/", "/en/core/", "/fr/core/", "/core/"):
+        if path in (
+            "/en/examples/",
+            "/fr/examples/",
+            "/examples/",
+            "/en/api/",
+            "/fr/api/",
+            "/api/",
+            "/en/modern/",
+            "/fr/modern/",
+            "/modern/",
+            "/en/core/",
+            "/fr/core/",
+            "/core/",
+        ):
             # Map /fr/examples/ -> /examples/basic-indexing, etc.
             # Strip locale prefix (en/ or fr/) from the path first
             raw = path.strip("/")
@@ -183,10 +194,16 @@ def convert_links(content: str, locale: str, is_stub: bool = False) -> str:
             if section in section_redirects:
                 return section_redirects[section]
         # Handle links to non-existent pages
-        migration_paths = ("/en/examples/migration/", "/fr/examples/migration/",
-                          "/examples/migration/", "/examples/migration")
+        migration_paths = (
+            "/en/examples/migration/",
+            "/fr/examples/migration/",
+            "/examples/migration/",
+            "/examples/migration",
+        )
         if path in migration_paths:
-            return "https://github.com/dorel14/whoosh-ng/tree/master/docs/archive_jekyll/_en/examples"
+            return (
+                "https://github.com/dorel14/whoosh-ng/tree/master/docs/archive_jekyll/_en/examples"
+            )
         # Direct lookup in the current locale's permalink map
         if path in pmap:
             return pmap[path]
@@ -218,12 +235,12 @@ def convert_links(content: str, locale: str, is_stub: bool = False) -> str:
             return "/"
         # Remove locale prefix if still present
         if stripped.startswith(f"{locale}/"):
-            stripped = stripped[len(f"{locale}/"):]
+            stripped = stripped[len(f"{locale}/") :]
         if stripped.startswith("en/") or stripped.startswith("fr/"):
             stripped = stripped[3:]
         # /guides/X/ -> /core/X or /modern/X (lookup by guide name)
         if stripped.startswith("guides/"):
-            guide_name = stripped[len("guides/"):]
+            guide_name = stripped[len("guides/") :]
             return _resolve_guide(guide_name, locale)
         # Bare /guides/ -> /core/ (the Core index page)
         if stripped == "guides":
@@ -251,6 +268,7 @@ def rewrite_internal_links(content: str, locale: str) -> str:
 
 
 # ─── Front matter conversion ──────────────────────────────────────────────────
+
 
 def process_front_matter(fm_text: str, locale: str) -> str:
     """Convert Jekyll front matter keys to Docusaurus equivalents.
@@ -553,6 +571,7 @@ FR_MISSING: list[str] = [
 
 # ─── Site config files ────────────────────────────────────────────────────────
 
+
 def create_website_scaffold() -> None:
     """Lot A: Create the Docusaurus website directory and config files."""
     if WEBSITE_DIR.exists():
@@ -560,7 +579,8 @@ def create_website_scaffold() -> None:
     WEBSITE_DIR.mkdir(parents=True)
 
     # package.json
-    (WEBSITE_DIR / "package.json").write_text("""{
+    (WEBSITE_DIR / "package.json").write_text(
+        """{
   "name": "whoosh-ng-docs",
   "version": "1.0.0",
   "private": true,
@@ -584,7 +604,9 @@ def create_website_scaffold() -> None:
     "typescript": "^5.6.0"
   }
 }
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     # docusaurus.config.ts
     config_ts = """import type {Config} from '@docusaurus/types';
@@ -694,7 +716,8 @@ export default config;
     (WEBSITE_DIR / "docusaurus.config.ts").write_text(config_ts, encoding="utf-8")
 
     # tsconfig.json
-    (WEBSITE_DIR / "tsconfig.json").write_text("""{
+    (WEBSITE_DIR / "tsconfig.json").write_text(
+        """{
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
@@ -711,7 +734,9 @@ export default config;
   "include": ["src", "docusaurus.config.ts", "sidebars.ts"],
   "exclude": ["node_modules", "build"]
 }
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     # Empty src/ to keep TypeScript happy
     (WEBSITE_DIR / "src").mkdir(parents=True, exist_ok=True)
@@ -741,18 +766,19 @@ export default config;
     (static_dir / "llms.txt").write_text(
         "# whoosh-ng\n\n> Documentation index. "
         "Run `python scripts/generate_llm_docs.py` to regenerate.\n",
-        encoding="utf-8"
+        encoding="utf-8",
     )
     (static_dir / "llms-full.txt").write_text(
         "# whoosh-ng - Full Technical Documentation\n\n"
         "> Run `python scripts/generate_llm_docs.py` to regenerate.\n",
-        encoding="utf-8"
+        encoding="utf-8",
     )
 
     print("Lot A: Docusaurus scaffold created at website/")
 
 
 # ─── Lot B: EN migration ───────────────────────────────────────────────────────
+
 
 def migrate_en() -> None:
     """Migrate EN content from docs/_en/ -> website/docs/."""
@@ -781,6 +807,7 @@ def migrate_en() -> None:
 
 
 # ─── Lot C: FR migration ──────────────────────────────────────────────────────
+
 
 def migrate_fr() -> None:
     """Migrate FR content from docs/_fr/ -> website/i18n/fr/.../current/."""
@@ -993,12 +1020,15 @@ export default sidebars;
 
 # ─── Lot D: Update generate_llm_docs.py ────────────────────────────────────────
 
+
 def update_llm_docs_script() -> None:
     script_path = REPO_ROOT / "scripts" / "generate_llm_docs.py"
 
     _llm_doc_header = '"""Module de generation des fichiers \
         de documentation LLM (llms.txt et llms-full.txt).'
-    new_script = _llm_doc_header + '''
+    new_script = (
+        _llm_doc_header
+        + '''
 
 Ce module genere deux fichiers a la racine du depot, consomes par les LLM
 et les robots d'indexation :
@@ -1133,11 +1163,13 @@ def generate() -> None:
 if __name__ == "__main__":
     generate()
 '''
+    )
     script_path.write_text(new_script, encoding="utf-8")
     print("Lot D: scripts/generate_llm_docs.py updated")
 
 
 # ─── Lot E: GitHub Actions ─────────────────────────────────────────────────────
+
 
 def update_workflows() -> None:
     workflow = """name: Deploy GitHub Pages
@@ -1226,13 +1258,14 @@ jobs:
     if "website/docs/**" not in llms:
         llms = llms.replace(
             "      - 'docs/**'",
-            "      - 'docs/**'\n      - 'website/docs/**'\n      - 'website/i18n/**'"
+            "      - 'docs/**'\n      - 'website/docs/**'\n      - 'website/i18n/**'",
         )
     llms_path.write_text(llms, encoding="utf-8")
     print("Lot E: pages.yml replaced, llms-doc.yml updated")
 
 
 # ─── Rename intro.md -> index.md ────────────────────────────────────────────────
+
 
 def _rename_intro_to_index() -> None:
     """Rename intro.md to index.md so Docusaurus serves it as the homepage.
@@ -1256,11 +1289,11 @@ def _rename_intro_to_index() -> None:
 
 # ─── .gitignore ─────────────────────────────────────────────────────────────────
 
+
 def update_gitignore() -> None:
     gitignore = REPO_ROOT / ".gitignore"
 
-
-# ─── Main ─────────────────────────────────────────────────────────────────────
+    # ─── Main ─────────────────────────────────────────────────────────────────────
     content = gitignore.read_text(encoding="utf-8")
     additions = []
     if "website/build/" not in content:
@@ -1274,6 +1307,7 @@ def update_gitignore() -> None:
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     print("=" * 60)
