@@ -1,6 +1,7 @@
 ---
 title: "Basic Indexing"
 sidebar_position: 200
+sidebars: examplesSidebar
 ---
 
 # Basic Indexing

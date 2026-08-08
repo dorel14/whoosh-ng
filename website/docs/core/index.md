@@ -1,6 +1,7 @@
 ---
 title: "Core"
 sidebar_position: 1
+sidebars: coreSidebar
 ---
 
 # Core

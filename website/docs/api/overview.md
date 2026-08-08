@@ -1,6 +1,7 @@
 ---
 title: "API Overview"
 sidebar_position: 100
+sidebars: apiSidebar
 ---
 
 # API Overview

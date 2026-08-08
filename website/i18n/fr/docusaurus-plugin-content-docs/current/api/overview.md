@@ -1,6 +1,7 @@
 ---
 title: "Vue d'ensemble API"
 sidebar_position: 100
+sidebars: apiSidebar
 ---
 
 # Vue d'ensemble API

@@ -52,10 +52,68 @@ const sidebars: SidebarsConfig = {
       'modern/ngrams',
       'modern/storage-providers',
     ],
+  },
+  // Dedicated sidebars for scoped sections — each only shows its own section
+  // so that navigating to an API page, Changelog, or Example doesn't display
+  // the entire site tree.
+  coreSidebar: {
+    Core: [
+      {type: 'doc', id: 'core/index', label: 'Core'},
+      'core/quickstart',
+      'core/installation',
+      {
+        type: 'category',
+        label: 'Classic Features',
+        items: [
+          'core/core-concepts',
+          'core/indexing',
+          'core/searching',
+          'core/schema',
+          'core/query',
+          'core/backends',
+          'core/dates',
+          'core/nested',
+          'core/sorting',
+          'core/auto-indexing',
+        ],
+      },
+      {
+        type: 'category',
+        label: 'Reference',
+        items: [
+          'core/glossary',
+          'core/migration',
+          'core/changelog',
+          'core/legacy-cleanup',
+          'core/translation-status',
+        ],
+      },
+    ],
+  },
+  modernSidebar: {
+    Modern: [
+      {type: 'doc', id: 'modern/index', label: 'Modern'},
+      'modern/middleware',
+      'modern/middleware-sprint-c',
+      'modern/plugins',
+      'modern/plugins-sprint-c',
+      'modern/autocomplete',
+      'modern/autocomplete-sprint-d',
+      'modern/vector',
+      'modern/modern-indexing',
+      'modern/monitoring',
+      'modern/performance',
+      'modern/linguistics-sprint-d',
+      'modern/stemming',
+      'modern/stemming-sprint-d',
+      'modern/ngrams',
+      'modern/storage-providers',
+    ],
+  },
+  apiSidebar: {
     'API Reference': [
       'api/overview',
       'api/reference',
-      'api/core',
       {
         type: 'category',
         label: 'Core API',
@@ -93,6 +151,8 @@ const sidebars: SidebarsConfig = {
         ],
       },
     ],
+  },
+  examplesSidebar: {
     Examples: [
       'examples/basic-indexing',
       'examples/search',

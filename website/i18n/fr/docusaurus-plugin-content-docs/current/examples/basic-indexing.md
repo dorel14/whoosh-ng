@@ -1,6 +1,7 @@
 ---
 title: "Indexation de base"
 sidebar_position: 200
+sidebars: examplesSidebar
 ---
 
 # Indexation de base
