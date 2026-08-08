@@ -1,10 +1,35 @@
 name: Deploy GitHub Pages
 
-# Build and deploy the Docusaurus site (source: website/) on every push to master
+# Build and deploy the Docusaurus site (source: website/) as the LAST step
+# after Changelog Generation has completed. This ensures the deployed site
+# always has the latest version number (from Semantic Release + Sync Version)
+# and changelog entries (from Generate Changelog).
+#
+# Workflow chain on master:
+#   1. Semantic Release  → version bump, commit, tag → pushes to master
+#   2. Sync Version       → syncs version strings → pushes to master
+#   3. Generate Changelog → generates changelog + API docs → pushes to master
+#   4. Deploy GitHub Pages  → builds & deploys (this workflow, runs LAST)
+#
+# For docs-only changes to master (not going through the release chain),
+# this also triggers on push to master paths: ['website/**', 'docs/*', '.gitignore'].
 on:
+  workflow_run:
+    workflows: ["Generate Changelog"]
+    types:
+      - completed
   push:
-    branches:
-      - master
+    branches: [master]
+    paths:
+      - "website/docs/**"
+      - "website/i18n/**"
+      - "website/static/**"
+      - "website/docusaurus.config.ts"
+      - "website/sidebars.ts"
+      - "docs/llms.txt"
+      - "docs/llms-full.txt"
+      - ".gitignore"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -14,12 +39,16 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  # Cancel in-progress deploys when a newer deploy is queued.
+  # This prevents stale builds from overwriting newer ones.
+  cancel-in-progress: true
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    # Only deploy if all triggering workflows succeeded
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,15 +70,10 @@ jobs:
       - name: Install pydoctor
         run: pip install pydoctor
 
-      - name: Generate changelog from GitHub releases
-        run: python scripts/generate_changelog.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate API docs
+      - name: Generate API docs (safety net — changelog.yml also runs this)
         run: python scripts/generate_api_docs.py
 
-      - name: Generate llms.txt
+      - name: Generate llms.txt (safety net — changelog.yml also runs this)
         run: python scripts/generate_llm_docs.py
 
       - name: Install dependencies

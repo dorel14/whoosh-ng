@@ -122,7 +122,7 @@ def create_api_page() -> None:
 
     The page uses an iframe to display the pydoctor HTML docs.
     """
-    md_content = '''---
+    md_content = """---
 title: "API Reference"
 sidebar_position: 60
 ---
@@ -146,7 +146,7 @@ full API docs in a new tab:
   height="1200px"
   style={{ border: "none" }}
 />
-'''
+"""
 
     en_path = DOCS_EN_DIR / "api" / "reference.md"
     fr_path = DOCS_FR_DIR / "api" / "reference.md"

@@ -36,18 +36,18 @@ const config: Config = {
       },
       items: [
         {
-          to: '/core/quickstart',
-          label: 'Core',
-          position: 'left',
-        },
-        {
-          to: '/modern/middleware',
-          label: 'Modern',
+          to: '/',
+          label: 'Docs',
           position: 'left',
         },
         {
           to: '/api/overview',
           label: 'API',
+          position: 'left',
+        },
+        {
+          to: '/core/changelog',
+          label: 'Changelog',
           position: 'left',
         },
         {

@@ -61,10 +61,7 @@ def _doc_url(doc_path: Path, locale: str) -> str:
         return f"{BASE_URL}/{slug_path}" if locale == "en" else f"{BASE_URL}/{locale}/{slug_path}"
 
     # Fallback: derive from file path
-    if locale == "en":
-        rel = doc_path.relative_to(DOCS_DIR)
-    else:
-        rel = doc_path.relative_to(DOCS_FR_DIR)
+    rel = doc_path.relative_to(DOCS_DIR) if locale == "en" else doc_path.relative_to(DOCS_FR_DIR)
     rel_posix = rel.with_suffix("").as_posix()
     return f"{BASE_URL}/{locale}/{rel_posix}/"
 

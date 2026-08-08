@@ -68,11 +68,12 @@ pip install "whoosh-ng[dev]"
 
 ## Documentation
 
-- **[API Reference](https://dorel14.github.io/whoosh-ng/en/api/overview/)** - Complete module documentation
-- **[User Guides](https://dorel14.github.io/whoosh-ng/en/guides/)** - Tutorials and best practices
-- **[Examples](https://dorel14.github.io/whoosh-ng/en/examples/)** - Runnable code examples
-- **[Data Sources](https://dorel14.github.io/whoosh-ng/en/examples/data-sources/)** - SQL, REST, GraphQL, CSV, JSON, Parquet data sources
-- **[French Documentation](https://dorel14.github.io/whoosh-ng/fr/)** - Documentation en français
+- **[Documentation](https://dorel14.github.io/whoosh-ng/)** — Full documentation site (English)
+- **[API Reference](https://dorel14.github.io/whoosh-ng/api/overview)** — Complete module documentation
+- **[Examples](https://dorel14.github.io/whoosh-ng/examples/basic-indexing)** — Runnable code examples
+- **[Data Sources](https://dorel14.github.io/whoosh-ng/examples/data-sources)** — SQL, REST, GraphQL, CSV, JSON, Parquet data sources
+- **[Changelog](https://dorel14.github.io/whoosh-ng/core/changelog)** — Release notes and version history
+- **[French Documentation](https://dorel14.github.io/whoosh-ng/fr/core/quickstart)** — Documentation en français
 - **LLM-Friendly Docs**: [`llms.txt`](https://dorel14.github.io/whoosh-ng/llms.txt) (index) | [`llms-full.txt`](https://dorel14.github.io/whoosh-ng/llms-full.txt) (complete API)
 
 ## Recent Changes in 4.2.2

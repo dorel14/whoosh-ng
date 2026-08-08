@@ -1,10 +1,19 @@
 name: Generate Changelog
 
+# Runs as the third step in the master deployment chain:
+#   1. Semantic Release → version bump + tag + release → pushes to master
+#   2. Sync Version → sync version strings in docs/config → pushes to master
+#   3. Generate Changelog (this workflow) → changelog + API docs + llms.txt → pushes to master
+#   4. Deploy GitHub Pages → build site & deploy
+#
+# Using workflow_run on "Sync Version" ensures this runs strictly after
+# sync-version.yml has pushed its commit, so the changelog generation
+# sees the fully synced version strings.
 on:
-  release:
+  workflow_run:
+    workflows: ["Sync Version"]
     types:
-      - published
-      - edited
+      - completed
   workflow_dispatch:
 
 concurrency:
@@ -15,6 +24,8 @@ jobs:
   changelog:
     name: Generate Changelog from GitHub Releases
     runs-on: ubuntu-latest
+    # Only proceed if the triggering workflow (Sync Version) succeeded.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
     steps:

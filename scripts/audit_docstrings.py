@@ -22,7 +22,9 @@ GOOGLE_PATTERNS = re.compile(
     r"^\s+(Args|Returns|Raises|Yields|Note|Example|Attributes|See Also):",
     re.MULTILINE,
 )
-REST_PATTERNS = re.compile(r"^\s+:(param|return|returns|raises|type|rtype|ivar|vartype|cvar):", re.MULTILINE)
+REST_PATTERNS = re.compile(
+    r"^\s+:(param|return|returns|raises|type|rtype|ivar|vartype|cvar):", re.MULTILINE
+)
 DOCSTRING_START = re.compile(r'^\s*"""')
 
 
@@ -60,9 +62,9 @@ def main() -> None:
         if not src_dir.exists():
             continue
         for py in sorted(src_dir.rglob("*.py")):
-            if py.name.startswith("_") and py.suffix == ".py" and not py.parent.name.startswith("test"):
-                # Skip internal files but still count them
-                pass
+            is_internal = py.name.startswith("_") and py.suffix == ".py"
+            if is_internal and not py.parent.name.startswith("test"):
+                pass  # Skip internal files but still count them
             info = audit_file(py)
             results["total"] += 1
 

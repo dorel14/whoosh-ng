@@ -216,12 +216,11 @@ def format_release_notes(release: dict, all_releases: list[dict], token: str | N
     # Find previous tag for commit comparison
     try:
         idx = all_releases.index(release)
-        if idx + 1 < len(all_releases):
-            prev_tag = all_releases[idx + 1].get("tag_name")
-        else:
-            prev_tag = None
     except ValueError:
-        prev_tag = None
+        idx = -1
+    prev_tag = (
+        all_releases[idx + 1].get("tag_name") if idx >= 0 and idx + 1 < len(all_releases) else None
+    )
 
     lines = [
         f"## {name} ({date_str})",
@@ -262,21 +261,27 @@ def generate_changelog(locale: str = "en", token: str | None = None) -> str:
 
     if locale == "en":
         title = "Changelog"
-        intro = "Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages."
+        intro = (
+            "Release notes for Whoosh-NG, auto-generated from GitHub "
+            "releases and commit messages."
+        )
     else:
         title = "Historique des modifications"
-        intro = "Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits."
+        intro = (
+            "Notes de version pour Whoosh-NG, generees automatiquement "
+            "a partir des releases GitHub et des messages de commits."
+        )
 
     lines = [
-        f"---",
+        "---",
         f'title: "{title}"',
-        f"sidebar_position: 80",
-        f"---",
-        f"",
+        "sidebar_position: 80",
+        "---",
+        "",
         f"# {title}",
-        f"",
-        f"{intro}",
-        f"",
+        "",
+        intro,
+        "",
     ]
 
     if not releases:

@@ -103,7 +103,7 @@ def _build_permalink_map(locale: str) -> dict[str, str]:
         permalink = None
         if fm_match:
             fm = fm_match.group(1)
-            pm = re.search(r'^permalink:\s*(.*)$', fm, re.MULTILINE)
+            pm = re.search(r"^permalink:\s*(.*)$", fm, re.MULTILINE)
             if pm:
                 permalink = pm.group(1).strip().strip('"').strip("'")
 
@@ -171,21 +171,21 @@ def convert_links(content: str, locale: str, is_stub: bool = False) -> str:
             # Map /fr/examples/ -> /examples/basic-indexing, etc.
             # Strip locale prefix (en/ or fr/) from the path first
             raw = path.strip("/")
-            if raw.startswith("en/"):
-                raw = raw[3:]
-            elif raw.startswith("fr/"):
+            if raw.startswith("en/") or raw.startswith("fr/"):
                 raw = raw[3:]
             section = raw.split("/")[0]
-            if section == "examples":
-                return "/examples/basic-indexing"
-            elif section == "api":
-                return "/api/overview"
-            elif section == "core":
-                return "/core/quickstart"
-            elif section == "modern":
-                return "/modern/middleware"
+            section_redirects = {
+                "examples": "/examples/basic-indexing",
+                "api": "/api/overview",
+                "core": "/core/quickstart",
+                "modern": "/modern/middleware",
+            }
+            if section in section_redirects:
+                return section_redirects[section]
         # Handle links to non-existent pages
-        if path in ("/en/examples/migration/", "/fr/examples/migration/", "/examples/migration/", "/examples/migration"):
+        migration_paths = ("/en/examples/migration/", "/fr/examples/migration/",
+                          "/examples/migration/", "/examples/migration")
+        if path in migration_paths:
             return "https://github.com/dorel14/whoosh-ng/tree/master/docs/archive_jekyll/_en/examples"
         # Direct lookup in the current locale's permalink map
         if path in pmap:
@@ -269,9 +269,7 @@ def process_front_matter(fm_text: str, locale: str) -> str:
         elif stripped.startswith("nav_order:"):
             val = stripped.split(":", 1)[1].strip()
             new_lines.append(f"sidebar_position: {val}")
-        elif stripped.startswith("lang:"):
-            continue
-        elif stripped.startswith("has_children:"):
+        elif stripped.startswith("lang:") or stripped.startswith("has_children:"):
             continue
         else:
             new_lines.append(line)
@@ -426,7 +424,8 @@ sidebar_position: 26
 
 # Sorting
 
-The `whoosh.sorting` module provides facets and sort-key computation for ordering and grouping search results.
+The `whoosh.sorting` module provides facets and sort-key computation for ordering and
+grouping search results.
 
 ## Quick start
 
@@ -462,7 +461,8 @@ discovery = SchemaDiscovery(source=data_source)
 schema = discovery.discover()
 ```
 
-See [SearchView](/examples/search-view) and [Data Sources](/examples/data-sources) for usage examples.
+See [SearchView](/examples/search-view) and [Data Sources](/examples/data-sources) for
+usage examples.
 """,
 }
 
@@ -587,7 +587,7 @@ def create_website_scaffold() -> None:
 """, encoding="utf-8")
 
     # docusaurus.config.ts
-    (WEBSITE_DIR / "docusaurus.config.ts").write_text("""import type {Config} from '@docusaurus/types';
+    config_ts = """import type {Config} from '@docusaurus/types';
 import {themes as prismThemes} from 'prism-react-renderer';
 
 const config: Config = {
@@ -690,7 +690,8 @@ const config: Config = {
 };
 
 export default config;
-""", encoding="utf-8")
+"""
+    (WEBSITE_DIR / "docusaurus.config.ts").write_text(config_ts, encoding="utf-8")
 
     # tsconfig.json
     (WEBSITE_DIR / "tsconfig.json").write_text("""{
@@ -738,11 +739,13 @@ export default config;
 
     # Create placeholder llms.txt and llms-full.txt in static/
     (static_dir / "llms.txt").write_text(
-        "# whoosh-ng\n\n> Documentation index. Run `python scripts/generate_llm_docs.py` to regenerate.\n",
+        "# whoosh-ng\n\n> Documentation index. "
+        "Run `python scripts/generate_llm_docs.py` to regenerate.\n",
         encoding="utf-8"
     )
     (static_dir / "llms-full.txt").write_text(
-        "# whoosh-ng - Full Technical Documentation\n\n> Run `python scripts/generate_llm_docs.py` to regenerate.\n",
+        "# whoosh-ng - Full Technical Documentation\n\n"
+        "> Run `python scripts/generate_llm_docs.py` to regenerate.\n",
         encoding="utf-8"
     )
 
@@ -813,13 +816,13 @@ def migrate_fr() -> None:
             if fm_match:
                 en_fm = fm_match.group(1)
                 en_body = fm_match.group(2)
-                en_title_m = re.search(r'^title:\s*(.*)$', en_fm, re.MULTILINE)
+                en_title_m = re.search(r"^title:\s*(.*)$", en_fm, re.MULTILINE)
                 en_title = en_title_m.group(1).strip().strip('"') if en_title_m else "Untitled"
-                en_nav_m = re.search(r'^sidebar_position:\s*(\d+)$', en_fm, re.MULTILINE)
+                en_nav_m = re.search(r"^sidebar_position:\s*(\d+)$", en_fm, re.MULTILINE)
                 en_nav = en_nav_m.group(1) if en_nav_m else "0"
                 # If no nav_order, try permalink-based ordering
                 if en_nav == "0":
-                    en_permalink_m = re.search(r'^permalink:\s*(.*)$', en_fm, re.MULTILINE)
+                    en_permalink_m = re.search(r"^permalink:\s*(.*)$", en_fm, re.MULTILINE)
                     if en_permalink_m:
                         # Assign based on known ordering
                         permalink = en_permalink_m.group(1).strip()
@@ -848,19 +851,19 @@ def migrate_fr() -> None:
 {stub_body}
 """
             else:
-                stub = f'''---
+                stub = f"""---
 title: "{missing_rel}"
 ---
 
 > **Note de traduction** : Cette page n'est pas encore traduite en français.
-'''
+"""
         else:
-            stub = f'''---
+            stub = f"""---
 title: "{missing_rel}"
 ---
 
 > **Note de traduction** : Cette page n'est pas encore traduite en français.
-'''
+"""
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(stub, encoding="utf-8")
 
@@ -993,7 +996,9 @@ export default sidebars;
 def update_llm_docs_script() -> None:
     script_path = REPO_ROOT / "scripts" / "generate_llm_docs.py"
 
-    new_script = '''"""Module de generation des fichiers de documentation LLM (llms.txt et llms-full.txt).
+    _llm_doc_header = '"""Module de generation des fichiers \
+        de documentation LLM (llms.txt et llms-full.txt).'
+    new_script = _llm_doc_header + '''
 
 Ce module genere deux fichiers a la racine du depot, consomes par les LLM
 et les robots d'indexation :
@@ -1241,8 +1246,9 @@ def _rename_intro_to_index() -> None:
     if en_intro.exists():
         en_intro.rename(en_index)
 
-    fr_intro = WEBSITE_DIR / "i18n" / "fr" / "docusaurus-plugin-content-docs" / "current" / "intro.md"
-    fr_index = WEBSITE_DIR / "i18n" / "fr" / "docusaurus-plugin-content-docs" / "current" / "index.md"
+    fr_i18n = WEBSITE_DIR / "i18n" / "fr" / "docusaurus-plugin-content-docs" / "current"
+    fr_intro = fr_i18n / "intro.md"
+    fr_index = fr_i18n / "index.md"
     if fr_intro.exists():
         fr_intro.rename(fr_index)
     print("Renamed intro.md -> index.md (homepage)")
