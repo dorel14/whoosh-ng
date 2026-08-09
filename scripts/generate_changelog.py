@@ -275,7 +275,7 @@ def generate_changelog(locale: str = "en", token: str | None = None) -> str:
         "---",
         f'title: "{title}"',
         "sidebar_position: 80",
-        "sidebars: coreSidebar",
+        "sidebars: changelogSidebar",
         "---",
         "",
         f"# {title}",

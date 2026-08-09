@@ -1,7 +1,7 @@
 ---
 title: "Modern"
 sidebar_position: 20
-sidebars: modernSidebar
+sidebars: docs
 ---
 
 # Modern
