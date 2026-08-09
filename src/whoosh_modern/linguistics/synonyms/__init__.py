@@ -10,6 +10,9 @@ Provides:
 - SynonymManager (CRUD + import/export)
 - SynonymExpansionMiddleware (hook into search/index pipeline)
 - LANG_SYNONYMS (prebuilt FR/EN/DE/ES/IT dictionaries)
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations

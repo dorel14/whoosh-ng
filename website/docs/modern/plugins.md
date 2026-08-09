@@ -156,4 +156,4 @@ class FastAPIPlugin(BasePlugin):
 
 ## Modern Plugin System (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduces an enhanced `PluginManager` with registry support for datasources, vector providers, embeddings, and middleware. For full details on the modern plugin architecture, entry point groups, and deployment, see the [Plugin System Guide](plugins-sprint-c.md).
+Whoosh-NG 2.0 introduces an enhanced `PluginManager` with registry support for datasources, vector providers, embeddings, and middleware. For full details on the modern plugin architecture, entry point groups, and deployment, see the [Plugin System Guide](plugins-advanced.md).

@@ -1,3 +1,12 @@
+"""Base module for Python model-to-Whoosh field mapping.
+
+Provides TypeMapper (central registry mapping Python types to Whoosh field
+types) and ModelIndex (automatic Schema construction from a Python model).
+
+Author: dorel14
+Version: 2.0.0
+"""
+
 from __future__ import annotations
 
 import dataclasses
@@ -17,7 +26,14 @@ T = TypeVar("T")
 
 
 def _unwrap_annotated(annotation: Any) -> tuple[Any, list[Any]]:
-    """Return (base_type, metadata) from an Annotated type."""
+    """Return (base_type, metadata) from an Annotated type.
+
+    Args:
+        annotation: A type annotation, possibly wrapped in ``Annotated``.
+
+    Returns:
+        A tuple of (base_type, metadata_list).
+    """
     origin = get_origin(annotation)
     if origin is not None:
         try:
@@ -32,11 +48,28 @@ def _unwrap_annotated(annotation: Any) -> tuple[Any, list[Any]]:
 
 
 def _is_list_like(annotation: Any) -> bool:
+    """Check whether the annotation represents a list-like type.
+
+    Args:
+        annotation: A type annotation.
+
+    Returns:
+        True if the annotation is ``list``, ``tuple``, or ``Sequence``.
+    """
     origin = get_origin(annotation)
     return origin is list or origin is tuple or origin is Sequence
 
 
 def _extract_search_options(annotation: Any, default: SearchOptions) -> SearchOptions:
+    """Extract SearchOptions from an Annotated type's metadata.
+
+    Args:
+        annotation: A type annotation, possibly wrapped in ``Annotated``.
+        default: Default SearchOptions to return if no SearchField is found.
+
+    Returns:
+        SearchOptions extracted from metadata or the default.
+    """
     _, metadata = _unwrap_annotated(annotation)
     for item in metadata:
         if isinstance(item, SearchField):
@@ -51,10 +84,25 @@ class TypeMapper:
 
     @classmethod
     def register(cls, py_type: Any, factory: Callable[[SearchOptions], Any]) -> None:
+        """Register a Python type -> Whoosh field factory mapping.
+
+        Args:
+            py_type: Python type to map.
+            factory: Function that takes SearchOptions and returns a Whoosh field type.
+        """
         cls._registry[py_type] = factory
 
     @classmethod
     def map(cls, py_type: Any, options: SearchOptions) -> Any:
+        """Map a Python type to a Whoosh field type.
+
+        Args:
+            py_type: Python type to map.
+            options: SearchOptions associated with the field.
+
+        Returns:
+            A Whoosh field type instance (TEXT, NUMERIC, etc.).
+        """
         if py_type in cls._registry:
             return cls._registry[py_type](options)
         origin = get_origin(py_type)
@@ -85,6 +133,7 @@ class TypeMapper:
 
 
 def _default_mappings() -> None:
+    """Register default Python-to-Whoosh type mappings."""
     TypeMapper.register(str, lambda opt: TEXT(stored=opt.stored, analyzer=opt.analyzer or None))
     TypeMapper.register(
         SearchField, lambda opt: TEXT(stored=opt.stored, analyzer=opt.analyzer or None)
@@ -102,6 +151,14 @@ _default_mappings()
 
 
 def _get_annotations(model: type) -> dict[str, Any]:
+    """Retrieve type annotations from a model class.
+
+    Args:
+        model: The model class to inspect.
+
+    Returns:
+        Dictionary of {field_name: type_annotation}.
+    """
     try:
         return inspect.get_annotations(model, eval_str=True)
     except Exception:
@@ -109,6 +166,14 @@ def _get_annotations(model: type) -> dict[str, Any]:
 
 
 def _get_type_hints(model: type) -> dict[str, Any]:
+    """Retrieve full type hints (including Annotated) from a model class.
+
+    Args:
+        model: The model class to inspect.
+
+    Returns:
+        Dictionary of {field_name: full_type_hint}.
+    """
     try:
         import typing
 
@@ -118,13 +183,21 @@ def _get_type_hints(model: type) -> dict[str, Any]:
 
 
 class ModelIndex:
-    """Auto-maps a Python model to a Whoosh Schema."""
+    """Automatically maps a Python model to a Whoosh Schema."""
 
     def __init__(self, model: type, schema: Schema | None = None) -> None:
         self.model = model
         self.schema = schema or self._build_schema()
 
     def _build_schema(self) -> Schema:
+        """Build the Whoosh schema from the model's annotations.
+
+        Supports dataclasses, Pydantic models (HasFields), SQLAlchemy models
+        (with __mapper__), and plain classes with annotations.
+
+        Returns:
+            A Whoosh Schema with fields mapped from the model.
+        """
         fields: dict[str, Any] = {}
         annotations: dict[str, Any] = {}
         model = self.model
@@ -188,6 +261,18 @@ class ModelIndex:
         return Schema(**fields)
 
     def _detect_id_field(self, fields: dict[str, Any], annotations: dict[str, Any]) -> str | None:
+        """Detect the ID field in the model automatically.
+
+        Looks for fields named ``id``, ``ID``, or ``_id``, then Whoosh ID
+        fields, then any remaining string field.
+
+        Args:
+            fields: Dictionary of Whoosh fields built from the model.
+            annotations: Dictionary of model annotations.
+
+        Returns:
+            The name of the ID field if found, otherwise None.
+        """
         for name in annotations:
             if name in ("id", "ID", "_id"):
                 return name
@@ -201,6 +286,17 @@ class ModelIndex:
         return None
 
     def to_whoosh_document(self, instance: Any) -> dict[str, Any]:
+        """Convert a model instance to a Whoosh document dictionary.
+
+        Handles dataclasses, Pydantic models, SQLAlchemy models, and plain
+        objects with annotations.
+
+        Args:
+            instance: A model instance to convert.
+
+        Returns:
+            A dictionary suitable for ``writer.add_document(**doc)``.
+        """
         if dataclasses.is_dataclass(instance):
             doc = {}
             for f in dataclasses.fields(instance):

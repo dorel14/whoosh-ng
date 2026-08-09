@@ -1,4 +1,8 @@
-"""YAML-based synonym provider."""
+"""YAML-based synonym provider.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 from __future__ import annotations
 
@@ -20,14 +24,30 @@ class YAMLSynonymProvider(StaticSynonymProvider):
         bike:
           - bicycle
           - motorcycle
+
+    Args:
+        path: Filesystem path to the YAML synonym file.
     """
 
     def __init__(self, path: str) -> None:
+        """Initialize the provider and load synonyms from a YAML file.
+
+        Args:
+            path: Filesystem path to the YAML synonym file.
+
+        Raises:
+            ImportError: If PyYAML is not installed.
+        """
         self._path = path
         super().__init__()
         self._load()
 
     def _load(self) -> None:
+        """Load and parse the YAML file, populating internal synonyms.
+
+        Raises:
+            ImportError: If PyYAML is not installed.
+        """
         try:
             import yaml  # type: ignore[import-untyped]
         except ImportError as exc:

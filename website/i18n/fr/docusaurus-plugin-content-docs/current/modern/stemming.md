@@ -188,4 +188,4 @@ Voir le [Guide N-grammes](ngrams.md) pour plus de détails.
 Whoosh-NG 2.0 introduit un système de fournisseurs de racines de style
 plugin avec détection automatique, support de PyStemmer et d'analyseurs
 spécifiques à chaque langue. Pour plus de détails, voir le
-[Guide des fournisseurs de racines](stemming-sprint-d.md).
+[Guide des fournisseurs de racines](stemmers-fournisseurs.md).

@@ -41,20 +41,21 @@ Both versions are kept synchronized, with code examples remaining in English for
 ### Modern (New Features)
 
 - **[Middleware](/modern/middleware)** — Pipeline hooks and middleware
-- **[Middleware & Plugin Pipeline](/modern/middleware-sprint-c)** — Hook-based pipeline
+- **[Middleware & Plugin Pipeline](/modern/middleware-pipeline)** — Hook-based pipeline
 - **[Plugins](/modern/plugins)** — Extending Whoosh-NG
-- **[Plugin System](/modern/plugins-sprint-c)** — PluginManager API
+- **[Plugin System](/modern/plugins-advanced)** — PluginManager API
 - **[Autocomplete](/modern/autocomplete)** — Autocomplete providers
-- **[Autocomplete Providers](/modern/autocomplete-sprint-d)** — NGram, Fuzzy, InvertedIndex
+- **[Autocomplete Providers](/modern/autocomplete-providers)** — NGram, Fuzzy, InvertedIndex
 - **[Vector Search](/modern/vector)** — NumPy, HNSW, Faiss
 - **[Modern Indexing](/modern/modern-indexing)** — BatchIndexWriter, AnalyzerCache
 - **[Monitoring](/modern/monitoring)** — Metrics and observability
 - **[Performance](/modern/performance)** — Benchmarking and optimization
-- **[Linguistics & Synonyms](/modern/linguistics-sprint-d)** — SynonymManager
+- **[Linguistics & Synonyms](/modern/linguistics)** — SynonymManager
 - **[Stemming](/modern/stemming)** — Language stemmers
-- **[Stemmer Providers](/modern/stemming-sprint-d)** — PyStemmer backends
+- **[Stemmer Providers](/modern/stemming-providers)** — PyStemmer backends
 - **[N-grams](/modern/ngrams)** — N-gram tokenization
 - **[Storage Providers](/modern/storage-providers)** — Hybrid storage backends
+- **[Provider Integration](/modern/provider-integration)** — Complete pipeline guide for all providers
 
 ### API Reference
 

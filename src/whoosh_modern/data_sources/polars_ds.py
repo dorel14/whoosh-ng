@@ -1,4 +1,8 @@
-"""Polars DataSource implementation (optional backend)."""
+"""Polars DataSource implementation (optional backend).
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 import logging
 from collections.abc import Iterator, Mapping
@@ -14,7 +18,15 @@ Document = Mapping[str, Any]
 
 
 def _to_datetime(value: Any) -> Any:
-    """Convert date-only values to datetime for Whoosh compatibility."""
+    """Convert date-only values to datetime for Whoosh compatibility.
+
+    Args:
+        value: A value that may be a ``date`` (but not ``datetime``).
+
+    Returns:
+        A ``datetime`` if ``value`` was a date, otherwise the original
+        value unchanged.
+    """
     if isinstance(value, date) and not isinstance(value, datetime):
         return datetime.combine(value, datetime.min.time())
     return value
@@ -25,6 +37,14 @@ class PolarsSource:
 
     Uses Polars dtypes to infer the Whoosh schema directly, so
     ``SchemaDiscovery`` is not needed here.
+
+    Args:
+        dataframe: A Polars ``DataFrame`` to iterate over.
+        incremental_field: Optional column name for incremental syncs.
+        id_field: Optional column name that uniquely identifies a
+            document.
+        sample_size: Number of rows to inspect during schema
+            discovery.
     """
 
     def __init__(
@@ -43,18 +63,36 @@ class PolarsSource:
 
     @property
     def name(self) -> str:
-        """Return the data source name."""
+        """Return the data source name.
+
+        Returns:
+            A string in the form ``polars:<id>`` where ``id`` is the
+            Python ``id()`` of the DataFrame.
+        """
         return f"polars:{id(self._dataframe)}"
 
     def health_check(self) -> bool:
-        """Return True if the DataFrame is non-empty."""
+        """Return True if the DataFrame is non-empty.
+
+        Returns:
+            ``True`` if the DataFrame has at least one row, ``False``
+            otherwise.
+        """
         try:
             return len(self._dataframe) > 0
         except Exception:
             return False
 
     def discover_schema(self) -> Schema:
-        """Discover schema from Polars DataFrame dtypes."""
+        """Discover schema from Polars DataFrame dtypes.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from the
+            DataFrame's column dtypes.
+
+        Raises:
+            DataSourceError: If the DataFrame has no columns.
+        """
         if self._schema is not None:
             return self._schema
 
@@ -82,7 +120,15 @@ class PolarsSource:
         return self._schema
 
     def _map_polars_dtype(self, dtype: Any) -> Any:
-        """Map Polars dtype to Whoosh field."""
+        """Map Polars dtype to Whoosh field.
+
+        Args:
+            dtype: A Polars dtype instance.
+
+        Returns:
+            A Whoosh field instance (``NUMERIC``, ``BOOLEAN``,
+            ``DATETIME``, or ``TEXT``) configured as stored.
+        """
         from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
 
         dtype_str = str(dtype).lower()
@@ -104,6 +150,10 @@ class PolarsSource:
         """Return a compiled document mapper for this source.
 
         Pre-computes column names for fast row extraction.
+
+        Returns:
+            A callable that accepts a Polars row and returns a
+            dictionary mapping column names to values.
         """
         if self._compiled_mapper is not None:
             return self._compiled_mapper
@@ -117,7 +167,14 @@ class PolarsSource:
         return self._compiled_mapper
 
     def iter_documents(self) -> Iterator[Document]:
-        """Yield documents from the DataFrame."""
+        """Yield documents from the DataFrame.
+
+        Yields:
+            Document dictionaries, one per row.
+
+        Raises:
+            DataSourceError: If the DataFrame is not initialied.
+        """
         if self._dataframe is None:
             raise DataSourceError(
                 "DataFrame is not initialized",
@@ -130,6 +187,16 @@ class PolarsSource:
         """Yield documents from the DataFrame in batches.
 
         Uses slice-based batching for efficient batch extraction.
+
+        Args:
+            batch_size: Maximum number of rows per batch.
+
+        Yields:
+            Lists of document dictionaries, each list containing at
+            most ``batch_size`` items.
+
+        Raises:
+            DataSourceError: If the DataFrame is not initialised.
         """
         if self._dataframe is None:
             raise DataSourceError(
@@ -149,11 +216,26 @@ class PolarsSource:
             ]
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
-        """Yield documents changed since a timestamp (not implemented for Polars)."""
+        """Yield documents changed since a timestamp (not implemented for Polars).
+
+        Args:
+            since: A timestamp or cursor value (accepted but ignored).
+
+        Yields:
+            Nothing — incremental changes are not supported for this
+            data source.
+        """
         return iter([])
 
     def document_count(self) -> int:
-        """Return total row count."""
+        """Return total row count.
+
+        Returns:
+            The number of rows in the DataFrame.
+
+        Raises:
+            DataSourceError: If the DataFrame is not initialised.
+        """
         if self._dataframe is None:
             raise DataSourceError(
                 "DataFrame is not initialized",
@@ -162,7 +244,12 @@ class PolarsSource:
         return len(self._dataframe)
 
     def metadata(self) -> dict[str, Any]:
-        """Return metadata about this Polars source."""
+        """Return metadata about this Polars source.
+
+        Returns:
+            A dictionary with keys ``type``, ``shape``, ``columns``,
+            ``incremental_field``, and ``id_field``.
+        """
         return {
             "type": "polars",
             "shape": tuple(self._dataframe.shape),

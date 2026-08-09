@@ -6551,6 +6551,14 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
+## See Also
+
+- [Storage Providers Guide](../modern/storage-providers.md) — Storage backend integration and benchmarks
+- [Provider Integration Guide](../modern/provider-integration.md) — Complete pipeline guide for all providers
+- [Middleware Guide](../modern/middleware-pipeline.md) — Pipeline hooks and provider adapters
+- [Stemming Guide](../modern/stemming-providers.md) — Stemmer provider integration
+- [Vector Search Guide](../modern/vector.md) — Vector provider integration
+- [Autocomplete Guide](../modern/autocomplete-providers.md) — Autocomplete provider integration
 ### S3Storage
 
 S3-compatible blob storage. ``boto3`` is required only when this provider
@@ -13783,7 +13791,7 @@ print(restored == tuple(values))  # True
 - Use `filter_ids` in `provider.search()` to restrict to a subset of documents.
 
 
-## DOCUMENT: Autocomplete Sprint D
+## DOCUMENT: Autocomplete Providers
 
 # Autocomplete Providers
 
@@ -14074,8 +14082,9 @@ pip install whoosh-ng[modern]
 
 ## See Also
 
-- [Plugin System Guide](plugins-sprint-c.md) — Plugin registration and discovery
-- [Middleware Guide](middleware-sprint-c.md) — Middleware pipeline integration
+- [Plugin System Guide](plugins-advanced.md) — Plugin registration and discovery
+- [Middleware Guide](middleware-pipeline.md) — Middleware pipeline integration
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [API: Modern](../api/modern.md) — Full API reference for autocomplete extensions
 
 
@@ -14094,34 +14103,172 @@ pip install whoosh-ng[autocomplete]
 ## Minimal index
 
 ```python
-from whoosh.fields import Schema, TEXT, AutocompleteField
+from whoosh.fields import Schema, TEXT, KEYWORD
 
 schema = Schema(
     title=TEXT(stored=True),
-    query=AutocompleteField()
+    tags=KEYWORD(stored=True, commas=True),
 )
 
 with ix.writer() as writer:
-    writer.add_document(title="Python Quickstart", query="python quickstart")
+    writer.add_document(title="Python Quickstart", tags="python,quickstart")
     writer.commit()
 ```
 
 ## Query autocomplete
 
 ```python
-from whoosh_modern.autocomplete import AutocompleteProvider
+from whoosh_modern.autocomplete import create_autocomplete
 
-provider = AutocompleteProvider(ix, "query")
-suggestions = provider.suggest("py", limit=5)
-print(suggestions)  # ["python", "pyramid", ...]
+# Create provider (inverted = prefix matching by default)
+provider = create_autocomplete("inverted")
+
+# Index terms (typically done at index time)
+provider.add(["python", "quickstart", "programming", "pyramid"])
+
+# Search for suggestions
+hits = provider.search("py", limit=5)
+for hit in hits:
+    print(hit.text, hit.score)
+# Output: python 0.9, pyramid 0.8
 ```
 
 ## Modern Autocomplete Providers (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduces multiple autocomplete provider strategies: `InvertedIndexAutocomplete`, `NGramProvider`, and `FuzzySuggestProvider`. For full details on creating, registering, and switching providers, see the [Autocomplete Providers Guide](autocomplete-sprint-d.md).
+Whoosh-NG 2.0 introduces multiple autocomplete provider strategies: `InvertedIndexAutocomplete`, `NGramProvider`, and `FuzzySuggestProvider`. For full details on creating, registering, and switching providers, see the [Autocomplete Providers Guide](autocomplete-providers.md).
+
+## Autocomplete Provider Integration in the Pipeline
+
+Autocomplete providers operate in **two modes**: standalone (in-memory index of phrases) and registry-based (discovered via `AutocompleteRegistry`). The `AutocompletePlugin` registers the default `"inverted"` provider at startup.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  Registration (startup)                                         │
+│                                                                 │
+│  AutocompletePlugin.register(PluginManager)                     │
+│    └── AutocompleteRegistry.register("inverted", provider)      │
+│                                                                 │
+│  The "inverted" provider is now available globally              │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  Mode 1: Standalone (in-memory index)                           │
+│                                                                 │
+│  provider = create_autocomplete("inverted")                     │
+│  provider.add(["python", "java", "javascript"])                 │
+│  hits = provider.search("py", limit=5)                          │
+│  └── [AutocompleteHit(text="python", score=0.9), ...]           │
+│                                                                 │
+│  No Whoosh index required. Pure in-memory lookup.               │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  Mode 2: Registry-based (tied to a Whoosh index)                │
+│                                                                 │
+│  provider = AutocompleteRegistry.get("inverted")                │
+│                                                                 │
+│  # Populate from index terms                                    │
+│  with ix.searcher() as s:                                       │
+│      for term in s.reader().all_terms():                       │
+│          provider.add_term(term, s.doc_freq(term))              │
+│                                                                 │
+│  # Query suggestions                                            │
+│  hits = provider.suggest("py", maxdist=1, limit=5)              │
+│  └── [AutocompleteHit(text="python", score=...), ...]           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Full workflow: indexing + autocomplete
+
+```python
+from whoosh import index, fields
+from whoosh_modern.autocomplete import create_autocomplete
+from whoosh_modern.autocomplete.plugin import AutocompletePlugin
+from whoosh.plugins.manager import PluginManager
+
+# 1. Register autocomplete plugin at startup
+manager = PluginManager()
+AutocompletePlugin().register(manager)
+
+# 2. Create index
+schema = fields.Schema(
+    title=fields.TEXT(stored=True),
+    content=fields.TEXT,
+)
+ix = index.create_in("indexdir", schema)
+
+# 3. Index documents
+with ix.writer() as writer:
+    writer.add_document(title="Python programming", content="Learn Python")
+    writer.add_document(title="Java development", content="Learn Java")
+    writer.add_document(title="JavaScript basics", content="Learn JS")
+    writer.commit()
+
+# 4. Build autocomplete provider from index terms
+provider = create_autocomplete("inverted")
+
+with ix.searcher() as searcher:
+    reader = searcher.reader()
+    for term in reader.all_terms():
+        # Add term with its document frequency as score weight
+        provider.add([term.decode("utf-8")])
+
+# 5. Query autocomplete
+hits = provider.search("py", limit=5)
+for hit in hits:
+    print(f"{hit.text} (score: {hit.score:.3f})")
+# Output: python (score: 0.429)
+```
+
+### Provider strategies
+
+| Provider | Strategy | Best for |
+|----------|----------|----------|
+| `InvertedIndexAutocomplete` | Prefix matching with scoring | Simple autocomplete, small vocabularies |
+| `NGramProvider` | Character n-gram indexing | Substring matching, typo tolerance |
+| `FuzzySuggestProvider` | Approximate matching via rapidfuzz | Typo-tolerant suggestions |
+
+```python
+# Prefix matching (default)
+provider = create_autocomplete("inverted")
+provider.add(["python", "pyramid", "pyodbc"])
+hits = provider.search("py")
+# → python, pyramid, pyodbc
+
+# N-gram matching
+provider = create_autocomplete("ngram", n=3)
+provider.add(["python", "java", "javascript"])
+hits = provider.search("pyt")
+# → python (matched by "pyt" n-gram)
+
+# Fuzzy matching
+provider = create_autocomplete("fuzzy", max_distance=2, score_cutoff=60.0)
+provider.add(["python", "pyramid", "pyodbc"])
+hits = provider.search("pythn")  # typo: missing 'o'
+# → python (fuzzy match)
+```
+
+### Integration with search middleware
+
+Autocomplete providers can be combined with search middleware for real-time suggestions:
+
+```python
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareSearcher
+
+provider = create_autocomplete("inverted")
+provider.add(["python", "java", "javascript"])
+
+# In a search handler
+def suggest(query: str, limit: int = 5):
+    hits = provider.search(query, limit=limit)
+    return {"suggestions": [hit.text for hit in hits]}
+```
 
 
-## DOCUMENT: Linguistics Sprint D
+## DOCUMENT: Linguistics
 
 # Synonyms & Linguistics
 
@@ -14444,12 +14591,13 @@ with MiddlewareSearcher(ix.searcher(), chain) as searcher:
 
 ## See Also
 
-- [Stemming Guide](stemming-sprint-d.md) — Stemmer providers and language analyzers
-- [Middleware Guide](middleware-sprint-c.md) — Middleware pipeline integration
+- [Stemming Guide](stemming-providers.md) — Stemmer providers and language analyzers
+- [Middleware Guide](middleware-pipeline.md) — Middleware pipeline integration
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [API: Linguistics](../api/modern.md) — Full API reference
 
 
-## DOCUMENT: Middleware Sprint C
+## DOCUMENT: Middleware Pipeline
 
 # Middleware & Plugin Pipeline
 
@@ -14829,7 +14977,8 @@ chain = manager.get_middleware_chain()
 
 ## See Also
 
-- [Plugin System Guide](plugins-sprint-c.md) — Plugin registration and entry points
+- [Plugin System Guide](plugins-advanced.md) — Plugin registration and entry points
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [Middleware Examples](../examples/middleware.md) — Practical middleware patterns
 - [API: Middleware](../api/middleware.md) — Full API reference
 - [API: Middleware Pipeline (modern)](../api/modern.md) — Modern middleware extensions
@@ -15044,9 +15193,147 @@ class ResilientMiddleware(Middleware):
 4. **Performance**: Keep hooks lightweight; use async for I/O
 5. **Testing**: Mock the context object to test middleware in isolation
 
+## Provider Integration via Middleware
+
+Many Whoosh-NG providers integrate into the indexing and search pipeline through
+middleware hooks. This is the standard pattern for cross-cutting concerns that
+need to transform documents, queries, or results.
+
+### Provider-to-Middleware Mapping
+
+| Provider | Middleware | Hooks Used | Purpose |
+|----------|-----------|------------|---------|
+| `StorageProvider` | `StorageMiddleware` | `before_index`, `on_commit` | Tags context with storage backend; writes commit checkpoints |
+| `StemmerProvider` | `StemmingMiddleware` | `before_index`, `before_search` | Stems document fields and query text |
+| `SynonymProvider` | `SynonymExpansionMiddleware` | `before_index`, `before_search` | Expands documents and queries with synonyms |
+| `VectorProvider` | (built into Whoosh core) | N/A (segment format) | Registered in `VectorRegistry`; resolved at search time from segment metadata |
+| `AutocompleteProvider` | (standalone or registry) | N/A | Used directly via `.search()` or via `AutocompleteRegistry` |
+
+### How providers flow through the pipeline
+
+```text
+                    ┌──────────────────┐
+                    │  PluginManager   │
+                    │  .load_plugins() │
+                    └────────┬─────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              │              │              │
+     ┌────────▼──────┐ ┌────▼─────┐ ┌──────▼────────┐
+     │ VectorPlugin  │ │AutoPlugin│ │ Other Plugins │
+     │               │ │         │ │               │
+     │ VectorRegistry│ │AutoReg. │ │ ProviderReg.  │
+     │ .register()   │ │.register│ │ .register()   │
+     └───────────────┘ └─────────┘ └───────────────┘
+
+                    ┌──────────────────┐
+                    │ MiddlewareChain  │
+                    │                  │
+                    │ ┌──────────────┐ │
+                    │ │ before_index │ │
+                    │ │  hooks       │ │
+                    │ │  (ordered)   │ │
+                    │ └──────┬───────┘ │
+                    │        │         │
+                    │ ┌──────▼───────┐ │
+                    │ │   Writer     │ │
+                    │ │  .add_doc()  │ │
+                    │ └──────┬───────┘ │
+                    │        │         │
+                    │ ┌──────▼───────┐ │
+                    │ │  on_commit   │ │
+                    │ │  hooks       │ │
+                    │ └──────────────┘ │
+                    └──────────────────┘
+
+                    ┌──────────────────┐
+                    │  Searcher         │
+                    │                  │
+                    │ ┌──────────────┐ │
+                    │ │before_search │ │
+                    │ │  hooks       │ │
+                    │ └──────┬───────┘ │
+                    │        │         │
+                    │ ┌──────▼───────┐ │
+                    │ │   Query      │ │
+                    │ │  execution   │ │
+                    │ └──────┬───────┘ │
+                    │        │         │
+                    │ ┌──────▼───────┐ │
+                    │ │ after_search │ │
+                    │ │  hooks       │ │
+                    │ └──────────────┘ │
+                    └──────────────────┘
+```
+
+### Example: Full provider pipeline
+
+```python
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareWriter, MiddlewareSearcher
+from whoosh_modern.middleware import (
+    StorageMiddleware,
+    StemmingMiddleware,
+    FileStorageProvider,
+)
+from whoosh_modern.linguistics.synonyms import (
+    SynonymExpansionMiddleware,
+    SynonymManager,
+)
+from whoosh_modern.analysis import get_stemmer
+
+# 1. Build providers
+storage = FileStorageProvider("/data/index")
+stemmer = get_stemmer("auto", "english")
+syn_manager = SynonymManager({"car": ["automobile", "vehicle"]})
+
+# 2. Build middleware chain
+chain = MiddlewareChain([
+    StorageMiddleware(storage, name="primary"),
+    StemmingMiddleware(stemmer=stemmer.stem, fields=["title", "content"]),
+    SynonymExpansionMiddleware(syn_manager),
+])
+
+# 3. Index with middleware
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Car for sale", content="House near beach")
+    # StorageMiddleware.before_index() tags context
+    # StemmingMiddleware stems "Car" → "car"
+    # SynonymExpansionMiddleware expands "Car" → "Car automobile vehicle"
+    writer.commit()
+    # StorageMiddleware.on_commit() writes checkpoint
+
+# 4. Search with middleware
+with MiddlewareSearcher(ix.searcher(), chain) as searcher:
+    # StemmingMiddleware stems query "cars" → "car"
+    # SynonymExpansionMiddleware expands "car" → "car automobile vehicle"
+    results = searcher.search("cars")
+```
+
+### Key insight: middleware as provider adapter
+
+Middleware acts as the **adapter** between providers and Whoosh's core pipeline:
+
+```text
+Provider (domain logic)
+    │
+    ▼
+Middleware (pipeline integration)
+    │
+    ▼
+Whoosh core (generic engine)
+```
+
+- **StorageProvider** → **StorageMiddleware** → Whoosh writer/searcher
+- **StemmerProvider** → **StemmingMiddleware** → Whoosh document/query
+- **SynonymProvider** → **SynonymExpansionMiddleware** → Whoosh text fields
+
+This separation keeps providers simple (single responsibility) while middleware
+handles the lifecycle integration (when and how to apply the provider).
+
 ## Modern Middleware (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 adds a modern middleware package (`whoosh_modern.middleware`) with wrap-style resilience middleware (retry, caching, logging) and hook-based middleware for storage, search, and analysis. For full details on the modern middleware architecture, plugin integration, and deployment, see the [Middleware & Plugin Pipeline Guide](middleware-sprint-c.md).
+Whoosh-NG 2.0 adds a modern middleware package (`whoosh_modern.middleware`) with wrap-style resilience middleware (retry, caching, logging) and hook-based middleware for storage, search, and analysis. For full details on the modern middleware architecture, plugin integration, and deployment, see the [Middleware & Plugin Pipeline Guide](middleware-pipeline.md).
 
 
 ## DOCUMENT: Modern Indexing
@@ -15709,7 +15996,7 @@ uv run python -m pytest -q
 ```
 
 
-## DOCUMENT: Plugins Sprint C
+## DOCUMENT: Plugins Advanced
 
 # Plugin System
 
@@ -15990,7 +16277,8 @@ Builds and returns a `MiddlewareChain` from all plugins that declare `middleware
 
 ## See Also
 
-- [Middleware Guide](middleware-sprint-c.md) — Pipeline hooks and custom middleware
+- [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and custom middleware
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [Plugin Development Example](../examples/plugin-dev.md) — Step-by-step plugin tutorial
 - [API: Plugins](../api/plugins.md) — Full API reference
 
@@ -16150,10 +16438,359 @@ class FastAPIPlugin(BasePlugin):
 
 ## Modern Plugin System (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduces an enhanced `PluginManager` with registry support for datasources, vector providers, embeddings, and middleware. For full details on the modern plugin architecture, entry point groups, and deployment, see the [Plugin System Guide](plugins-sprint-c.md).
+Whoosh-NG 2.0 introduces an enhanced `PluginManager` with registry support for datasources, vector providers, embeddings, and middleware. For full details on the modern plugin architecture, entry point groups, and deployment, see the [Plugin System Guide](plugins-advanced.md).
 
 
-## DOCUMENT: Stemming Sprint D
+## DOCUMENT: Provider Integration
+
+# Provider Integration: Complete Pipeline Guide
+
+Module: `whoosh_modern.storage`, `whoosh_modern.analysis.stemmer_providers`, `whoosh_modern.linguistics.synonyms`, `whoosh_modern.vector`, `whoosh_modern.autocomplete`
+Version: 2.0.0
+
+This guide explains how all Whoosh-NG providers integrate into the indexing and
+search pipeline. It is the definitive reference for understanding the data flow
+from raw documents to search results.
+
+## Overview
+
+Whoosh-NG uses a **provider pattern** to keep the core engine lean while enabling
+pluggable behavior for storage, text analysis, vector search, and autocomplete.
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                        Whoosh-NG Provider Stack                      │
+│                                                                      │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────┐  ┌───────────┐ │
+│  │ Storage     │  │ Stemmer      │  │ Synonym     │  │ Vector    │ │
+│  │ Providers   │  │ Providers    │  │ Providers   │  │ Providers │ │
+│  │             │  │              │  │             │  │           │ │
+│  │ FileStorage │  │ Internal     │  │ Static      │  │ Numpy     │ │
+│  │ S3Storage   │  │ PyStemmer    │  │ YAML        │  │ HNSW      │ │
+│  │ Hybrid      │  │ Identity     │  │ JSON        │  │ Faiss     │ │
+│  │ SQLite      │  │ Custom       │  │ SQLite      │  │ Qdrant    │ │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └─────┬─────┘ │
+│         │                │                │                │       │
+│         ▼                ▼                ▼                ▼       │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │              Middleware Pipeline (hooks)                         ││
+│  │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐    ││
+│  │  │Storage      │  │Stemming      │  │Synonym              │    ││
+│  │  │Middleware   │  │Middleware    │  │ExpansionMiddleware  │    ││
+│  │  └─────────────┘  └──────────────┘  └─────────────────────┘    ││
+│  └─────────────────────────────────────────────────────────────────┘│
+│                              │                                       │
+│                              ▼                                       │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │              Whoosh Core Engine                                  ││
+│  │  Index │ Writer │ Searcher │ QueryParser │ Segment files         ││
+│  └─────────────────────────────────────────────────────────────────┘│
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+## Complete Indexing Pipeline
+
+### Step-by-step flow
+
+```text
+┌─────────────────┐
+│   DataSource    │  (SQL, JSON, REST, CSV, DataFrame, etc.)
+│   .stream_batches() │
+└────────┬────────┘
+         │ batches of documents
+         ▼
+┌─────────────────┐
+│  SchemaDiscovery │  Infers Whoosh Schema from data source columns
+│  .discover_schema() │
+└────────┬────────┘
+         │ Schema(TEXT, ID, NUMERIC, VECTOR, ...)
+         ▼
+┌─────────────────────────────────────────┐
+│  Storage Provider Resolution             │
+│                                         │
+│  storage._root (if any)                 │
+│    └──► whoosh.index.create_in(root)    │
+│  No root                                 │
+│    └──► tempfile.mkdtemp() → create_in() │
+└────────┬────────────────────────────────┘
+         │ Index instance
+         ▼
+┌─────────────────────────────────────────┐
+│  Writer + MiddlewareChain                │
+│                                         │
+│  chain.run_before("before_index")        │
+│    ├── StorageMiddleware                 │
+│    │   └── tags context with provider    │
+│    ├── StemmingMiddleware                │
+│    │   └── stems document fields         │
+│    └── SynonymExpansionMiddleware        │
+│        └── expands fields with synonyms  │
+│                                         │
+│  writer.add_document(**doc)              │
+│    └── Whoosh core applies field         │
+│        analyzers (TEXT.analyzer)          │
+│        and writes to segment             │
+│                                         │
+│  writer.commit()                         │
+│    └── chain.run_after("on_commit")      │
+│        └── StorageMiddleware             │
+│            └── writes commit checkpoint  │
+└────────┬────────────────────────────────┘
+         │ Segment files on disk/S3/cache
+         ▼
+┌─────────────────┐
+│  Whoosh Index    │
+│  (segments)      │
+└─────────────────┘
+```
+
+### Concrete example
+
+```python
+from whoosh import index, fields
+from whoosh_modern import (
+    SearchApplication,
+    SQLSource,
+    HybridStorage,
+    S3Storage,
+    StemmingAnalyzer,
+    get_stemmer,
+    SynonymManager,
+    SynonymExpansionMiddleware,
+    StorageMiddleware,
+    StemmingMiddleware,
+)
+from sqlalchemy import create_engine
+
+# 1. Data source
+engine = create_engine("sqlite:///products.db")
+source = SQLSource(query="SELECT id, name, description FROM products", connection=engine)
+
+# 2. Storage
+remote = S3Storage(bucket="my-index-bucket", prefix="segments")
+storage = HybridStorage(local_cache="./cache", remote=remote)
+
+# 3. Schema (auto-discovered from SQL columns)
+#    But we customize the analyzer
+stemmer = get_stemmer("auto", "english")
+schema = fields.Schema(
+    name=fields.TEXT(analyzer=StemmingAnalyzer(stemmer=stemmer), stored=True),
+    description=fields.TEXT(analyzer=StemmingAnalyzer(stemmer=stemmer)),
+    id=fields.ID(stored=True, unique=True),
+)
+
+# 4. Create index in storage root
+ix = index.create_in(storage._cache_root, schema)
+
+# 5. Build middleware chain
+syn_manager = SynonymManager({"laptop": ["notebook", "portable"]})
+chain = MiddlewareChain([
+    StorageMiddleware(storage, name="products"),
+    StemmingMiddleware(stemmer=stemmer.stem),
+    SynonymExpansionMiddleware(syn_manager),
+])
+
+# 6. Index with middleware
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    for batch in source.stream_batches():
+        for doc in batch:
+            writer.add_document(**doc)
+    writer.commit()
+```
+
+## Complete Search Pipeline
+
+### Step-by-step flow
+
+```text
+┌─────────────────┐
+│   User Query    │  "running cats"
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│  MiddlewareChain.run_before("search")    │
+│                                         │
+│  ├── StemmingMiddleware                  │
+│  │   └── "running cats" → "run cat"      │
+│  ├── SynonymExpansionMiddleware          │
+│  │   └── "run cat" → "run cat running feline" │
+│  └── QueryRewriteMiddleware              │
+│      └── custom rewrites                 │
+└────────┬────────────────────────────────┘
+         │ Modified query
+         ▼
+┌─────────────────────────────────────────┐
+│  QueryParser.parse(query)                │
+│    └── Query object (Term, And, Or...)  │
+└────────┬────────────────────────────────┘
+         │ Query object
+         ▼
+┌─────────────────────────────────────────┐
+│  Searcher.search(query)                  │
+│                                         │
+│  ┌───────────────────────────────────┐  │
+│  │  Keyword search path              │  │
+│  │  └── reads posting lists from     │  │
+│  │      segment files                │  │
+│  └───────────────────────────────────┘  │
+│                                         │
+│  ┌───────────────────────────────────┐  │
+│  │  Vector search path (if VECTOR)   │  │
+│  │  └── VectorRegistry.get(provider) │  │
+│  │      └── NumpyProvider.search()   │  │
+│  │          └── cosine similarity    │  │
+│  └───────────────────────────────────┘  │
+│                                         │
+│  ┌───────────────────────────────────┐  │
+│  │  Autocomplete path                │  │
+│  │  └── AutocompleteRegistry.get()   │  │
+│  │      └── provider.suggest()       │  │
+│  └───────────────────────────────────┘  │
+└────────┬────────────────────────────────┘
+         │ Raw Results
+         ▼
+┌─────────────────────────────────────────┐
+│  MiddlewareChain.run_after("search")     │
+│                                         │
+│  └── RankingMiddleware                   │
+│      └── re-sorts results                │
+└────────┬────────────────────────────────┘
+         │ Final Results
+         ▼
+┌─────────────────┐
+│  Hits returned   │
+└─────────────────┘
+```
+
+### Concrete example
+
+```python
+from whoosh.qparser import QueryParser
+from whoosh_modern.middleware import (
+    StemmingMiddleware,
+    RankingMiddleware,
+    QueryRewriteMiddleware,
+)
+from whoosh_modern.analysis import get_stemmer
+from whoosh_modern.vector import NumpyProvider
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh.plugins.manager import PluginManager
+import numpy as np
+
+# 1. Setup plugins at startup
+manager = PluginManager()
+VectorPlugin().register(manager)
+
+# 2. Open index
+ix = index.open_dir("indexdir")
+
+# 3. Build middleware chain
+stemmer = get_stemmer("auto", "english")
+chain = MiddlewareChain([
+    StemmingMiddleware(stemmer=stemmer.stem),
+    QueryRewriteMiddleware(rewriter=lambda q: q + " portable"),  # add synonym
+    RankingMiddleware(ranker=lambda r: sorted(r, key=lambda h: h.score, reverse=True)),
+])
+
+# 4. Search with middleware
+with MiddlewareSearcher(ix.searcher(), chain) as searcher:
+    # Query is transformed by middleware before execution
+    results = searcher.search("laptop")
+    for hit in results:
+        print(f"{hit['name']}: {hit.score:.4f}")
+
+    # 5. Vector search (parallel)
+    query_vec = np.random.rand(384).tolist()
+    vector_results = searcher.vector_search("embedding", query_vec, limit=10)
+    for hit in vector_results:
+        print(f"doc_id={hit.doc_id}, score={hit.score:.4f}")
+```
+
+## Provider Comparison Matrix
+
+| Aspect | Storage | Stemmer | Synonym | Vector | Autocomplete |
+|--------|---------|---------|---------|--------|--------------|
+| **Integration point** | `StorageMiddleware` + `create_in()` | `StemmingAnalyzer` (field) + `StemmingMiddleware` | `SynonymExpansionMiddleware` | `VectorRegistry` + segment format | `AutocompleteRegistry` + standalone |
+| **Registration** | Manual or `__getattr__` | `register_stemmer()` decorator | `SynonymManager` CRUD | `VectorPlugin.register()` | `AutocompletePlugin.register()` |
+| **Used at index time** | Yes (commit checkpoints) | Yes (field analyzer + middleware) | Yes (before_index) | Yes (VECTOR field) | No (standalone or post-index) |
+| **Used at search time** | Yes (segment reads via filesystem) | Yes (field analyzer + middleware) | Yes (before_search) | Yes (vector_search) | Yes (suggest/search) |
+| **Persistence** | Segment files / S3 / SQLite | In-memory (stateless) | In-memory / YAML / JSON / SQLite | Segment files (metadata) | In-memory (phrase list) |
+| **Configuration** | Provider class + kwargs | Backend name + language | Mapping dict or file | Provider name + metric | Provider type + params |
+
+## Common Patterns
+
+### Pattern 1: Provider as Field Analyzer
+
+Used by: Stemmer providers, language analyzers
+
+```python
+schema = Schema(
+    content=TEXT(analyzer=StemmingAnalyzer(stemmer="auto"))
+)
+```
+
+The provider is wrapped in a Whoosh analyzer and applied automatically.
+
+### Pattern 2: Provider as Middleware
+
+Used by: Storage, Stemmer, Synonyms
+
+```python
+chain = MiddlewareChain([
+    StorageMiddleware(storage),
+    StemmingMiddleware(stemmer=stemmer.stem),
+    SynonymExpansionMiddleware(manager),
+])
+```
+
+The provider is consumed by middleware hooks in the pipeline.
+
+### Pattern 3: Provider as Registry Entry
+
+Used by: Vector, Autocomplete
+
+```python
+VectorRegistry.register("numpy", NumpyProvider(), owner="my_app")
+provider = VectorRegistry.get("numpy", "my_app")
+```
+
+The provider is stored in a global registry and resolved by name at runtime.
+
+### Pattern 4: Provider as Standalone Service
+
+Used by: Autocomplete, Vector (manual mode)
+
+```python
+provider = NumpyProvider()
+provider.add([(doc_id, vec)])
+results = provider.search(query_vec)
+```
+
+The provider operates independently of Whoosh's index/searcher.
+
+## Best Practices
+
+1. **Choose the right integration pattern**: Field analyzers for static schemas, middleware for dynamic behavior, registry for pluggable backends.
+2. **Avoid double-application**: Don't use both field-level analyzers and middleware for the same transformation (e.g., stemming).
+3. **Register providers at startup**: Call `VectorPlugin().register(manager)` and `AutocompletePlugin().register(manager)` before creating indexes.
+4. **Use the highest-level API when possible**: `SearchApplication` for end-to-end, `create_autocomplete()` for suggestions, `get_stemmer()` for stemming.
+5. **Keep providers stateless**: Providers should not hold index-specific state; use middleware context for per-request data.
+6. **Test providers in isolation**: Each provider should be testable without Whoosh core (unit tests for `provider.search()`, `provider.add()`).
+7. **Document provider dependencies**: Note optional dependencies (boto3, PyStemmer, PyYAML) in your project's requirements.
+
+## See Also
+
+- [Storage Providers Guide](storage-providers.md) — Storage backend integration
+- [Stemming Guide](stemming.md) — Stemmer provider integration
+- [Vector Search Guide](vector.md) — Vector provider integration
+- [Autocomplete Guide](autocomplete.md) — Autocomplete provider integration
+- [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters
+- [Plugins Guide](plugins-advanced.md) — Plugin registration and entry points
+- [API: Modern](../api/modern.md) — Full API reference for all providers
+
+
+## DOCUMENT: Stemming Providers
 
 # Stemmer Providers
 
@@ -16479,10 +17116,183 @@ pip install whoosh-ng[fast-stemming]
 pip install whoosh-ng[modern]
 ```
 
+## Stemmer Provider Integration in the Pipeline
+
+The `StemmerProvider` system integrates at **two levels**: field-level analyzers and
+pipeline middleware. Understanding both is key to avoiding double-stemming.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  StemmingAnalyzer (field-level, in Schema)                      │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │ RegexTokenizer() │ StopFilter │ StemmingAnalyzer          │  │
+│  │                    (stop words)    │                       │  │
+│  │                                   ▼                       │  │
+│  │                         stemfn = provider.stem            │  │
+│  │                                   │                       │  │
+│  │                                   ▼                       │  │
+│  │                         Token(stemmed=True)                │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  Applied by Whoosh core at index time AND query time            │
+│  (via QueryParser). Automatic, no middleware needed.             │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  StemmingMiddleware (pipeline-level)                            │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │ before_index(context)                                     │  │
+│  │   └── stem all str values in context.document             │  │
+│  │                                                             │  │
+│  │ before_search(context)                                     │  │
+│  │   └── stem context.query if stem_query=True                │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  Hooked into MiddlewareChain. Manual opt-in.                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Level 1: Field-level (automatic)
+
+The `StemmingAnalyzer` wraps Whoosh's built-in `StemmingAnalyzer` and injects
+a `StemmerProvider`'s `.stem` method as the `stemfn`. Whoosh core applies it
+automatically to the field at both index time and query time.
+
+```python
+from whoosh.fields import Schema, TEXT
+from whoosh_modern.analysis import StemmingAnalyzer, get_stemmer
+
+# Auto-detect best stemmer (PyStemmer preferred)
+stemmer = get_stemmer("auto", "english")
+
+# Create analyzer with the provider's stem function
+analyzer = StemmingAnalyzer(stemmer=stemmer)
+
+schema = Schema(
+    title=TEXT(stored=True),
+    content=TEXT(analyzer=analyzer),
+)
+
+# At index time: "running cats" → ["run", "cat"]
+# At query time: QueryParser also uses the same analyzer
+# so "running cats" matches documents containing "run cat"
+```
+
+**Pros**: Automatic, no middleware configuration needed, consistent index/query behavior.
+
+**Cons**: Requires the analyzer to be set on each `TEXT` field. Harder to change at runtime.
+
+### Level 2: Middleware-level (opt-in)
+
+`StemmingMiddleware` applies stemming at the pipeline level, operating on raw
+string values in `context.document` and `context.query` before Whoosh's analyzers
+see them.
+
+```python
+from whoosh_modern.middleware import StemmingMiddleware
+from whoosh_modern.analysis import get_stemmer
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareWriter
+
+stemmer = get_stemmer("auto", "english")
+
+chain = MiddlewareChain([
+    StemmingMiddleware(
+        stemmer=stemmer.stem,
+        fields=["title", "content"],  # None = all str fields
+        stem_query=True,
+    ),
+])
+
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Running cats", content="Fast dogs")
+    # before_index stems: "Running cats" → "run cat"
+    writer.commit()
+```
+
+**Pros**: Works on any field without modifying the schema. Can be toggled at runtime.
+
+**Cons**: Must be manually wired into the pipeline. Risk of double-stemming if the field also uses `StemmingAnalyzer`.
+
+### Full pipeline example: index + search
+
+```python
+from whoosh import index, fields
+from whoosh.qparser import QueryParser
+from whoosh_modern.analysis import StemmingAnalyzer, get_stemmer
+from whoosh_modern.middleware import StemmingMiddleware
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareWriter, MiddlewareSearcher
+
+# 1. Schema with field-level analyzer
+stemmer = get_stemmer("auto", "english")
+schema = fields.Schema(
+    title=fields.TEXT(stored=True, analyzer=StemmingAnalyzer(stemmer=stemmer)),
+    content=fields.TEXT(analyzer=StemmingAnalyzer(stemmer=stemmer)),
+)
+
+ix = index.create_in("indexdir", schema)
+
+# 2. Index with middleware (no double-stemming because
+#    we don't use StemmingMiddleware when fields already have StemmingAnalyzer)
+with ix.writer() as writer:
+    writer.add_document(title="Running cats", content="Fast dogs")
+    writer.commit()
+
+# 3. Search: QueryParser applies the same analyzer to the query
+with ix.searcher() as searcher:
+    qp = QueryParser("content", schema)
+    q = qp.parse("running cats")
+    results = searcher.search(q)
+    # "running" is stemmed to "run" by the analyzer
+    # "cats" is stemmed to "cat" by the analyzer
+    # Matches document with "run" and "cat"
+```
+
+### Avoiding double-stemming
+
+```python
+# WRONG: double stemming
+schema = Schema(
+    content=TEXT(analyzer=StemmingAnalyzer(stemmer="auto")),
+)
+chain = MiddlewareChain([
+    StemmingMiddleware(stemmer=get_stemmer("auto").stem),  # Don't do this!
+])
+# Result: "running" → "run" (analyzer) → "run" (middleware) — harmless but wasteful
+
+# CORRECT: choose ONE level
+# Option A: field-level only (recommended for static schemas)
+schema = Schema(content=TEXT(analyzer=StemmingAnalyzer(stemmer="auto")))
+# No StemmingMiddleware needed
+
+# Option B: middleware-only (for dynamic fields)
+schema = Schema(content=TEXT)  # No analyzer
+chain = MiddlewareChain([StemmingMiddleware(stemmer=get_stemmer("auto").stem)])
+```
+
+### Custom stemmer provider
+
+```python
+from whoosh_modern.analysis import register_stemmer, get_stemmer
+
+@register_stemmer("my_stemmer")
+class MyStemmer:
+    def stem(self, word: str) -> str:
+        return word.lower().rstrip("s")
+
+# Use it like any built-in backend
+stemmer = get_stemmer("my_stemmer", "english")
+analyzer = StemmingAnalyzer(stemmer=stemmer)
+```
+
 ## See Also
 
 - [Stemming and Stop Words Guide](stemming.md) — Classic Whoosh stemming guide
-- [Synonyms & Linguistics Guide](linguistics-sprint-d.md) — Synonym expansion engine
+- [Synonyms & Linguistics Guide](linguistics.md) — Synonym expansion engine
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [API: Modern](../api/modern.md) — Full API reference for analysis extensions
 
 
@@ -16666,7 +17476,7 @@ See the [N-grams Guide](ngrams.md) for more details.
 
 ## Modern Stemmer Providers (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduces a plugin-style stemmer provider system with auto-detection, PyStemmer support, and language-specific analyzers. For full details, see the [Stemmer Providers Guide](stemming-sprint-d.md).
+Whoosh-NG 2.0 introduces a plugin-style stemmer provider system with auto-detection, PyStemmer support, and language-specific analyzers. For full details, see the [Stemmer Providers Guide](stemming-providers.md).
 
 
 ## DOCUMENT: Storage Providers
@@ -16948,6 +17758,129 @@ python benchmark/s3_storage_benchmark.py
 python benchmark/s3_storage_benchmark_real.py
 ```
 
+## How Storage Providers Integrate into the Indexing and Search Pipeline
+
+The storage provider participates in two distinct phases: **index creation** (determining where segments live) and **runtime pipeline integration** (via `StorageMiddleware`).
+
+### Full indexing flow with a storage provider
+
+```text
+DataSource.stream_batches()
+    │
+    ▼
+SearchApplication.build()
+    │
+    ├── source.discover_schema() ──► Whoosh Schema
+    │
+    ├── storage._root resolution
+    │       │
+    │       ├── HybridStorage/S3Storage/FileStorage
+    │       │   └── has _root? ──► whoosh.index.create_in(root, schema)
+    │       │
+    │       └── No _root (pure S3/SnapshotStorage)
+    │           └── tempfile.mkdtemp() ──► create_in(tmpdir, schema)
+    │
+    ├── Writer = index.writer()
+    │       │
+    │       ├── MiddlewareChain.before_index()
+    │       │   └── StorageMiddleware.before_index()
+    │       │       ├── context.labels["storage_backend"] = provider.__class__.__name__
+    │       │       └── context.metadata["storage_provider"] = self
+    │       │
+    │       ├── for batch in source.stream_batches():
+    │       │       for doc in batch:
+    │       │           writer.add_document(**doc)
+    │       │
+    │       └── writer.commit()
+    │           │
+    │           └── StorageMiddleware.on_commit()
+    │               └── provider.write("commits/{name}/{timestamp}", b"1")
+    │
+    ▼
+Index persisted on disk / S3 / hybrid cache
+```
+
+### Full search flow with a storage provider
+
+```text
+SearchApplication.search(query)
+    │
+    ├── index.searcher()
+    │       │
+    │       └── Whoosh core opens segment files from:
+    │           ├── local filesystem (FileStorageProvider root)
+    │           ├── SQLite DB (SQLiteStorageProvider)
+    │           └── S3 / hybrid cache (S3StorageProvider / HybridStorage)
+    │
+    ├── QueryParser.parse(query) ──► Query object
+    │
+    └── searcher.search(query)
+        │
+        └── Whoosh core reads posting lists from segment files
+            └── Returns Results (Hits)
+```
+
+### StorageMiddleware hooks in detail
+
+`StorageMiddleware` (`whoosh_modern.middleware.storage`) is the integration point
+that routes index persistence through any `SyncStorageProvider` without modifying
+the writer.
+
+| Hook | When | What it does |
+|------|------|--------------|
+| `before_index(context)` | Before each document is added | Tags the context with `storage_backend` label and `storage_provider` metadata |
+| `on_commit(context)` | After `writer.commit()` | Writes a commit checkpoint marker (`commits/{name}/{timestamp}`) to the provider |
+
+### Example: StorageMiddleware with a custom chain
+
+```python
+from whoosh_modern.middleware import (
+    StorageMiddleware,
+    FileStorageProvider,
+    StemmingMiddleware,
+)
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh_modern.analysis import get_stemmer
+
+# Storage provider
+storage = FileStorageProvider("/data/index")
+
+# Create middleware chain
+chain = MiddlewareChain([
+    StorageMiddleware(storage, name="primary"),
+    StemmingMiddleware(stemmer=get_stemmer("auto", "english").stem),
+])
+
+# Apply to writer
+from whoosh.middleware.wrappers import MiddlewareWriter
+
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Hello", content="World")
+    # StorageMiddleware.before_index() tags the context
+    # StemmingMiddleware stems the fields
+    # writer.commit() triggers StorageMiddleware.on_commit()
+    writer.commit()
+```
+
+### Key insight: StorageProvider vs StorageMiddleware
+
+| Component | Role |
+|-----------|------|
+| `SyncStorageProvider` / `AsyncStorageProvider` | **Contract** defining `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
+| `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implementations** of the contract |
+| `StorageMiddleware` | **Integration layer** that calls the provider at specific lifecycle hooks (`before_index`, `on_commit`) |
+| `SearchApplication` | **Entry point** that extracts `_root` from the provider to create the Whoosh index directory |
+
+The provider itself does **not** intercept Whoosh's internal segment reads. Those reads go through Whoosh's built-in `FileStorage` (`whoosh.filedb.filestore`) which reads from the filesystem path given to `create_in()`. The Whoosh-NG storage provider abstraction is designed for:
+- Custom segment routing (S3, SQLite, hybrid cache)
+- Commit checkpointing via middleware
+- Future: segment-level read/write interception
+
+## See Also
+
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
+- [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters
+
 
 ## DOCUMENT: Vector
 
@@ -17102,6 +18035,176 @@ indexer.commit()
 3. **Hybrid search**: Combine vector and keyword search for best results
 4. **Cache embeddings**: Pre-compute and store to avoid recomputation
 5. **Batch indexing**: Index vectors in batches for efficiency
+
+## Vector Provider Integration in the Pipeline
+
+The vector search system integrates through Whoosh's plugin registry and segment
+format. The provider is stored in the index segment and resolved at search time.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│  Registration (startup)                                            │
+│                                                                     │
+│  VectorPlugin.register(PluginManager)                              │
+│    └── VectorRegistry.register("numpy", NumpyProvider(), owner)     │
+│                                                                     │
+│  The provider is now available for any VECTOR field                │
+│  that specifies provider="numpy"                                   │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Indexation                                                         │
+│                                                                     │
+│  VECTOR(dimensions=384, provider="numpy")                          │
+│       │                                                             │
+│       ▼                                                             │
+│  PerDocWriter.add_vector_items(fieldname, field, items)            │
+│       │                                                             │
+│       ▼                                                             │
+│  Segment file contains:                                            │
+│    - vector bytes (raw)                                            │
+│    - provider name ("numpy")                                        │
+│    - metric ("cosine")                                              │
+│       │                                                             │
+│       ▼                                                             │
+│  writer.commit() → segments written to disk                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Search                                                          │
+│                                                                     │
+│  searcher.vector_search("embedding", query_vec, k=10)              │
+│       │                                                             │
+│       ▼                                                             │
+│  Whoosh core reads segment                                         │
+│    └── retrieves provider name ("numpy")                            │
+│       │                                                             │
+│       ▼                                                             │
+│  VectorRegistry.get("numpy")                                        │
+│       │                                                             │
+│       ▼                                                             │
+│  NumpyProvider.search(query_vec, k, filter_ids)                    │
+│       │                                                             │
+│       ▼                                                             │
+│  VectorHit[] sorted by cosine similarity                           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Full indexing flow
+
+```python
+from whoosh import index, fields
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh.plugins.manager import PluginManager
+from whoosh_modern.storage import FileStorage
+import numpy as np
+
+# 1. Register vector plugin (startup)
+manager = PluginManager()
+VectorPlugin().register(manager)
+
+# 2. Define schema with VECTOR field
+schema = fields.Schema(
+    title=fields.TEXT(stored=True),
+    embedding=fields.VECTOR(dimensions=384, provider="numpy", stored=True),
+)
+
+# 3. Create index (storage determines where segments live)
+ix = index.create_in("indexdir", schema)
+
+# 4. Index documents with vectors
+np.random.seed(42)
+embeddings = {
+    "doc1": np.random.rand(384).astype(np.float32).tolist(),
+    "doc2": np.random.rand(384).astype(np.float32).tolist(),
+}
+
+with ix.writer() as writer:
+    for doc_id, vec in embeddings.items():
+        writer.add_document(
+            title=f"Document {doc_id}",
+            embedding=vec,
+        )
+    writer.commit()
+    # Whoosh core serializes vectors to segment files
+    # Provider name "numpy" is stored in the segment
+```
+
+### Full search flow
+
+```python
+from whoosh.qparser import QueryParser
+import numpy as np
+
+with ix.searcher() as searcher:
+    # 1. Keyword search
+    qp = QueryParser("title", schema)
+    keyword_results = searcher.search(qp.parse("Document"))
+
+    # 2. Vector search
+    query_vec = np.random.rand(384).astype(np.float32).tolist()
+    vector_results = searcher.vector_search(
+        "embedding",
+        query_vec,
+        limit=10,
+    )
+
+    # 3. Hybrid: combine both
+    # Example: Reciprocal Rank Fusion (RRF)
+    def rrf(results_list, k=60):
+        scores = {}
+        for results in results_list:
+            for rank, hit in enumerate(results):
+                doc_id = hit.doc_id if hasattr(hit, "doc_id") else hit["doc_id"]
+                scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank + 1)
+        return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+    combined = rrf([keyword_results, vector_results])
+```
+
+### Standalone usage (no schema)
+
+```python
+from whoosh_modern.vector import NumpyProvider
+
+# Create provider directly
+provider = NumpyProvider()
+
+# Add vectors
+provider.add([
+    ("doc1", [0.1, 0.2, 0.3]),
+    ("doc2", [0.4, 0.5, 0.6]),
+])
+
+# Search
+query_vec = [0.1, 0.2, 0.3]
+hits = provider.search(query_vec, k=5)
+
+for hit in hits:
+    print(f"doc_id={hit.doc_id}, score={hit.score:.4f}")
+```
+
+### Provider resolution chain
+
+When `searcher.vector_search()` is called, Whoosh core:
+
+1. Reads the `VECTOR` field configuration from the schema
+2. Opens the segment file containing the vector data
+3. Extracts the provider name stored in the segment (e.g., `"numpy"`)
+4. Looks up the provider in `VectorRegistry`
+5. Calls `provider.search(query_vector, k, filter_ids)`
+6. Returns `list[VectorHit]`
+
+If the provider is not registered, the search fails with a registry miss. This
+is why `VectorPlugin().register(manager)` (or manual registration) is required
+at startup.
+
+## See Also
+
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
+- [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters
 
 
 ## DOCUMENT (FR): Analysis
@@ -28696,7 +29799,7 @@ print(restored == tuple(values))  # True
 - Utilisez `filter_ids` dans `provider.search()` pour restreindre les documents.
 
 
-## DOCUMENT (FR): Autocomplete Sprint D
+## DOCUMENT (FR): Autocomplete Fournisseurs
 
 # Fournisseurs d'Autocomplétion
 
@@ -28987,8 +30090,9 @@ pip install whoosh-ng[modern]
 
 ## Voir Aussi
 
-- [Guide Système de Plugins](plugins-sprint-c.md) — Enregistrement et découverte de plugins
-- [Guide Middleware](middleware-sprint-c.md) — Intégration du pipeline de middleware
+- [Guide Système de Plugins](plugins-avances.md) — Enregistrement et découverte de plugins
+- [Guide Middleware](middleware-pipeline.md) — Intégration du pipeline de middleware
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [API: Moderne](../api/modern.md) — Référence complète de l'API pour les extensions d'autocomplétion
 
 
@@ -29030,7 +30134,7 @@ print(suggestions)  # ["demarrage python", ...]
 ```
 
 
-## DOCUMENT (FR): Linguistics Sprint D
+## DOCUMENT (FR): Linguistique
 
 # Synonymes & Linguistique
 
@@ -29287,12 +30391,13 @@ tokens = analyzer("The running cats")
 
 ## Voir Aussi
 
-- [Guide Stemmers](stemming-sprint-d.md) — Fournisseurs de stemmers et analyseurs linguistiques
-- [Guide Middleware](middleware-sprint-c.md) — Intégration du pipeline de middleware
+- [Guide Stemmers](stemmers-fournisseurs.md) — Fournisseurs de stemmers et analyseurs linguistiques
+- [Guide Middleware](middleware-pipeline.md) — Intégration du pipeline de middleware
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [API: Linguistique](../api/modern.md) — Référence complète de l'API
 
 
-## DOCUMENT (FR): Middleware Sprint C
+## DOCUMENT (FR): Middleware Pipeline
 
 # Middleware & Pipeline de Plugins
 
@@ -29672,7 +30777,8 @@ chain = manager.get_middleware_chain()
 
 ## Voir Aussi
 
-- [Guide Système de Plugins](plugins-sprint-c.md) — Enregistrement et entry points des plugins
+- [Guide Système de Plugins](plugins-avances.md) — Enregistrement et entry points des plugins
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [Exemples: Middleware](../examples/middleware.md) — Patterns de middleware pratiques
 - [API: Middleware](../api/middleware.md) — Référence complète de l'API
 - [API: Middleware Pipeline (moderne)](../api/modern.md) — Extensions middleware modernes
@@ -29831,7 +30937,7 @@ class ResilientMiddleware(Middleware):
 
 ## Middleware Moderne (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 ajoute un package middleware moderne (`whoosh_modern.middleware`) avec un middleware de résilience de type wrapper (réessaissance, cache, journalisation) et un middleware basé sur des hooks pour le stockage, la recherche et l'analyse. Pour plus de détails sur l'architecture moderne du middleware, l'intégration de plugins et le déploiement, consultez le [Guide Middleware & Pipeline de Plugins](middleware-sprint-c.md).
+Whoosh-NG 2.0 ajoute un package middleware moderne (`whoosh_modern.middleware`) avec un middleware de résilience de type wrapper (réessaissance, cache, journalisation) et un middleware basé sur des hooks pour le stockage, la recherche et l'analyse. Pour plus de détails sur l'architecture moderne du middleware, l'intégration de plugins et le déploiement, consultez le [Guide Middleware & Pipeline de Plugins](middleware-pipeline.md).
 
 
 ## DOCUMENT (FR): Modern Indexing
@@ -30491,7 +31597,7 @@ uv run python -m pytest -q
 ```
 
 
-## DOCUMENT (FR): Plugins Sprint C
+## DOCUMENT (FR): Plugins Avances
 
 # Système de Plugins
 
@@ -30772,7 +31878,8 @@ Construit et retourne une `MiddlewareChain` à partir de tous les plugins qui d�
 
 ## Voir Aussi
 
-- [Guide Middleware](middleware-sprint-c.md) — Pipeline hooks et middleware personnalisé
+- [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et middleware personnalisé
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [Exemple: Développement de Plugin](../examples/plugin-dev.md) — Tutoriel pas à pas
 - [API: Plugins](../api/plugins.md) — Référence complète de l'API
 
@@ -30881,10 +31988,360 @@ Le `PluginManager` résout l'ordre de chargement et détecte les conflits.
 
 ## Système de Plugins Moderne (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduit un `PluginManager` amélioré avec support de registres pour les sources de données, les fournisseurs de vecteurs, les embeddings et le middleware. Pour plus de détails sur l'architecture moderne des plugins, les groupes d'entry points et le déploiement, consultez le [Guide Système de Plugins](plugins-sprint-c.md).
+Whoosh-NG 2.0 introduit un `PluginManager` amélioré avec support de registres pour les sources de données, les fournisseurs de vecteurs, les embeddings et le middleware. Pour plus de détails sur l'architecture moderne des plugins, les groupes d'entry points et le déploiement, consultez le [Guide Système de Plugins](plugins-avances.md).
 
 
-## DOCUMENT (FR): Stemming Sprint D
+## DOCUMENT (FR): Provider Integration
+
+# Intégration des Providers : Guide Complet du Pipeline
+
+Module: `whoosh_modern.storage`, `whoosh_modern.analysis.stemmer_providers`, `whoosh_modern.linguistics.synonyms`, `whoosh_modern.vector`, `whoosh_modern.autocomplete`
+Version: 2.0.0
+
+Ce guide explique comment tous les providers de Whoosh-NG s'intègrent dans le
+pipeline d'indexation et de recherche. Il est la référence définitive pour
+comprendre le flux de données des documents bruts aux résultats de recherche.
+
+## Vue d'ensemble
+
+Whoosh-NG utilise un **pattern de provider** pour garder le moteur de recherche
+léger tout en activant un comportement pluggable pour le stockage, l'analyse de
+texte, la recherche vectorielle et l'autocomplétion.
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                        Pile de Providers Whoosh-NG                   │
+│                                                                      │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────┐  ┌───────────┐ │
+│  │ Stockage    │  │ Stemmer      │  │ Synonyme    │  │ Vecteur   │ │
+│  │ Providers   │  │ Providers    │  │ Providers   │  │ Providers │ │
+│  │             │  │              │  │             │  │           │ │
+│  │ FileStorage │  │ Internal     │  │ Static      │  │ Numpy     │ │
+│  │ S3Storage   │  │ PyStemmer    │  │ YAML        │  │ HNSW      │ │
+│  │ Hybride     │  │ Identity     │  │ JSON        │  │ Faiss     │ │
+│  │ SQLite      │  │ Custom       │  │ SQLite      │  │ Qdrant    │ │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └─────┬─────┘ │
+│         │                │                │                │       │
+│         ▼                ▼                ▼                ▼       │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │              Pipeline de Middleware (hooks)                     ││
+│  │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐    ││
+│  │  │Stockage     │  │Stemming      │  │Synonyme             │    ││
+│  │  │Middleware   │  │Middleware    │  │ExpansionMiddleware  │    ││
+│  │  └─────────────┘  └──────────────┘  └─────────────────────┘    ││
+│  └─────────────────────────────────────────────────────────────────┘│
+│                              │                                       │
+│                              ▼                                       │
+│  ┌─────────────────────────────────────────────────────────────────┐│
+│  │              Moteur Core Whoosh                                 ││
+│  │  Index │ Writer │ Searcher │ QueryParser │ Fichiers segment     ││
+│  └─────────────────────────────────────────────────────────────────┘│
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+## Pipeline d'Indexation Complet
+
+### Flux étape par étape
+
+```text
+┌─────────────────┐
+│   DataSource    │  (SQL, JSON, REST, CSV, DataFrame, etc.)
+│   .stream_batches() │
+└────────┬────────┘
+         │ lots de documents
+         ▼
+┌─────────────────┐
+│  SchemaDiscovery │  Infère le schéma Whoosh depuis les colonnes de la source
+│  .discover_schema() │
+└────────┬────────┘
+         │ Schema(TEXT, ID, NUMERIC, VECTOR, ...)
+         ▼
+┌─────────────────────────────────────────┐
+│  Résolution du Provider de Stockage      │
+│                                         │
+│  storage._root (si présent)             │
+│    └──► whoosh.index.create_in(root)    │
+│  Pas de root                             │
+│    └──► tempfile.mkdtemp() → create_in() │
+└────────┬────────────────────────────────┘
+         │ Instance Index
+         ▼
+┌─────────────────────────────────────────┐
+│  Writer + MiddlewareChain                │
+│                                         │
+│  chain.run_before("before_index")        │
+│    ├── StorageMiddleware                 │
+│    │   └── marque le contexte            │
+│    ├── StemmingMiddleware                │
+│    │   └── stemme les champs             │
+│    └── SynonymExpansionMiddleware        │
+│        └── expande les champs            │
+│                                         │
+│  writer.add_document(**doc)              │
+│    └── Whoosh core applique les analyzeurs│
+│        (TEXT.analyzer)                    │
+│        et écrit le segment               │
+│                                         │
+│  writer.commit()                         │
+│    └── chain.run_after("on_commit")      │
+│        └── StorageMiddleware             │
+│            └── écrit un point de commit  │
+└────────┬────────────────────────────────┘
+         │ Fichiers segment sur le disque/S3/cache
+         ▼
+┌─────────────────┐
+│  Index Whoosh    │
+│  (segments)      │
+└─────────────────┘
+```
+
+### Exemple concret
+
+```python
+from whoosh import index, fields
+from whoosh_modern import (
+    SearchApplication,
+    SQLSource,
+    HybridStorage,
+    S3Storage,
+    StemmingAnalyzer,
+    get_stemmer,
+    SynonymManager,
+    SynonymExpansionMiddleware,
+    StorageMiddleware,
+    StemmingMiddleware,
+)
+from sqlalchemy import create_engine
+
+# 1. Source de données
+engine = create_engine("sqlite:///products.db")
+source = SQLSource(query="SELECT id, name, description FROM products", connection=engine)
+
+# 2. Stockage
+remote = S3Storage(bucket="my-index-bucket", prefix="segments")
+storage = HybridStorage(local_cache="./cache", remote=remote)
+
+# 3. Schéma (auto-découvert des colonnes SQL)
+#    Mais on personnalise l'analyseur
+stemmer = get_stemmer("auto", "english")
+schema = fields.Schema(
+    name=fields.TEXT(analyzer=StemmingAnalyzer(stemmer=stemmer), stored=True),
+    description=fields.TEXT(analyzer=StemmingAnalyzer(stemmer=stemmer)),
+    id=fields.ID(stored=True, unique=True),
+)
+
+# 4. Créer l'index dans la racine du stockage
+ix = index.create_in(storage._cache_root, schema)
+
+# 5. Construire la chaîne de middleware
+syn_manager = SynonymManager({"laptop": ["notebook", "portable"]})
+chain = MiddlewareChain([
+    StorageMiddleware(storage, name="products"),
+    StemmingMiddleware(stemmer=stemmer.stem),
+    SynonymExpansionMiddleware(syn_manager),
+])
+
+# 6. Indexer avec le middleware
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    for batch in source.stream_batches():
+        for doc in batch:
+            writer.add_document(**doc)
+    writer.commit()
+```
+
+## Pipeline de Recherche Complet
+
+### Flux étape par étape
+
+```text
+┌─────────────────┐
+│   Requête Utilisateur │  "running cats"
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│  MiddlewareChain.run_before("search")    │
+│                                         │
+│  ├── StemmingMiddleware                  │
+│  │   └── "running cats" → "run cat"      │
+│  ├── SynonymExpansionMiddleware          │
+│  │   └── "run cat" → "run cat running feline" │
+│  └── QueryRewriteMiddleware              │
+│      └── réécritures personnalisées      │
+└────────┬────────────────────────────────┘
+         │ Requête modifiée
+         ▼
+┌─────────────────────────────────────────┐
+│  QueryParser.parse(query)                │
+│    └── Objet Query (Term, And, Or...)    │
+└────────┬────────────────────────────────┘
+         │ Objet Query
+         ▼
+┌─────────────────────────────────────────┐
+│  Searcher.search(query)                  │
+│                                         │
+│  ┌───────────────────────────────────┐  │
+│  │  Chemin de recherche par mot-clé  │  │
+│  │  └── lit les listes de postings │  │
+│  │      depuis les fichiers segment   │  │
+│  └───────────────────────────────────┘  │
+│                                         │
+│  ┌───────────────────────────────────┐  │
+│  │  Chemin de recherche vectorielle  │  │
+│  │  └── VectorRegistry.get(provider) │  │
+│  │      └── NumpyProvider.search()   │  │
+│  │          └── similarité cosinus   │  │
+│  └───────────────────────────────────┘  │
+│                                         │
+│  ┌───────────────────────────────────┐  │
+│  │  Chemin d'autocomplétion            │  │
+│  │  └── AutocompleteRegistry.get()   │  │
+│  │      └── provider.suggest()       │  │
+│  └───────────────────────────────────┘  │
+└────────┬────────────────────────────────┘
+         │ Résultats bruts
+         ▼
+┌─────────────────────────────────────────┐
+│  MiddlewareChain.run_after("search")     │
+│                                         │
+│  └── RankingMiddleware                   │
+│      └── réclasse les résultats          │
+└────────┬────────────────────────────────┘
+         │ Résultats finaux
+         ▼
+┌─────────────────┐
+│  Hits retournés   │
+└─────────────────┘
+```
+
+### Exemple concret
+
+```python
+from whoosh.qparser import QueryParser
+from whoosh_modern.middleware import (
+    StemmingMiddleware,
+    RankingMiddleware,
+    QueryRewriteMiddleware,
+)
+from whoosh_modern.analysis import get_stemmer
+from whoosh_modern.vector import NumpyProvider
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh.plugins.manager import PluginManager
+import numpy as np
+
+# 1. Configurer les plugins au démarrage
+manager = PluginManager()
+VectorPlugin().register(manager)
+
+# 2. Ouvrir l'index
+ix = index.open_dir("indexdir")
+
+# 3. Construire la chaîne de middleware
+stemmer = get_stemmer("auto", "english")
+chain = MiddlewareChain([
+    StemmingMiddleware(stemmer=stemmer.stem),
+    QueryRewriteMiddleware(rewriter=lambda q: q + " portable"),  # ajouter synonyme
+    RankingMiddleware(ranker=lambda r: sorted(r, key=lambda h: h.score, reverse=True)),
+])
+
+# 4. Rechercher avec le middleware
+with MiddlewareSearcher(ix.searcher(), chain) as searcher:
+    # La requête est transformée par le middleware avant l'exécution
+    results = searcher.search("laptop")
+    for hit in results:
+        print(f"{hit['name']}: {hit.score:.4f}")
+
+    # 5. Recherche vectorielle (parallèle)
+    query_vec = np.random.rand(384).tolist()
+    vector_results = searcher.vector_search("embedding", query_vec, limit=10)
+    for hit in vector_results:
+        print(f"doc_id={hit.doc_id}, score={hit.score:.4f}")
+```
+
+## Matrice de Comparaison des Providers
+
+| Aspect | Stockage | Stemmer | Synonyme | Vecteur | Autocomplétion |
+|--------|----------|---------|----------|---------|----------------|
+| **Point d'intégration** | `StorageMiddleware` + `create_in()` | `StemmingAnalyzer` (champ) + `StemmingMiddleware` | `SynonymExpansionMiddleware` | `VectorRegistry` + format de segment | `AutocompleteRegistry` + autonome |
+| **Enregistrement** | Manuel ou `__getattr__` | Décorateur `register_stemmer()` | CRUD `SynonymManager` | `VectorPlugin.register()` | `AutocompletePlugin.register()` |
+| **Utilisé à l'indexation** | Oui (points de commit) | Oui (analyseur de champ + middleware) | Oui (before_index) | Oui (champ VECTOR) | Non (autonome ou post-indexation) |
+| **Utilisé à la recherche** | Oui (lectures de segments via le système de fichiers) | Oui (analyseur de champ + middleware) | Oui (before_search) | Oui (vector_search) | Oui (suggest/search) |
+| **Persistance** | Fichiers segment / S3 / SQLite | En mémoire (sans état) | En mémoire / YAML / JSON / SQLite | Fichiers segment (métadonnées) | En mémoire (liste de phrases) |
+| **Configuration** | Classe provider + kwargs | Nom du backend + langue | Dict de mapping ou fichier | Nom du provider + métrique | Type de provider + paramètres |
+
+## Patterns Communs
+
+### Pattern 1 : Provider comme Analyseur de Champ
+
+Utilisé par: Stemmer providers, analyzeurs linguistiques
+
+```python
+schema = Schema(
+    content=TEXT(analyzer=StemmingAnalyzer(stemmer="auto"))
+)
+```
+
+Le provider est encapsulé dans un analyzeur Whoosh et appliqué automatiquement.
+
+### Pattern 2 : Provider comme Middleware
+
+Utilisé par: Stockage, Stemmer, Synonymes
+
+```python
+chain = MiddlewareChain([
+    StorageMiddleware(storage),
+    StemmingMiddleware(stemmer=stemmer.stem),
+    SynonymExpansionMiddleware(manager),
+])
+```
+
+Le provider est consommé par des hooks de middleware dans le pipeline.
+
+### Pattern 3 : Provider comme Entrée du Registre
+
+Utilisé par: Vecteur, Autocomplétion
+
+```python
+VectorRegistry.register("numpy", NumpyProvider(), owner="my_app")
+provider = VectorRegistry.get("numpy", "my_app")
+```
+
+Le provider est stocké dans un registre global et résolu par nom à l'exécution.
+
+### Pattern 4 : Provider comme Service Autonome
+
+Utilisé par: Autocomplétion, Vecteur (mode manuel)
+
+```python
+provider = NumpyProvider()
+provider.add([(doc_id, vec)])
+results = provider.search(query_vec)
+```
+
+Le provider fonctionne indépendamment de l'index/searcher Whoosh.
+
+## Bonnes Pratiques
+
+1. **Choisir le bon pattern d'intégration** : Les analyseurs de champs pour les schémas statiques, le middleware pour le comportement dynamique, le registre pour les backends interchangeables.
+2. **Éviter les double-applications** : Ne pas utiliser à la fois les analyseurs de niveau champ et le middleware pour la même transformation (ex: stemming).
+3. **Enregistrer les providers au démarrage** : Appeler `VectorPlugin().register(manager)` et `AutocompletePlugin().register(manager)` avant de créer les index.
+4. **Utiliser l'API de plus haut niveau quand c'est possible** : `SearchApplication` pour le bout en bout, `create_autocomplete()` pour les suggestions, `get_stemmer()` pour le stemming.
+5. **Garder les providers sans état** : Les providers ne devraient pas contenir d'état spécifique à l'index; utilisez le contexte de middleware pour les données par requête.
+6. **Tester les providers en isolation** : Chaque provider devrait être testable sans Whoosh core (tests unitaires pour `provider.search()`, `provider.add()`).
+7. **Documenter les dépendances des providers** : Noter les dépendances optionnelles (boto3, PyStemmer, PyYAML) dans les exigences de votre projet.
+
+## Voir Aussi
+
+- [Guide des Fournisseurs de Stockage](storage-providers.md) — Intégration des backends de stockage
+- [Guide des Stemmers](stemming-providers.md) — Intégration des fournisseurs de stemmers
+- [Guide de Recherche Vectorielle](vector.md) — Intégration des fournisseurs de vecteurs
+- [Guide d'Autocomplétion](autocomplete-providers.md) — Intégration des fournisseurs d'autocomplétion
+- [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
+- [Guide Plugins](plugins-advanced.md) — Enregistrement et entry points des plugins
+- [API: Moderne](../api/modern.md) — Référence complète de l'API pour tous les providers
+
+
+## DOCUMENT (FR): Stemmers Fournisseurs
 
 # Fournisseurs de Stemmers
 
@@ -31210,10 +32667,182 @@ pip install whoosh-ng[fast-stemming]
 pip install whoosh-ng[modern]
 ```
 
+## Intégration des Fournisseurs de Stemmers dans le Pipeline
+
+Le système `StemmerProvider` s'intègre à **deux niveaux** : les analyseurs de niveau champ et le middleware de pipeline. Comprendre les deux est essentiel pour éviter le double-stemming.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  StemmingAnalyzer (niveau champ, dans Schema)                   │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │ RegexTokenizer() │ StopFilter │ StemmingAnalyzer          │  │
+│  │                    (mots vides)    │                       │  │
+│  │                                   ▼                       │  │
+│  │                         stemfn = provider.stem            │  │
+│  │                                   │                       │  │
+│  │                                   ▼                       │  │
+│  │                         Token(stemmed=True)                │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  Appliqué par Whoosh core à l'indexation ET à la recherche     │
+│  (via QueryParser). Automatique, aucun middleware nécessaire.   │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  StemmingMiddleware (niveau pipeline)                           │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │ before_index(context)                                     │  │
+│  │   └── stemmer toutes les valeurs str dans context.document  │  │
+│  │                                                             │  │
+│  │ before_search(context)                                     │  │
+│  │   └── stemmer context.query si stem_query=True             │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  Intégré dans MiddlewareChain. Activation manuelle.              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Niveau 1 : Niveau champ (automatique)
+
+Le `StemmingAnalyzer` encapsule le `StemmingAnalyzer` intégré de Whoosh et injecte
+la méthode `.stem` d'un `StemmerProvider` comme `stemfn`. Whoosh core l'applique
+automatiquement au champ à la fois à l'indexation et à la recherche.
+
+```python
+from whoosh.fields import Schema, TEXT
+from whoosh_modern.analysis import StemmingAnalyzer, get_stemmer
+
+# Détection automatique du meilleur stemmer (PyStemmer préféré)
+stemmer = get_stemmer("auto", "english")
+
+# Créer un analyseur avec la fonction de stem du provider
+analyzer = StemmingAnalyzer(stemmer=stemmer)
+
+schema = Schema(
+    title=TEXT(stored=True),
+    content=TEXT(analyzer=analyzer),
+)
+
+# À l'indexation : "running cats" → ["run", "cat"]
+# À la recherche : QueryParser utilise le même analyseur
+# donc "running cats" correspond aux documents contenant "run cat"
+```
+
+**Avantages** : Automatique, pas de configuration de middleware nécessaire, comportement cohérent index/recherche.
+
+**Inconvénients** : Nécessite que l'analyseur soit défini sur chaque champ TEXT. Plus difficile à changer à l'exécution.
+
+### Niveau 2 : Niveau middleware (activé manuellement)
+
+`StemmingMiddleware` applique le stemming au niveau du pipeline, opérant sur les
+valeurs de chaîne brutes dans `context.document` et `context.query` avant que
+Whoosh's analyzeurs ne les voient.
+
+```python
+from whoosh_modern.middleware import StemmingMiddleware
+from whoosh_modern.analysis import get_stemmer
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareWriter
+
+stemmer = get_stemmer("auto", "english")
+
+chain = MiddlewareChain([
+    StemmingMiddleware(
+        stemmer=stemmer.stem,
+        fields=["title", "content"],  # None = tous les champs str
+        stem_query=True,
+    ),
+])
+
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Running cats", content="Fast dogs")
+    # before_index stemme : "Running cats" → "run cat"
+    writer.commit()
+```
+
+**Avantages** : Fonctionne avec n'importe quel champ sans modifier le schéma. Peut être activé/désactivé à l'exécution.
+
+**Inconvénients** : Doit être connecté manuellement au pipeline. Risque de double-stemming si le champ utilise aussi `StemmingAnalyzer`.
+
+### Exemple de pipeline complet : indexation + recherche
+
+```python
+from whoosh import index, fields
+from whoosh.qparser import QueryParser
+from whoosh_modern.analysis import StemmingAnalyzer, get_stemmer
+from whoosh_modern.middleware import StemmingMiddleware
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh_modern.analysis import StemmingAnalyzer
+
+# 1. Schéma avec analyseur de niveau champ
+stemmer = get_stemmer("auto", "english")
+schema = fields.Schema(
+    title=fields.TEXT(stored=True, analyzer=StemmingAnalyzer(stemmer=stemmer)),
+    content=fields.TEXT(analyzer=StemmingAnalyzer(stemmer=stemmer)),
+)
+
+ix = index.create_in("indexdir", schema)
+
+# 2. Indexation (pas de double-stemming car
+#    on n'utilise pas StemmingMiddleware quand les champs ont StemmingAnalyzer)
+with ix.writer() as writer:
+    writer.add_document(title="Running cats", content="Fast dogs")
+    writer.commit()
+
+# 3. Recherche : QueryParser applique le même analyseur à la requête
+with ix.searcher() as searcher:
+    qp = QueryParser("content", schema)
+    q = qp.parse("running cats")
+    results = searcher.search(q)
+    # "running" est stemmé en "run" par l'analyseur
+    # "cats" est stemmé en "cat" par l'analyseur
+    # Correspond au document avec "run" et "cat"
+```
+
+### Éviter le double-stemming
+
+```python
+# FAUX : double stemming
+schema = Schema(
+    content=TEXT(analyzer=StemmingAnalyzer(stemmer="auto")),
+)
+chain = MiddlewareChain([
+    StemmingMiddleware(stemmer=get_stemmer("auto").stem),  # Ne pas faire ça !
+])
+# Résultat : "running" → "run" (analyseur) → "run" (middleware) — inoffensif mais gaspilleux
+
+# CORRECT : choisir UN niveau
+# Option A : niveau champ uniquement (recommandé pour schémas statiques)
+schema = Schema(content=TEXT(analyzer=StemmingAnalyzer(stemmer="auto")))
+# Aucun StemmingMiddleware nécessaire
+
+# Option B : middleware uniquement (pour champs dynamiques)
+schema = Schema(content=TEXT)  # Pas d'analyseur
+chain = MiddlewareChain([StemmingMiddleware(stemmer=get_stemmer("auto").stem)])
+```
+
+### Provider de stemmer personnalisé
+
+```python
+from whoosh_modern.analysis import register_stemmer, get_stemmer
+
+@register_stemmer("my_stemmer")
+class MyStemmer:
+    def stem(self, word: str) -> str:
+        return word.lower().rstrip("s")
+
+# Utilisez-le comme n'importe quel backend intégré
+stemmer = get_stemmer("my_stemmer", "english")
+analyzer = StemmingAnalyzer(stemmer=stemmer)
+```
+
 ## Voir Aussi
 
 - [Guide Stemming et Mots Vides](stemming.md) — Guide classique de stemming de Whoosh
-- [Guide Synonymes & Linguistique](linguistics-sprint-d.md) — Moteur d'expansion de synonymes
+- [Guide Synonymes & Linguistique](linguistique.md) — Moteur d'expansion de synonymes
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [API: Moderne](../api/modern.md) — Référence complète de l'API pour les extensions d'analyse
 
 
@@ -31404,7 +33033,7 @@ Voir le [Guide N-grammes](ngrams.md) pour plus de détails.
 Whoosh-NG 2.0 introduit un système de fournisseurs de racines de style
 plugin avec détection automatique, support de PyStemmer et d'analyseurs
 spécifiques à chaque langue. Pour plus de détails, voir le
-[Guide des fournisseurs de racines](stemming-sprint-d.md).
+[Guide des fournisseurs de racines](stemmers-fournisseurs.md).
 
 
 ## DOCUMENT (FR): Storage Providers
@@ -31695,6 +33324,98 @@ python benchmark/s3_storage_benchmark.py
 python benchmark/s3_storage_benchmark_real.py
 ```
 
+## Comment les Fournisseurs de Stockage s'Intègre dans le Pipeline d'Indexation et de Recherche
+
+Le fournisseur de stockage participe à deux phases distinctes : **la création de l'index** (déterminer où les segments vivent) et **l'intégration en temps réel** (via `StorageMiddleware`).
+
+### Flux d'indexation complet avec un fournisseur de stockage
+
+```text
+DataSource.stream_batches()
+    │
+    ▼
+SearchApplication.build()
+    │
+    ├── source.discover_schema() ──► Whoosh Schema
+    │
+    ├── résolution de storage._root
+    │       │
+    │       ├── HybridStorage/S3Storage/FileStorage
+    │       │   └── a _root ? ──► whoosh.index.create_in(root, schema)
+    │       │
+    │       └── Pas de _root (S3 pur/SnapshotStorage)
+    │           └── tempfile.mkdtemp() ──► create_in(tmpdir, schema)
+    │
+    ├── Writer = index.writer()
+    │       │
+    │       ├── MiddlewareChain.before_index()
+    │       │   └── StorageMiddleware.before_index()
+    │       │       ├── context.labels["storage_backend"] = provider.__class__.__name__
+    │       │       └── context.metadata["storage_provider"] = self
+    │       │
+    │       ├── for batch in source.stream_batches():
+    │       │       for doc in batch:
+    │       │           writer.add_document(**doc)
+    │       │
+    │       └── writer.commit()
+    │           │
+    │           └── StorageMiddleware.on_commit()
+    │               └── provider.write("commits/{name}/{timestamp}", b"1")
+    │
+    ▼
+Index persistsé sur le disque / S3 / cache hybride
+```
+
+### Flux de recherche complet avec un fournisseur de stockage
+
+```text
+SearchApplication.search(query)
+    │
+    ├── index.searcher()
+    │       │
+    │       └── Whoosh core ouvre les fichiers segment depuis :
+    │           ├── système de fichiers local (racine FileStorageProvider)
+    │           ├── base de données SQLite (SQLiteStorageProvider)
+    │           └── S3 / cache hybride (S3StorageProvider / HybridStorage)
+    │
+    ├── QueryParser.parse(query) ──► Objet Query
+    │
+    └── searcher.search(query)
+        │
+        └── Whoosh core lit les listes de postings depuis les fichiers segment
+            └── Retourne Results (Hits)
+```
+
+### Hooks détaillés de StorageMiddleware
+
+`StorageMiddleware` (`whoosh_modern.middleware.storage`) est le point d'intégration
+qui redirige la persistance de l'index via n'importe quel `SyncStorageProvider` sans
+modifier le writer.
+
+| Hook | Quand | Ce qu'il fait |
+|------|------|--------------|
+| `before_index(context)` | Avant qu'un document soit ajouté | Marque le contexte avec l'étiquette `storage_backend` et les métadonnées `storage_provider` |
+| `on_commit(context)` | Après `writer.commit()` | Écrit un point de commit (`commits/{name}/{timestamp}`) dans le provider |
+
+### Insight clé : StorageProvider vs StorageMiddleware
+
+| Composant | Rôle |
+|-----------|------|
+| `SyncStorageProvider` / `AsyncStorageProvider` | **Contrat** définissant `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
+| `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implémentations** du contrat |
+| `StorageMiddleware` | **Couche d'intégration** qui appelle le provider aux hooks de cycle de vie (`before_index`, `on_commit`) |
+| `SearchApplication` | **Point d'entrée** qui extrait `_root` du provider pour créer le répertoire d'index Whoosh |
+
+Le provider ne **n'intercepte pas** les lectures internes de segments de Whoosh. Ces lectures passent par le `FileStorage` intégré de Whoosh (`whoosh.filedb.filestore`) qui lit depuis le chemin du système de fichiers donné à `create_in()`. L'abstraction provider de Whoosh-NG est conçue pour :
+- Le routage personnalisé de segments (S3, SQLite, cache hybride)
+- Le pointage de commit via le middleware
+- Futur : l'interception de lectures/écritures au niveau des segments
+
+## Voir Aussi
+
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
+- [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
+
 
 ## DOCUMENT (FR): Vector
 
@@ -31778,6 +33499,83 @@ with ix.searcher() as searcher:
 3. **Recherche hybride**: Combinez vecteur et mots-clés pour de meilleurs résultats
 4. **Cachez les embeddings**: Pré-calculez et stockez pour éviter de recalculer
 5. **Indexation par lots**: Indexez les vecteurs en lots pour l'efficacité
+
+## Intégration des Fournisseurs de Vecteurs dans le Pipeline
+
+Le système de recherche vectorielle s'intègre via le registre de plugins de Whoosh
+et le format de segment. Le provider est stocké dans le segment d'index et résolu
+au moment de la recherche.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│  Enregistrement (démarrage)                                         │
+│                                                                     │
+│  VectorPlugin.register(PluginManager)                              │
+│    └── VectorRegistry.register("numpy", NumpyProvider(), owner)     │
+│                                                                     │
+│  Le provider est maintenant disponible pour tout champ VECTOR      │
+│  qui spécifie provider="numpy"                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Indexation                                                          │
+│                                                                     │
+│  VECTOR(dimensions=384, provider="numpy")                          │
+│       │                                                             │
+│       ▼                                                             │
+│  PerDocWriter.add_vector_items(fieldname, field, items)            │
+│       │                                                             │
+│       ▼                                                             │
+│  Le fichier segment contient :                                     │
+│    - octets vectoriels (bruts)                                     │
+│    - nom du provider ("numpy")                                     │
+│    - métrique ("cosine")                                           │
+│       │                                                             │
+│       ▼                                                             │
+│  writer.commit() → segments écrits sur le disque                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Recherche                                                         │
+│                                                                     │
+│  searcher.vector_search("embedding", query_vec, k=10)              │
+│       │                                                             │
+│       ▼                                                             │
+│  Whoosh core lit le segment                                        │
+│    └── récupère le nom du provider ("numpy")                        │
+│       │                                                             │
+│       ▼                                                             │
+│  VectorRegistry.get("numpy")                                        │
+│       │                                                             │
+│       ▼                                                             │
+│  NumpyProvider.search(query_vec, k, filter_ids)                    │
+│       │                                                             │
+│       ▼                                                             │
+│  VectorHit[] trié par similarité cosinus                           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Chaîne de résolution du provider
+
+Quand `searcher.vector_search()` est appelé, Whoosh core :
+
+1. Lit la configuration du champ `VECTOR` depuis le schéma
+2. Ouvre le fichier segment contenant les données vectorielles
+3. Extrait le nom du provider stocké dans le segment (ex: `"numpy"`)
+4. Recherche le provider dans `VectorRegistry`
+5. Appelle `provider.search(query_vector, k, filter_ids)`
+6. Retourne `list[VectorHit]`
+
+Si le provider n'est pas enregistré, la recherche échoue avec un manquant de registre.
+C'est pourquoi `VectorPlugin().register(manager)` (ou l'enregistrement manuel) est
+requise au démarrage.
+
+## Voir Aussi
+
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
+- [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
 
 
 # Code Examples

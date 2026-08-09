@@ -1,4 +1,10 @@
-"""Storage providers."""
+"""Storage providers for Whoosh-NG.
+
+Provides local file, S3, and hybrid (cache + remote) storage backends.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 from __future__ import annotations
 
@@ -19,6 +25,17 @@ __all__ = [
 
 
 def __getattr__(name: str) -> Any:
+    """Provide lazy access to deprecated/compat attribute names.
+
+    Args:
+        name: The attribute name being accessed.
+
+    Returns:
+        The resolved object.
+
+    Raises:
+        AttributeError: If the attribute does not exist.
+    """
     if name == "CachedObjectStorage":
         return HybridStorage
     if name == "FileStorage":

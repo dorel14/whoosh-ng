@@ -83,3 +83,80 @@ with ix.searcher() as searcher:
 3. **Recherche hybride**: Combinez vecteur et mots-clés pour de meilleurs résultats
 4. **Cachez les embeddings**: Pré-calculez et stockez pour éviter de recalculer
 5. **Indexation par lots**: Indexez les vecteurs en lots pour l'efficacité
+
+## Intégration des Fournisseurs de Vecteurs dans le Pipeline
+
+Le système de recherche vectorielle s'intègre via le registre de plugins de Whoosh
+et le format de segment. Le provider est stocké dans le segment d'index et résolu
+au moment de la recherche.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│  Enregistrement (démarrage)                                         │
+│                                                                     │
+│  VectorPlugin.register(PluginManager)                              │
+│    └── VectorRegistry.register("numpy", NumpyProvider(), owner)     │
+│                                                                     │
+│  Le provider est maintenant disponible pour tout champ VECTOR      │
+│  qui spécifie provider="numpy"                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Indexation                                                          │
+│                                                                     │
+│  VECTOR(dimensions=384, provider="numpy")                          │
+│       │                                                             │
+│       ▼                                                             │
+│  PerDocWriter.add_vector_items(fieldname, field, items)            │
+│       │                                                             │
+│       ▼                                                             │
+│  Le fichier segment contient :                                     │
+│    - octets vectoriels (bruts)                                     │
+│    - nom du provider ("numpy")                                     │
+│    - métrique ("cosine")                                           │
+│       │                                                             │
+│       ▼                                                             │
+│  writer.commit() → segments écrits sur le disque                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Recherche                                                         │
+│                                                                     │
+│  searcher.vector_search("embedding", query_vec, k=10)              │
+│       │                                                             │
+│       ▼                                                             │
+│  Whoosh core lit le segment                                        │
+│    └── récupère le nom du provider ("numpy")                        │
+│       │                                                             │
+│       ▼                                                             │
+│  VectorRegistry.get("numpy")                                        │
+│       │                                                             │
+│       ▼                                                             │
+│  NumpyProvider.search(query_vec, k, filter_ids)                    │
+│       │                                                             │
+│       ▼                                                             │
+│  VectorHit[] trié par similarité cosinus                           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Chaîne de résolution du provider
+
+Quand `searcher.vector_search()` est appelé, Whoosh core :
+
+1. Lit la configuration du champ `VECTOR` depuis le schéma
+2. Ouvre le fichier segment contenant les données vectorielles
+3. Extrait le nom du provider stocké dans le segment (ex: `"numpy"`)
+4. Recherche le provider dans `VectorRegistry`
+5. Appelle `provider.search(query_vector, k, filter_ids)`
+6. Retourne `list[VectorHit]`
+
+Si le provider n'est pas enregistré, la recherche échoue avec un manquant de registre.
+C'est pourquoi `VectorPlugin().register(manager)` (ou l'enregistrement manuel) est
+requise au démarrage.
+
+## Voir Aussi
+
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
+- [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers

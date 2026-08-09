@@ -181,4 +181,4 @@ See the [N-grams Guide](ngrams.md) for more details.
 
 ## Modern Stemmer Providers (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduces a plugin-style stemmer provider system with auto-detection, PyStemmer support, and language-specific analyzers. For full details, see the [Stemmer Providers Guide](stemming-sprint-d.md).
+Whoosh-NG 2.0 introduces a plugin-style stemmer provider system with auto-detection, PyStemmer support, and language-specific analyzers. For full details, see the [Stemmer Providers Guide](stemming-providers.md).

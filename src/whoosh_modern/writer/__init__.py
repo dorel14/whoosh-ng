@@ -1,4 +1,4 @@
-"""Modern optimized writer for large-scale indexing in Whoosh-NG.
+"""Optimized writer module for large-scale indexing in Whoosh-NG.
 
 This module provides batch-optimized writing that does NOT modify
 the core whoosh writer. It wraps the core writer with optimizations
@@ -8,6 +8,9 @@ Key optimizations:
 - Multisegment mode (no merging during indexing)
 - Reduced Python overhead in batch loops
 - Configurable batch sizes and memory limits
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations
@@ -52,6 +55,11 @@ class ModernIndexWriter:
         self._doc_count = 0
 
     def __enter__(self) -> ModernIndexWriter:
+        """Open the underlying writer and return self for context management.
+
+        Returns:
+            The ModernIndexWriter instance (self).
+        """
         self._writer = self._index.writer(
             limitmb=self._limitmb,
             multisegment=self._multisegment,
@@ -65,6 +73,13 @@ class ModernIndexWriter:
         exc_val: BaseException | None,
         exc_tb: Any,
     ) -> None:
+        """Commit or cancel the writer on context exit.
+
+        Args:
+            exc_type: Exception type if an error occurred, None otherwise.
+            exc_val: Exception value if an error occurred, None otherwise.
+            exc_tb: Exception traceback if an error occurred, None otherwise.
+        """
         if self._writer is not None:
             if exc_type is None:
                 self._writer.commit(merge=False)
@@ -73,10 +88,16 @@ class ModernIndexWriter:
             self._writer = None
 
     def add_batch(self, docs: list[dict[str, Any]]) -> int:
-        """Add a batch of documents.
+        """Add a batch of documents to the index.
 
-        :param docs: list of document dicts.
-        :returns: number of documents added.
+        Args:
+            docs: List of document dictionaries to index.
+
+        Returns:
+            Number of documents added.
+
+        Raises:
+            RuntimeError: If the writer is not open (not inside a context manager).
         """
         if not docs:
             return 0
@@ -94,10 +115,13 @@ class ModernIndexWriter:
         return count
 
     def add_batches(self, batches: Iterator[list[dict[str, Any]]]) -> int:
-        """Add multiple batches of documents.
+        """Add multiple batches of documents to the index.
 
-        :param batches: iterable of document lists.
-        :returns: total number of documents added.
+        Args:
+            batches: Iterable of document batch lists.
+
+        Returns:
+            Total number of documents added across all batches.
         """
         total = 0
         for batch in batches:
@@ -106,6 +130,7 @@ class ModernIndexWriter:
 
     @property
     def doc_count(self) -> int:
+        """Return the total number of documents indexed so far."""
         return self._doc_count
 
 
@@ -130,7 +155,16 @@ class ModernIndex:
 
     @classmethod
     def create(cls, path: str, schema: Any, **kwargs: Any) -> ModernIndex:
-        """Create a new modern index."""
+        """Create a new modern index at the given path.
+
+        Args:
+            path: Directory path for the new index.
+            schema: Whoosh Schema object for the index.
+            **kwargs: Additional arguments passed to the index creator.
+
+        Returns:
+            A new ModernIndex instance wrapping the created index.
+        """
         from whoosh.index import create_in
 
         ix = create_in(path, schema, **kwargs)
@@ -138,7 +172,14 @@ class ModernIndex:
 
     @classmethod
     def open(cls, path: str) -> ModernIndex:
-        """Open an existing modern index."""
+        """Open an existing modern index from the given path.
+
+        Args:
+            path: Directory path of the existing index.
+
+        Returns:
+            A ModernIndex instance wrapping the opened index.
+        """
         from whoosh.index import open_dir
 
         ix = open_dir(path)
@@ -150,7 +191,16 @@ class ModernIndex:
         limitmb: int = 512,
         **kwargs: Any,
     ) -> ModernIndexWriter:
-        """Return a ModernIndexWriter with optimized settings."""
+        """Return a ModernIndexWriter with optimized settings.
+
+        Args:
+            batch_size: Number of documents per batch for indexing.
+            limitmb: Memory limit in megabytes for the writer.
+            **kwargs: Additional arguments passed to the writer.
+
+        Returns:
+            A configured ModernIndexWriter instance.
+        """
         return ModernIndexWriter(
             self._index,
             batch_size=batch_size,
@@ -160,13 +210,25 @@ class ModernIndex:
         )
 
     def searcher(self, **kwargs: Any) -> Any:
-        """Return a searcher from the underlying index."""
+        """Return a searcher from the underlying index.
+
+        Args:
+            **kwargs: Additional arguments passed to the index searcher.
+
+        Returns:
+            A Whoosh Searcher instance.
+        """
         return self._index.searcher(**kwargs)
 
     @property
     def schema(self) -> Any:
+        """Return the schema of the underlying index."""
         return self._index.schema
 
     @property
     def doc_count(self) -> int:
+        """Return the total number of documents in the index."""
         return int(self._index.doc_count())
+
+
+__all__ = ["ModernIndex", "ModernIndexWriter"]

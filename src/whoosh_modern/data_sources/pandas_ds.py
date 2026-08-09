@@ -1,4 +1,8 @@
-"""Pandas DataSource implementation (optional backend)."""
+"""Pandas DataSource implementation (optional backend).
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 import logging
 from collections.abc import Iterator, Mapping
@@ -17,6 +21,13 @@ class PandasSource:
 
     Uses pandas dtypes to infer the Whoosh schema directly, so
     ``SchemaDiscovery`` is not needed here.
+
+    Args:
+        dataframe: A pandas ``DataFrame`` to iterate over.
+        incremental_field: Optional column name for incremental syncs.
+        id_field: Optional column name that uniquely identifies a
+            document.
+        sample_size: Number of rows to inspect during schema discovery.
     """
 
     def __init__(
@@ -35,18 +46,37 @@ class PandasSource:
 
     @property
     def name(self) -> str:
-        """Return the data source name."""
+        """Return the data source name.
+
+        Returns:
+            A string in the form ``pandas:<id>`` where ``id`` is the
+            Python ``id()`` of the DataFrame.
+        """
         return f"pandas:{id(self._dataframe)}"
 
     def health_check(self) -> bool:
-        """Return True if the DataFrame is non-empty."""
+        """Return True if the DataFrame is non-empty.
+
+        Returns:
+            ``True`` if the DataFrame has at least one row, ``False``
+            otherwise.
+        """
         try:
             return len(self._dataframe) > 0
         except Exception:
             return False
 
     def discover_schema(self) -> Schema:
-        """Discover schema from pandas DataFrame dtypes."""
+        """Discover schema from pandas DataFrame dtypes.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from the
+            DataFrame's column dtypes.
+
+        Raises:
+            DataSourceError: If the DataFrame is not initialised or
+                has no columns.
+        """
         if self._schema is not None:
             return self._schema
 
@@ -74,7 +104,15 @@ class PandasSource:
         return self._schema
 
     def _map_pandas_dtype(self, dtype: Any) -> Any:
-        """Map pandas dtype to Whoosh field."""
+        """Map pandas dtype to Whoosh field.
+
+        Args:
+            dtype: A pandas dtype instance.
+
+        Returns:
+            A Whoosh field instance (``NUMERIC``, ``BOOLEAN``,
+            ``DATETIME``, or ``TEXT``) configured as stored.
+        """
         from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
 
         dtype_str = str(dtype).lower()
@@ -97,6 +135,10 @@ class PandasSource:
 
         Pre-computes column names for fast DataFrame-to-dict conversion.
         Uses to_dict(orient='records') for batch extraction.
+
+        Returns:
+            A callable that accepts a pandas DataFrame and returns a
+            list of document dictionaries.
         """
         if self._compiled_mapper is not None:
             return self._compiled_mapper
@@ -110,7 +152,14 @@ class PandasSource:
         return self._compiled_mapper
 
     def iter_documents(self) -> Iterator[Document]:
-        """Yield documents from the DataFrame."""
+        """Yield documents from the DataFrame.
+
+        Yields:
+            Document dictionaries, one per row.
+
+        Raises:
+            DataSourceError: If the DataFrame is not initialised.
+        """
         if self._dataframe is None:
             raise DataSourceError(
                 "DataFrame is not initialized",
@@ -123,6 +172,16 @@ class PandasSource:
         """Yield documents from the DataFrame in batches.
 
         Uses to_dict(orient='records') for efficient batch extraction.
+
+        Args:
+            batch_size: Maximum number of rows per batch.
+
+        Yields:
+            Lists of document dictionaries, each list containing at
+            most ``batch_size`` items.
+
+        Raises:
+            DataSourceError: If the DataFrame is not initialised.
         """
         if self._dataframe is None:
             raise DataSourceError(
@@ -140,11 +199,26 @@ class PandasSource:
             yield batch_df[columns].to_dict(orient="records")
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
-        """Yield documents changed since a timestamp (not implemented for Pandas)."""
+        """Yield documents changed since a timestamp (not implemented for Pandas).
+
+        Args:
+            since: A timestamp or cursor value (accepted but ignored).
+
+        Yields:
+            Nothing — incremental changes are not supported for this
+            data source.
+        """
         return iter([])
 
     def document_count(self) -> int:
-        """Return total row count."""
+        """Return total row count.
+
+        Returns:
+            The number of rows in the DataFrame.
+
+        Raises:
+            DataSourceError: If the DataFrame is not initialised.
+        """
         if self._dataframe is None:
             raise DataSourceError(
                 "DataFrame is not initialized",
@@ -153,7 +227,12 @@ class PandasSource:
         return len(self._dataframe)
 
     def metadata(self) -> dict[str, Any]:
-        """Return metadata about this Pandas source."""
+        """Return metadata about this Pandas source.
+
+        Returns:
+            A dictionary with keys ``type``, ``shape``, ``columns``,
+            ``incremental_field``, and ``id_field``.
+        """
         return {
             "type": "pandas",
             "shape": tuple(self._dataframe.shape),

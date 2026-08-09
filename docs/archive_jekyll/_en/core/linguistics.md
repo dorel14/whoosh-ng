@@ -326,6 +326,6 @@ with MiddlewareSearcher(ix.searcher(), chain) as searcher:
 
 ## See Also
 
-- [Stemming Guide](stemming-sprint-d.md) — Stemmer providers and language analyzers
-- [Middleware Guide](middleware-sprint-c.md) — Middleware pipeline integration
+- [Stemming Guide](stemming-providers.md) — Stemmer providers and language analyzers
+- [Middleware Guide](middleware-pipeline.md) — Middleware pipeline integration
 - [API: Linguistics](../api/modern.md) — Full API reference

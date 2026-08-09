@@ -5,6 +5,9 @@ Re-exports the resilience pipeline (:class:`Middleware`, :class:`RetryMiddleware
 and the hook-based business middleware (:class:`StorageMiddleware`,
 :class:`SearchMiddleware`, :class:`AnalyzerMiddleware` and friends) which subclass
 :class:`whoosh.middleware.base.Middleware`.
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations

@@ -1,0 +1,33 @@
+name: Sync Dev from Master
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  sync-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge master into dev
+        run: |
+          git merge --no-ff origin/master -m "chore: merge master into dev [skip ci]"
+
+      - name: Push dev update
+        run: |
+          git push origin dev

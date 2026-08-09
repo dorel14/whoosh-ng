@@ -1,3 +1,13 @@
+"""Whoosh-NG: a modern search engine built on top of Whoosh.
+
+This package provides a unified search application entry point with
+support for multiple data sources, storage backends, analyzers,
+middleware, facets, validation, and profiling.
+
+Author: dorel14
+Version: 3.0.0
+"""
+
 from __future__ import annotations
 
 from whoosh_modern.application import FileStorage, SearchApplication

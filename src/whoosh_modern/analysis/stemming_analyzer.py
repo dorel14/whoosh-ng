@@ -19,6 +19,9 @@ Usage:
 
     # Custom stemmer provider
     analyzer = StemmingAnalyzer(stemmer=my_custom_stemmer)
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations
@@ -49,16 +52,26 @@ def stemming_analyzer(
 ):
     """Enhanced StemmingAnalyzer with plugin support.
 
-    :param expression: Regular expression pattern for tokenization
-    :param stoplist: List of stop words
-    :param minsize: Minimum word size
-    :param maxsize: Maximum word size
-    :param gaps: If True, split on expression instead of matching
-    :param stemmer: Stemmer backend: "auto", "internal", "pystemmer", or provider
-    :param language: Language code for the stemmer (default: "english")
-    :param ignore: Set of words to not stem
-    :param cachesize: Maximum number of stemmed words to cache
-    :returns: Composed analyzer pipeline
+    Creates a Whoosh StemmingAnalyzer with a configurable stemmer backend.
+
+    Args:
+        expression: Regular expression pattern for tokenization.
+        stoplist: Set of stop words to filter out.
+        minsize: Minimum word size to stem.
+        maxsize: Maximum word size to stem.
+        gaps: If True, split on expression instead of matching.
+        stemmer: Stemmer backend: "auto", "internal", "pystemmer", or a
+            custom StemmerProvider instance.
+        language: Language code for the stemmer (default: "english").
+        ignore: Set of words to not stem.
+        cachesize: Maximum number of stemmed words to cache.
+
+    Returns:
+        A composed Whoosh StemmingAnalyzer instance.
+
+    Raises:
+        ValueError: If ``stemmer`` is neither a string nor a
+            StemmerProvider-compatible object.
     """
     # Resolve stemmer parameter to a callable
     if isinstance(stemmer, str):

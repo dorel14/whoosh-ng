@@ -381,7 +381,8 @@ chain = manager.get_middleware_chain()
 
 ## See Also
 
-- [Plugin System Guide](plugins-sprint-c.md) — Plugin registration and entry points
+- [Plugin System Guide](plugins-advanced.md) — Plugin registration and entry points
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [Middleware Examples](../examples/middleware.md) — Practical middleware patterns
 - [API: Middleware](../api/middleware.md) — Full API reference
 - [API: Middleware Pipeline (modern)](../api/modern.md) — Modern middleware extensions

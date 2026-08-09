@@ -1,3 +1,13 @@
+"""SQLAlchemy model registration for Whoosh indexing.
+
+Provides a convenience wrapper that registers a SQLAlchemy declarative model
+with the Whoosh-NG indexing machinery, introspecting columns via
+``sqlalchemy.inspect`` and mapping their Python types to Whoosh field types.
+
+Author: dorel14
+Version: 3.0.0
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -7,7 +17,26 @@ from .types import SearchOptions
 
 
 def register_model(model: type) -> ModelIndex:
-    """Register a SQLAlchemy model and return a ModelIndex."""
+    """Register a SQLAlchemy model and return a ModelIndex.
+
+    Inspects the model's SQLAlchemy mapper to enumerate columns, extracts
+    primary-key information and any per-column ``search`` metadata stored
+    in ``column.info``, and constructs a
+    :class:`~whoosh_modern.models.base.ModelIndex` with a corresponding
+    Whoosh :class:`~whoosh.fields.Schema`.
+
+    Args:
+        model: A SQLAlchemy mapped class (must be inspectable via
+            :func:`sqlalchemy.inspect` and yield a :class:`sqlalchemy.orm.Mapper`).
+
+    Returns:
+        A :class:`~whoosh_modern.models.base.ModelIndex` wrapping the model
+        with its auto-generated Whoosh schema.
+
+    Raises:
+        ImportError: If the ``sqlalchemy`` package is not installed.
+        ValueError: If ``model`` is not a SQLAlchemy mapped class.
+    """
     try:
         from sqlalchemy import inspect as sa_inspect  # pyright: ignore[reportMissingImports]
         from sqlalchemy.orm import Mapper  # pyright: ignore[reportMissingImports]

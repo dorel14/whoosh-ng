@@ -258,6 +258,7 @@ tokens = analyzer("The running cats")
 
 ## Voir Aussi
 
-- [Guide Stemmers](stemming-sprint-d.md) — Fournisseurs de stemmers et analyseurs linguistiques
-- [Guide Middleware](middleware-sprint-c.md) — Intégration du pipeline de middleware
+- [Guide Stemmers](stemmers-fournisseurs.md) — Fournisseurs de stemmers et analyseurs linguistiques
+- [Guide Middleware](middleware-pipeline.md) — Intégration du pipeline de middleware
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [API: Linguistique](../api/modern.md) — Référence complète de l'API

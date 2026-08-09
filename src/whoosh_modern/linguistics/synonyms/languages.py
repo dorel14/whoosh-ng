@@ -2,6 +2,9 @@
 
 These are minimal starter dictionaries for demonstration and testing.
 Production deployments should load from compact-dictionaries or curated sources.
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations

@@ -332,5 +332,5 @@ pip install whoosh-ng[modern]
 ## See Also
 
 - [Stemming and Stop Words Guide](stemming.md) — Classic Whoosh stemming guide
-- [Synonyms & Linguistics Guide](linguistics-sprint-d.md) — Synonym expansion engine
+- [Synonyms & Linguistics Guide](linguistics.md) — Synonym expansion engine
 - [API: Modern](../api/modern.md) — Full API reference for analysis extensions

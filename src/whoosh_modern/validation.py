@@ -1,4 +1,8 @@
-"""4-level validation framework with different error handling."""
+"""4-level validation framework with different error handling.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 from contextlib import suppress
 from dataclasses import dataclass, field
@@ -9,7 +13,14 @@ from whoosh.fields import Schema
 
 @dataclass
 class ValidationResult:
-    """Result of a validation check."""
+    """Result of a validation check.
+
+    Attributes:
+        level: Validation level number (1-4).
+        passed: Whether the validation level passed without errors.
+        warnings: List of warning messages from the validation level.
+        errors: List of error messages from the validation level.
+    """
 
     level: int
     passed: bool
@@ -18,7 +29,13 @@ class ValidationResult:
 
 
 class ValidationFramework:
-    """Main validation orchestrator with 4 levels."""
+    """Main validation orchestrator with 4 levels.
+
+    Level 1: Structural validation (DataSource availability, schema detection).
+    Level 2: Search validation (indexable fields, analyzer compatibility).
+    Level 3: Performance validation (performance warnings).
+    Level 4: Runtime validation (sample iteration, type validation).
+    """
 
     def validate_structural(self, source: Any) -> list[str]:
         """Level 1: DataSource availability, schema detection.
@@ -114,7 +131,15 @@ class ValidationFramework:
 
     @staticmethod
     def _check_type(value: Any, field_type: Any) -> bool:
-        """Check if a value is compatible with a Whoosh field type."""
+        """Check if a value is compatible with a Whoosh field type.
+
+        Args:
+            value: The value to check.
+            field_type: The Whoosh field type instance.
+
+        Returns:
+            True if the value is compatible with the field type.
+        """
         from whoosh.fields import DATETIME, ID, KEYWORD, NUMERIC, TEXT
 
         if isinstance(field_type, ID):

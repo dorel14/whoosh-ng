@@ -210,6 +210,144 @@ class ResilientMiddleware(Middleware):
 4. **Performance**: Keep hooks lightweight; use async for I/O
 5. **Testing**: Mock the context object to test middleware in isolation
 
+## Provider Integration via Middleware
+
+Many Whoosh-NG providers integrate into the indexing and search pipeline through
+middleware hooks. This is the standard pattern for cross-cutting concerns that
+need to transform documents, queries, or results.
+
+### Provider-to-Middleware Mapping
+
+| Provider | Middleware | Hooks Used | Purpose |
+|----------|-----------|------------|---------|
+| `StorageProvider` | `StorageMiddleware` | `before_index`, `on_commit` | Tags context with storage backend; writes commit checkpoints |
+| `StemmerProvider` | `StemmingMiddleware` | `before_index`, `before_search` | Stems document fields and query text |
+| `SynonymProvider` | `SynonymExpansionMiddleware` | `before_index`, `before_search` | Expands documents and queries with synonyms |
+| `VectorProvider` | (built into Whoosh core) | N/A (segment format) | Registered in `VectorRegistry`; resolved at search time from segment metadata |
+| `AutocompleteProvider` | (standalone or registry) | N/A | Used directly via `.search()` or via `AutocompleteRegistry` |
+
+### How providers flow through the pipeline
+
+```text
+                    ┌──────────────────┐
+                    │  PluginManager   │
+                    │  .load_plugins() │
+                    └────────┬─────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              │              │              │
+     ┌────────▼──────┐ ┌────▼─────┐ ┌──────▼────────┐
+     │ VectorPlugin  │ │AutoPlugin│ │ Other Plugins │
+     │               │ │         │ │               │
+     │ VectorRegistry│ │AutoReg. │ │ ProviderReg.  │
+     │ .register()   │ │.register│ │ .register()   │
+     └───────────────┘ └─────────┘ └───────────────┘
+
+                    ┌──────────────────┐
+                    │ MiddlewareChain  │
+                    │                  │
+                    │ ┌──────────────┐ │
+                    │ │ before_index │ │
+                    │ │  hooks       │ │
+                    │ │  (ordered)   │ │
+                    │ └──────┬───────┘ │
+                    │        │         │
+                    │ ┌──────▼───────┐ │
+                    │ │   Writer     │ │
+                    │ │  .add_doc()  │ │
+                    │ └──────┬───────┘ │
+                    │        │         │
+                    │ ┌──────▼───────┐ │
+                    │ │  on_commit   │ │
+                    │ │  hooks       │ │
+                    │ └──────────────┘ │
+                    └──────────────────┘
+
+                    ┌──────────────────┐
+                    │  Searcher         │
+                    │                  │
+                    │ ┌──────────────┐ │
+                    │ │before_search │ │
+                    │ │  hooks       │ │
+                    │ └──────┬───────┘ │
+                    │        │         │
+                    │ ┌──────▼───────┐ │
+                    │ │   Query      │ │
+                    │ │  execution   │ │
+                    │ └──────┬───────┘ │
+                    │        │         │
+                    │ ┌──────▼───────┐ │
+                    │ │ after_search │ │
+                    │ │  hooks       │ │
+                    │ └──────────────┘ │
+                    └──────────────────┘
+```
+
+### Example: Full provider pipeline
+
+```python
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareWriter, MiddlewareSearcher
+from whoosh_modern.middleware import (
+    StorageMiddleware,
+    StemmingMiddleware,
+    FileStorageProvider,
+)
+from whoosh_modern.linguistics.synonyms import (
+    SynonymExpansionMiddleware,
+    SynonymManager,
+)
+from whoosh_modern.analysis import get_stemmer
+
+# 1. Build providers
+storage = FileStorageProvider("/data/index")
+stemmer = get_stemmer("auto", "english")
+syn_manager = SynonymManager({"car": ["automobile", "vehicle"]})
+
+# 2. Build middleware chain
+chain = MiddlewareChain([
+    StorageMiddleware(storage, name="primary"),
+    StemmingMiddleware(stemmer=stemmer.stem, fields=["title", "content"]),
+    SynonymExpansionMiddleware(syn_manager),
+])
+
+# 3. Index with middleware
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Car for sale", content="House near beach")
+    # StorageMiddleware.before_index() tags context
+    # StemmingMiddleware stems "Car" → "car"
+    # SynonymExpansionMiddleware expands "Car" → "Car automobile vehicle"
+    writer.commit()
+    # StorageMiddleware.on_commit() writes checkpoint
+
+# 4. Search with middleware
+with MiddlewareSearcher(ix.searcher(), chain) as searcher:
+    # StemmingMiddleware stems query "cars" → "car"
+    # SynonymExpansionMiddleware expands "car" → "car automobile vehicle"
+    results = searcher.search("cars")
+```
+
+### Key insight: middleware as provider adapter
+
+Middleware acts as the **adapter** between providers and Whoosh's core pipeline:
+
+```text
+Provider (domain logic)
+    │
+    ▼
+Middleware (pipeline integration)
+    │
+    ▼
+Whoosh core (generic engine)
+```
+
+- **StorageProvider** → **StorageMiddleware** → Whoosh writer/searcher
+- **StemmerProvider** → **StemmingMiddleware** → Whoosh document/query
+- **SynonymProvider** → **SynonymExpansionMiddleware** → Whoosh text fields
+
+This separation keeps providers simple (single responsibility) while middleware
+handles the lifecycle integration (when and how to apply the provider).
+
 ## Modern Middleware (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 adds a modern middleware package (`whoosh_modern.middleware`) with wrap-style resilience middleware (retry, caching, logging) and hook-based middleware for storage, search, and analysis. For full details on the modern middleware architecture, plugin integration, and deployment, see the [Middleware & Plugin Pipeline Guide](middleware-sprint-c.md).
+Whoosh-NG 2.0 adds a modern middleware package (`whoosh_modern.middleware`) with wrap-style resilience middleware (retry, caching, logging) and hook-based middleware for storage, search, and analysis. For full details on the modern middleware architecture, plugin integration, and deployment, see the [Middleware & Plugin Pipeline Guide](middleware-pipeline.md).

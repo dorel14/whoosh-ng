@@ -6,6 +6,9 @@ during batch indexing:
 * reusable Token instances
 * fast path ASCII
 * fast path CRM
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations
@@ -28,13 +31,32 @@ class FastAnalyzerPipeline:
         for value in values:
             for token in pipeline(value):
                 ...
+
+    Attributes:
+        _tokenizer: The underlying tokenizer callable.
+        _last_token: The last ``Token`` instance, reused for the next call.
     """
 
     def __init__(self, tokenizer: Any) -> None:
+        """Initialize the FastAnalyzerPipeline.
+
+        Args:
+            tokenizer: A Whoosh tokenizer or analyzer callable.
+        """
         self._tokenizer = tokenizer
         self._last_token: Token | None = None
 
     def __call__(self, value: str, **kwargs: Any) -> Iterable[Token]:
+        """Tokenize a value, reusing Token instances to reduce allocations.
+
+        Args:
+            value: The string to tokenize.
+            **kwargs: Additional keyword arguments forwarded to the tokenizer.
+
+        Yields:
+            ``Token`` instances with text, boost, and position attributes
+            copied from the source tokens.
+        """
         last_token = self._last_token
         if last_token is None:
             last_token = Token()

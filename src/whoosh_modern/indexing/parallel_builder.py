@@ -3,6 +3,9 @@
 Uses ``concurrent.futures`` to build multiple index segments concurrently,
 then merges them into a single index. This provides near-linear speedups on
 multi-core machines for CPU-bound indexing workloads.
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations
@@ -32,6 +35,11 @@ def _rmtree_retry(path: str, retries: int = 20, delay: float = 0.5) -> None:
     On Windows, files created by worker processes can remain briefly
     locked after the process pool shuts down. Retrying with small
     delays avoids spurious failures in tests and cleanup paths.
+
+    Args:
+        path: Path to the directory tree to remove.
+        retries: Maximum number of retry attempts. Defaults to 20.
+        delay: Delay in seconds between retries. Defaults to 0.5.
     """
     for attempt in range(retries):
         try:
@@ -45,8 +53,14 @@ def _rmtree_retry(path: str, retries: int = 20, delay: float = 0.5) -> None:
 def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -> str:
     """Worker function that builds a single segment in a separate process.
 
-    :param args: tuple of (temp_dir, schema, docs, docbase)
-    :returns: path to the written segment directory
+    Args:
+        args: A tuple of ``(temp_dir, schema, docs, docbase)`` where
+            ``temp_dir`` is the output directory, ``schema`` is the Whoosh
+            schema, ``docs`` is the list of document dicts, and ``docbase``
+            is the starting document ID (unused in this implementation).
+
+    Returns:
+        The path to the written segment directory.
     """
     import gc
 
@@ -101,6 +115,20 @@ class ParallelIndexBuilder:
         limitmb: int = 128,
         merge_policy: Any | None = None,
     ) -> None:
+        """Initialize the parallel index builder.
+
+        Args:
+            schema: The Whoosh schema defining the index structure.
+            index_path: Filesystem path where the index will be created.
+            workers: Number of worker processes for parallel segment building.
+                Defaults to 4.
+            batch_size: Number of documents per batch submitted to a worker.
+                Defaults to 10000.
+            limitmb: Memory limit in MB for each worker's writer buffer.
+                Defaults to 128.
+            merge_policy: Optional merge policy object. If ``None``, the
+                Whoosh default is used. Defaults to None.
+        """
         self.schema = schema
         self.index_path = str(index_path)
         self.workers = workers
@@ -126,9 +154,12 @@ class ParallelIndexBuilder:
         remain isolated in their own temp directories and the main index
         would end up empty after commit.
 
-        :param batches: iterable of document lists (e.g. from
-            ``source.stream_batches()``).
-        :returns: total number of documents indexed.
+        Args:
+            batches: Iterable of document lists (e.g. from
+                ``source.stream_batches()``).
+
+        Returns:
+            Total number of documents indexed.
         """
         segments: list[str] = []
         total = 0
@@ -199,7 +230,10 @@ class ParallelIndexBuilder:
     def build_from_source(self, source: DataSource) -> int:
         """Build the index directly from a DataSource.
 
-        :param source: any object implementing ``stream_batches(batch_size)``.
-        :returns: total number of documents indexed.
+        Args:
+            source: Any object implementing ``stream_batches(batch_size)``.
+
+        Returns:
+            Total number of documents indexed.
         """
         return self.build(source.stream_batches(self.batch_size))

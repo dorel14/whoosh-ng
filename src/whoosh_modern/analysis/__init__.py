@@ -4,6 +4,9 @@ Provides:
 - Stemmer provider plugin system
 - Enhanced analyzers with plugin support
 - Compatibility validation
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations

@@ -1,4 +1,8 @@
-"""Parquet DataSource implementation (optional backend)."""
+"""Parquet DataSource implementation (optional backend).
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 import logging
 import os
@@ -17,7 +21,15 @@ _BATCH_SIZE = 1000
 
 
 def _to_datetime(value: Any) -> Any:
-    """Convert date-only values to datetime for Whoosh compatibility."""
+    """Convert date-only values to datetime for Whoosh compatibility.
+
+    Args:
+        value: A value that may be a ``date`` (but not ``datetime``).
+
+    Returns:
+        A ``datetime`` if ``value`` was a date, otherwise the original
+        value unchanged.
+    """
     if isinstance(value, date) and not isinstance(value, datetime):
         return datetime.combine(value, datetime.min.time())
     return value
@@ -32,6 +44,15 @@ class ParquetSource:
 
     Uses PyArrow schema / pandas dtypes / Polars dtypes to infer the
     Whoosh schema directly, so ``SchemaDiscovery`` is not needed here.
+
+    Args:
+        path: Filesystem path to the Parquet file.
+        incremental_field: Optional column name for incremental syncs.
+        id_field: Optional column name that uniquely identifies a
+            document.
+        sample_size: Number of rows to sample during schema discovery.
+        engine: Parquet read engine (``"auto"``, ``"fastparquet"``,
+            ``"pyarrow"``).
     """
 
     def __init__(
@@ -52,15 +73,37 @@ class ParquetSource:
 
     @property
     def name(self) -> str:
-        """Return the data source name."""
+        """Return the data source name.
+
+        Returns:
+            A string in the form ``parquet:<path>``.
+        """
         return f"parquet:{self.path}"
 
     def health_check(self) -> bool:
-        """Return True if the Parquet file exists and is readable."""
+        """Return True if the Parquet file exists and is readable.
+
+        Returns:
+            ``True`` if the file is readable, ``False`` otherwise.
+        """
         return os.path.isfile(self.path) and os.access(self.path, os.R_OK)
 
     def _read_parquet(self, sample: bool = False) -> Any:
-        """Read the Parquet file and return a DataFrame."""
+        """Read the Parquet file and return a DataFrame.
+
+        Tries ``pandas``, then ``polars``, then ``pyarrow``+pandas
+        as backends.
+
+        Args:
+            sample: If ``True``, read only the first ``sample_size``
+                rows.
+
+        Returns:
+            A DataFrame (pandas or polars) containing the data.
+
+        Raises:
+            DataSourceError: If no Parquet engine is installed.
+        """
         try:
             import pandas as pd
 
@@ -99,7 +142,14 @@ class ParquetSource:
         )
 
     def _iter_pyarrow_batches(self, batch_size: int = _BATCH_SIZE) -> Iterator[dict[str, Any]]:
-        """Stream documents from a Parquet file using PyArrow batches."""
+        """Stream documents from a Parquet file using PyArrow batches.
+
+        Args:
+            batch_size: Number of rows per PyArrow batch.
+
+        Yields:
+            Document dictionaries streamed from the Parquet file.
+        """
         try:
             import pyarrow.parquet as pq
         except ImportError:
@@ -120,6 +170,10 @@ class ParquetSource:
         """Return a compiled document mapper for this source.
 
         Pre-computes column keys for fast batch extraction.
+
+        Returns:
+            A callable that transforms a batch result into a list
+            of document dictionaries.
         """
         if self._compiled_mapper is not None:
             return self._compiled_mapper
@@ -149,7 +203,18 @@ class ParquetSource:
         return self._compiled_mapper
 
     def discover_schema(self) -> Schema:
-        """Discover schema from Parquet file metadata."""
+        """Discover schema from Parquet file metadata.
+
+        Uses PyArrow's schema introspection when available, falling
+        back to pandas dtypes.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from the
+            Parquet file's column types.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"Parquet file not found or not readable: {self.path}",
@@ -223,7 +288,14 @@ class ParquetSource:
         return self._schema
 
     def iter_documents(self) -> Iterator[Document]:
-        """Yield documents from the Parquet file."""
+        """Yield documents from the Parquet file.
+
+        Yields:
+            Document dictionaries streamed from the Parquet file.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"Parquet file not found or not readable: {self.path}",
@@ -237,6 +309,16 @@ class ParquetSource:
 
         Uses PyArrow native batch reading when available to avoid loading
         the entire dataset into memory.
+
+        Args:
+            batch_size: Maximum number of documents per batch.
+
+        Yields:
+            Lists of document dictionaries, each list containing at
+            most ``batch_size`` items.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
         """
         if not self.health_check():
             raise DataSourceError(
@@ -267,11 +349,28 @@ class ParquetSource:
                 yield batch
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
-        """Yield documents changed since a timestamp (not implemented for Parquet)."""
+        """Yield documents changed since a timestamp (not implemented for Parquet).
+
+        Args:
+            since: A timestamp or cursor value (accepted but ignored).
+
+        Yields:
+            Nothing — incremental changes are not supported for this
+            data source.
+        """
         return iter([])
 
     def document_count(self) -> int:
-        """Return total row count."""
+        """Return total row count.
+
+        Uses PyArrow metadata for a fast count when available.
+
+        Returns:
+            The number of rows in the Parquet file.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"Parquet file not found or not readable: {self.path}",
@@ -290,7 +389,12 @@ class ParquetSource:
         return len(df)
 
     def metadata(self) -> dict[str, Any]:
-        """Return metadata about this Parquet source."""
+        """Return metadata about this Parquet source.
+
+        Returns:
+            A dictionary with keys ``type``, ``path``, ``engine``,
+            ``incremental_field``, and ``id_field``.
+        """
         return {
             "type": "parquet",
             "path": self.path,

@@ -288,3 +288,95 @@ python benchmark/s3_storage_benchmark.py
 # Run real Whoosh index benchmark (requires customers CSV)
 python benchmark/s3_storage_benchmark_real.py
 ```
+
+## Comment les Fournisseurs de Stockage s'Intègre dans le Pipeline d'Indexation et de Recherche
+
+Le fournisseur de stockage participe à deux phases distinctes : **la création de l'index** (déterminer où les segments vivent) et **l'intégration en temps réel** (via `StorageMiddleware`).
+
+### Flux d'indexation complet avec un fournisseur de stockage
+
+```text
+DataSource.stream_batches()
+    │
+    ▼
+SearchApplication.build()
+    │
+    ├── source.discover_schema() ──► Whoosh Schema
+    │
+    ├── résolution de storage._root
+    │       │
+    │       ├── HybridStorage/S3Storage/FileStorage
+    │       │   └── a _root ? ──► whoosh.index.create_in(root, schema)
+    │       │
+    │       └── Pas de _root (S3 pur/SnapshotStorage)
+    │           └── tempfile.mkdtemp() ──► create_in(tmpdir, schema)
+    │
+    ├── Writer = index.writer()
+    │       │
+    │       ├── MiddlewareChain.before_index()
+    │       │   └── StorageMiddleware.before_index()
+    │       │       ├── context.labels["storage_backend"] = provider.__class__.__name__
+    │       │       └── context.metadata["storage_provider"] = self
+    │       │
+    │       ├── for batch in source.stream_batches():
+    │       │       for doc in batch:
+    │       │           writer.add_document(**doc)
+    │       │
+    │       └── writer.commit()
+    │           │
+    │           └── StorageMiddleware.on_commit()
+    │               └── provider.write("commits/{name}/{timestamp}", b"1")
+    │
+    ▼
+Index persistsé sur le disque / S3 / cache hybride
+```
+
+### Flux de recherche complet avec un fournisseur de stockage
+
+```text
+SearchApplication.search(query)
+    │
+    ├── index.searcher()
+    │       │
+    │       └── Whoosh core ouvre les fichiers segment depuis :
+    │           ├── système de fichiers local (racine FileStorageProvider)
+    │           ├── base de données SQLite (SQLiteStorageProvider)
+    │           └── S3 / cache hybride (S3StorageProvider / HybridStorage)
+    │
+    ├── QueryParser.parse(query) ──► Objet Query
+    │
+    └── searcher.search(query)
+        │
+        └── Whoosh core lit les listes de postings depuis les fichiers segment
+            └── Retourne Results (Hits)
+```
+
+### Hooks détaillés de StorageMiddleware
+
+`StorageMiddleware` (`whoosh_modern.middleware.storage`) est le point d'intégration
+qui redirige la persistance de l'index via n'importe quel `SyncStorageProvider` sans
+modifier le writer.
+
+| Hook | Quand | Ce qu'il fait |
+|------|------|--------------|
+| `before_index(context)` | Avant qu'un document soit ajouté | Marque le contexte avec l'étiquette `storage_backend` et les métadonnées `storage_provider` |
+| `on_commit(context)` | Après `writer.commit()` | Écrit un point de commit (`commits/{name}/{timestamp}`) dans le provider |
+
+### Insight clé : StorageProvider vs StorageMiddleware
+
+| Composant | Rôle |
+|-----------|------|
+| `SyncStorageProvider` / `AsyncStorageProvider` | **Contrat** définissant `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
+| `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implémentations** du contrat |
+| `StorageMiddleware` | **Couche d'intégration** qui appelle le provider aux hooks de cycle de vie (`before_index`, `on_commit`) |
+| `SearchApplication` | **Point d'entrée** qui extrait `_root` du provider pour créer le répertoire d'index Whoosh |
+
+Le provider ne **n'intercepte pas** les lectures internes de segments de Whoosh. Ces lectures passent par le `FileStorage` intégré de Whoosh (`whoosh.filedb.filestore`) qui lit depuis le chemin du système de fichiers donné à `create_in()`. L'abstraction provider de Whoosh-NG est conçue pour :
+- Le routage personnalisé de segments (S3, SQLite, cache hybride)
+- Le pointage de commit via le middleware
+- Futur : l'interception de lectures/écritures au niveau des segments
+
+## Voir Aussi
+
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
+- [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
