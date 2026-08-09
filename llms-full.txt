@@ -7468,6 +7468,69 @@ whoosh.reading.read_terminfo(reader, fieldname, text) -> TermInfo or None
 Returns a `TermInfo` for the given term, or `None` if not found.
 
 
+## DOCUMENT: Reference
+
+# API Reference
+
+The Whoosh-NG API reference is auto-generated from source code using
+[pydoctor](https://pydoctor.readthedocs.io/), which parses Python modules
+and generates HTML documentation from docstrings.
+
+:::note
+If the embedded documentation does not display, the API docs may not have
+been generated yet in this deployment. [View on GitHub](https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs) for the full API documentation, or check the
+[API modules list](#api-modules) below for a structured overview.
+:::
+
+## API Modules
+
+### Core API
+
+| Module | Description |
+|--------|-------------|
+| `whoosh.index` | High-level index creation, opening, and management |
+| `whoosh.fields` | Schema and field type definitions |
+| `whoosh.writing` | Writer classes and merge policies |
+| `whoosh.searching` | Searcher, Results, and collectors |
+| `whoosh.query` | Query classes and parsers |
+| `whoosh.qparser` | Query parser implementation |
+| `whoosh.analysis` | Tokenizers, filters, and analyzers |
+| `whoosh.highlight` | Search result highlighting |
+| `whoosh.spelling` | Spelling correction |
+| `whoosh.sorting` | Facets and sorting |
+| `whoosh.event_bus` | Event system |
+| `whoosh.hooks` | Hook system |
+| `whoosh.middleware` | Middleware pipeline |
+| `whoosh.plugins` | Plugin system and registry |
+| `whoosh.backends` | Storage backends |
+
+### Modern API
+
+| Module | Description |
+|--------|-------------|
+| `whoosh_modern.data_sources` | Data source protocol and implementations |
+| `whoosh_modern.views` | SearchView unified interface |
+| `whoosh_modern.middleware` | Retry, cache, logging middleware |
+| `whoosh_modern.facets` | FacetManager for auto-discovery |
+| `whoosh_modern.validation` | 4-level validation framework |
+| `whoosh_modern.indexing` | BatchIndexWriter, AnalyzerCache |
+| `whoosh_modern.linguistics` | Linguistic engine (stemmers, synonyms) |
+| `whoosh_modern.storage` | Storage providers (HybridStorage, etc.) |
+| `whoosh_modern.vector` | NumpyProvider for vector similarity |
+| `whoosh_modern.autocomplete` | Autocomplete provider plugins |
+| `whoosh_fastapi` | FastAPI REST API endpoints |
+| `whoosh_admin` | Admin UI dashboard |
+
+:::info
+For the full interactive API documentation, run:
+```bash
+pip install pydoctor
+python scripts/generate_api_docs.py
+```
+Then open `website/static/api_docs/index.html` in your browser.
+:::
+
+
 ## DOCUMENT: Searching
 
 # Searching API
@@ -8685,6 +8748,918 @@ Choose a backend based on your use case:
 3. **Memory for tests**: Fast, no cleanup needed
 4. **Compound files**: Enable for reduced file count
 5. **Backup strategy**: File backend = copy directory; SQLite = copy file
+
+
+## DOCUMENT: Changelog
+
+# Changelog
+
+Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
+
+## v4.2.3 (2026-08-08)
+**Tag**: `v4.2.3`
+
+## v4.2.3 (2026-08-08)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Add concurrency groups to prevent workflow race conditions ([`76e38f0`](https://github.com/dorel14/whoosh-ng/commit/76e38f03045d19b8d8032f066432af4e9d17d133))
+
+---
+
+**Detailed Changes**: [v4.2.2...v4.2.3](https://github.com/dorel14/whoosh-ng/compare/v4.2.2...v4.2.3)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- sync version to 4.2.1 [skip ci]
+- v4.2.3 [skip ci]
+
+### Other
+
+- Merge: resolve sync-version conflicts (CI and local generated same changes)
+
+### Bug Fixes
+
+- add concurrency groups to prevent workflow race conditions
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.3)
+
+## v4.2.2 (2026-08-08)
+**Tag**: `v4.2.2`
+
+## v4.2.2 (2026-08-08)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix changelog workflow detached HEAD ([`db4b78e`](https://github.com/dorel14/whoosh-ng/commit/db4b78e6dc51a0e10fde48fd93eb2ce5d1dbecd0))
+
+---
+
+**Detailed Changes**: [v4.2.1...v4.2.2](https://github.com/dorel14/whoosh-ng/compare/v4.2.1...v4.2.2)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.2 [skip ci]
+
+### Bug Fixes
+
+- fix changelog workflow detached HEAD
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.2)
+
+## v4.2.1 (2026-08-07)
+**Tag**: `v4.2.1`
+
+## v4.2.1 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v4.2.0...v4.2.1](https://github.com/dorel14/whoosh-ng/compare/v4.2.0...v4.2.1)
+
+### Commits
+
+### Bug Fixes
+
+- fix sync-changelog.yml YAML syntax error
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+- i18n(fr): translate nested.md, storage-providers.md, stemming.md, ngrams.md, glossary.md
+
+### Chores
+
+- synchronize version to 4.2.0 [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.1 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.1)
+
+## v4.2.0 (2026-08-07)
+**Tag**: `v4.2.0`
+
+## v4.2.0 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix changelog workflow typo and pages.yml checkout depth ([`d88b82b`](https://github.com/dorel14/whoosh-ng/commit/d88b82b68f7ea2ed28c4530cbda1ecad77308acf))
+
+### Features
+
+- **docs**: Enable dark theme by default and remove edit button ([`2c3d98b`](https://github.com/dorel14/whoosh-ng/commit/2c3d98b27087125073729505cba156d1c2578d66))
+
+---
+
+**Detailed Changes**: [v4.1.0...v4.2.0](https://github.com/dorel14/whoosh-ng/compare/v4.1.0...v4.2.0)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.0 [skip ci]
+
+### Features
+
+- enable dark theme by default and remove edit button
+
+### Bug Fixes
+
+- fix changelog workflow typo and pages.yml checkout depth
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.0)
+
+## v4.1.0 (2026-08-07)
+**Tag**: `v4.1.0`
+
+## v4.1.0 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix broken workflows and Docusaurus build errors after migration ([`0e86e6c`](https://github.com/dorel14/whoosh-ng/commit/0e86e6c51e3d41fec984f0f79a4457e9d5d0b1ef))
+
+- **ci**: Fix sync_version.py NameError and missing imports ([`f809f56`](https://github.com/dorel14/whoosh-ng/commit/f809f563851b102c7220cec0371c560191bdb217))
+
+### Features
+
+- **docs**: Migrate Jekyll/Just the Docs to Docusaurus v3 ([`7e70791`](https://github.com/dorel14/whoosh-ng/commit/7e70791d23fb0f3097e3603ba0ff3fa5c8d822c2))
+
+---
+
+**Detailed Changes**: [v4.0.1...v4.1.0](https://github.com/dorel14/whoosh-ng/compare/v4.0.1...v4.1.0)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.1.0 [skip ci]
+
+### Features
+
+- migrate Jekyll/Just the Docs to Docusaurus v3
+
+### Bug Fixes
+
+- fix broken workflows and Docusaurus build errors after migration
+- fix sync_version.py NameError and missing imports
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.1.0)
+
+## v4.0.1 (2026-08-07)
+**Tag**: `v4.0.1`
+
+## v4.0.1 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **pages**: Pointer Bundler sur docs/Gemfile via BUNDLE_GEMFILE ([`0f3a8f1`](https://github.com/dorel14/whoosh-ng/commit/0f3a8f11087c5df910d1762f31ae1cee4017ed31))
+
+---
+
+**Detailed Changes**: [v4.0.0...v4.0.1](https://github.com/dorel14/whoosh-ng/compare/v4.0.0...v4.0.1)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.0.1 [skip ci]
+
+### Bug Fixes
+
+- pointer Bundler sur docs/Gemfile via BUNDLE_GEMFILE
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.0.1)
+
+## v4.0.0 (2026-08-07)
+**Tag**: `v4.0.0`
+
+## v4.0.0 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Corriger les erreurs de lint, mypy et pyright ([`4283355`](https://github.com/dorel14/whoosh-ng/commit/428335590e641870f6bc399b241b453745e4b9a3))
+
+---
+
+**Detailed Changes**: [v3.0.0...v4.0.0](https://github.com/dorel14/whoosh-ng/compare/v3.0.0...v4.0.0)
+
+### Commits
+
+### Features
+
+- restructurer le système de middleware et étendre PluginManager
+- ajouter le module linguistics avec analyseurs multilingues
+- add asearch/awriter bridges and AsyncFileStorage
+- enhance FastAPI models and Admin Studio modules
+- add SearchApplication and FileStorage exports
+- add S3Storage, HybridStorage, AsyncHybridStorage
+- add SnapshotStorage, CachedObjectStorage alias, and Phase 3 roadmap
+- publier la version 3.0.0 et ajouter la documentation LLM
+
+### Documentation
+
+- ajouter les guides Whoosh-NG 2.0 et ajuster la configuration de release
+- add Gemfile.lock for reproducible Jekyll build and fix French index permalinks
+- add S3 storage benchmarks and documentation
+- auto-update llms context files
+
+### Chores
+
+- restructurer les workflows CI/CD et nettoyer le code
+- apply pre-commit fixes
+- v4.0.0 [skip ci]
+
+### Other
+
+- Merge branch 'master' into dev
+- Merge pull request #14 from dorel14/dev
+
+### Bug Fixes
+
+- corriger les erreurs de lint, mypy et pyright
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.0.0)
+
+## v3.0.0 (2026-08-06)
+**Tag**: `v3.0.0`
+
+## v3.0.0 (2026-08-06)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- Ajouter reportAssignmentType en warning dans pyrightconfig.json ([`3259c76`](https://github.com/dorel14/whoosh-ng/commit/3259c76660a4f99135a8cda1ac26baa3f642a873))
+
+- Corriger docstring PathTokenizer et restaurer Literal pour engine ([`b90222e`](https://github.com/dorel14/whoosh-ng/commit/b90222e5962671dfb20f496d396f546f33c95747))
+
+- Mapper engine pyarrow vers auto pour pandas et exclure tests/ de mypy ([`dadeb91`](https://github.com/dorel14/whoosh-ng/commit/dadeb91cffd9462d0c5c2aff77fd36f4cbac8f4a))
+
+- Ne pas yield de token vide dans RegexTokenizer gaps=True ([`6385a24`](https://github.com/dorel14/whoosh-ng/commit/6385a24cb048777aef9cc5d2bad46f2e5d2e5dfa))
+
+- Remove unreachable dead code after build() return in parallel_builder ([`c2e03c9`](https://github.com/dorel14/whoosh-ng/commit/c2e03c97bda6ac61d78c38c6ac3ad37df4f9345a))
+
+- Rendre test_buffered_threads deterministe en couverture des valeurs ([`77a66f6`](https://github.com/dorel14/whoosh-ng/commit/77a66f6320f9ff7bfe8a1c787c52d1bb0e3cf0d6))
+
+- Resolve mypy errors in CI (parquet, tortoise, hnswlib) ([`514f1f6`](https://github.com/dorel14/whoosh-ng/commit/514f1f62d55edd92633654e0096caf920a9ff3a6))
+
+- Réintégrer assert segment_reader is not None après merge distant ([`c42b065`](https://github.com/dorel14/whoosh-ng/commit/c42b065355bb0004094223748a7c9b6eca810405))
+
+- Résoudre les erreurs pyright dans pre-commit (Token typing, reportAttributeAccessIssue) ([`eff5adf`](https://github.com/dorel14/whoosh-ng/commit/eff5adf55cbbae6169bf2efacc76fddacc1891dd))
+
+- Résoudre les erreurs pyright reportOptionalMemberAccess et reportAssignmentType ([`572529e`](https://github.com/dorel14/whoosh-ng/commit/572529e1fb7f0828f3729ed7920e219a71df139c))
+
+- Supprimer cast redondant et ajouter reportAssignmentType en warning ([`0834923`](https://github.com/dorel14/whoosh-ng/commit/0834923f185a4fb62ded3e5020ea6d36b90bfc42))
+
+- **analysis**: Corriger l'indentation du RegexTokenizer et ajuster les annotations de type ([`69e9ad8`](https://github.com/dorel14/whoosh-ng/commit/69e9ad815192ed9113acea4075e21eaf9e514f8d))
+
+- **deps**: Retirer les modules obsolètes des exclusions mypy ([`f53e157`](https://github.com/dorel14/whoosh-ng/commit/f53e15729647ac7473066f193a33fcbfb2a3dce0))
+
+- **indexing**: Close segment_ix in ParallelIndexBuilder to prevent fd leak ([`bad2928`](https://github.com/dorel14/whoosh-ng/commit/bad2928155d424e19de24e5b00822831695e7449))
+
+- **indexing**: Corriger les fuites de handles et erreurs de nettoyage sous Windows ([`3cb85c7`](https://github.com/dorel14/whoosh-ng/commit/3cb85c7d9f80eccdbb5d2225d270d9f4c15b79bd))
+
+- **indexing**: Merge parallel worker segments into main index ([`6f18248`](https://github.com/dorel14/whoosh-ng/commit/6f182488b18aedaceaf4c886b1b0d87eadc02a99))
+
+- **indexing**: Merge worker segments into main index in ParallelIndexBuilder ([`27b0541`](https://github.com/dorel14/whoosh-ng/commit/27b054140d1a99228a804b75a1d4efd3e4f300ce))
+
+- **mypy**: Restore ignore_missing_imports for pytest, peewee, httpx, re2, psutil ([`699ee4f`](https://github.com/dorel14/whoosh-ng/commit/699ee4f2fb3007012913d5970376f97fc99a0296))
+
+- **profiling**: Add segment_write() and sibling step context managers to CommitProfilerV2 ([`599b650`](https://github.com/dorel14/whoosh-ng/commit/599b6507149332b3e0522b753e547bae718b468e))
+
+- **profiling**: Implement SegmentProfiler to resolve NameError in benchmark.py ([`1b03b3a`](https://github.com/dorel14/whoosh-ng/commit/1b03b3ae7fbc3d03c7223ab4f7759eb500c9c8bf))
+
+### Documentation
+
+- Auto-update llms context files ([`5cca243`](https://github.com/dorel14/whoosh-ng/commit/5cca243cba55d49836e89793af3ac126815b862c))
+
+- Auto-update llms context files ([`55825c1`](https://github.com/dorel14/whoosh-ng/commit/55825c15502f0b15041aec9ac15d7f9c4bc23e6c))
+
+- Auto-update llms context files ([`c0d74a4`](https://github.com/dorel14/whoosh-ng/commit/c0d74a4cda58a44898a0b3f67fdc009fefa565fe))
+
+- Restructurer la documentation et ajouter les pages API et guides ([`4e9b1e2`](https://github.com/dorel14/whoosh-ng/commit/4e9b1e2ce8a494c66f1725cec3b03e5025643e8d))
+
+- **guides**: Ajouter le guide d'indexation moderne et mettre à jour les index de documentation ([`9fbc4ff`](https://github.com/dorel14/whoosh-ng/commit/9fbc4ff41dafc184219f0b4f1da3ee4f3e0ecb71))
+
+### Features
+
+- Ajouter FastCSVSource, indexation par lots, infrastructure de profiling et optimisations du cœur ([`fc63f9c`](https://github.com/dorel14/whoosh-ng/commit/fc63f9c890155fa9ce0b25c03e9db733eb7f0139))
+
+- **analysis**: Ajouter le système de stemmers, FastCSVSource et l'infrastructure de profiling des performances ([`a077319`](https://github.com/dorel14/whoosh-ng/commit/a077319a8fc7435ef283b5c2b5402538c6550819))
+
+- **core**: Ajouter CacheMiddleware et ObservableDataSource ([`508589a`](https://github.com/dorel14/whoosh-ng/commit/508589a8c86c7d1eadeb6ffd044a340fe84363be))
+
+- **data-sources**: Ajouter les sources de données et le pooling de connexions ([`51805d4`](https://github.com/dorel14/whoosh-ng/commit/51805d4c08109b78704f6938deb4c135f57b0674))
+
+- **data-sources**: Améliorer la robustesse et la validation des sources de données ([`35281b5`](https://github.com/dorel14/whoosh-ng/commit/35281b534865111e30d0d1195c492d72b8769e75))
+
+- **profiling**: Ajouter les groupes d'options profiling et fast-stemming, stream_batches et restructurer les chemins d'import des sources de données ([`152e9c4`](https://github.com/dorel14/whoosh-ng/commit/152e9c44b68380a9d238489a29ebfd52e28f97a9))
+
+---
+
+**Detailed Changes**: [v2.0.0...v3.0.0](https://github.com/dorel14/whoosh-ng/compare/v2.0.0...v3.0.0)
+
+### Commits
+
+### Other
+
+- Remove workflows permission from test.yml
+- Revise README for version 2.0.0 updates
+- Merge pull request #12 from dorel14/master
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- .
+- Update src/whoosh_modern/indexing/parallel_builder.py
+- codec/base: restore missing out-of-order term check in add_postings
+- Update src/whoosh_modern/profiling/segment_profiler.py
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge c42b065355bb0004094223748a7c9b6eca810405 into 9988770df03a2d255a21b74843772776dbbf998a
+- Merge pull request #13 from dorel14/dev
+- Update commit_parser_options in pyproject.toml
+- Add files via upload
+
+### Build System
+
+- automatiser la synchronisation de la version entre les fichiers du projet
+
+### Chores
+
+- apply pre-commit fixes
+- simplifier la configuration type-checking et retirer les dépendances inutilisées
+- apply pre-commit fixes
+- apply pre-commit fixes
+- trigger pre-commit workflow
+- v3.0.0 [skip ci]
+
+### Features
+
+- ajouter CacheMiddleware et ObservableDataSource
+- ajouter les sources de données et le pooling de connexions
+- ajouter FastCSVSource, indexation par lots, infrastructure de profiling et optimisations du cœur
+- ajouter le système de stemmers, FastCSVSource et l'infrastructure de profiling des performances
+- ajouter les groupes d'options profiling et fast-stemming, stream_batches et restructurer les chemins d'import des sources de données
+- améliorer la robustesse et la validation des sources de données
+
+### Code Refactoring
+
+- simplifier les expressions multi-lignes et optimiser Token avec __slots__
+- nettoyer les annotations de type et supprimer les dépendances inutilisées
+
+### Documentation
+
+- auto-update llms context files
+- restructurer la documentation et ajouter les pages API et guides
+- auto-update llms context files
+- ajouter le guide d'indexation moderne et mettre à jour les index de documentation
+- auto-update llms context files
+
+### Bug Fixes
+
+- corriger l'indentation du RegexTokenizer et ajuster les annotations de type
+- resolve mypy errors in CI (parquet, tortoise, hnswlib)
+- ne pas yield de token vide dans RegexTokenizer gaps=True
+- résoudre les erreurs pyright dans pre-commit (Token typing, reportAttributeAccessIssue)
+- supprimer cast redondant et ajouter reportAssignmentType en warning
+- ajouter reportAssignmentType en warning dans pyrightconfig.json
+- corriger docstring PathTokenizer et restaurer Literal pour engine
+- mapper engine pyarrow vers auto pour pandas et exclure tests/ de mypy
+- remove unreachable dead code after build() return in parallel_builder
+- add segment_write() and sibling step context managers to CommitProfilerV2
+- implement SegmentProfiler to resolve NameError in benchmark.py
+- merge parallel worker segments into main index
+- merge worker segments into main index in ParallelIndexBuilder
+- rendre test_buffered_threads deterministe en couverture des valeurs
+- retirer les modules obsolètes des exclusions mypy
+- close segment_ix in ParallelIndexBuilder to prevent fd leak
+- résoudre les erreurs pyright reportOptionalMemberAccess et reportAssignmentType
+- réintégrer assert segment_reader is not None après merge distant
+- restore ignore_missing_imports for pytest, peewee, httpx, re2, psutil
+- corriger les fuites de handles et erreurs de nettoyage sous Windows
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v3.0.0)
+
+## v2.0.0 (2026-07-31)
+**Tag**: `v2.0.0`
+
+## v2.0.0 (2026-07-31)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- Address review findings in CI/CD workflows and documentation ([`b1e0b89`](https://github.com/dorel14/whoosh-ng/commit/b1e0b89f10ad182ad0120d6d19bcac2f8a04470a))
+
+### Documentation
+
+- Auto-update llms context files ([`10e6c90`](https://github.com/dorel14/whoosh-ng/commit/10e6c90fb6e7ffd9ec9f1b3fa7f4e398a933077b))
+
+- Auto-update llms context files ([`992e4d7`](https://github.com/dorel14/whoosh-ng/commit/992e4d780fd7829bd804d68b215e06f255e9cacf))
+
+- Auto-update llms context files ([`5dfe9dc`](https://github.com/dorel14/whoosh-ng/commit/5dfe9dcfdd725d1ca12f3bba0c09a2f7d163aa88))
+
+- Auto-update llms context files ([`aadce99`](https://github.com/dorel14/whoosh-ng/commit/aadce99460c30cd5950e44c927c07eb6fa5ffde8))
+
+### Features
+
+- **deps**: Add sqlalchemy and sqlmodel to models extra and configure mypy overrides ([`4486b5f`](https://github.com/dorel14/whoosh-ng/commit/4486b5feef2700fd8720a0dec1419985f9479951))
+
+- **models**: Ajouter AutoIndexer et améliorer la génération de schémas ([`919131c`](https://github.com/dorel14/whoosh-ng/commit/919131ce7f475b8584e74d98d9cf41e04891b7c7))
+
+- **models**: ✨ Introduce ModelIndex and SearchField for auto-mapping ([`6c202bc`](https://github.com/dorel14/whoosh-ng/commit/6c202bc6c4e20ad9dba7e4cd81deadfdaf3dcf2a))
+
+- **whoosh_modern**: Add modern API with data sources, schema discovery, facets, validation, middleware, and SearchView ([`36bfbae`](https://github.com/dorel14/whoosh-ng/commit/36bfbaebd6acc18cda06aba83bebade7154c9972))
+
+---
+
+**Detailed Changes**: [v1.3.3...v2.0.0](https://github.com/dorel14/whoosh-ng/compare/v1.3.3...v2.0.0)
+
+### Commits
+
+### Documentation
+
+- merge duplicate FastAPI example into fastapi-search.md
+- auto-update llms context files
+- auto-update llms context files
+- auto-update llms context files
+- auto-update llms context files
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+- ..
+- Merge pull request #10 from dorel14/master
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- style(benchmark): ajouter un saut de ligne final manquant dans reuters_modern.py
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- .
+- .
+- .
+- Merge pull request #11 from dorel14/dev
+
+### Features
+
+- ✨ Introduce ModelIndex and SearchField for auto-mapping
+- ajouter AutoIndexer et améliorer la génération de schémas
+- add modern API with data sources, schema discovery, facets, validation, middleware, and SearchView
+- add sqlalchemy and sqlmodel to models extra and configure mypy overrides
+
+### Bug Fixes
+
+- address review findings in CI/CD workflows and documentation
+
+### Code Refactoring
+
+- moderniser les annotations de type avec la syntaxe union PEP 604
+- moderniser les annotations de type avec Coroutine et ajouter des ignores pyright
+- ajouter des annotations de retour aux méthodes replace des matchers
+- moderniser la vérification isinstance avec la syntaxe union PEP 604
+
+### CI/CD
+
+- ajouter des extras d'installation et simplifier la couverture
+
+### Chores
+
+- v2.0.0 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v2.0.0)
+
+## v1.3.3 (2026-07-26)
+**Tag**: `v1.3.3`
+
+## v1.3.3 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.3.2...v1.3.3](https://github.com/dorel14/whoosh-ng/compare/v1.3.2...v1.3.3)
+
+### Commits
+
+### Bug Fixes
+
+- reorganize nav_order for coherent navigation (Guides 1-90, API 100-190, Examples 200-270)
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.3.3 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.3)
+
+## v1.3.2 (2026-07-26)
+**Tag**: `v1.3.2`
+
+## v1.3.2 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.3.1...v1.3.2](https://github.com/dorel14/whoosh-ng/compare/v1.3.1...v1.3.2)
+
+### Commits
+
+### Bug Fixes
+
+- remove color_scheme from individual pages, use global config
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.3.2 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.2)
+
+## v1.3.1 (2026-07-26)
+**Tag**: `v1.3.1`
+
+## v1.3.1 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.3.0...v1.3.1](https://github.com/dorel14/whoosh-ng/compare/v1.3.0...v1.3.1)
+
+### Commits
+
+### Bug Fixes
+
+- align _config.yml with taskiq-flow and clean README front matter
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.3.1 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.1)
+
+## v1.3.0 (2026-07-26)
+**Tag**: `v1.3.0`
+
+## v1.3.0 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.2.4...v1.3.0](https://github.com/dorel14/whoosh-ng/compare/v1.2.4...v1.3.0)
+
+### Commits
+
+### Features
+
+- éviter les exécutions inutiles du workflow lors des commits de release
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.3.0 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.0)
+
+## v1.2.4 (2026-07-26)
+**Tag**: `v1.2.4`
+
+## v1.2.4 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.2.3...v1.2.4](https://github.com/dorel14/whoosh-ng/compare/v1.2.3...v1.2.4)
+
+### Commits
+
+### Bug Fixes
+
+- remove invalid parent fields and align config with taskiq-flow
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.2.4
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.4)
+
+## v1.2.3 (2026-07-26)
+**Tag**: `v1.2.3`
+
+## v1.2.3 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.2.2...v1.2.3](https://github.com/dorel14/whoosh-ng/compare/v1.2.2...v1.2.3)
+
+### Commits
+
+### Bug Fixes
+
+- remove invalid parent fields from all pages
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.2.3
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.3)
+
+## v1.2.2 (2026-07-26)
+**Tag**: `v1.2.2`
+
+## v1.2.2 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **docs**: Align _config.yml with taskiq-flow pattern ([`2124be0`](https://github.com/dorel14/whoosh-ng/commit/2124be0cf1fd4669c9ebdaa4ad485eabae22c279))
+
+---
+
+**Detailed Changes**: [v1.2.1...v1.2.2](https://github.com/dorel14/whoosh-ng/compare/v1.2.1...v1.2.2)
+
+### Commits
+
+### Code Refactoring
+
+- supprimer la navigation statique codée en dur
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Bug Fixes
+
+- align _config.yml with taskiq-flow pattern
+
+### Chores
+
+- v1.2.2
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.2)
+
+## v1.2.1 (2026-07-26)
+**Tag**: `v1.2.1`
+
+## v1.2.1 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **docs**: Restore front matter and add explicit nav config ([`74dc151`](https://github.com/dorel14/whoosh-ng/commit/74dc151104a7a89ffd1459a60e0e28488bf110ff))
+
+### Documentation
+
+- Fix Jekyll links with relative_url and clean deploy workflow ([`2f9afc2`](https://github.com/dorel14/whoosh-ng/commit/2f9afc20f5e41022117a636b0d223f92c660df3d))
+
+---
+
+**Detailed Changes**: [v1.2.0...v1.2.1](https://github.com/dorel14/whoosh-ng/compare/v1.2.0...v1.2.1)
+
+### Commits
+
+### Documentation
+
+- fix Jekyll links with relative_url and clean deploy workflow
+
+### Bug Fixes
+
+- restore front matter and add explicit nav config
+
+### Chores
+
+- v1.2.1
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.1)
+
+## v1.2.0 (2026-07-26)
+**Tag**: `v1.2.0`
+
+## v1.2.0 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+### Documentation
+
+- Ajouter la documentation complète bilingue et le déploiement GitHub Pages ([`a091ced`](https://github.com/dorel14/whoosh-ng/commit/a091cede82bb5d722e5db0ff233c1dcbcecd35ea))
+
+- Auto-update llms context files ([`96e4f2c`](https://github.com/dorel14/whoosh-ng/commit/96e4f2c251ccdde5e9fd7e9cb0ce6b2650ab64d9))
+
+- Auto-update llms context files ([`6abefe4`](https://github.com/dorel14/whoosh-ng/commit/6abefe4b84d99e29c1d6ccb471dd7bf27ea4f31d))
+
+### Features
+
+- **docs**: Ajouter le support multilingue dans la configuration ([`967ed12`](https://github.com/dorel14/whoosh-ng/commit/967ed125e5fcd167e237e1c32b7feeb3ab6f9c4f))
+
+---
+
+**Detailed Changes**: [v1.1.0...v1.2.0](https://github.com/dorel14/whoosh-ng/compare/v1.1.0...v1.2.0)
+
+### Commits
+
+### CI/CD
+
+- restructurer le workflow de release sémantique
+
+### Other
+
+- Merge pull request #7 from dorel14/dev
+- revert: supprimer la documentation complète bilingue et restaurer l'état précédent
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #8 from dorel14/dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #9 from dorel14/dev
+
+### Documentation
+
+- ajouter la documentation complète bilingue et le déploiement GitHub Pages
+- auto-update llms context files
+- auto-update llms context files
+
+### Features
+
+- ajouter le support multilingue dans la configuration
+
+### Chores
+
+- v1.2.0
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.0)
+
+## v1.1.0 (2026-07-26)
+**Tag**: `v1.1.0`
+
+## v1.1.0 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **bench**: 🐛 add type ignores for method overrides in `XappyModule` ([`822e957`](https://github.com/dorel14/whoosh-ng/commit/822e957c986f603e9fd1c2de2799fb60d3c122a9))
+
+- **schema**: 🐛 corriger l'initialisation de l'objet dans `__new__` ([`5a764a7`](https://github.com/dorel14/whoosh-ng/commit/5a764a78751a6a2bb94118340784da074fdcf2c8))
+
+- **stress**: 🐛 ensure correct handling of string encoding in `test_bigtable` ([`822e957`](https://github.com/dorel14/whoosh-ng/commit/822e957c986f603e9fd1c2de2799fb60d3c122a9))
+
+### Build System
+
+- **deps**: Supprimer les dépendances obsolètes de la section models ([`227a59f`](https://github.com/dorel14/whoosh-ng/commit/227a59fc195799aca02289c2cb5f3d60135ea063))
+
+### Features
+
+- **benchmark**: Refonte du système de benchmarks avec nouvelles spécifications ([`417efd1`](https://github.com/dorel14/whoosh-ng/commit/417efd1be034fe8be4377ad2716e7b15028ad929))
+
+- **matching**: ✨ add type hints for `supports_block_quality` methods ([`822e957`](https://github.com/dorel14/whoosh-ng/commit/822e957c986f603e9fd1c2de2799fb60d3c122a9))
+
+- **support**: ✨ add compatibility for Python 3 unicode handling ([`822e957`](https://github.com/dorel14/whoosh-ng/commit/822e957c986f603e9fd1c2de2799fb60d3c122a9))
+
+- **writing**: ✨ Implement segment writing and merging policies ([`ae5fc62`](https://github.com/dorel14/whoosh-ng/commit/ae5fc62d2185ac349b56cbbf006bbb7fd4f92c80))
+
+---
+
+**Detailed Changes**: [v1.0.0...v1.1.0](https://github.com/dorel14/whoosh-ng/compare/v1.0.0...v1.1.0)
+
+### Commits
+
+### Chores
+
+- ✏️ Mise à jour de la version dans le README
+- prepare whoosh-ng 1.0.0
+- bump version to 1.0.1
+- 🔄 Update project dependencies
+- apply pre-commit fixes
+- apply pre-commit fixes
+- v1.1.0
+
+### Other
+
+- Potential fix for code scanning alert no. 1: Workflow does not contain permissions
+- Potential fix for code scanning alert no. 1: Workflow does not contain permissions
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #5 from dorel14/alert-autofix-1
+- Merge branch 'master' into dev
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge 3d0187143ec5a2a4e19f62d26a622d2c53efc2c7 into 68e67aaefb0d48f136d53576e00f10d68f77f15a
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge 4473223d510f0cde2d30ca638d284f23dc467b14 into 68e67aaefb0d48f136d53576e00f10d68f77f15a
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #6 from dorel14/dev
+
+### Features
+
+- ✨ Ajout de la validation de l'intégrité des segments
+- ✨ Ajout d'un wrapper Asyncio pour la gestion asynchrone des écritures
+- ✨ Isolation des espaces de stockage temporaires pour les écrivains concurrents
+- ✨ Ajout de la normalisation des boosts pour les sous-requêtes
+- ✨ Ajout d'un module de reporting pour les résultats de benchmark
+- ✨ Ajout d'un backend LMDB et d'un support d'autocomplétion
+- ✨ Implement segment writing and merging policies
+- refonte du système de benchmarks avec nouvelles spécifications
+- ✨ add type hints for `supports_block_quality` methods
+
+### Bug Fixes
+
+- 🐛 Ajout d'un type d'ignore pour l'appel de la requête
+- 🐛 Amélioration des benchmarks avec un échauffement et ajustement des seuils d'alerte
+- 🐛 corriger l'initialisation de l'objet dans `__new__`
+
+### Code Refactoring
+
+- improve _posting_size estimation, fix benchmark CLI, update mypy target to 3.12
+
+### Build System
+
+- supprimer les dépendances obsolètes de la section models
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.1.0)
+
+## v1.0.0 (2026-07-12)
+**Tag**: `v1.0.0`
+
+## v1.0.0 (2026-07-12)
+
+_This release is published under the BSD-2-Clause License._
+
+- Initial Release
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.0.0)
 
 
 ## DOCUMENT: Core Concepts
@@ -22519,6 +23494,68 @@ whoosh.reading.read_terminfo(reader, fieldname, text) -> TermInfo or None
 Returns a `TermInfo` for the given term, or `None` if not found.
 
 
+## DOCUMENT (FR): Reference
+
+# Référence API
+
+La référence API de Whoosh-NG est générée automatiquement à partir du code source avec
+[pydoctor](https://pydoctor.readthedocs.io/), qui analyse les modules Python
+et génère une documentation HTML à partir des docstrings.
+
+:::note
+Si la documentation intégrée ne s'affiche pas, les docs API peuvent ne pas
+avoir été générées dans ce déploiement. [Voir sur GitHub](https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs) pour la documentation complète, ou consultez la liste des modules ci-dessous.
+:::
+
+## Modules API
+
+### API Core
+
+| Module | Description |
+|--------|-------------|
+| `whoosh.index` | Création, ouverture et gestion d'index |
+| `whoosh.fields` | Définitions de schémas et de types de champs |
+| `whoosh.writing` | Classes Writer et politiques de fusion |
+| `whoosh.searching` | Searcher, Results et collecteurs |
+| `whoosh.query` | Classes et analyseurs de requêtes |
+| `whoosh.qparser` | Analyseur de requêtes |
+| `whoosh.analysis` | Tokenizers, filtres et analyseurs |
+| `whoosh.highlight` | Surlignage des résultats de recherche |
+| `whoosh.spelling` | Correction orthographique |
+| `whoosh.sorting` | Facettes et tri |
+| `whoosh.event_bus` | Système d'événements |
+| `whoosh.hooks` | Système de hooks |
+| `whoosh.middleware` | Pipeline de middleware |
+| `whoosh.plugins` | Système et registre de plugins |
+| `whoosh.backends` | Backends de stockage |
+
+### API Moderne
+
+| Module | Description |
+|--------|-------------|
+| `whoosh_modern.data_sources` | Protocole et implémentations de sources de données |
+| `whoosh_modern.views` | Interface unifiée SearchView |
+| `whoosh_modern.middleware` | Middleware de retry, cache, logging |
+| `whoosh_modern.facets` | FacetManager pour la découverte automatique |
+| `whoosh_modern.validation` | Framework de validation à 4 niveaux |
+| `whoosh_modern.indexing` | BatchIndexWriter, AnalyzerCache |
+| `whoosh_modern.linguistics` | Moteur linguistique (stemmers, synonymes) |
+| `whoosh_modern.storage` | Fournisseurs de stockage (HybridStorage, etc.) |
+| `whoosh_modern.vector` | NumpyProvider pour la similarité vectorielle |
+| `whoosh_modern.autocomplete` | Plugins de fournisseurs d'autocomplétion |
+| `whoosh_fastapi` | Points de terminaison REST API FastAPI |
+| `whoosh_admin` | Interface d'administration |
+
+:::info
+Pour la documentation API interactive complète, exécutez :
+```bash
+pip install pydoctor
+python scripts/generate_api_docs.py
+```
+Puis ouvrez `website/static/api_docs/index.html` dans votre navigateur.
+:::
+
+
 ## DOCUMENT (FR): Searching
 
 # API Recherche
@@ -23458,6 +24495,918 @@ backend = MemoryBackend()  # Utile pour les tests
 5. **Stratégie de sauvegarde**: File = copier le répertoire; SQLite = copier le fichier
 
 
+## DOCUMENT (FR): Changelog
+
+# Historique des modifications
+
+Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
+
+## v4.2.3 (2026-08-08)
+**Tag**: `v4.2.3`
+
+## v4.2.3 (2026-08-08)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Add concurrency groups to prevent workflow race conditions ([`76e38f0`](https://github.com/dorel14/whoosh-ng/commit/76e38f03045d19b8d8032f066432af4e9d17d133))
+
+---
+
+**Detailed Changes**: [v4.2.2...v4.2.3](https://github.com/dorel14/whoosh-ng/compare/v4.2.2...v4.2.3)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- sync version to 4.2.1 [skip ci]
+- v4.2.3 [skip ci]
+
+### Other
+
+- Merge: resolve sync-version conflicts (CI and local generated same changes)
+
+### Bug Fixes
+
+- add concurrency groups to prevent workflow race conditions
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.3)
+
+## v4.2.2 (2026-08-08)
+**Tag**: `v4.2.2`
+
+## v4.2.2 (2026-08-08)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix changelog workflow detached HEAD ([`db4b78e`](https://github.com/dorel14/whoosh-ng/commit/db4b78e6dc51a0e10fde48fd93eb2ce5d1dbecd0))
+
+---
+
+**Detailed Changes**: [v4.2.1...v4.2.2](https://github.com/dorel14/whoosh-ng/compare/v4.2.1...v4.2.2)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.2 [skip ci]
+
+### Bug Fixes
+
+- fix changelog workflow detached HEAD
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.2)
+
+## v4.2.1 (2026-08-07)
+**Tag**: `v4.2.1`
+
+## v4.2.1 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v4.2.0...v4.2.1](https://github.com/dorel14/whoosh-ng/compare/v4.2.0...v4.2.1)
+
+### Commits
+
+### Bug Fixes
+
+- fix sync-changelog.yml YAML syntax error
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+- i18n(fr): translate nested.md, storage-providers.md, stemming.md, ngrams.md, glossary.md
+
+### Chores
+
+- synchronize version to 4.2.0 [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.1 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.1)
+
+## v4.2.0 (2026-08-07)
+**Tag**: `v4.2.0`
+
+## v4.2.0 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix changelog workflow typo and pages.yml checkout depth ([`d88b82b`](https://github.com/dorel14/whoosh-ng/commit/d88b82b68f7ea2ed28c4530cbda1ecad77308acf))
+
+### Features
+
+- **docs**: Enable dark theme by default and remove edit button ([`2c3d98b`](https://github.com/dorel14/whoosh-ng/commit/2c3d98b27087125073729505cba156d1c2578d66))
+
+---
+
+**Detailed Changes**: [v4.1.0...v4.2.0](https://github.com/dorel14/whoosh-ng/compare/v4.1.0...v4.2.0)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.2.0 [skip ci]
+
+### Features
+
+- enable dark theme by default and remove edit button
+
+### Bug Fixes
+
+- fix changelog workflow typo and pages.yml checkout depth
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.0)
+
+## v4.1.0 (2026-08-07)
+**Tag**: `v4.1.0`
+
+## v4.1.0 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Fix broken workflows and Docusaurus build errors after migration ([`0e86e6c`](https://github.com/dorel14/whoosh-ng/commit/0e86e6c51e3d41fec984f0f79a4457e9d5d0b1ef))
+
+- **ci**: Fix sync_version.py NameError and missing imports ([`f809f56`](https://github.com/dorel14/whoosh-ng/commit/f809f563851b102c7220cec0371c560191bdb217))
+
+### Features
+
+- **docs**: Migrate Jekyll/Just the Docs to Docusaurus v3 ([`7e70791`](https://github.com/dorel14/whoosh-ng/commit/7e70791d23fb0f3097e3603ba0ff3fa5c8d822c2))
+
+---
+
+**Detailed Changes**: [v4.0.1...v4.1.0](https://github.com/dorel14/whoosh-ng/compare/v4.0.1...v4.1.0)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.1.0 [skip ci]
+
+### Features
+
+- migrate Jekyll/Just the Docs to Docusaurus v3
+
+### Bug Fixes
+
+- fix broken workflows and Docusaurus build errors after migration
+- fix sync_version.py NameError and missing imports
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.1.0)
+
+## v4.0.1 (2026-08-07)
+**Tag**: `v4.0.1`
+
+## v4.0.1 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **pages**: Pointer Bundler sur docs/Gemfile via BUNDLE_GEMFILE ([`0f3a8f1`](https://github.com/dorel14/whoosh-ng/commit/0f3a8f11087c5df910d1762f31ae1cee4017ed31))
+
+---
+
+**Detailed Changes**: [v4.0.0...v4.0.1](https://github.com/dorel14/whoosh-ng/compare/v4.0.0...v4.0.1)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- v4.0.1 [skip ci]
+
+### Bug Fixes
+
+- pointer Bundler sur docs/Gemfile via BUNDLE_GEMFILE
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.0.1)
+
+## v4.0.0 (2026-08-07)
+**Tag**: `v4.0.0`
+
+## v4.0.0 (2026-08-07)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Corriger les erreurs de lint, mypy et pyright ([`4283355`](https://github.com/dorel14/whoosh-ng/commit/428335590e641870f6bc399b241b453745e4b9a3))
+
+---
+
+**Detailed Changes**: [v3.0.0...v4.0.0](https://github.com/dorel14/whoosh-ng/compare/v3.0.0...v4.0.0)
+
+### Commits
+
+### Features
+
+- restructurer le système de middleware et étendre PluginManager
+- ajouter le module linguistics avec analyseurs multilingues
+- add asearch/awriter bridges and AsyncFileStorage
+- enhance FastAPI models and Admin Studio modules
+- add SearchApplication and FileStorage exports
+- add S3Storage, HybridStorage, AsyncHybridStorage
+- add SnapshotStorage, CachedObjectStorage alias, and Phase 3 roadmap
+- publier la version 3.0.0 et ajouter la documentation LLM
+
+### Documentation
+
+- ajouter les guides Whoosh-NG 2.0 et ajuster la configuration de release
+- add Gemfile.lock for reproducible Jekyll build and fix French index permalinks
+- add S3 storage benchmarks and documentation
+- auto-update llms context files
+
+### Chores
+
+- restructurer les workflows CI/CD et nettoyer le code
+- apply pre-commit fixes
+- v4.0.0 [skip ci]
+
+### Other
+
+- Merge branch 'master' into dev
+- Merge pull request #14 from dorel14/dev
+
+### Bug Fixes
+
+- corriger les erreurs de lint, mypy et pyright
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.0.0)
+
+## v3.0.0 (2026-08-06)
+**Tag**: `v3.0.0`
+
+## v3.0.0 (2026-08-06)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- Ajouter reportAssignmentType en warning dans pyrightconfig.json ([`3259c76`](https://github.com/dorel14/whoosh-ng/commit/3259c76660a4f99135a8cda1ac26baa3f642a873))
+
+- Corriger docstring PathTokenizer et restaurer Literal pour engine ([`b90222e`](https://github.com/dorel14/whoosh-ng/commit/b90222e5962671dfb20f496d396f546f33c95747))
+
+- Mapper engine pyarrow vers auto pour pandas et exclure tests/ de mypy ([`dadeb91`](https://github.com/dorel14/whoosh-ng/commit/dadeb91cffd9462d0c5c2aff77fd36f4cbac8f4a))
+
+- Ne pas yield de token vide dans RegexTokenizer gaps=True ([`6385a24`](https://github.com/dorel14/whoosh-ng/commit/6385a24cb048777aef9cc5d2bad46f2e5d2e5dfa))
+
+- Remove unreachable dead code after build() return in parallel_builder ([`c2e03c9`](https://github.com/dorel14/whoosh-ng/commit/c2e03c97bda6ac61d78c38c6ac3ad37df4f9345a))
+
+- Rendre test_buffered_threads deterministe en couverture des valeurs ([`77a66f6`](https://github.com/dorel14/whoosh-ng/commit/77a66f6320f9ff7bfe8a1c787c52d1bb0e3cf0d6))
+
+- Resolve mypy errors in CI (parquet, tortoise, hnswlib) ([`514f1f6`](https://github.com/dorel14/whoosh-ng/commit/514f1f62d55edd92633654e0096caf920a9ff3a6))
+
+- Réintégrer assert segment_reader is not None après merge distant ([`c42b065`](https://github.com/dorel14/whoosh-ng/commit/c42b065355bb0004094223748a7c9b6eca810405))
+
+- Résoudre les erreurs pyright dans pre-commit (Token typing, reportAttributeAccessIssue) ([`eff5adf`](https://github.com/dorel14/whoosh-ng/commit/eff5adf55cbbae6169bf2efacc76fddacc1891dd))
+
+- Résoudre les erreurs pyright reportOptionalMemberAccess et reportAssignmentType ([`572529e`](https://github.com/dorel14/whoosh-ng/commit/572529e1fb7f0828f3729ed7920e219a71df139c))
+
+- Supprimer cast redondant et ajouter reportAssignmentType en warning ([`0834923`](https://github.com/dorel14/whoosh-ng/commit/0834923f185a4fb62ded3e5020ea6d36b90bfc42))
+
+- **analysis**: Corriger l'indentation du RegexTokenizer et ajuster les annotations de type ([`69e9ad8`](https://github.com/dorel14/whoosh-ng/commit/69e9ad815192ed9113acea4075e21eaf9e514f8d))
+
+- **deps**: Retirer les modules obsolètes des exclusions mypy ([`f53e157`](https://github.com/dorel14/whoosh-ng/commit/f53e15729647ac7473066f193a33fcbfb2a3dce0))
+
+- **indexing**: Close segment_ix in ParallelIndexBuilder to prevent fd leak ([`bad2928`](https://github.com/dorel14/whoosh-ng/commit/bad2928155d424e19de24e5b00822831695e7449))
+
+- **indexing**: Corriger les fuites de handles et erreurs de nettoyage sous Windows ([`3cb85c7`](https://github.com/dorel14/whoosh-ng/commit/3cb85c7d9f80eccdbb5d2225d270d9f4c15b79bd))
+
+- **indexing**: Merge parallel worker segments into main index ([`6f18248`](https://github.com/dorel14/whoosh-ng/commit/6f182488b18aedaceaf4c886b1b0d87eadc02a99))
+
+- **indexing**: Merge worker segments into main index in ParallelIndexBuilder ([`27b0541`](https://github.com/dorel14/whoosh-ng/commit/27b054140d1a99228a804b75a1d4efd3e4f300ce))
+
+- **mypy**: Restore ignore_missing_imports for pytest, peewee, httpx, re2, psutil ([`699ee4f`](https://github.com/dorel14/whoosh-ng/commit/699ee4f2fb3007012913d5970376f97fc99a0296))
+
+- **profiling**: Add segment_write() and sibling step context managers to CommitProfilerV2 ([`599b650`](https://github.com/dorel14/whoosh-ng/commit/599b6507149332b3e0522b753e547bae718b468e))
+
+- **profiling**: Implement SegmentProfiler to resolve NameError in benchmark.py ([`1b03b3a`](https://github.com/dorel14/whoosh-ng/commit/1b03b3ae7fbc3d03c7223ab4f7759eb500c9c8bf))
+
+### Documentation
+
+- Auto-update llms context files ([`5cca243`](https://github.com/dorel14/whoosh-ng/commit/5cca243cba55d49836e89793af3ac126815b862c))
+
+- Auto-update llms context files ([`55825c1`](https://github.com/dorel14/whoosh-ng/commit/55825c15502f0b15041aec9ac15d7f9c4bc23e6c))
+
+- Auto-update llms context files ([`c0d74a4`](https://github.com/dorel14/whoosh-ng/commit/c0d74a4cda58a44898a0b3f67fdc009fefa565fe))
+
+- Restructurer la documentation et ajouter les pages API et guides ([`4e9b1e2`](https://github.com/dorel14/whoosh-ng/commit/4e9b1e2ce8a494c66f1725cec3b03e5025643e8d))
+
+- **guides**: Ajouter le guide d'indexation moderne et mettre à jour les index de documentation ([`9fbc4ff`](https://github.com/dorel14/whoosh-ng/commit/9fbc4ff41dafc184219f0b4f1da3ee4f3e0ecb71))
+
+### Features
+
+- Ajouter FastCSVSource, indexation par lots, infrastructure de profiling et optimisations du cœur ([`fc63f9c`](https://github.com/dorel14/whoosh-ng/commit/fc63f9c890155fa9ce0b25c03e9db733eb7f0139))
+
+- **analysis**: Ajouter le système de stemmers, FastCSVSource et l'infrastructure de profiling des performances ([`a077319`](https://github.com/dorel14/whoosh-ng/commit/a077319a8fc7435ef283b5c2b5402538c6550819))
+
+- **core**: Ajouter CacheMiddleware et ObservableDataSource ([`508589a`](https://github.com/dorel14/whoosh-ng/commit/508589a8c86c7d1eadeb6ffd044a340fe84363be))
+
+- **data-sources**: Ajouter les sources de données et le pooling de connexions ([`51805d4`](https://github.com/dorel14/whoosh-ng/commit/51805d4c08109b78704f6938deb4c135f57b0674))
+
+- **data-sources**: Améliorer la robustesse et la validation des sources de données ([`35281b5`](https://github.com/dorel14/whoosh-ng/commit/35281b534865111e30d0d1195c492d72b8769e75))
+
+- **profiling**: Ajouter les groupes d'options profiling et fast-stemming, stream_batches et restructurer les chemins d'import des sources de données ([`152e9c4`](https://github.com/dorel14/whoosh-ng/commit/152e9c44b68380a9d238489a29ebfd52e28f97a9))
+
+---
+
+**Detailed Changes**: [v2.0.0...v3.0.0](https://github.com/dorel14/whoosh-ng/compare/v2.0.0...v3.0.0)
+
+### Commits
+
+### Other
+
+- Remove workflows permission from test.yml
+- Revise README for version 2.0.0 updates
+- Merge pull request #12 from dorel14/master
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- .
+- Update src/whoosh_modern/indexing/parallel_builder.py
+- codec/base: restore missing out-of-order term check in add_postings
+- Update src/whoosh_modern/profiling/segment_profiler.py
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge c42b065355bb0004094223748a7c9b6eca810405 into 9988770df03a2d255a21b74843772776dbbf998a
+- Merge pull request #13 from dorel14/dev
+- Update commit_parser_options in pyproject.toml
+- Add files via upload
+
+### Build System
+
+- automatiser la synchronisation de la version entre les fichiers du projet
+
+### Chores
+
+- apply pre-commit fixes
+- simplifier la configuration type-checking et retirer les dépendances inutilisées
+- apply pre-commit fixes
+- apply pre-commit fixes
+- trigger pre-commit workflow
+- v3.0.0 [skip ci]
+
+### Features
+
+- ajouter CacheMiddleware et ObservableDataSource
+- ajouter les sources de données et le pooling de connexions
+- ajouter FastCSVSource, indexation par lots, infrastructure de profiling et optimisations du cœur
+- ajouter le système de stemmers, FastCSVSource et l'infrastructure de profiling des performances
+- ajouter les groupes d'options profiling et fast-stemming, stream_batches et restructurer les chemins d'import des sources de données
+- améliorer la robustesse et la validation des sources de données
+
+### Code Refactoring
+
+- simplifier les expressions multi-lignes et optimiser Token avec __slots__
+- nettoyer les annotations de type et supprimer les dépendances inutilisées
+
+### Documentation
+
+- auto-update llms context files
+- restructurer la documentation et ajouter les pages API et guides
+- auto-update llms context files
+- ajouter le guide d'indexation moderne et mettre à jour les index de documentation
+- auto-update llms context files
+
+### Bug Fixes
+
+- corriger l'indentation du RegexTokenizer et ajuster les annotations de type
+- resolve mypy errors in CI (parquet, tortoise, hnswlib)
+- ne pas yield de token vide dans RegexTokenizer gaps=True
+- résoudre les erreurs pyright dans pre-commit (Token typing, reportAttributeAccessIssue)
+- supprimer cast redondant et ajouter reportAssignmentType en warning
+- ajouter reportAssignmentType en warning dans pyrightconfig.json
+- corriger docstring PathTokenizer et restaurer Literal pour engine
+- mapper engine pyarrow vers auto pour pandas et exclure tests/ de mypy
+- remove unreachable dead code after build() return in parallel_builder
+- add segment_write() and sibling step context managers to CommitProfilerV2
+- implement SegmentProfiler to resolve NameError in benchmark.py
+- merge parallel worker segments into main index
+- merge worker segments into main index in ParallelIndexBuilder
+- rendre test_buffered_threads deterministe en couverture des valeurs
+- retirer les modules obsolètes des exclusions mypy
+- close segment_ix in ParallelIndexBuilder to prevent fd leak
+- résoudre les erreurs pyright reportOptionalMemberAccess et reportAssignmentType
+- réintégrer assert segment_reader is not None après merge distant
+- restore ignore_missing_imports for pytest, peewee, httpx, re2, psutil
+- corriger les fuites de handles et erreurs de nettoyage sous Windows
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v3.0.0)
+
+## v2.0.0 (2026-07-31)
+**Tag**: `v2.0.0`
+
+## v2.0.0 (2026-07-31)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- Address review findings in CI/CD workflows and documentation ([`b1e0b89`](https://github.com/dorel14/whoosh-ng/commit/b1e0b89f10ad182ad0120d6d19bcac2f8a04470a))
+
+### Documentation
+
+- Auto-update llms context files ([`10e6c90`](https://github.com/dorel14/whoosh-ng/commit/10e6c90fb6e7ffd9ec9f1b3fa7f4e398a933077b))
+
+- Auto-update llms context files ([`992e4d7`](https://github.com/dorel14/whoosh-ng/commit/992e4d780fd7829bd804d68b215e06f255e9cacf))
+
+- Auto-update llms context files ([`5dfe9dc`](https://github.com/dorel14/whoosh-ng/commit/5dfe9dcfdd725d1ca12f3bba0c09a2f7d163aa88))
+
+- Auto-update llms context files ([`aadce99`](https://github.com/dorel14/whoosh-ng/commit/aadce99460c30cd5950e44c927c07eb6fa5ffde8))
+
+### Features
+
+- **deps**: Add sqlalchemy and sqlmodel to models extra and configure mypy overrides ([`4486b5f`](https://github.com/dorel14/whoosh-ng/commit/4486b5feef2700fd8720a0dec1419985f9479951))
+
+- **models**: Ajouter AutoIndexer et améliorer la génération de schémas ([`919131c`](https://github.com/dorel14/whoosh-ng/commit/919131ce7f475b8584e74d98d9cf41e04891b7c7))
+
+- **models**: ✨ Introduce ModelIndex and SearchField for auto-mapping ([`6c202bc`](https://github.com/dorel14/whoosh-ng/commit/6c202bc6c4e20ad9dba7e4cd81deadfdaf3dcf2a))
+
+- **whoosh_modern**: Add modern API with data sources, schema discovery, facets, validation, middleware, and SearchView ([`36bfbae`](https://github.com/dorel14/whoosh-ng/commit/36bfbaebd6acc18cda06aba83bebade7154c9972))
+
+---
+
+**Detailed Changes**: [v1.3.3...v2.0.0](https://github.com/dorel14/whoosh-ng/compare/v1.3.3...v2.0.0)
+
+### Commits
+
+### Documentation
+
+- merge duplicate FastAPI example into fastapi-search.md
+- auto-update llms context files
+- auto-update llms context files
+- auto-update llms context files
+- auto-update llms context files
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+- ..
+- Merge pull request #10 from dorel14/master
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- style(benchmark): ajouter un saut de ligne final manquant dans reuters_modern.py
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- .
+- .
+- .
+- Merge pull request #11 from dorel14/dev
+
+### Features
+
+- ✨ Introduce ModelIndex and SearchField for auto-mapping
+- ajouter AutoIndexer et améliorer la génération de schémas
+- add modern API with data sources, schema discovery, facets, validation, middleware, and SearchView
+- add sqlalchemy and sqlmodel to models extra and configure mypy overrides
+
+### Bug Fixes
+
+- address review findings in CI/CD workflows and documentation
+
+### Code Refactoring
+
+- moderniser les annotations de type avec la syntaxe union PEP 604
+- moderniser les annotations de type avec Coroutine et ajouter des ignores pyright
+- ajouter des annotations de retour aux méthodes replace des matchers
+- moderniser la vérification isinstance avec la syntaxe union PEP 604
+
+### CI/CD
+
+- ajouter des extras d'installation et simplifier la couverture
+
+### Chores
+
+- v2.0.0 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v2.0.0)
+
+## v1.3.3 (2026-07-26)
+**Tag**: `v1.3.3`
+
+## v1.3.3 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.3.2...v1.3.3](https://github.com/dorel14/whoosh-ng/compare/v1.3.2...v1.3.3)
+
+### Commits
+
+### Bug Fixes
+
+- reorganize nav_order for coherent navigation (Guides 1-90, API 100-190, Examples 200-270)
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.3.3 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.3)
+
+## v1.3.2 (2026-07-26)
+**Tag**: `v1.3.2`
+
+## v1.3.2 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.3.1...v1.3.2](https://github.com/dorel14/whoosh-ng/compare/v1.3.1...v1.3.2)
+
+### Commits
+
+### Bug Fixes
+
+- remove color_scheme from individual pages, use global config
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.3.2 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.2)
+
+## v1.3.1 (2026-07-26)
+**Tag**: `v1.3.1`
+
+## v1.3.1 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.3.0...v1.3.1](https://github.com/dorel14/whoosh-ng/compare/v1.3.0...v1.3.1)
+
+### Commits
+
+### Bug Fixes
+
+- align _config.yml with taskiq-flow and clean README front matter
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.3.1 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.1)
+
+## v1.3.0 (2026-07-26)
+**Tag**: `v1.3.0`
+
+## v1.3.0 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.2.4...v1.3.0](https://github.com/dorel14/whoosh-ng/compare/v1.2.4...v1.3.0)
+
+### Commits
+
+### Features
+
+- éviter les exécutions inutiles du workflow lors des commits de release
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.3.0 [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.0)
+
+## v1.2.4 (2026-07-26)
+**Tag**: `v1.2.4`
+
+## v1.2.4 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.2.3...v1.2.4](https://github.com/dorel14/whoosh-ng/compare/v1.2.3...v1.2.4)
+
+### Commits
+
+### Bug Fixes
+
+- remove invalid parent fields and align config with taskiq-flow
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.2.4
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.4)
+
+## v1.2.3 (2026-07-26)
+**Tag**: `v1.2.3`
+
+## v1.2.3 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+---
+
+**Detailed Changes**: [v1.2.2...v1.2.3](https://github.com/dorel14/whoosh-ng/compare/v1.2.2...v1.2.3)
+
+### Commits
+
+### Bug Fixes
+
+- remove invalid parent fields from all pages
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Chores
+
+- v1.2.3
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.3)
+
+## v1.2.2 (2026-07-26)
+**Tag**: `v1.2.2`
+
+## v1.2.2 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **docs**: Align _config.yml with taskiq-flow pattern ([`2124be0`](https://github.com/dorel14/whoosh-ng/commit/2124be0cf1fd4669c9ebdaa4ad485eabae22c279))
+
+---
+
+**Detailed Changes**: [v1.2.1...v1.2.2](https://github.com/dorel14/whoosh-ng/compare/v1.2.1...v1.2.2)
+
+### Commits
+
+### Code Refactoring
+
+- supprimer la navigation statique codée en dur
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Bug Fixes
+
+- align _config.yml with taskiq-flow pattern
+
+### Chores
+
+- v1.2.2
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.2)
+
+## v1.2.1 (2026-07-26)
+**Tag**: `v1.2.1`
+
+## v1.2.1 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **docs**: Restore front matter and add explicit nav config ([`74dc151`](https://github.com/dorel14/whoosh-ng/commit/74dc151104a7a89ffd1459a60e0e28488bf110ff))
+
+### Documentation
+
+- Fix Jekyll links with relative_url and clean deploy workflow ([`2f9afc2`](https://github.com/dorel14/whoosh-ng/commit/2f9afc20f5e41022117a636b0d223f92c660df3d))
+
+---
+
+**Detailed Changes**: [v1.2.0...v1.2.1](https://github.com/dorel14/whoosh-ng/compare/v1.2.0...v1.2.1)
+
+### Commits
+
+### Documentation
+
+- fix Jekyll links with relative_url and clean deploy workflow
+
+### Bug Fixes
+
+- restore front matter and add explicit nav config
+
+### Chores
+
+- v1.2.1
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.1)
+
+## v1.2.0 (2026-07-26)
+**Tag**: `v1.2.0`
+
+## v1.2.0 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+### Documentation
+
+- Ajouter la documentation complète bilingue et le déploiement GitHub Pages ([`a091ced`](https://github.com/dorel14/whoosh-ng/commit/a091cede82bb5d722e5db0ff233c1dcbcecd35ea))
+
+- Auto-update llms context files ([`96e4f2c`](https://github.com/dorel14/whoosh-ng/commit/96e4f2c251ccdde5e9fd7e9cb0ce6b2650ab64d9))
+
+- Auto-update llms context files ([`6abefe4`](https://github.com/dorel14/whoosh-ng/commit/6abefe4b84d99e29c1d6ccb471dd7bf27ea4f31d))
+
+### Features
+
+- **docs**: Ajouter le support multilingue dans la configuration ([`967ed12`](https://github.com/dorel14/whoosh-ng/commit/967ed125e5fcd167e237e1c32b7feeb3ab6f9c4f))
+
+---
+
+**Detailed Changes**: [v1.1.0...v1.2.0](https://github.com/dorel14/whoosh-ng/compare/v1.1.0...v1.2.0)
+
+### Commits
+
+### CI/CD
+
+- restructurer le workflow de release sémantique
+
+### Other
+
+- Merge pull request #7 from dorel14/dev
+- revert: supprimer la documentation complète bilingue et restaurer l'état précédent
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #8 from dorel14/dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #9 from dorel14/dev
+
+### Documentation
+
+- ajouter la documentation complète bilingue et le déploiement GitHub Pages
+- auto-update llms context files
+- auto-update llms context files
+
+### Features
+
+- ajouter le support multilingue dans la configuration
+
+### Chores
+
+- v1.2.0
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.0)
+
+## v1.1.0 (2026-07-26)
+**Tag**: `v1.1.0`
+
+## v1.1.0 (2026-07-26)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **bench**: 🐛 add type ignores for method overrides in `XappyModule` ([`822e957`](https://github.com/dorel14/whoosh-ng/commit/822e957c986f603e9fd1c2de2799fb60d3c122a9))
+
+- **schema**: 🐛 corriger l'initialisation de l'objet dans `__new__` ([`5a764a7`](https://github.com/dorel14/whoosh-ng/commit/5a764a78751a6a2bb94118340784da074fdcf2c8))
+
+- **stress**: 🐛 ensure correct handling of string encoding in `test_bigtable` ([`822e957`](https://github.com/dorel14/whoosh-ng/commit/822e957c986f603e9fd1c2de2799fb60d3c122a9))
+
+### Build System
+
+- **deps**: Supprimer les dépendances obsolètes de la section models ([`227a59f`](https://github.com/dorel14/whoosh-ng/commit/227a59fc195799aca02289c2cb5f3d60135ea063))
+
+### Features
+
+- **benchmark**: Refonte du système de benchmarks avec nouvelles spécifications ([`417efd1`](https://github.com/dorel14/whoosh-ng/commit/417efd1be034fe8be4377ad2716e7b15028ad929))
+
+- **matching**: ✨ add type hints for `supports_block_quality` methods ([`822e957`](https://github.com/dorel14/whoosh-ng/commit/822e957c986f603e9fd1c2de2799fb60d3c122a9))
+
+- **support**: ✨ add compatibility for Python 3 unicode handling ([`822e957`](https://github.com/dorel14/whoosh-ng/commit/822e957c986f603e9fd1c2de2799fb60d3c122a9))
+
+- **writing**: ✨ Implement segment writing and merging policies ([`ae5fc62`](https://github.com/dorel14/whoosh-ng/commit/ae5fc62d2185ac349b56cbbf006bbb7fd4f92c80))
+
+---
+
+**Detailed Changes**: [v1.0.0...v1.1.0](https://github.com/dorel14/whoosh-ng/compare/v1.0.0...v1.1.0)
+
+### Commits
+
+### Chores
+
+- ✏️ Mise à jour de la version dans le README
+- prepare whoosh-ng 1.0.0
+- bump version to 1.0.1
+- 🔄 Update project dependencies
+- apply pre-commit fixes
+- apply pre-commit fixes
+- v1.1.0
+
+### Other
+
+- Potential fix for code scanning alert no. 1: Workflow does not contain permissions
+- Potential fix for code scanning alert no. 1: Workflow does not contain permissions
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #5 from dorel14/alert-autofix-1
+- Merge branch 'master' into dev
+- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge 3d0187143ec5a2a4e19f62d26a622d2c53efc2c7 into 68e67aaefb0d48f136d53576e00f10d68f77f15a
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge 4473223d510f0cde2d30ca638d284f23dc467b14 into 68e67aaefb0d48f136d53576e00f10d68f77f15a
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #6 from dorel14/dev
+
+### Features
+
+- ✨ Ajout de la validation de l'intégrité des segments
+- ✨ Ajout d'un wrapper Asyncio pour la gestion asynchrone des écritures
+- ✨ Isolation des espaces de stockage temporaires pour les écrivains concurrents
+- ✨ Ajout de la normalisation des boosts pour les sous-requêtes
+- ✨ Ajout d'un module de reporting pour les résultats de benchmark
+- ✨ Ajout d'un backend LMDB et d'un support d'autocomplétion
+- ✨ Implement segment writing and merging policies
+- refonte du système de benchmarks avec nouvelles spécifications
+- ✨ add type hints for `supports_block_quality` methods
+
+### Bug Fixes
+
+- 🐛 Ajout d'un type d'ignore pour l'appel de la requête
+- 🐛 Amélioration des benchmarks avec un échauffement et ajustement des seuils d'alerte
+- 🐛 corriger l'initialisation de l'objet dans `__new__`
+
+### Code Refactoring
+
+- improve _posting_size estimation, fix benchmark CLI, update mypy target to 3.12
+
+### Build System
+
+- supprimer les dépendances obsolètes de la section models
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.1.0)
+
+## v1.0.0 (2026-07-12)
+**Tag**: `v1.0.0`
+
+## v1.0.0 (2026-07-12)
+
+_This release is published under the BSD-2-Clause License._
+
+- Initial Release
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.0.0)
+
+
 ## DOCUMENT (FR): Core Concepts
 
 # Concepts fondamentaux
@@ -23807,148 +25756,155 @@ with ix.writer() as w:
 
 ## DOCUMENT (FR): Glossary
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# Glossaire
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Un glossaire des termes clés utilisés dans Whoosh.
 
+## Analyse
 
-# Glossary
+Le processus de conversion du texte en jetons (unités individuelles comme
+les mots ou les termes) pour l'indexation. Implique la tokenisation, la
+normalisation (mise en minuscules, racinement) et le filtrage (suppression
+des mots vides, etc.).
 
-A glossary of key terms used in Whoosh.
+## Analyseur
 
-## Analysis
+Une chaîne d'objets `Tokenizer` et `Filter` qui traite le texte en jetons.
+Exemples : `RegexTokenizer`, `NgramTokenizer`, `LowercaseFilter`,
+`StopFilter`, `StemmerFilter`.
 
-The process of converting text into tokens (individual units like words or
-terms) for indexing. Involves tokenization, normalization (lowercasing,
-stemming), and filtering (stop word removal, etc.).
+## Fichier composé
 
-## Analyzer
-
-A chain of `Tokenizer` and `Filter` objects that processes text into
-tokens. Examples include `RegexTokenizer`, `NgramTokenizer`, `LowercaseFilter`,
-`StopFilter`, and `StemmerFilter`.
-
-## Compound File
-
-A file format that combines multiple index segment files into a single
-`.seg` file. This can improve performance on some filesystems by reducing
-file handle usage. Configured via the codec's `should_assemble` setting.
+Un format de fichier qui combine plusieurs fichiers de segment d'index
+en un seul fichier `.seg`. Cela peut améliorer les performances sur
+certains systèmes de fichiers en réduisant l'utilisation des descripteurs
+de fichiers. Configuré via le paramètre `should_assemble` du codec.
 
 ## Document
 
-A single record in the index, similar to a row in a database. A document
-contains fields (analogous to columns).
+Un enregistrement unique dans l'index, similaire à une ligne dans une base
+de données. Un document contient des champs (analogues aux colonnes).
 
-## Field
+## Champ
 
-A named attribute of a document. Fields have a type (defined by `FieldType`)
-that determines how the field's value is indexed and stored.
+Un attribut nommé d'un document. Les champs ont un type (défini par
+`FieldType`) qui détermine comment la valeur du champ est indexée et
+stockée.
 
-## Field Type
+## Type de champ
 
-The class (e.g., `TEXT`, `ID`, `NUMERIC`, `DATETIME`, `BOOLEAN`) that
-defines how a field's value is tokenized, stored, indexed, and made
-sortable/facetable.
+La classe (ex. : `TEXT`, `ID`, `NUMERIC`, `DATETIME`, `BOOLEAN`) qui
+définit comment la valeur d'un champ est tokenisée, stockée, indexée, et
+rendue triable/facetable.
 
-## Filter
+## Filtre
 
-An `Analyzer` component that processes, transforms, or filters tokens
-after tokenization. Examples: `LowercaseFilter`, `StopFilter`,
+Un composant d'`Analyzer` qui traite, transforme ou filtre les jetons
+après la tokenisation. Exemples : `LowercaseFilter`, `StopFilter`,
 `StemmerFilter`.
 
 ## Format
 
-A `Format` object controls how posting information (term frequency, positions,
-character offsets) is encoded for each field in the inverted index.
-Examples: `Existence`, `Frequency`, `Positions`, `Characters`.
+Un objet `Format` contrôle comment les informations de posting (fréquence
+du terme, positions, décalages de caractères) sont encodées pour chaque
+champ dans l'index inversé.
+Exemples : `Existence`, `Frequency`, `Positions`, `Characters`.
 
 ## Fragmentation
 
-The process of selecting text spans around matched terms for highlighting.
+Le processus de sélection des fragments de texte autour des termes
+correspondants pour la mise en évidence.
 
-## Highlighter
+## Mise en évidence (Highlighter)
 
-The `whoosh.highlight` module, which provides formatters, fragmenters, and
-scorers for highlighting search terms in documents.
+Le module `whoosh.highlight`, qui fournit des formateurs, fragmenteurs
+et évaluateurs pour mettre en évidence les termes de recherche dans les
+documents.
 
 ## Index
 
-The collection of segment files that store the inverted index, document
-data, and metadata (the table of contents, or TOC).
+La collection de fichiers de segment qui stockent l'index inversé, les
+données de documents et les métadonnées (la table des matières, ou TOC).
 
 ## IndexWriter
 
-The `IndexWriter` class is used to create and modify the index. It buffers
-document additions and deletions and commits them to disk.
+La classe `IndexWriter` est utilisée pour créer et modifier l'index. Elle
+met en mémoire tampon les ajouts et suppressions de documents et les
+valide sur le disque.
 
-## Inverted Index
+## Index inversé (Inverted Index)
 
-The core data structure of a search engine: for each unique term, it stores a
-list of documents (and positions) where that term appears.
+La structure de données centrale d'un moteur de recherche : pour chaque
+terme unique, il stocke une liste de documents (et de positions) où ce
+terme apparaît.
 
-## Matcher
+## Correspondance (Matcher)
 
-An object that iterates over matching documents in the postings list for a
-query. Matchers can be combined (union, intersection, etc.) for compound
-queries.
+Un objet qui itère sur les documents correspondants dans la liste de
+postings pour une requête. Les correspondances peuvent être combinées
+(union, intersection, etc.) pour des requêtes composées.
 
 ## Posting
 
-A single entry in the inverted index: a (document ID, term frequency, value)
-tuple for a given term.
+Une entrée unique dans l'index inversé : un tuple
+(ID de document, fréquence du terme, valeur) pour un terme donné.
 
-## Schema
+## Schéma (Schema)
 
-Defines the fields, their types, and indexing options for an index. A schema
-is passed to `Storage.create_index()`.
+Définit les champs, leurs types et les options d'indexation. Un schéma
+est passé à `Storage.create_index()`.
 
-## Scorer
+## Évaluateur (Scorer)
 
-An object that computes a relevance score for a document given a query and
-term weights. Different weighting models (BM25, TF-IDF, etc.) use different
-scorers.
+Un objet qui calcule un score de pertinence pour un document donné une
+requête et des poids de termes. Les différents modèles de pondération
+(BM25, TF-IDF, etc.) utilisent des évaluateurs différents.
 
 ## Segment
 
-A self-contained portion of the inverted index. An index may consist of
-multiple segments. Segments are merged periodically (during optimize or
-merge operations) to improve performance.
+Une portion autonome de l'index inversé. Un index peut consiste en
+plusieurs segments. Les segments sont fusionnés périodiquement (lors de
+l'optimisation ou des opérations de fusion) pour améliorer les
+performances.
 
-## Sort Key
+## Clé de tri (Sort Key)
 
-A value computed per-document (via a `FacetType` and its `Categorizer`)
-used to order results during sorting and faceting.
+Une valeur calculée par document (via un `FacetType` et son
+`Categorizer`) utilisée pour ordonner les résultats lors du tri et de la
+facettisation.
 
-## Stemming
+## Racinement (Stemming)
 
-The process of reducing words to their root form (e.g., "running" → "run",
-"cats" → "cat") to improve recall by matching inflected forms.
+Le processus de réduction des mots à leur forme racine (par ex.,
+"running" → "run", "cats" → "cat") pour améliorer le rappel en
+correspondant les formes inflectées.
 
-## Stop Words
+## Mots vides (Stop Words)
 
-High-frequency, low-information words (e.g., "the", "a", "and") that are
-typically filtered out during indexing.
+Des mots à haute fréquence et faible information (ex. : "the", "a",
+"and") qui sont généralement filtrés lors de l'indexation.
 
-## Term
+## Terme
 
-A unique (field name, token text) pair in the inverted index.
+Un couple unique (nom de champ, texte du jeton) dans l'index inversé.
 
-## Term Vector
+## Vecteur de termes (Term Vector)
 
-Optional per-document data structure storing the terms (and optionally
-positions and character offsets) that appear in a document's field, enabling
-features like highlighting and pseudo-relevance feedback.
+Structure de données optionnelle par document stockant les termes (et
+optionnellement les positions et décalages de caractères) qui apparaissent
+dans le champ d'un document, permettant des fonctionnalités comme la mise
+en évidence et les retours de pertinence pseudo.
 
-## Tokenizer
+## Tokeniseur (Tokenizer)
 
-An `Analyzer` component that splits input text into tokens. Examples:
-`RegexTokenizer`, `PathTokenizer`, `NgramTokenizer`.
+Un composant d'`Analyzer` qui divise le texte d'entrée en jetons.
+Exemples : `RegexTokenizer`, `PathTokenizer`, `NgramTokenizer`.
 
-## Whoosh Query
+## Requête Whoosh
 
-Whoosh's own query syntax, parsed by `QueryParser`. Supports fielded
-search, phrase queries, wildcards, ranges, and more.
+La syntaxe de requête propre à Whoosh, analysée par `QueryParser`.
+Prend en charge la recherche sur champs, les requêtes de phrase, les
+jokers, les intervalles et plus encore.
 
 
 ## DOCUMENT (FR): Indexing
@@ -24256,22 +26212,17 @@ Whoosh-NG maintient la compatibilité ascendante. Si vous trouvez un changement 
 
 ## DOCUMENT (FR): Nested
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# Documents imbriqués (Nested)
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Ce guide couvre l'indexation et la recherche de structures de documents
+hiérarchiques imbriqués (par exemple, un document parent contenant plusieurs
+documents enfants) en utilisant les fonctionnalités de relation
+parent-enfant de Whoosh.
 
+## Définition des documents imbriqués
 
-# Nested Documents
-
-This guide covers indexing and searching hierarchical/nested document
-structures (e.g., a parent document with multiple child documents) using
-Whoosh's parent-child relationship features.
-
-## Defining Nested Documents
-
-You can index parent documents that contain child documents by using a
-parent field and child fields:
+Vous pouvez indexer des documents parents qui contiennent des documents
+enfants en utilisant un champ parent et des champs enfants :
 
 ```python
 from whoosh import fields, index
@@ -24285,12 +26236,12 @@ schema = fields.Schema(
 )
 ```
 
-The `type` field distinguishes parent documents from child documents.
+Le champ `type` distingue les documents parents des documents enfants.
 
-## Indexing Nested Documents
+## Indexation des documents imbriqués
 
-Use `IndexWriter.add_all()` with a generator that yields parent and child
-documents grouped together:
+Utilisez `IndexWriter.add_all()` avec un générateur qui produit les
+documents parents et enfants groupés ensemble :
 
 ```python
 writer = ix.writer()
@@ -24303,76 +26254,78 @@ writer.add_all([
 ])
 ```
 
-Parent documents have `type="parent"` and child documents have
+Les documents parents ont `type="parent"` et les documents enfants ont
 `type="child"`.
 
-## Searching Nested Documents
+## Recherche dans les documents imbriqués
 
-### Parent-Query Child-Search
+### Recherche-enfants, correspondance-parents
 
-Search within child documents and match their parents:
+Recherchez dans les documents enfants et faites correspondre leurs
+documents parents :
 
 ```python
 from whoosh.query import Every, Term
 from whoosh.sorting import NestedParent
 
-# Match all parent documents
+# Correspondre tous les documents parents
 parents = NestedParent(Term("type", "parent"))
 q = Every("section_content", "hello")
 results = searcher.search(q, sortedby=parents)
 ```
 
-### Child-Query Parent-Search
+### Recherche-parents, correspondance-enfants
 
-Search for parent documents whose children match:
+Recherchez les documents parents dont les enfants correspondent :
 
 ```python
 from whoosh.sorting import NestedChildren
 
-# Match parent documents that have children matching the query
+# Correspondre les documents parents qui ont des enfants correspondant à la requête
 parent_results = searcher.search(child_query, groupedby=NestedChildren(parent_matcher, child_matcher))
 ```
 
-## Parent-Child Relationships at Index Time
+## Relations parent-enfant lors de l'indexation
 
-When writing documents, use the `parent` parameter to link children to
-parents:
+Lors de l'écriture des documents, utilisez le paramètre `parent` pour
+lier les enfants aux parents :
 
 ```python
-writer.add_document(type="parent", title="Chapter 1", _key="chapter1")
+writer.add_document(type="parent", title="Chapitre 1", _key="chapter1")
 writer.add_document(type="child", section_name="Section 1.1",
                     section_content="...", parent="chapter1")
 writer.add_document(type="child", section_name="Section 1.2",
                     section_content="...", parent="chapter1")
 ```
 
-## Accessing Nested Results
+## Accès aux résultats imbriqués
 
-To retrieve child matches alongside parent results, use the `expand` method
-on the results:
+Pour récupérer les correspondances d'enfants aux côtés des résultats
+parents, utilisez la méthode `expand` sur les résultats :
 
 ```python
 results = searcher.search(parent_query)
 expanded = results.expand_child("section")
 ```
 
-## Nested Faceting
+## Facettisation imbriquée
 
-Combine parent-child relationships with faceting using `NestedParent` and
-`NestedChildren` as facets:
+Combinez les relations parent-enfant avec la facettisation en utilisant
+`NestedParent` et `NestedChildren` comme facets :
 
 ```python
 parent_facet = NestedParent(FieldFacet("type"))
 results = searcher.search(query, groupedby=parent_facet)
 ```
 
-## Performance Considerations
+## Considérations de performance
 
-- Parent-child joins are more expensive than flat document searches
-- Use `childperm` searcher option to limit the number of permutations
-  examined
-- Consider whether hierarchical structure is needed at query time, or
-  whether documents can be flattened during indexing
+- Les jointures parent-enfant sont plus coûteuses que les recherches
+  sur des documents plats.
+- Utilisez l'option `childperm` du chercheur pour limiter le nombre de
+  permutations examinées.
+- Considérez si la structure hiérarchique est nécessaire lors de la
+  requête, ou si les documents peuvent être aplatis lors de l'indexation.
 
 
 ## DOCUMENT (FR): Query
@@ -28134,30 +30087,27 @@ def on_searched(event: SearchExecuted):
 
 ## DOCUMENT (FR): Ngrams
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# N-grammes
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Ce guide couvre la tokenisation et l'analyse N-gramme pour la recherche
+de sous-chaînes, les requêtes par préfixe et la fonctionnalité
+d'autocomplétion.
 
+## Qu'est-ce que les N-grammes ?
 
-# N-grams
+Un N-gramme est une séquence continue de N caractères (ou de jetons)
+d'une chaîne. Par exemple, les 2-grammes de "hello" sont : "he", "el",
+"ll", "lo".
 
-This guide covers N-gram tokenization and analysis for substring matching,
-prefix queries, and autocomplete functionality.
-
-## What Are N-grams?
-
-An N-gram is a contiguous sequence of N characters (or tokens) from a string.
-For example, the 2-grams of "hello" are: "he", "el", "ll", "lo".
-
-N-gram analysis is useful for:
-- Substring search (finding "ell" within "hello")
-- Autocomplete / typeahead suggestions
-- Fuzzy matching without edit distance computation
+L'analyse N-gramme est utile pour :
+- Recherche de sous-chaînes (trouver "ell" dans "hello")
+- Autocomplétion / suggestions en temps réel
+- Correspondance floue sans calcul de distance d'édition
 
 ## NgramTokenizer
 
-The `NgramTokenizer` splits text into character-level N-grams:
+Le `NgramTokenizer` divise le texte en N-grammes au niveau des
+caractères :
 
 ```python
 from whoosh.analysis import NgramTokenizer
@@ -28170,17 +30120,18 @@ schema = fields.Schema(
 )
 ```
 
-### NgramTokenizer Parameters
+### Paramètres de NgramTokenizer
 
-- `minsize`: Minimum N-gram length (default `2`)
-- `maxsize`: Maximum N-gram length (default `4`)
+- `minsize` : Longueur minimale des N-grammes (par défaut `2`)
+- `maxsize` : Longueur maximale des N-grammes (par défaut `4`)
 
-With the example above, the text "hello" produces these 2-4-grams:
+Avec l'exemple ci-dessus, le texte "hello" produit ces 2-4-grammes :
 `he, hel, hell, el, ell, ello, l, ll, llo, l, lo, o`
 
 ## NgramFilter
 
-The `NgramFilter` creates word-level N-grams from tokenized text:
+Le `NgramFilter` crée des N-grammes au niveau des mots à partir du
+texte tokenisé :
 
 ```python
 from whoosh.analysis import RegexTokenizer, NgramFilter
@@ -28188,12 +30139,13 @@ from whoosh.analysis import RegexTokenizer, NgramFilter
 analyzer = RegexTokenizer() | NgramFilter(maxsize=2)
 ```
 
-This produces word-level grams: for "hello world", it produces ("hello",)
-and ("hello", "world").
+Cela produit des grammes au niveau des mots : pour "hello world", il
+produit ("hello",) et ("hello", "world").
 
 ## NgramWordAnalyzer
 
-A convenience analyzer that combines `NgramTokenizer` with `LowercaseFilter`:
+Un analyseur de commodité qui combine `NgramTokenizer` avec
+`LowercaseFilter` :
 
 ```python
 from whoosh.analysis import NgramWordAnalyzer
@@ -28205,11 +30157,11 @@ schema = fields.Schema(
 )
 ```
 
-## Use Cases
+## Cas d'utilisation
 
-### Substring Search
+### Recherche de sous-chaînes
 
-With N-gram analysis, you can match substrings:
+Avec l'analyse N-gramme, vous pouvez correspondre des sous-chaînes :
 
 ```python
 from whoosh.qparser import QueryParser
@@ -28221,9 +30173,10 @@ q = qp.parse("ell")
 results = searcher.search(q)
 ```
 
-### Prefix Matching
+### Correspondance par préfixe
 
-Set `maxsize` equal to a large value to effectively create prefix N-grams:
+Définissez `maxsize` à une grande valeur pour créer efficacement des
+N-grammes de préfixe :
 
 ```python
 from whoosh.analysis import NgramWordAnalyzer
@@ -28233,10 +30186,11 @@ from whoosh.analysis import NgramWordAnalyzer
 analyzer = NgramWordAnalyzer(minsize=1, maxsize=10)
 ```
 
-### Autocomplete
+### Autocomplétion
 
-N-gram indexes are commonly used for autocomplete/typeahead. For more
-advanced autocomplete with edge n-grams, consider:
+Les index N-gramme sont couramment utilisés pour l'autocomplétion.
+Pour une autocomplétion plus avancée avec des N-grammes de bord
+(edge n-grams), envisrez :
 
 ```python
 from whoosh.analysis import RegexTokenizer, NgramFilter
@@ -28255,26 +30209,30 @@ qp = QueryParser("title", schema=ix.schema)
 q = Prefix("title", "hel")  # Find documents where title starts with "hel"
 ```
 
-## Comparison with Edge N-grams
+## Comparaison avec les N-grammes de bord (Edge N-grams)
 
-Some search engines support "edge n-grams" (only generating N-grams from the
-beginning of words). This is more space-efficient for autocomplete:
+Certains moteurs de recherche prennent en charge les "N-grammes de bord"
+(uniquement la génération de N-grammes à partir du début des mots).
+C'est plus efficace en espace pour l'autocomplétion :
 
-- Full N-grams: "hello" → "he", "el", "ll", "lo", "hel", "ell", ...
-- Edge N-grams: "hello" → "h", "he", "hel", "hell", "hello"
+- N-grammes complets : "hello" → "he", "el", "ll", "lo", "hel", "ell", ...
+- N-grammes de bord : "hello" → "h", "he", "hel", "hell", "hello"
 
-Whoosh's `NgramTokenizer` generates full (bidirectional) N-grams. For
-edge-ngram-like behavior, use the `minsize` and `maxsize` parameters
-strategically, or use `Prefix` queries against a standard tokenized field.
+Le `NgramTokenizer` de Whoosh génère des N-grammes complets (bidirectionnels).
+Pour un comportement similaire aux N-grammes de bord, utilisez les
+paramètres `minsize` et `maxsize` stratégiquement, ou utilisez des
+requêtes `Prefix` sur un champ tokenisé standard.
 
-## Performance Considerations
+## Considérations de performance
 
-- N-gram indexes are typically much larger than standard indexes
-- Each original token produces multiple N-gram tokens, increasing index size
-- Choose `minsize` and `maxsize` carefully to balance search quality against
-  index size
-- For autocomplete, consider using `Prefix` queries with a
-  non-N-gram field for better performance
+- Les index N-gramme sont généralement beaucoup plus volumineux que les
+  index standard.
+- Chaque jeton original produit plusieurs jetons N-gramme, augmentant
+  la taille de l'index.
+- Choisissez `minsize` et `maxsize` avec soin pour équilibrer la qualité
+  de recherche et la taille de l'index.
+- Pour l'autocomplétion, envisenez d'utiliser des requêtes `Prefix` sur
+  un champ non-N-gramme pour de meilleures performances.
 
 
 ## DOCUMENT (FR): Performance
@@ -29261,24 +31219,19 @@ pip install whoosh-ng[modern]
 
 ## DOCUMENT (FR): Stemming
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# Racinement (Stemming) et mots vides
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Ce guide couvre l'utilisation des racines (stemmers), des filtres de
+mots vides (stop words) et de l'analyse de texte spécifique à chaque
+langue avec Whoosh.
 
+## Racines (Stemmers)
 
-# Stemming and Stop Words
+Un racine (stemmer) réduit les mots à leur forme racine (par ex.,
+"running" → "run", "cats" → "cat"), afin que les différentes formes
+du même mot correspondent lors des recherches.
 
-This guide covers using stemmers, stop-word filters, and language-specific
-text analysis with Whoosh.
-
-## Stemmers
-
-A stemmer reduces words to their root form (e.g., "running" → "run",
-"cats" → "cat"), so that different forms of the same word match in
-searches.
-
-### Using StemmerFilter
+### Utilisation de StemmerFilter
 
 ```python
 from whoosh.analysis import RegexTokenizer, StemmerFilter
@@ -29294,9 +31247,9 @@ schema = fields.Schema(
 )
 ```
 
-### Snowball Stemmers
+### Racines Snowball
 
-Whoosh includes Snowball stemmers for multiple languages:
+Whoosh inclut des racines Snowball pour plusieurs langues :
 
 ```python
 from whoosh.analysis import StemmerFilter
@@ -29305,7 +31258,7 @@ from whoosh.lang.snowball import EnglishStemmer
 stem_analyzer = RegexTokenizer() | StemmerFilter(stemfn=EnglishStemmer().stem)
 ```
 
-### Language-Aware Stemmer Selection
+### Sélection de racine selon la langue
 
 ```python
 from whoosh.lang import stemmer_for_language, StemmerFilter
@@ -29314,13 +31267,13 @@ from whoosh.analysis import RegexTokenizer
 stem = stemmer_for_language("en")
 analyzer = RegexTokenizer() | StemmerFilter(stemfn=stem)
 
-# Or use the analysis StemmingAnalyzer:
+# Ou utilisez l'analyseur StemmingAnalyzer :
 from whoosh.analysis import StemmingAnalyzer
 
 analyzer = StemmingAnalyzer("en")
 ```
 
-### Available Languages
+### Langues disponibles
 
 ```python
 from whoosh.lang import languages, has_stemmer, has_stopwords
@@ -29330,13 +31283,13 @@ print(has_stemmer("en"))  # True
 print(has_stopwords("en"))  # True
 ```
 
-## Stop Words
+## Mots vides (Stop Words)
 
-Stop words are common words (like "the", "a", "and") that are typically
-filtered out during indexing since they appear in too many documents to be
-useful for ranking.
+Les mots vides sont des mots fréquents (comme "the", "a", "and") qui
+sont généralement filtrés lors de l'indexation car ils apparaissent
+dans trop de documents pour être utiles au classement.
 
-### Using StopFilter
+### Utilisation de StopFilter
 
 ```python
 from whoosh.analysis import RegexTokenizer, StopFilter
@@ -29351,12 +31304,12 @@ schema = fields.Schema(
 )
 ```
 
-### Combining Stemming and Stop Words
+### Combinaison de racinement et de mots vides
 
 ```python
 from whoosh.analysis import StemmingAnalyzer
 
-# StemmingAnalyzer automatically loads stemmer and stopwords for the language
+# StemmingAnalyzer charge automatiquement le racine et les mots vides pour la langue
 analyzer = StemmingAnalyzer("en")
 
 schema = fields.Schema(
@@ -29364,43 +31317,44 @@ schema = fields.Schema(
 )
 ```
 
-### Custom Stop Words
+### Mots vides personnalisés
 
 ```python
 from whoosh.analysis import RegexTokenizer, StopFilter
 
-# Custom stop words list
+# Liste personnalisée de mots vides
 custom_stops = frozenset(["the", "a", "an", "foo", "bar"])
 analyzer = RegexTokenizer() | StopFilter(stoplist=custom_stops)
 ```
 
-## StemmingAnalyzer (Recommended)
+## StemmingAnalyzer (Recommandé)
 
-The `StemmingAnalyzer` combines tokenizer, stemming, and stop word filtering:
+Le `StemmingAnalyzer` combine le tokeniseur, le racinement et le
+filtrage des mots vides :
 
 ```python
 from whoosh.analysis import StemmingAnalyzer
 
-# Automatically uses the correct stemmer and stop words for the language
+# Utilise automatiquement le bon racine et les mots vides pour la langue
 analyzer = StemmingAnalyzer("en")
 
-# You can override defaults
+# Vous pouvez remplacer les valeurs par défaut
 analyzer = StemmingAnalyzer("en",
                             use_stopwords=True,
                             use_stems=True)
 ```
 
-### StemmingAnalyzer Options
+### Options de StemmingAnalyzer
 
-- `lang`: Language code (e.g., `"en"`, `"fr"`, `"de"`)
-- `use_stopwords`: Whether to load and apply stop words (default `True`)
-- `use_stems`: Whether to apply stemming (default `True`)
-- `args`: Arguments passed to the tokenizer
-- `kwargs`: Keyword arguments for the stemmer or stopwords
+- `lang` : Code de langue (ex. : `"en"`, `"fr"`, `"de"`)
+- `use_stopwords` : Charge et applique les mots vides (par défaut `True`)
+- `use_stems` : Applique le racinement (par défaut `True`)
+- `args` : Arguments passés au tokeniseur
+- `kwargs` : Arguments du mot-clé pour le racine ou les mots vides
 
-## Language-Specific Considerations
+## Considérations spécifiques selon la langue
 
-### Arabic (ISRI Stemmer)
+### Arabe (ISRI Stemmer)
 
 ```python
 from whoosh.analysis import StemmerFilter
@@ -29409,7 +31363,7 @@ from whoosh.lang.isri import ISRIStemmer
 stem_analyzer = RegexTokenizer() | StemmerFilter(stemfn=ISRIStemmer().stem)
 ```
 
-### Double Metaphone for Phonetic Matching
+### Double Métaphone pour la correspondance phonétique
 
 ```python
 from whoosh.analysis import RegexTokenizer, DoubleMetaphoneFilter
@@ -29417,22 +31371,24 @@ from whoosh.analysis import RegexTokenizer, DoubleMetaphoneFilter
 analyzer = RegexTokenizer() | DoubleMetaphoneFilter()
 ```
 
-## Query-Side Stemming
+## Racinement côté requête
 
-The analyzer is applied at both index time and query time (via the query
-parser), so stemming is automatically applied to search terms:
+L'analyseur est appliqué à la fois lors de l'indexation et lors de la
+requête (via l'analyseur de requête), donc le racinement est automatiquement
+appliqué aux termes de recherche :
 
 ```python
 from whoosh.qparser import QueryParser
 
-# If the index uses stemming, queries are stemmed too
+# Si l'index utilise le racinement, les requêtes sont racinées aussi
 qp = QueryParser("content", schema=ix.schema)
-q = qp.parse("running cats")  # Will match "run", "cat", etc.
+q = qp.parse("running cats")  # Correspondra à "run", "cat", etc.
 ```
 
-## N-gram Analysis
+## Analyse N-gramme
 
-For substring and prefix matching, use N-gram analyzers:
+Pour la correspondance de sous-chaînes et les requêtes par préfixe,
+utilisez les analyseurs N-gramme :
 
 ```python
 from whoosh.analysis import NgramWordAnalyzer
@@ -29441,81 +31397,80 @@ analyzer = NgramWordAnalyzer(minsize=2, maxsize=4)
 schema = fields.Schema(content=fields.TEXT(analyzer=analyzer))
 ```
 
-See the [N-grams Guide](ngrams.md) for more details.
+Voir le [Guide N-grammes](ngrams.md) pour plus de détails.
 
-## Modern Stemmer Providers (Whoosh-NG 2.0)
+## Fournisseurs de racines modernes (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduces a plugin-style stemmer provider system with auto-detection, PyStemmer support, and language-specific analyzers. For full details, see the [Stemmer Providers Guide](stemming-sprint-d.md).
+Whoosh-NG 2.0 introduit un système de fournisseurs de racines de style
+plugin avec détection automatique, support de PyStemmer et d'analyseurs
+spécifiques à chaque langue. Pour plus de détails, voir le
+[Guide des fournisseurs de racines](stemming-sprint-d.md).
 
 
 ## DOCUMENT (FR): Storage Providers
 
-> **Note de traduction** : Cette page n'est pas encore traduite en français.
-> Le contenu anglais est affiché ci-dessous en attendant la traduction.
+# Fournisseurs de stockage
 
-<!-- Creez une version francaise de ce fichier et supprimez ce message. -->
+Whoosh-NG fournit des backends de stockage modulaires via les contrats
+`SyncStorageProvider` / `AsyncStorageProvider`. Cela permet de persister
+l'index sur le disque local, SQLite, S3, ou une configuration hybride
+(cache local + distant) sans modifier l'écrivain ou l'index.
 
+## Aperçu de l'architecture
 
-# Storage Providers
-
-Whoosh-NG provides pluggable storage backends through the
-`SyncStorageProvider` / `AsyncStorageProvider` contracts. This allows the
-index to be persisted on local disk, SQLite, S3, or a hybrid cache + remote
-setup without changing the writer or the index.
-
-## Architecture Overview
-
-### Level 1: SnapshotStorage (Simple)
+### Niveau 1 : SnapshotStorage (Simple)
 
 ```
 Writer → Local FS → Commit → Upload Segment → S3
 Reader → Download Segment → Open locally
 ```
 
-Very simple to maintain. Use `SnapshotStorage` when you want S3 as a simple
-backup/restore target without the complexity of a local cache.
+Très simple à maintenir. Utilisez `SnapshotStorage` quand vous voulez
+utiliser S3 comme cible de sauvegarde/restauration simple sans la
+complexité d'un cache local.
 
-### Level 2: CachedObjectStorage (Recommended for Production)
+### Niveau 2 : CachedObjectStorage (Recommandé pour la production)
 
 ```
 +----------+
 |  MinIO   |
 +----------+
-     ^
-     |
- Sync |
-     v
+    ^
+    |
+Sync |
+    v
 +-----------+   Cache Layer   +-----------+
 | Searcher  |<--------------->| Writer    |
 +-----------+                 +-----------+
-        |
-        v
- Local SSD
+         |
+         v
+  Local SSD
 ```
 
-- Index lives on SSD
-- S3 serves as replication
-- Segments are pushed after commit
-- Restoration possible at any moment
+- L'index réside sur un SSD
+- S3 sert de réplication
+- Les segments sont poussés après le commit
+- La restauration est possible à tout moment
 
-This is what many modern distributed search systems do.
+C'est ce que font de nombreux systèmes de recherche distribués modernes.
 
-## Available providers
+## Fournisseurs disponibles
 
-| Provider | Type | Backend | Use Case |
-|----------|------|---------|----------|
-| `FileStorage` | sync | local filesystem | Single-node, no cloud |
-| `AsyncFileStorage` | async | local filesystem | Single-node async |
-| `S3Storage` | sync | S3-compatible | Direct S3 access |
-| `SnapshotStorage` | sync | S3-compatible | Simple backup/restore |
-| `HybridStorage` | sync | local cache + remote | **Production** (alias: `CachedObjectStorage`) |
-| `AsyncHybridStorage` | async | local cache + remote | Production async |
+| Fournisseur | Type | Backend | Cas d'utilisation |
+|-------------|------|---------|--------------------|
+| `FileStorage` | sync | système de fichiers local | Nœud unique, pas de cloud |
+| `AsyncFileStorage` | async | système de fichiers local | Nœud unique async |
+| `S3Storage` | sync | compatible S3 | Accès direct S3 |
+| `SnapshotStorage` | sync | compatible S3 | Sauvegarde/restauration simple |
+| `HybridStorage` | sync | cache local + distant | **Production** (alias : `CachedObjectStorage`) |
+| `AsyncHybridStorage` | async | cache local + distant | Production async |
 
-All providers are importable from `whoosh_modern.storage`.
+Tous les fournisseurs sont importables depuis `whoosh_modern.storage`.
 
 ## FileStorage
 
-Local filesystem storage. Keys are relative paths under `root`.
+Stockage sur le système de fichiers local. Les clés sont des chemins
+relatifs sous `root`.
 
 ```python
 from whoosh_modern.storage import FileStorage
@@ -29530,8 +31485,9 @@ keys = storage.list_keys()
 
 ## AsyncFileStorage
 
-Async variant of `FileStorage`. All operations run on a worker thread via
-`asyncio.to_thread` so the event loop is never blocked.
+ Variante asynce de `FileStorage`. Toutes les opérations s'exécutent sur
+un thread de travail via `asyncio.to_thread` afin de ne jamais bloquer
+la boucle d'événements.
 
 ```python
 import asyncio
@@ -29549,16 +31505,17 @@ asyncio.run(main())
 
 ## S3Storage
 
-S3-compatible blob storage. `boto3` is imported lazily, so it is an optional
-dependency. A `client` can be injected for testing.
+Stockage d'objets compatible S3. `boto3` est importé de manière paresseuse,
+il s'agit donc d'une dépendance optionnelle. Un `client` peut être injecté
+pour les tests.
 
 ```python
 from whoosh_modern.storage import S3Storage
 
-# Default client (requires boto3 installed and configured)
+# Client par défaut (nécessite boto3 installé et configuré)
 storage = S3Storage(bucket="my-index-bucket", prefix="segments")
 
-# Or inject a client for testing / custom configuration
+# Ou injecter un client pour tests / configuration personnalisée
 storage = S3Storage(
     bucket="my-index-bucket",
     prefix="segments",
@@ -29570,7 +31527,7 @@ data = storage.read("segment_1.dat")
 keys = storage.list_keys()
 ```
 
-Install the optional dependency:
+Installez la dépendance optionnelle :
 
 ```bash
 pip install whoosh-ng[s3]
@@ -29578,14 +31535,14 @@ pip install whoosh-ng[s3]
 
 ## SnapshotStorage
 
-Simple S3 snapshot storage without local cache. This is the simplest
-S3-backed storage strategy:
+Stockage d'instantané S3 simple sans cache local. C'est la stratégie de
+stockage S3 la plus simple :
 
-- Write: upload segment directly to S3
-- Read: download segment from S3 to local temporary file
+- Écriture : téléverse le segment directement vers S3
+- Lecture : télécharge le segment depuis S3 vers un fichier temporaire local
 
-Use this when you want S3 as a simple backup/restore target without the
-complexity of a local cache.
+Utilisez cela quand vous voulez utiliser S3 comme cible de
+sauvegarde/restauration simple sans la complexité d'un cache local.
 
 ```python
 from whoosh_modern.storage import SnapshotStorage
@@ -29602,14 +31559,15 @@ data = storage.read("segment_1.dat")
 
 ## HybridStorage / CachedObjectStorage
 
-`HybridStorage` composes a local cache and a remote backend. The remote is
-the source of truth; the local cache is a write-through performance layer.
+`HybridStorage` compose un cache local et un backend distant. Le backend
+distant est la source de vérité ; le cache local est un anneau de
+performance en écriture-transparente.
 
-`CachedObjectStorage` is an alias for `HybridStorage` that better conveys
-the intent: a local object cache synchronized with S3.
+`CachedObjectStorage` est un alias pour `HybridStorage` qui exprime
+mieux l'intention : un cache d'objets local synchronisé avec S3.
 
-This is the recommended architecture for production deployments with repeated
-read patterns.
+C'est l'architecture recommandée pour les déploiements de production
+avec des modèles de lecture répétés.
 
 ```python
 from whoosh_modern.storage import HybridStorage, S3Storage
@@ -29617,48 +31575,50 @@ from whoosh_modern.storage import HybridStorage, S3Storage
 remote = S3Storage(bucket="my-index-bucket", prefix="segments")
 storage = HybridStorage(local_cache="./cache", remote=remote)
 
-# Write-through: remote is source of truth, cache is updated on success
+# Write-through : le distant est la source de vérité, le cache est mis à jour en cas de succès
 storage.write("segment_1.dat", b"data")
 
-# First read: cache miss → fetch from S3, write-through into cache
+# Première lecture : cache manquant → récupère depuis S3, écrit dans le cache
 data = storage.read("segment_1.dat")
 
-# Second read: cache hit → served from local disk, zero network
+# Deuxième lecture : cache hit → servi depuis le disque local, zéro réseau
 data = storage.read("segment_1.dat")
 
-# Force refresh from remote
+# Forcer le rafraîchissement depuis le distant
 storage.invalidate("segment_1.dat")
 
-# Warm cache proactively
+# Préchauffer le cache de manière proactive
 storage.prefetch(["segment_2.dat", "segment_3.dat"])
 ```
 
-### Read path
+### Chemin de lecture
 
-1. local cache hit → return immediately
-2. cache miss → read from remote, write-through into cache, return
+1. cache local hit → retourne immédiatement
+2. cache manquant → lit depuis le distant, écrit dans le cache, retourne
 
-### Write path
+### Chemin d'écriture
 
-- `remote.write(key, data)` (source of truth)
-- on success → `local_cache.write(key, data)`
-- on failure → raise before polluting cache
+- `remote.write(key, data)` (source de vérité)
+- en cas de succès → `local_cache.write(key, data)`
+- en cas d'échec → lève l'erreur avant de polluer le cache
 
-### Cache eviction
+### Éviction du cache
 
-The local cache is bounded by `max_cache_size_mb` (default 1024 MB). When
-the limit is reached, the oldest entries are evicted using an LRU policy.
+Le cache local est borné par `max_cache_size_mb` (par défaut 1024 Mo).
+Lorsque la limite est atteinte, les entrées les plus anciennes sont
+évictées selon une politique LRU.
 
 ### `list_keys`
 
-`list_keys()` uses the remote as source of truth because the cache is only
-partial. Pass `include_cache=True` to return the union of remote and cache
-keys.
+`list_keys()` utilise le backend distant comme source de vérité car le
+cache n'est qu'partiel. Passez `include_cache=True` pour retourner
+l'union des clés distantes et du cache.
 
 ## AsyncHybridStorage
 
-Async variant of `HybridStorage`. Remote operations are executed on a worker
-thread via `asyncio.to_thread` so the event loop is never blocked.
+ Variante asynce de `HybridStorage`. Les opérations distantes sont
+exécutées sur un thread de travail via `asyncio.to_thread` afin de ne
+jamais bloquer la boucle d'événements.
 
 ```python
 import asyncio
@@ -29676,7 +31636,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## Using storage with SearchApplication
+## Utilisation du stockage avec SearchApplication
 
 ```python
 from whoosh_modern import SearchApplication, SQLSource
@@ -29693,32 +31653,34 @@ app.build()
 results = app.index.search("laptop")
 ```
 
-## Performance Benchmarks
+## Benchmarks de performance
 
-Benchmarks were run against a local MinIO instance using a 28.89 MB Whoosh
-index (2 segment files). Results are indicative of relative performance
-between strategies on S3-compatible storage.
+Les benchmarks ont été exécutés contre une instance MinIO locale en
+utilisant un index Whoosh de 28,89 Mo (2 fichiers de segment). Les
+résultats sont indicatives de la performance relative entre les
+stratégies sur du stockage compatible S3.
 
-| Strategy | Backup (MB/s) | Restore (MB/s) | Notes |
-|----------|---------------|----------------|-------|
-| `1_obj_per_segment` | 39.44 | 139.72 | Best restore throughput; simplest |
-| `compressed_zstd` | 31.56 | 133.74 | Lower bandwidth, CPU overhead |
-| `hybrid_cache_s3` | 44.97 | 133.61 | Best backup; excellent warm-cache reads |
-| `1_obj_per_posting_list` | 0.28 | 4.79 | **Avoid**: millions of small objects kill S3 |
+| Stratégie | Sauvegarde (Mo/s) | Restauration (Mo/s) | Notes |
+|-----------|-------------------|---------------------|-------|
+| `1_obj_per_segment` | 39.44 | 139.72 | Meilleur débit de restauration ; le plus simple |
+| `compressed_zstd` | 31.56 | 133.74 | Moins de bande passante, surcharge CPU |
+| `hybrid_cache_s3` | 44.97 | 133.61 | Meilleur sauvegarde ; lectures excellentes avec cache chaud |
+| `1_obj_per_posting_list` | 0.28 | 4.79 | **À éviter** : des millions de petits objets tuent S3 |
 
-### Recommendations
+### Recommandations
 
-- **Default**: `S3Storage` with 1 object per segment file. It offers the
-  best restore throughput and is the simplest to operate.
-- **Production with repeated reads**: `HybridStorage(local_cache, S3Storage)`.
-  After the first read, subsequent reads are served from local disk at
-  ~133 MB/s.
-- **Avoid**: 1 object per posting list. S3 is not optimized for millions of
-  tiny objects; latency and cost explode.
-- **Compression**: ZSTD reduces transfer size by ~20-30% at the cost of CPU.
-  Use it when network bandwidth is the bottleneck, not when CPU is.
+- **Par défaut** : `S3Storage` avec 1 objet par fichier de segment. Offre
+  le meilleur débit de restauration et est le plus simple à exploiter.
+- **Production avec lectures répétées** : `HybridStorage(local_cache, S3Storage)`.
+  Après la première lecture, les lectures suivantes sont servies depuis le
+  disque local à ~133 Mo/s.
+- **À éviter** : 1 objet par liste de postings. S3 n'est pas optimisé
+  pour des millions de petits objets ; la latence et les coûts explosent.
+- **Compression** : ZSTD réduit la taille de transfert d'environ 20-30%
+  au coût du CPU. Utilisez-le quand la bande passante réseau est le
+  goulot d'étranglement, pas quand c'est le CPU.
 
-### Running the benchmarks
+### Exécution des benchmarks
 
 ```bash
 # Start MinIO
