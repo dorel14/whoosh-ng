@@ -10,16 +10,16 @@ name: Deploy GitHub Pages
 #   4. Deploy GitHub Pages (this workflow) → builds & deploys LAST
 #
 # Triggers:
-#   - workflow_run on "Generate Changelog" completion (primary — ensures
-#     deployment happens after all version sync + changelog generation)
-#   - push to master (fallback — catches bot commits from sync-version.yml
-#     and changelog.yml; the fetch-depth: 0 checkout ensures the latest
-#     master state is used)
+#   - repository_dispatch from "Generate Changelog" (primary — the changelog
+#     workflow explicitly dispatches this event when it finishes, ensuring
+#     Pages deploys after all version sync + changelog generation)
+#   - push to master (fallback — catches all pushes including bot commits
+#     from sync-version.yml and changelog.yml; the fetch-depth: 0 checkout
+#     ensures the latest master state is used)
+#   - workflow_dispatch (manual trigger for debugging)
 on:
-  workflow_run:
-    workflows: ["Generate Changelog"]
-    types:
-      - completed
+  repository_dispatch:
+    types: [deploy-pages]
   push:
     branches: [master]
   workflow_dispatch:
@@ -28,7 +28,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  actions: read  # Required for workflow_run trigger to check triggering workflow status
 
 concurrency:
   group: pages
@@ -38,14 +37,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # For workflow_run: only proceed if the triggering workflow succeeded.
-    # For push: always proceed (the concurrency group prevents overlapping
-    # deploys, and the checkout fetch-depth: 0 ensures we get the latest
-    # master state including any bot commits from the release chain).
-    if: |
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-      (github.event_name == 'push') ||
-      (github.event_name == 'workflow_dispatch')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,10 +58,10 @@ jobs:
       - name: Install pydoctor
         run: pip install pydoctor
 
-      - name: Generate API docs (safety net — changelog.yml also runs this)
+      - name: Generate API docs
         run: python scripts/generate_api_docs.py
 
-      - name: Generate llms.txt (safety net — changelog.yml also runs this)
+      - name: Generate llms.txt
         run: python scripts/generate_llm_docs.py
 
       - name: Install dependencies
