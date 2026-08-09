@@ -1,0 +1,47 @@
+name: Build API Docs
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/whoosh/**'
+      - 'src/whoosh_modern/**'
+      - 'scripts/generate_api_docs.py'
+      - 'pydoctor.ini'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-docs:
+    name: Generate API Docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pydoctor
+        run: pip install pydoctor
+
+      - name: Generate API docs
+        run: python scripts/generate_api_docs.py
+
+      - name: Build Docusaurus site
+        working-directory: ./website
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs-build
+          path: ./website/build
+          include-hidden-files: true

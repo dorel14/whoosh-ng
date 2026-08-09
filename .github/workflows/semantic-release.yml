@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - "src/**"
+      - "pyproject.toml"
   workflow_dispatch:
   workflow_run:
     workflows: ["CI", "Legacy Code Validation"]
@@ -15,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  actions: read  # Required for workflow_run trigger
 
 concurrency:
   group: release-${{ github.ref }}
@@ -22,7 +24,10 @@ concurrency:
 
 jobs:
   release:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    if: |
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event_name == 'workflow_run')
     name: Release
     runs-on: ubuntu-latest
     permissions:
@@ -36,6 +41,26 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GH_TOKEN }}
 
+      # For workflow_run triggers: verify that src/ or pyproject.toml changed
+      # in the commit that triggered CI. This prevents semantic-release from
+      # running on docs-only or workflow-only changes.
+      - name: Check if src changed (workflow_run only)
+        if: github.event_name == 'workflow_run'
+        id: src_check
+        run: |
+          HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          echo "Checking commit: $HEAD_SHA"
+          CHANGED=$(git diff --name-only "${HEAD_SHA}~1" "$HEAD_SHA" 2>/dev/null || git diff --name-only "$HEAD_SHA" HEAD)
+          if echo "$CHANGED" | grep -qE '^(src/|pyproject\.toml)'; then
+            echo "src_changed=true" >> "$GITHUB_OUTPUT"
+            echo "Source files changed — proceeding with release check"
+          else
+            echo "src_changed=false" >> "$GITHUB_OUTPUT"
+            echo "No source changes — skipping release"
+            echo "Changed files:"
+            echo "$CHANGED"
+          fi
+
       - name: Skip if release commit
         id: skip
         run: |
@@ -45,7 +70,19 @@ jobs:
             echo "Skipping: latest commit is a release commit"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "Proceeding: not a release commit"
+          fi
+
+      # For workflow_run triggers: combine the release-commit skip with src check
+      - name: Final skip decision (workflow_run only)
+        if: github.event_name == 'workflow_run' && steps.skip.outputs.skip != 'true'
+        id: skip_src
+        run: |
+          if [ "${{ steps.src_check.outputs.src_changed }}" != "true" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping: no src/ or pyproject.toml changes"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "Proceeding: source files changed"
           fi
 
       - name: Set up Python 3.12
@@ -61,7 +98,7 @@ jobs:
 
       - name: Determine release version
         id: version
-        if: steps.skip.outputs.skip != 'true'
+        if: steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
         run: |
           VERSION="$(python -m semantic_release version --print)"
           if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
@@ -72,22 +109,22 @@ jobs:
           fi
 
       - name: Update docs & Release
-        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true'
+        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
 
           # Mise à jour du README et des Markdown
-          find docs/ -name "*.md" -exec sed -i -E \
-            "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" {} \;
+           find docs/ -name "*.md" -not -path "docs/archive_jekyll/*" -exec sed -i -E \
+             "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" {} \;
 
           sed -i -E "s/whoosh-ng==(\{[Vv]ersion\}|[0-9.]+)/whoosh-ng==$VERSION/g" README.md
 
           # Mise à jour de docs/_config.yml (clé 'version:')
-          if [ -f docs/_config.yml ]; then
-            sed -i -E "s/^(v|V)ersion: .*/version: $VERSION/" docs/_config.yml
-          fi
+           if [ -f docs/archive_jekyll/_config.yml ]; then
+             sed -i -E "s/^(v|V)ersion: .*/version: $VERSION/" docs/archive_jekyll/_config.yml
+           fi
 
           # Configurer git et commiter les changements
           git config user.name "github-actions[bot]"
@@ -97,9 +134,18 @@ jobs:
           python -m semantic_release version --vcs-release
 
       - name: Publish to PyPI
-        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true'
+        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
+          set -e
           uv build
+          # Check if version already exists on PyPI to prevent 400 errors
+          VERSION="${{ steps.version.outputs.version }}"
+          EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://pypi.org/pypi/whoosh-ng/$VERSION/json)
+          if [ "$EXISTS" == "200" ]; then
+            echo "Version $VERSION already exists on PyPI — skipping publish"
+            exit 0
+          fi
+          echo "Publishing version $VERSION to PyPI..."
           uv publish --token "$PYPI_TOKEN"

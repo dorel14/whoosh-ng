@@ -1,11 +1,28 @@
 name: Deploy GitHub Pages
 
-# Build and deploy the Jekyll site (source: docs/) on every push to master
+# Build and deploy the Docusaurus site as the LAST step after changelog
+# generation has completed.
+#
+# Workflow chain on master:
+#   1. Semantic Release → version bump + tag → pushes to master
+#   2. Sync Version → syncs version strings → pushes to master
+#   3. Generate Changelog → changelog + API docs → pushes to master
+#   4. Deploy GitHub Pages (this workflow) → builds & deploys LAST
+#
+# Triggers:
+#   - repository_dispatch from "Generate Changelog" (primary — the changelog
+#     workflow explicitly dispatches this event when it finishes, ensuring
+#     Pages deploys after all version sync + changelog generation)
+#   - push to master (fallback — catches all pushes including bot commits
+#     from sync-version.yml and changelog.yml; the fetch-depth: 0 checkout
+#     ensures the latest master state is used)
+#   - workflow_dispatch (manual trigger for debugging)
 on:
+  repository_dispatch:
+    types: [deploy-pages]
   push:
-    branches:
-      - master
-  workflow_dispatch: # Manual trigger for re-runs / debugging
+    branches: [master]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,12 +31,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
-
-env:
-  JEKYLL_ENV: production
-  # Project Pages are served at https://dorel14.github.io/whoosh-ng
-  BASE_URL: /whoosh-ng
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -28,26 +40,42 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
-          bundler-cache: true # Caches gems between runs (uses docs/Gemfile.lock)
+          fetch-depth: 0
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          base_url: ${{ env.BASE_URL }}
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
 
-      - name: Build with Jekyll
-        run: bundle exec jekyll build --source docs --destination _site
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pydoctor
+        run: pip install pydoctor
+
+      - name: Generate API docs
+        run: python scripts/generate_api_docs.py
+
+      - name: Generate llms.txt
+        run: python scripts/generate_llm_docs.py
+
+      - name: Install dependencies
+        working-directory: ./website
+        run: npm ci
+
+      - name: Build
+        working-directory: ./website
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
-          # Include hidden files like .nojekyll for Jekyll-built sites without one
+          path: ./website/build
           include-hidden-files: true
 
   deploy:

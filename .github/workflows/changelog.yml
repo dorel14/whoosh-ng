@@ -1,0 +1,79 @@
+name: Generate Changelog
+
+# Runs as the third step in the master deployment chain:
+#   1. Semantic Release → version bump + tag + release → pushes to master
+#   2. Sync Version → sync version strings in docs/config → pushes to master
+#   3. Generate Changelog (this workflow) → changelog + API docs + llms.txt → pushes to master
+#   4. Deploy GitHub Pages → build site & deploy
+#
+# Using workflow_run on "Sync Version" ensures this runs strictly after
+# sync-version.yml has pushed its commit, so the changelog generation
+# sees the fully synced version strings.
+on:
+  workflow_run:
+    workflows: ["Sync Version"]
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: changelog
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read  # Required for workflow_run trigger
+
+jobs:
+  changelog:
+    name: Generate Changelog from GitHub Releases
+    runs-on: ubuntu-latest
+    # Only proceed if the triggering workflow (Sync Version) succeeded.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pydoctor
+        run: pip install pydoctor
+
+      - name: Generate changelog from releases and commits
+        run: python scripts/generate_changelog.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate API docs
+        run: python scripts/generate_api_docs.py
+
+      - name: Generate llms.txt
+        run: python scripts/generate_llm_docs.py
+
+      - name: Commit and push changelog updates
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git fetch origin master
+          git reset --hard origin/master
+          git checkout master
+          git add website/docs/core/changelog.md website/i18n/fr/docusaurus-plugin-content-docs/current/core/changelog.md
+          git add website/docs/api/reference.md website/i18n/fr/docusaurus-plugin-content-docs/current/api/reference.md
+          git add website/static/llms.txt website/static/llms-full.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update changelog and API docs [skip ci]" && git push)
+
+      - name: Trigger Pages deployment
+        if: always()
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/dispatches \
+            -d '{"event_type":"deploy-pages"}'

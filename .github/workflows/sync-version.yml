@@ -8,6 +8,12 @@ on:
 
 permissions:
   contents: read
+  actions: read  # Required for workflow_run trigger
+
+# Prevent concurrent version sync commits from racing with other workflows
+concurrency:
+  group: version-sync
+  cancel-in-progress: false
 
 jobs:
   sync-version:
