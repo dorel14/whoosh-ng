@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  actions: read  # Required for workflow_run trigger
 
 concurrency:
   group: release-${{ github.ref }}

@@ -20,14 +20,16 @@ concurrency:
   group: changelog
   cancel-in-progress: false
 
+permissions:
+  contents: write
+  actions: read  # Required for workflow_run trigger
+
 jobs:
   changelog:
     name: Generate Changelog from GitHub Releases
     runs-on: ubuntu-latest
     # Only proceed if the triggering workflow (Sync Version) succeeded.
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,4 +67,4 @@ jobs:
           git add website/docs/core/changelog.md website/i18n/fr/docusaurus-plugin-content-docs/current/core/changelog.md
           git add website/docs/api/reference.md website/i18n/fr/docusaurus-plugin-content-docs/current/api/reference.md
           git add website/static/llms.txt website/static/llms-full.txt
-          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update changelog and API docs" && git push)
+          git diff --quiet && git diff --staged --quiet || (          git commit -m "docs: update changelog and API docs [skip ci]" && git push)
