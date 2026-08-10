@@ -53,6 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   configured `local_path`. Keys are now sanitized and validated before being
   used to build local scratch file paths, raising `ValueError` for `..`
   segments, absolute paths, or resolutions escaping `local_path`.
+- `whoosh_modern.linguistics.stemmers`: restored backward compatibility for
+  `FrenchAnalyzer`, `EnglishAnalyzer`, `GermanAnalyzer`, `SpanishAnalyzer`, and
+  `ItalianAnalyzer`. These are still ready-to-use `CompositeAnalyzer`
+  instances (`FrenchAnalyzer(text)`), but calling them with no arguments
+  (`FrenchAnalyzer()`) now returns a fresh analyzer instance instead of
+  raising `TypeError`, so historical class-style usage
+  (`FrenchAnalyzer()(text)`) keeps working.
 
 ### In Progress (tracked in `.kilo/plans/1783617590838-whoosh-ng-consolidated-plan.md`)
 - Async ecosystem: `run_sync` bridge, async plugin registration,

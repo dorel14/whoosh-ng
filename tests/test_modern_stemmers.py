@@ -55,6 +55,42 @@ class TestLanguageAnalyzers:
         assert [t.text for t in SpanishAnalyzer(word)] != [t.text for t in EnglishAnalyzer(word)]
 
 
+class TestLanguageAnalyzersBackwardCompatibility:
+    """Ensure the historical class-style usage keeps working.
+
+    Before being refactored into module-level ``LanguageAnalyzer`` instances,
+    these names used to be classes, so existing code instantiates them before
+    calling: ``FrenchAnalyzer()(text)``. This must keep working alongside the
+    newer instance-style usage (``FrenchAnalyzer(text)``).
+    """
+
+    @pytest.mark.parametrize(
+        "analyzer",
+        [FrenchAnalyzer, EnglishAnalyzer, GermanAnalyzer, SpanishAnalyzer, ItalianAnalyzer],
+    )
+    def test_instantiation_style_call_returns_analyzer_instance(self, analyzer):
+        # FrenchAnalyzer() must not raise TypeError and must return something
+        # usable as an analyzer.
+        instance = analyzer()
+        assert isinstance(instance, CompositeAnalyzer)
+        assert instance is not analyzer
+
+    @pytest.mark.parametrize(
+        "analyzer",
+        [FrenchAnalyzer, EnglishAnalyzer, GermanAnalyzer, SpanishAnalyzer, ItalianAnalyzer],
+    )
+    def test_instantiation_style_call_then_call_with_text(self, analyzer):
+        # Historical usage: FrenchAnalyzer()(text)
+        tokens_via_instantiation = [t.text for t in analyzer()("maison et ordinateur")]
+        # Modern usage: FrenchAnalyzer(text)
+        tokens_direct = [t.text for t in analyzer("maison et ordinateur")]
+        assert tokens_via_instantiation == tokens_direct
+        assert len(tokens_direct) > 0
+
+    def test_french_stems_via_instantiation_style(self):
+        assert [t.text for t in FrenchAnalyzer()("maisons")] == ["maison"]
+
+
 class TestStemmingAnalyzerLanguageFix:
     def test_stemming_analyzer_with_language(self):
         analyzer = stemming_analyzer(stemmer="internal", language="french")
