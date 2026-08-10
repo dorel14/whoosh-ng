@@ -6322,7 +6322,6 @@ pipeline = MiddlewarePipeline(
     CacheMiddleware(maxsize=128),
 )
 
-@pipeline.wrap
 def my_operation():
     return searcher.search(query)
 
@@ -6331,7 +6330,7 @@ result = pipeline.execute(my_operation)
 
 ### Middleware Types
 
-- **`Middleware`** (abstract): Subclass and implement `wrap(operation)`.
+- **`Middleware`**: The core base class (`whoosh.middleware.base.Middleware`, re-exported from `whoosh_modern.middleware`). Subclass it and implement the lifecycle hooks (`before_index`, `after_index`, `before_search`, `after_search`, `on_error`, `on_commit`). `RetryMiddleware`, `LoggingMiddleware`, and `CacheMiddleware` additionally keep a `wrap(operation)` helper for decorating callables.
 - **`RetryMiddleware`**: Retries failed operations with exponential or linear
   backoff, with optional jitter.
 - **`LoggingMiddleware`**: Logs execution time and errors.
@@ -6364,7 +6363,7 @@ view.evolve_schema({"new_field": fields.TEXT})  # Add fields without reindexing
 ## Optimized Writer
 
 ```python
-from whoosh_modern.writer import ModernIndex, ModernIndexWriter
+from whoosh_modern.writer import ModernIndex
 
 # Create or open an optimized index
 index = ModernIndex.create("indexdir", schema=my_schema)
@@ -6519,7 +6518,8 @@ from whoosh_modern.storage import (
 
 ### FileStorage
 
-Local filesystem storage. Keys are relative paths under ``root``.
+Local filesystem storage. `FileStorage` is an alias of `FileStorageProvider`. Keys are
+relative paths under ``root``.
 
 ```python
 from whoosh_modern.storage import FileStorage
@@ -12310,8 +12310,13 @@ FacetManager automatically identifies facetable fields:
 ```python
 # Auto-discovered facets
 facets = manager.get_facets()
-# {"title": TermsFacet(limit=100), "category": TermsFacet(limit=100), "price": RangeFacet(), "active": TermsFacet(limit=100)}
+# {"title": TermsFacet(limit=100), "category": TermsFacet(limit=100),
+#  "price": RangeFacet("price", 0, 1000, 100), "active": TermsFacet(limit=100)}
 ```
+
+> `RangeFacet` and `DateRangeFacet` are re-exports of the core
+> `whoosh.sorting.RangeFacet` / `whoosh.sorting.DateRangeFacet`, so the facet objects
+> returned by `FacetManager` can be passed directly to `searcher.search(..., groupedby=...)`.
 
 ## Manual Override
 
@@ -14517,8 +14522,8 @@ from whoosh_modern.linguistics.stemmers import (
     ItalianAnalyzer,
 )
 
-# Each analyzer is callable and returns a list of tokens
-analyzer = EnglishAnalyzer()
+# Each analyzer is an instance of LanguageAnalyzer and is callable: it returns a list of tokens
+analyzer = EnglishAnalyzer
 tokens = analyzer("The running cats")
 # tokens are stemmed: ["run", "cat"] (stop words removed)
 ```
@@ -14602,7 +14607,7 @@ with MiddlewareSearcher(ix.searcher(), chain) as searcher:
 # Middleware & Plugin Pipeline
 
 Module: `whoosh.middleware`, `whoosh.middleware.chain`, `whoosh.middleware.context`, `whoosh_modern.middleware`
-Version: 2.0.0
+Version: 3.0.0
 
 The middleware pipeline allows you to intercept and modify indexing and search operations. It is the primary extension mechanism for cross-cutting concerns like logging, caching, metrics, query rewriting, and security. Middleware can come from both the core `whoosh.middleware` package and from plugins loaded via the `PluginManager`.
 
@@ -14794,16 +14799,26 @@ prom = PrometheusMiddleware()
 
 ### Modern Middleware (`whoosh_modern.middleware`)
 
-#### Resilience Pipeline (`whoosh_modern.middleware.pipeline`)
+#### Resilience Middleware (core subclasses)
 
-These use a **wrap-style** API (decorator pattern) rather than hooks:
+`RetryMiddleware`, `LoggingMiddleware`, and `CacheMiddleware` are now **subclasses of the
+core `whoosh.middleware.base.Middleware`** (the same base class re-exported as
+`whoosh_modern.middleware.Middleware`). They participate in the standard hook pipeline
+(`before_index` / `after_index` / `before_search` / `after_search` / `on_error` /
+`on_commit`) and additionally keep a `wrap(operation)` helper so arbitrary callables can
+still be decorated.
+
+`MiddlewarePipeline` is a thin wrapper around `whoosh.middleware.chain.MiddlewareChain`
+that executes a callable through the chain hooks and returns its result. The previous
+`whoosh_modern.middleware.pipeline` module has been removed — import these names directly
+from `whoosh_modern.middleware`.
 
 | Class                  | Description                              |
 |------------------------|------------------------------------------|
 | `RetryMiddleware`      | Retries failed operations with exponential backoff |
 | `LoggingMiddleware`    | Logs operation execution time and errors |
 | `CacheMiddleware`      | Caches operation results (LRU eviction)  |
-| `MiddlewarePipeline`   | Chains multiple wrap-style middlewares   |
+| `MiddlewarePipeline`   | Chains multiple middlewares via `MiddlewareChain` |
 
 ```python
 from whoosh_modern.middleware import MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
@@ -14879,30 +14894,32 @@ class RequestLoggingMiddleware(Middleware):
         return context
 ```
 
-### Wrap-Style Middleware
+### Custom Middleware (Hook-Based)
+
+The `Middleware` base class is `whoosh.middleware.base.Middleware`, re-exported from
+`whoosh_modern.middleware`. Subclass it and implement the lifecycle hooks:
 
 ```python
-from whoosh_modern.middleware.pipeline import Middleware as WrapMiddleware
+from whoosh_modern.middleware import Middleware
+from whoosh.middleware.context import MiddlewareContext
 
-class RetryMiddleware(WrapMiddleware):
-    """Retry failed operations with backoff."""
+class RetryMiddleware(Middleware):
+    """Retry failed operations with backoff (illustrative)."""
 
     def __init__(self, attempts: int = 3) -> None:
         self._attempts = attempts
 
-    def wrap(self, operation):
-        def wrapped(*args, **kwargs):
-            last_exc = None
-            for attempt in range(self._attempts):
-                try:
-                    return operation(*args, **kwargs)
-                except Exception as e:
-                    last_exc = e
-                    if attempt < self._attempts - 1:
-                        time.sleep(2 ** attempt)
-            raise last_exc
-        return wrapped
+    def on_error(self, context: MiddlewareContext, exc: Exception) -> None:
+        # Built-in resilience middlewares already implement this pattern.
+        # Custom logic can record failures in context.metadata here.
+        context.metadata.setdefault("retry_errors", 0)
+        context.metadata["retry_errors"] += 1
+        raise exc
 ```
+
+> Note: the built-in `RetryMiddleware`, `LoggingMiddleware`, and `CacheMiddleware` also
+> expose a `wrap(operation)` helper (preserved for backwards compatibility) so they can
+> decorate plain callables, but their primary mechanism is the hook pipeline above.
 
 ### Middleware with Plugin Integration
 
@@ -14914,7 +14931,7 @@ from whoosh.plugins.manager import Plugin
 class LoggingPlugin(Plugin):
     name = "logging"
     version = "1.0.0"
-    middleware = ["whoosh_modern.middleware.pipeline.LoggingMiddleware"]
+    middleware = ["whoosh_modern.middleware.LoggingMiddleware"]
 
     def register(self, manager):
         manager.register_middleware(
@@ -17603,11 +17620,12 @@ pip install whoosh-ng[s3]
 
 ## SnapshotStorage
 
-Simple S3 snapshot storage without local cache. This is the simplest
-S3-backed storage strategy:
+Simple S3 snapshot storage. S3 remains the source of truth; on read, the object is
+downloaded from S3 and also persisted under `local_path` so subsequent reads of the same
+key can be served from the local scratch copy:
 
 - Write: upload segment directly to S3
-- Read: download segment from S3 to local temporary file
+- Read: download segment from S3, cache it under `local_path`
 
 Use this when you want S3 as a simple backup/restore target without the
 complexity of a local cache.
@@ -17772,12 +17790,12 @@ SearchApplication.build()
     │
     ├── source.discover_schema() ──► Whoosh Schema
     │
-    ├── storage._root resolution
+    ├── storage root resolution
     │       │
-    │       ├── HybridStorage/S3Storage/FileStorage
-    │       │   └── has _root? ──► whoosh.index.create_in(root, schema)
+    │       ├── FileStorageProvider (exposed as `FileStorage`)
+    │       │   └── exposes a public `root` ──► whoosh.index.create_in(root, schema)
     │       │
-    │       └── No _root (pure S3/SnapshotStorage)
+    │       └── Other providers (S3 / Snapshot / Hybrid, no filesystem root)
     │           └── tempfile.mkdtemp() ──► create_in(tmpdir, schema)
     │
     ├── Writer = index.writer()
@@ -17869,7 +17887,7 @@ with MiddlewareWriter(ix.writer(), chain) as writer:
 | `SyncStorageProvider` / `AsyncStorageProvider` | **Contract** defining `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
 | `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implementations** of the contract |
 | `StorageMiddleware` | **Integration layer** that calls the provider at specific lifecycle hooks (`before_index`, `on_commit`) |
-| `SearchApplication` | **Entry point** that extracts `_root` from the provider to create the Whoosh index directory |
+| `SearchApplication` | **Entry point** that delegates to `SearchView.build()`; when the storage is a `FileStorageProvider` (exposed as `FileStorage`) it uses its public `root` to create the Whoosh index directory, otherwise it falls back to a temporary directory |
 
 The provider itself does **not** intercept Whoosh's internal segment reads. Those reads go through Whoosh's built-in `FileStorage` (`whoosh.filedb.filestore`) which reads from the filesystem path given to `create_in()`. The Whoosh-NG storage provider abstraction is designed for:
 - Custom segment routing (S3, SQLite, hybrid cache)
@@ -30594,16 +30612,26 @@ prom = PrometheusMiddleware()
 
 ### Middleware Moderne (`whoosh_modern.middleware`)
 
-#### Pipeline de Résilience (`whoosh_modern.middleware.pipeline`)
+#### Middleware de Résilience (sous-classes du core)
 
-Ces middleware utilisent un **API de type wrapper** (pattern décorateur) plutôt que des hooks :
+`RetryMiddleware`, `LoggingMiddleware` et `CacheMiddleware` sont désormais des **sous-classes
+du core `whoosh.middleware.base.Middleware`** (la même classe de base ré-exportée sous
+`whoosh_modern.middleware.Middleware`). Ils participent au pipeline de hooks standard
+(`before_index` / `after_index` / `before_search` / `after_search` / `on_error` /
+`on_commit`) et conservent en plus un helper `wrap(operation)` permettant de décorer de
+simples callables.
+
+`MiddlewarePipeline` est un fin wrapper autour de `whoosh.middleware.chain.MiddlewareChain`
+qui exécute un callable à travers les hooks de la chaîne et renvoie son résultat. L'ancien
+module `whoosh_modern.middleware.pipeline` a été supprimé — importez ces noms directement
+depuis `whoosh_modern.middleware`.
 
 | Classe                  | Description                              |
 |------------------------|------------------------------------------|
 | `RetryMiddleware`      | Réessaie les opérations échouées avec backoff exponentiel |
 | `LoggingMiddleware`    | Journalise le temps d'exécution et les erreurs |
 | `CacheMiddleware`      | Met en cache les résultats d'opérations (éviction LRU) |
-| `MiddlewarePipeline`   | Enchaîne plusieurs middleware de type wrapper |
+| `MiddlewarePipeline`   | Enchaîne plusieurs middleware via `MiddlewareChain` |
 
 ```python
 from whoosh_modern.middleware import MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
@@ -30679,30 +30707,32 @@ class RequestLoggingMiddleware(Middleware):
         return context
 ```
 
-### Middleware de Type Wrapper
+### Middleware Personnalisé (Basé sur des Hooks)
+
+La classe de base `Middleware` est `whoosh.middleware.base.Middleware`, ré-exportée depuis
+`whoosh_modern.middleware`. Sous-classez-la et implémentez les hooks du cycle de vie :
 
 ```python
-from whoosh_modern.middleware.pipeline import Middleware as WrapMiddleware
+from whoosh_modern.middleware import Middleware
+from whoosh.middleware.context import MiddlewareContext
 
-class RetryMiddleware(WrapMiddleware):
-    """Réessaie les opérations échouées avec backoff."""
+class RetryMiddleware(Middleware):
+    """Réessaie les opérations échouées avec backoff (illustratif)."""
 
     def __init__(self, attempts: int = 3) -> None:
         self._attempts = attempts
 
-    def wrap(self, operation):
-        def wrapped(*args, **kwargs):
-            last_exc = None
-            for attempt in range(self._attempts):
-                try:
-                    return operation(*args, **kwargs)
-                except Exception as e:
-                    last_exc = e
-                    if attempt < self._attempts - 1:
-                        time.sleep(2 ** attempt)
-            raise last_exc
-        return wrapped
+    def on_error(self, context: MiddlewareContext, exc: Exception) -> None:
+        # Les middleware de résilience intégrés implémentent déjà ce pattern.
+        context.metadata.setdefault("retry_errors", 0)
+        context.metadata["retry_errors"] += 1
+        raise exc
 ```
+
+> Note : les `RetryMiddleware`, `LoggingMiddleware` et `CacheMiddleware` intégrés exposent
+> aussi un helper `wrap(operation)` (préservé pour compatibilité ascendante) leur permettant
+> de décorer de simples callables, mais leur mécanisme principal reste le pipeline de hooks
+> ci-dessus.
 
 ### Middleware avec Intégration de Plugin
 
@@ -30714,7 +30744,7 @@ from whoosh.plugins.manager import Plugin
 class LoggingPlugin(Plugin):
     name = "logging"
     version = "1.0.0"
-    middleware = ["whoosh_modern.middleware.pipeline.LoggingMiddleware"]
+    middleware = ["whoosh_modern.middleware.LoggingMiddleware"]
 
     def register(self, manager):
         manager.register_middleware(
