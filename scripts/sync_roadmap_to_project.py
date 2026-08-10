@@ -142,6 +142,7 @@ def gh_post(path: str, body: dict[str, Any]) -> Any:
     )
     if resp.status_code == 429:
         import time
+
         reset = int(resp.headers.get("X-RateLimit-Reset", 0))
         sleep = max(reset - time.time(), 1)
         print(f"⏳ Rate limit, pause {sleep:.1f}s")
@@ -160,6 +161,7 @@ def gh_patch(path: str, body: dict[str, Any]) -> Any:
     )
     if resp.status_code == 429:
         import time
+
         reset = int(resp.headers.get("X-RateLimit-Reset", 0))
         sleep = max(reset - time.time(), 1)
         print(f"⏳ Rate limit, pause {sleep:.1f}s")
@@ -211,6 +213,7 @@ def gh_graphql(query: str, variables: dict[str, Any] | None = None) -> dict[str,
     )
     if resp.status_code == 429:
         import time
+
         reset = int(resp.headers.get("X-RateLimit-Reset", 0))
         sleep = max(reset - time.time(), 1)
         print(f"⏳ Rate limit, pause {sleep:.1f}s")
@@ -600,8 +603,10 @@ def update_roadmap_with_issues(
     if changed:
         with open(path, "w", encoding="utf-8") as f:
             f.writelines(updated_lines)
-        print(f"📝 Roadmap mis à jour avec "
-              f"{len(epic_issues) + len(sprint_issues)} références d'issues")
+        print(
+            f"📝 Roadmap mis à jour avec "
+            f"{len(epic_issues) + len(sprint_issues)} références d'issues"
+        )
     else:
         print("📝 Roadmap déjà à jour (aucune modification)")
 
@@ -643,14 +648,16 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
             m_lot = LOT_RE.match(stripped)
             if m_lot and not stripped.startswith("###"):
                 current_lot = m_lot.group(1).strip()
-                items.append({
-                    "type": "lot",
-                    "title": current_lot,
-                    "status": None,
-                    "parent": None,
-                    "lot": current_lot,
-                    "epic": None,
-                })
+                items.append(
+                    {
+                        "type": "lot",
+                        "title": current_lot,
+                        "status": None,
+                        "parent": None,
+                        "lot": current_lot,
+                        "epic": None,
+                    }
+                )
                 continue
 
             if stripped.startswith("### "):
@@ -661,14 +668,16 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
                     raw_status = m_epic.group(3).strip().upper()
                     status = status_from_text(raw_status)
 
-                    items.append({
-                        "type": "epic",
-                        "title": f"{epic_id} — {epic_title}",
-                        "status": status,
-                        "parent": current_lot,
-                        "lot": current_lot,
-                        "epic": epic_id,
-                    })
+                    items.append(
+                        {
+                            "type": "epic",
+                            "title": f"{epic_id} — {epic_title}",
+                            "status": status,
+                            "parent": current_lot,
+                            "lot": current_lot,
+                            "epic": epic_id,
+                        }
+                    )
                     continue
 
                 content = stripped[4:].strip()
@@ -688,7 +697,7 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
                 )
                 if id_match:
                     epic_id = id_match.group(1)
-                    rest = title_part[len(id_match.group(0)):].strip()
+                    rest = title_part[len(id_match.group(0)) :].strip()
                     if rest.startswith("— "):
                         rest = rest[2:].strip()
                     elif rest.startswith("—"):
@@ -705,14 +714,16 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
 
                     full_title = f"{epic_id} — {rest}" if rest else epic_id
 
-                    items.append({
-                        "type": "epic",
-                        "title": full_title,
-                        "status": status,
-                        "parent": current_lot,
-                        "lot": current_lot,
-                        "epic": epic_id,
-                    })
+                    items.append(
+                        {
+                            "type": "epic",
+                            "title": full_title,
+                            "status": status,
+                            "parent": current_lot,
+                            "lot": current_lot,
+                            "epic": epic_id,
+                        }
+                    )
                     continue
 
             m_sprint = SPRINT_RE.match(stripped)
@@ -721,14 +732,16 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
                 raw_sprint_status = m_sprint.group(3).upper()
                 sprint_status = status_from_text(raw_sprint_status)
                 sprint_title = m_sprint.group(2).strip()
-                items.append({
-                    "type": "sprint",
-                    "title": f"{sprint_id} — {sprint_title}",
-                    "status": sprint_status,
-                    "parent": None,
-                    "lot": None,
-                    "epic": None,
-                })
+                items.append(
+                    {
+                        "type": "sprint",
+                        "title": f"{sprint_id} — {sprint_title}",
+                        "status": sprint_status,
+                        "parent": None,
+                        "lot": None,
+                        "epic": None,
+                    }
+                )
                 continue
 
             if (stripped.startswith("## ") and not stripped.startswith("## Lot")) or (
@@ -926,8 +939,7 @@ def main() -> None:
         sprint_project_item_id: str | None = None
         try:
             sprint_project_item_id = add_issue_to_project(
-                project_id,
-                get_issue_node_id(repo_id, issue_number)
+                project_id, get_issue_node_id(repo_id, issue_number)
             )
         except Exception as exc:
             print(f"   ⚠️  Issue non ajoutée au Project: {title}: {exc}")
@@ -944,13 +956,15 @@ def main() -> None:
         if parent_number and parent_number != issue_number:
             try:
                 if is_sub_issue(parent_number, issue_number):
-                    print(f"   ✅ Sub-issue déjà liée à #{parent_number}: "
-                          f"{title} (#{issue_number})")
+                    print(
+                        f"   ✅ Sub-issue déjà liée à #{parent_number}: {title} (#{issue_number})"
+                    )
                 elif add_sub_issue(parent_number, issue_number):
                     print(f"   ✅ Sub-issue liée à #{parent_number}: {title} (#{issue_number})")
                 else:
-                    print(f"   ⚠️  Sub-issue non activé, issue standalone: "
-                          f"{title} (#{issue_number})")
+                    print(
+                        f"   ⚠️  Sub-issue non activé, issue standalone: {title} (#{issue_number})"
+                    )
             except Exception as exc:
                 print(f"   ⚠️  Sub-issue échouée, issue standalone: {title}: {exc}")
 
@@ -958,16 +972,20 @@ def main() -> None:
         if sprint_project_item_id:
             if sprint["status"] and sprint["status"] in status_opts:
                 set_select_field(
-                    project_id, sprint_project_item_id,
-                    status_field["id"], status_opts[sprint["status"]],
+                    project_id,
+                    sprint_project_item_id,
+                    status_field["id"],
+                    status_opts[sprint["status"]],
                 )
 
             if priority_field and sprint["status"] and sprint["status"] in PRIORITY_FROM_STATUS:
                 prio = PRIORITY_FROM_STATUS[sprint["status"]]
                 if prio in priority_opts:
                     set_select_field(
-                        project_id, sprint_project_item_id,
-                        priority_field["id"], priority_opts[prio],
+                        project_id,
+                        sprint_project_item_id,
+                        priority_field["id"],
+                        priority_opts[prio],
                     )
 
         sprint_issues[title] = issue_number
