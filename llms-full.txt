@@ -14526,6 +14526,11 @@ from whoosh_modern.linguistics.stemmers import (
 analyzer = EnglishAnalyzer
 tokens = analyzer("The running cats")
 # tokens are stemmed: ["run", "cat"] (stop words removed)
+
+# Backward-compatible "class-style" usage also works: calling the analyzer
+# with no arguments returns a fresh analyzer instance, so historical code
+# written as EnglishAnalyzer()(text) keeps working unchanged.
+tokens = EnglishAnalyzer()("The running cats")
 ```
 
 ### Stemmer Backend Selection
