@@ -9,9 +9,14 @@ PyArrow, SQLAlchemy, Peewee, Tortoise ORM) implement their own
 ``discover_schema()`` directly from the native type system and do not
 need ``SchemaDiscovery``.
 
+Type mapping itself is **not** duplicated here: every inference delegates
+to the canonical :class:`whoosh_modern.models.base.TypeMapper`.
+
 Author: dorel14
 Version: 3.0.0
 """
+
+from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Sequence
@@ -19,6 +24,7 @@ from typing import Any
 
 from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT, Schema
 from whoosh_modern.exceptions import SchemaDiscoveryError
+from whoosh_modern.models.base import TypeMapper
 
 
 class SchemaDiscovery:
@@ -148,11 +154,16 @@ class SchemaDiscovery:
             current = type(field).__name__
             if current == "TEXT" and name not in searchable:
                 continue
-            if current == "TEXT" and SchemaDiscovery._looks_like_id(name):
-                optimized[name] = ID(stored=True)
-                continue
-            if current == "TEXT" and SchemaDiscovery._looks_like_bool(documents, name):
+            usage = {
+                "is_id": SchemaDiscovery._looks_like_id(name),
+                "is_bool": SchemaDiscovery._looks_like_bool(documents, name),
+            }
+            suggested = TypeMapper.suggest_type(current, usage)
+            if suggested == "BOOLEAN":
                 optimized[name] = BOOLEAN(stored=True)
+                continue
+            if suggested == "ID":
+                optimized[name] = ID(stored=True)
                 continue
             optimized[name] = field
         return Schema(**optimized)
@@ -187,7 +198,10 @@ class SchemaDiscovery:
 
     @staticmethod
     def _infer_field_type(value: Any) -> Any:
-        """Infer a Whoosh field type from a Python value.
+        """Infer a Whoosh field class from a Python value.
+
+        Delegates to the canonical
+        :meth:`whoosh_modern.models.base.TypeMapper.map_value`.
 
         Args:
             value: A sample Python value to infer the type from.
@@ -195,17 +209,7 @@ class SchemaDiscovery:
         Returns:
             A Whoosh field class (BOOLEAN, NUMERIC, KEYWORD, TEXT).
         """
-        if isinstance(value, bool):
-            return BOOLEAN
-        if isinstance(value, int):
-            return NUMERIC
-        if isinstance(value, float):
-            return NUMERIC
-        if isinstance(value, dict):
-            return KEYWORD
-        if isinstance(value, list):
-            return KEYWORD
-        return TEXT
+        return type(TypeMapper.map_value(value))
 
     @staticmethod
     def _looks_like_id(name: str) -> bool:

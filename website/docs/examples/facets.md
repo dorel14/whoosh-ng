@@ -36,8 +36,13 @@ FacetManager automatically identifies facetable fields:
 ```python
 # Auto-discovered facets
 facets = manager.get_facets()
-# {"title": TermsFacet(limit=100), "category": TermsFacet(limit=100), "price": RangeFacet(), "active": TermsFacet(limit=100)}
+# {"title": TermsFacet(limit=100), "category": TermsFacet(limit=100),
+#  "price": RangeFacet("price", 0, 1000, 100), "active": TermsFacet(limit=100)}
 ```
+
+> `RangeFacet` and `DateRangeFacet` are re-exports of the core
+> `whoosh.sorting.RangeFacet` / `whoosh.sorting.DateRangeFacet`, so the facet objects
+> returned by `FacetManager` can be passed directly to `searcher.search(..., groupedby=...)`.
 
 ## Manual Override
 

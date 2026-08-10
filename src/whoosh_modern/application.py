@@ -13,73 +13,8 @@ from typing import Any
 from whoosh.index import Index
 from whoosh.plugins.storage_base import SyncStorageProvider
 from whoosh_modern.data_sources import DataSource
-
-
-class FileStorage(SyncStorageProvider):
-    """Local filesystem storage provider (alias for FileStorageProvider).
-
-    Keys are interpreted as relative paths under ``root``.
-
-    Attributes:
-        _provider: The underlying ``FileStorageProvider`` instance.
-    """
-
-    def __init__(self, root: str) -> None:
-        """Initialize file-based storage.
-
-        Args:
-            root: Root directory path for storing index files.
-        """
-        from whoosh_modern.middleware.storage import FileStorageProvider
-
-        self._provider = FileStorageProvider(root)
-
-    def write(self, key: str, data: bytes) -> None:
-        """Write data to the file system.
-
-        Args:
-            key: Relative path key under the root directory.
-            data: Byte payload to store.
-        """
-        self._provider.write(key, data)
-
-    def read(self, key: str) -> bytes:
-        """Read data from the file system.
-
-        Args:
-            key: Relative path key under the root directory.
-
-        Returns:
-            The stored byte payload.
-        """
-        return self._provider.read(key)
-
-    def delete(self, key: str) -> None:
-        """Delete a file from the file system.
-
-        Args:
-            key: Relative path key under the root directory.
-        """
-        self._provider.delete(key)
-
-    def exists(self, key: str) -> bool:
-        """Check if a key exists in the file system.
-
-        Args:
-            key: Relative path key under the root directory.
-
-        Returns:
-            True if the file exists, False otherwise.
-        """
-        return self._provider.exists(key)
-
-    def list_keys(self) -> list[str]:
-        """List all keys (file paths) in the root directory.
-
-        Returns:
-            A list of relative path key strings.
-        """
-        return self._provider.list_keys()
+from whoosh_modern.middleware.storage import FileStorageProvider
+from whoosh_modern.views import SearchView
 
 
 class SearchApplication:
@@ -146,38 +81,34 @@ class SearchApplication:
         if self._source is None:
             raise ValueError("A source is required to build the index")
 
-        schema = self._source.discover_schema()
-        self._schema = schema
+        index_path = self._resolve_index_path()
 
-        if self._storage is not None:
-            storage_path = getattr(self._storage, "_provider", self._storage)
-            root = getattr(storage_path, "_root", None)
-            if root is not None:
-                from whoosh.index import create_in
-
-                self._index = create_in(root, schema)
-            else:
-                import tempfile
-
-                from whoosh.index import create_in
-
-                tmp = tempfile.mkdtemp()
-                self._index = create_in(tmp, schema)
-        else:
-            import tempfile
-
-            from whoosh.index import create_in
-
-            tmp = tempfile.mkdtemp()
-            self._index = create_in(tmp, schema)
-
-        writer = self._index.writer()
-        for batch in self._source.stream_batches():
-            for doc in batch:
-                writer.add_document(**doc)
-        writer.commit()
+        view = SearchView(name="search_application", source=self._source)
+        self._index = view.build(index_path)
+        self._schema = view._schema
+        self._view = view
 
         return self
+
+    def _resolve_index_path(self) -> str:
+        """Resolve a filesystem path where the index will be built.
+
+        The path is derived from the configured storage provider when it is
+        filesystem-backed (exposing a public ``root``), otherwise a temporary
+        directory is used. This avoids reaching into provider internals.
+
+        Returns:
+            An absolute directory path suitable for ``create_in``.
+        """
+        if self._storage is None:
+            import tempfile
+
+            return tempfile.mkdtemp()
+        if isinstance(self._storage, FileStorageProvider):
+            return self._storage.root
+        import tempfile
+
+        return tempfile.mkdtemp()
 
     def search(self, query: Any, **kwargs: Any) -> Any:
         """Search the index.
@@ -205,4 +136,4 @@ class SearchApplication:
             return searcher.search(query, **kwargs)
 
 
-__all__ = ["SearchApplication", "FileStorage"]
+__all__ = ["SearchApplication"]

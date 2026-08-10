@@ -2,8 +2,9 @@
 
 This module exposes :class:`S3Storage` (a thin alias over
 :class:`~whoosh_modern.middleware.storage.S3StorageProvider`) and
-:class:`SnapshotStorage`, which downloads segments into local temporary files
-on read.
+:class:`SnapshotStorage`, which downloads segments into local scratch files on
+read so the remote remains the source of truth while reads are served from a
+local copy.
 
 Author: dorel14
 Version: 3.0.0
@@ -11,7 +12,7 @@ Version: 3.0.0
 
 from __future__ import annotations
 
-from typing import Any
+import os
 
 from whoosh_modern.middleware.storage import S3StorageProvider
 
@@ -51,15 +52,11 @@ class S3Storage(S3StorageProvider):
 
 
 class SnapshotStorage(S3StorageProvider):
-    """Simple S3 snapshot storage without a local cache.
+    """S3 snapshot storage with a local scratch copy on read.
 
-    This is the simplest S3-backed storage strategy:
-
-    - Write: upload segment directly to S3
-    - Read: download segment from S3 to local temporary file
-
-    Use this when you want S3 as a simple backup/restore target without
-    the complexity of a local cache.
+    The remote S3 bucket remains the source of truth. On ``read`` the object is
+    downloaded from S3 and also persisted into ``local_path`` so subsequent
+    reads of the same key can be served from the local scratch copy.
 
     Example::
 
@@ -92,7 +89,7 @@ class SnapshotStorage(S3StorageProvider):
         local_path: str,
         bucket: str,
         prefix: str = "",
-        client: Any | None = None,
+        client: object | None = None,
     ) -> None:
         """Initialize the snapshot storage provider.
 
@@ -110,5 +107,28 @@ class SnapshotStorage(S3StorageProvider):
             ImportError: If ``boto3`` is not installed and no ``client`` is
                 provided.
         """
-        self._local_path = local_path
+        self._local_path = os.path.abspath(local_path)
+        os.makedirs(self._local_path, exist_ok=True)
         super().__init__(bucket=bucket, prefix=prefix, client=client)
+
+    def read(self, key: str) -> bytes:
+        """Read the object for ``key`` from S3 and cache it locally.
+
+        Args:
+            key: The blob key.
+
+        Returns:
+            The raw bytes stored in the S3 object, also persisted under
+            ``local_path``.
+        """
+        data = super().read(key)
+        path = os.path.join(self._local_path, key.replace("/", os.sep))
+        parent = os.path.dirname(path)
+        if parent:
+            os.makedirs(parent, exist_ok=True)
+        with open(path, "wb") as fh:
+            fh.write(data)
+        return data
+
+
+__all__ = ["S3Storage", "SnapshotStorage"]

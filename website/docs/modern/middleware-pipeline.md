@@ -6,7 +6,7 @@ sidebar_position: 41
 # Middleware & Plugin Pipeline
 
 Module: `whoosh.middleware`, `whoosh.middleware.chain`, `whoosh.middleware.context`, `whoosh_modern.middleware`
-Version: 2.0.0
+Version: 3.0.0
 
 The middleware pipeline allows you to intercept and modify indexing and search operations. It is the primary extension mechanism for cross-cutting concerns like logging, caching, metrics, query rewriting, and security. Middleware can come from both the core `whoosh.middleware` package and from plugins loaded via the `PluginManager`.
 
@@ -198,16 +198,26 @@ prom = PrometheusMiddleware()
 
 ### Modern Middleware (`whoosh_modern.middleware`)
 
-#### Resilience Pipeline (`whoosh_modern.middleware.pipeline`)
+#### Resilience Middleware (core subclasses)
 
-These use a **wrap-style** API (decorator pattern) rather than hooks:
+`RetryMiddleware`, `LoggingMiddleware`, and `CacheMiddleware` are now **subclasses of the
+core `whoosh.middleware.base.Middleware`** (the same base class re-exported as
+`whoosh_modern.middleware.Middleware`). They participate in the standard hook pipeline
+(`before_index` / `after_index` / `before_search` / `after_search` / `on_error` /
+`on_commit`) and additionally keep a `wrap(operation)` helper so arbitrary callables can
+still be decorated.
+
+`MiddlewarePipeline` is a thin wrapper around `whoosh.middleware.chain.MiddlewareChain`
+that executes a callable through the chain hooks and returns its result. The previous
+`whoosh_modern.middleware.pipeline` module has been removed — import these names directly
+from `whoosh_modern.middleware`.
 
 | Class                  | Description                              |
 |------------------------|------------------------------------------|
 | `RetryMiddleware`      | Retries failed operations with exponential backoff |
 | `LoggingMiddleware`    | Logs operation execution time and errors |
 | `CacheMiddleware`      | Caches operation results (LRU eviction)  |
-| `MiddlewarePipeline`   | Chains multiple wrap-style middlewares   |
+| `MiddlewarePipeline`   | Chains multiple middlewares via `MiddlewareChain` |
 
 ```python
 from whoosh_modern.middleware import MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
@@ -283,30 +293,32 @@ class RequestLoggingMiddleware(Middleware):
         return context
 ```
 
-### Wrap-Style Middleware
+### Custom Middleware (Hook-Based)
+
+The `Middleware` base class is `whoosh.middleware.base.Middleware`, re-exported from
+`whoosh_modern.middleware`. Subclass it and implement the lifecycle hooks:
 
 ```python
-from whoosh_modern.middleware.pipeline import Middleware as WrapMiddleware
+from whoosh_modern.middleware import Middleware
+from whoosh.middleware.context import MiddlewareContext
 
-class RetryMiddleware(WrapMiddleware):
-    """Retry failed operations with backoff."""
+class RetryMiddleware(Middleware):
+    """Retry failed operations with backoff (illustrative)."""
 
     def __init__(self, attempts: int = 3) -> None:
         self._attempts = attempts
 
-    def wrap(self, operation):
-        def wrapped(*args, **kwargs):
-            last_exc = None
-            for attempt in range(self._attempts):
-                try:
-                    return operation(*args, **kwargs)
-                except Exception as e:
-                    last_exc = e
-                    if attempt < self._attempts - 1:
-                        time.sleep(2 ** attempt)
-            raise last_exc
-        return wrapped
+    def on_error(self, context: MiddlewareContext, exc: Exception) -> None:
+        # Built-in resilience middlewares already implement this pattern.
+        # Custom logic can record failures in context.metadata here.
+        context.metadata.setdefault("retry_errors", 0)
+        context.metadata["retry_errors"] += 1
+        raise exc
 ```
+
+> Note: the built-in `RetryMiddleware`, `LoggingMiddleware`, and `CacheMiddleware` also
+> expose a `wrap(operation)` helper (preserved for backwards compatibility) so they can
+> decorate plain callables, but their primary mechanism is the hook pipeline above.
 
 ### Middleware with Plugin Integration
 
@@ -318,7 +330,7 @@ from whoosh.plugins.manager import Plugin
 class LoggingPlugin(Plugin):
     name = "logging"
     version = "1.0.0"
-    middleware = ["whoosh_modern.middleware.pipeline.LoggingMiddleware"]
+    middleware = ["whoosh_modern.middleware.LoggingMiddleware"]
 
     def register(self, manager):
         manager.register_middleware(

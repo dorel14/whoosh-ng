@@ -3,15 +3,18 @@
 
 Champs du Project:
 - Status: SELECT (Done / In Progress / Planned / Deferred)
-- Lot: TEXT (ex. "Lot 1 — Core Platform")
 - Epic: TEXT (ex. "EPIC 4.5", "Sprint G")
 - Priority: SELECT (High / Medium / Low)
 
 Corrections appliquees:
 - Idempotence : matcher par titre, update si existe, create sinon.
-- Peuplement complet : Status + Lot (texte) + Epic (texte) + Priority.
-- Issues GitHub : 1 issue par Epic (sauf Done), ajoutée au Project,
-  référence écrite dans roadmap.md.
+- Peuplement complet : Status + Epic (texte) + Priority.
+- Aucun draft issue : tout est une vraie issue GitHub.
+  - Epic → issue GitHub réelle, ajoutée au Project.
+  - Sprint → issue GitHub réelle, ajoutée au Project.
+    (Sub-issues activable plus tard via `gh issue create -- --parent N`
+    quand la feature sera activée dans les settings du repo.)
+- Lots → créés comme milestones GitHub, les issues correspondantes sont taguées.
 - Utilise gh CLI pour l'authentification et l'API REST Projects v2.
 
 Usage:
@@ -54,7 +57,35 @@ PRIORITY_FROM_STATUS = {
     "In Progress": "High",
     "Planned": "Medium",
     "Deferred": "Low",
+    "Blocked": "Medium",
 }
+
+STATUS_KEYWORDS = {
+    "DONE": "Done",
+    "IN_PROGRESS": "In Progress",
+    "PLANNED": "Planned",
+    "DEFERRED": "Deferred",
+    "BLOCKED": "Blocked",
+    "PARTIEL": "In Progress",
+    "TODO": "Planned",
+    "REPORTÉ": "Deferred",
+    "REPORTÉE": "Deferred",
+    "ANNULÉ": "Deferred",
+    "ANNULÉE": "Deferred",
+    "À FAIRE": "Planned",
+}
+
+
+def status_from_text(text: str) -> str | None:
+    """Extrait le status (Done/In Progress/Planned/Deferred/Blocked) depuis un texte."""
+    for emoji, mapped in EMOJI_TO_STATUS.items():
+        if emoji in text:
+            return mapped
+    upper = text.upper()
+    for keyword, mapped in STATUS_KEYWORDS.items():
+        if keyword in upper:
+            return mapped
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -84,6 +115,10 @@ GH_HEADERS = {
     "Authorization": f"token {GH_TOKEN}",
     "Accept": "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
+}
+GRAPHQL_HEADERS = {
+    **GH_HEADERS,
+    "GraphQL-Features": "issue_types,sub_issues",
 }
 
 
@@ -154,7 +189,7 @@ def get_project_node_id() -> str:
     resp = session.post(
         "https://api.github.com/graphql",
         json=payload,
-        headers=GH_HEADERS,
+        headers=GRAPHQL_HEADERS,
         timeout=30,
     )
     resp.raise_for_status()
@@ -171,7 +206,7 @@ def gh_graphql(query: str, variables: dict[str, Any] | None = None) -> dict[str,
     resp = session.post(
         "https://api.github.com/graphql",
         json=payload,
-        headers=GH_HEADERS,
+        headers=GRAPHQL_HEADERS,
         timeout=30,
     )
     if resp.status_code == 429:
@@ -210,7 +245,7 @@ def get_fields(project_id: str) -> dict[str, dict[str, Any]]:
     resp = session.post(
         "https://api.github.com/graphql",
         json=payload,
-        headers=GH_HEADERS,
+        headers=GRAPHQL_HEADERS,
         timeout=30,
     )
     resp.raise_for_status()
@@ -257,7 +292,10 @@ def get_existing_items(project_id: str) -> dict[str, str]:
 
 
 def get_or_create_item(project_id: str, title: str, cache: dict[str, str]) -> str:
-    """Crée un draft issue dans le projet via GraphQL et retourne son node ID."""
+    """FALLBACK: crée un draft issue dans le projet.
+
+    Utilise uniquement si l'issue GitHub n'existe pas.
+    """
     if title in cache:
         return cache[title]
 
@@ -271,7 +309,7 @@ def get_or_create_item(project_id: str, title: str, cache: dict[str, str]) -> st
     data = gh_graphql(query, {"project_id": project_id, "title": title})
     node_id = cast(str, data["addProjectV2DraftIssue"]["projectItem"]["id"])
     cache[title] = node_id
-    return node_id
+    return cache[title]
 
 
 def set_field_value(item_id: str, field_id: str, value: dict[str, Any]) -> None:
@@ -336,7 +374,7 @@ def get_repo_node_id() -> str:
         "variables": {"owner": OWNER, "repo": REPO.split("/")[1]},
     }
     resp = session.post(
-        "https://api.github.com/graphql", json=payload, headers=GH_HEADERS, timeout=30
+        "https://api.github.com/graphql", json=payload, headers=GRAPHQL_HEADERS, timeout=30
     )
     resp.raise_for_status()
     data = resp.json()
@@ -360,7 +398,7 @@ def get_issue_node_id(repo_id: str, issue_number: int) -> str:
         "variables": {"repo_id": repo_id, "number": issue_number},
     }
     resp = session.post(
-        "https://api.github.com/graphql", json=payload, headers=GH_HEADERS, timeout=30
+        "https://api.github.com/graphql", json=payload, headers=GRAPHQL_HEADERS, timeout=30
     )
     resp.raise_for_status()
     data = resp.json()
@@ -370,6 +408,7 @@ def get_issue_node_id(repo_id: str, issue_number: int) -> str:
 
 
 def create_issue(repo_id: str, title: str, body: str) -> tuple[int, str]:
+    """Crée une issue GraphQL et retourne (number, node_id)."""
     query = """
     mutation($input: CreateIssueInput!) {
       createIssue(input: $input) {
@@ -390,7 +429,7 @@ def create_issue(repo_id: str, title: str, body: str) -> tuple[int, str]:
     resp = session.post(
         "https://api.github.com/graphql",
         json=payload,
-        headers=GH_HEADERS,
+        headers=GRAPHQL_HEADERS,
         timeout=30,
     )
     resp.raise_for_status()
@@ -400,6 +439,51 @@ def create_issue(repo_id: str, title: str, body: str) -> tuple[int, str]:
     number = int(data["data"]["createIssue"]["issue"]["number"])
     node_id = cast(str, data["data"]["createIssue"]["issue"]["id"])
     return number, node_id
+
+
+def add_sub_issue(parent_issue_number: int, child_issue_number: int) -> bool:
+    """Lie une issue enfant comme sub-issue d'une issue parent via GraphQL mutation.
+
+    Utilise le header GraphQL-Features: sub_issues pour activer la feature.
+    """
+    repo_id = get_repo_node_id()
+    parent_id = get_issue_node_id(repo_id, parent_issue_number)
+    child_id = get_issue_node_id(repo_id, child_issue_number)
+
+    mutation = """
+    mutation($parentIssueId: ID!, $childIssueId: ID!) {
+      addSubIssue(input: { issueId: $parentIssueId, subIssueId: $childIssueId }) {
+        issue { number }
+        subIssue { number }
+      }
+    }
+    """
+    data = gh_graphql(
+        mutation,
+        {"parentIssueId": parent_id, "childIssueId": child_id},
+    )
+    return bool(data.get("addSubIssue"))
+
+
+def is_sub_issue(parent_issue_number: int, child_issue_number: int) -> bool:
+    """Vérifie si une issue est déjà une sub-issue d'une autre via GraphQL."""
+    repo_id = get_repo_node_id()
+    parent_id = get_issue_node_id(repo_id, parent_issue_number)
+    child_id = get_issue_node_id(repo_id, child_issue_number)
+    query = """
+    query($parentId: ID!) {
+      node(id: $parentId) {
+        ... on Issue {
+          subIssues(first: 100) {
+            nodes { number }
+          }
+        }
+      }
+    }
+    """
+    data = gh_graphql(query, {"parentId": parent_id})
+    sub_issues = data.get("node", {}).get("subIssues", {}).get("nodes", [])
+    return any(s.get("number") == child_issue_number for s in sub_issues)
 
 
 def add_issue_to_project(project_id: str, issue_node_id: str) -> str:
@@ -417,7 +501,7 @@ def add_issue_to_project(project_id: str, issue_node_id: str) -> str:
     resp = session.post(
         "https://api.github.com/graphql",
         json=payload,
-        headers=GH_HEADERS,
+        headers=GRAPHQL_HEADERS,
         timeout=30,
     )
     resp.raise_for_status()
@@ -427,6 +511,32 @@ def add_issue_to_project(project_id: str, issue_node_id: str) -> str:
     return cast(str, data["data"]["addProjectV2ItemById"]["item"]["id"])
 
 
+def get_or_create_milestone(title: str) -> int:
+    """Crée ou récupère un milestone par titre. Retourne l'issue number du milestone (ID entier)."""
+    path = f"/repos/{REPO}/milestones"
+    data = gh_get(path, {"state": "all", "per_page": 100})
+    for m in data:
+        if m.get("title") == title:
+            return int(m["number"])
+
+    resp = session.post(
+        f"https://api.github.com{path}",
+        headers=GH_HEADERS,
+        json={"title": title, "state": "open"},
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return int(resp.json()["number"])
+
+
+def set_issue_milestone(issue_number: int, milestone_number: int) -> None:
+    """Tague une issue avec un milestone via REST PATCH."""
+    gh_patch(
+        f"/repos/{REPO}/issues/{issue_number}",
+        {"milestone": milestone_number},
+    )
+
+
 # ---------------------------------------------------------------------------
 # Roadmap file helpers
 # ---------------------------------------------------------------------------
@@ -434,28 +544,41 @@ def add_issue_to_project(project_id: str, issue_node_id: str) -> str:
 ISSUE_REF_RE = re.compile(r"\(#(\d+)\)")
 
 
-def parse_existing_issue_numbers(path: str) -> dict[str, int]:
-    """Lit le roadmap et retourne {epic_title: issue_number} pour les épics déjà référencés."""
-    mapping: dict[str, int] = {}
-    with open(path, encoding="utf-8") as f:
-        for line in f:
-            stripped = line.strip()
-            if not stripped.startswith("### "):
-                continue
-            m = ISSUE_REF_RE.search(stripped)
-            if m:
-                issue_number = int(m.group(1))
-                title_part = stripped[4:].strip()
-                title_part = ISSUE_REF_RE.sub("", title_part).strip()
-                parts = re.split(r"\s*[·\-]\s*", title_part, maxsplit=1)
-                clean_title = parts[0].strip()
-                clean_title = re.sub(r"[✅🟡🔴⏸️🟢\[\]]", "", clean_title).strip()
-                mapping[clean_title] = issue_number
-    return mapping
+def find_issue_by_title(title: str) -> int | None:
+    """Recherche une issue GitHub existante par titre exact.
+
+    Parcourt toutes les issues ouvertes. Si le titre correspond exactement,
+    retourne le numéro. Sinon, retourne None.
+    """
+    page = 1
+    while True:
+        data = gh_get(
+            f"/repos/{REPO}/issues",
+            {"state": "open", "per_page": 100, "page": page},
+        )
+        if not data:
+            break
+        for issue in data:
+            if issue.get("title") == title:
+                return int(issue["number"])
+        if len(data) < 100:
+            break
+        page += 1
+    return None
 
 
-def update_roadmap_with_issues(path: str, epic_issues: dict[str, int]) -> None:
-    """Écrit les références (#NUMBER) dans le fichier roadmap à la ligne de chaque epic."""
+def update_roadmap_with_issues(
+    path: str,
+    epic_issues: dict[str, int],
+    sprint_issues: dict[str, int] | None = None,
+) -> None:
+    """Écrit les références (#NUMBER) dans le fichier roadmap.
+
+    Supprime d'abord toutes les anciennes références (#NN) pour éviter les doublons.
+    Met à jour les lignes Epic (###) et Sprint (####).
+    """
+    if sprint_issues is None:
+        sprint_issues = {}
     with open(path, encoding="utf-8") as f:
         lines = f.readlines()
 
@@ -464,18 +587,21 @@ def update_roadmap_with_issues(path: str, epic_issues: dict[str, int]) -> None:
     for line in lines:
         new_line = line
         stripped = line.strip()
-        if stripped.startswith("### "):
-            for title, number in epic_issues.items():
-                if title in stripped and f"(#{number})" not in stripped:
-                    new_line = line.rstrip("\n") + f" (#{number})\n"
-                    changed = True
+        if stripped.startswith("### ") or stripped.startswith("#### "):
+            base = ISSUE_REF_RE.sub("", stripped).rstrip()
+            for title, number in {**epic_issues, **sprint_issues}.items():
+                if title in stripped:
+                    new_line = base + f" (#{number})\n"
+                    if new_line != line:
+                        changed = True
                     break
         updated_lines.append(new_line)
 
     if changed:
         with open(path, "w", encoding="utf-8") as f:
             f.writelines(updated_lines)
-        print(f"📝 Roadmap mis à jour avec {len(epic_issues)} références d'issues")
+        print(f"📝 Roadmap mis à jour avec "
+              f"{len(epic_issues) + len(sprint_issues)} références d'issues")
     else:
         print("📝 Roadmap déjà à jour (aucune modification)")
 
@@ -486,16 +612,18 @@ def update_roadmap_with_issues(path: str, epic_issues: dict[str, int]) -> None:
 
 LOT_RE = re.compile(r"^##\s+Lot\s+\d+\s*[\u2014\u2013-]\s*(.+)$")
 EPIC_BRACKET_RE = re.compile(
-    r"^###\s+(EPIC\s+[\d.]+(?:/[A-Z]+)?|"
+    r"^###\s+(EPIC\s+[\d.]+(?:[+]\s*)?(?:/[A-Z]+)?|"
     r"\u00c9l\u00e9ments critiques manquants|"
     r"Workstreams?|Configuration Engine)"
     r"\s*[\u2014\u2013-]\s*(.+?)"
-    r"\s*\[(DONE|IN_PROGRESS|PLANNED|DEFERRED|BLOCKED|PARTIEL|TODO)\]"
-    r"\s*$"
+    r"\s*\[(DONE|IN_PROGRESS|PLANNED|DEFERRED|BLOCKED|PARTIEL|TODO"
+    r"|REPORT[EÉ]|ANNUL[EÉ]|À_FAIRE)\]"
 )
 SPRINT_RE = re.compile(
-    r"^####\s+Sprint\s+(.+?)\s*[\u2014\u2013-]\s*(.+?)"
-    r"\s*\[(DONE|IN_PROGRESS|PLANNED|DEFERRED|BLOCKED|PARTIEL|TODO)\]\s*$"
+    r"^####\s+Sprint\s+(.+?)\s*[\u2014\u2013]\s*(.+?)"
+    r"\s*\[(DONE|IN_PROGRESS|PLANNED|DEFERRED|BLOCKED|PARTIEL|TODO"
+    r"|REPORT[EÉ]|ANNUL[EÉ]|À_FAIRE)\]"
+    r"(?:\s*\(#\d+\))?\s*$"
 )
 
 
@@ -531,15 +659,7 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
                     epic_id = m_epic.group(1).strip()
                     epic_title = m_epic.group(2).strip()
                     raw_status = m_epic.group(3).strip().upper()
-                    status = {
-                        "DONE": "Done",
-                        "IN_PROGRESS": "In Progress",
-                        "PLANNED": "Planned",
-                        "DEFERRED": "Deferred",
-                        "BLOCKED": "Blocked",
-                        "PARTIEL": "In Progress",
-                        "TODO": "Planned",
-                    }.get(raw_status)
+                    status = status_from_text(raw_status)
 
                     items.append({
                         "type": "epic",
@@ -552,6 +672,10 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
                     continue
 
                 content = stripped[4:].strip()
+                # Remove issue references (#NN)
+                content = ISSUE_REF_RE.sub("", content).strip()
+                # Remove status brackets [STATUS]
+                content = re.sub(r"\s*\[[A-ZÀ-ÿ_ ]+\]\s*", " ", content).strip()
                 parts = re.split(r"\s*[·\-]\s*", content, maxsplit=1)
                 title_part = parts[0].strip()
                 status_part = parts[1].strip() if len(parts) > 1 else ""
@@ -576,7 +700,7 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
                             for emoji, mapped in EMOJI_TO_STATUS.items()
                             if emoji in status_part
                         ),
-                        None,
+                        status_from_text(status_part),
                     )
 
                     full_title = f"{epic_id} — {rest}" if rest else epic_id
@@ -595,15 +719,7 @@ def parse_roadmap(path: str) -> list[dict[str, Any]]:
             if m_sprint:
                 sprint_id = f"Sprint {m_sprint.group(1)}"
                 raw_sprint_status = m_sprint.group(3).upper()
-                sprint_status = {
-                    "DONE": "Done",
-                    "IN_PROGRESS": "In Progress",
-                    "PLANNED": "Planned",
-                    "DEFERRED": "Deferred",
-                    "BLOCKED": "Blocked",
-                    "PARTIEL": "In Progress",
-                    "TODO": "Planned",
-                }.get(raw_sprint_status)
+                sprint_status = status_from_text(raw_sprint_status)
                 sprint_title = m_sprint.group(2).strip()
                 items.append({
                     "type": "sprint",
@@ -654,16 +770,11 @@ def main() -> None:
     print("📖 Lecture des champs...")
     fields = get_fields(project_id)
     status_field = fields.get("Status")
-    lot_field = fields.get("Lot")
     epic_field = fields.get("Epic")
     priority_field = fields.get("Priority")
 
     if not status_field or status_field.get("type") != "SELECT":
         print("❌ Champ 'Status' (select) introuvable dans le Project")
-        sys.exit(1)
-
-    if not lot_field:
-        print("❌ Champ 'Lot' introuvable dans le Project")
         sys.exit(1)
 
     def option_ids(field):
@@ -680,22 +791,18 @@ def main() -> None:
     existing_items = get_existing_items(project_id)
     print(f"   → {len(existing_items)} items existants")
 
-    print("\n📦 Synchronisation des Lots...")
-    lot_node_ids: dict[str, str] = {}
+    print("\n📌 Création des milestones pour les Lots...")
+    lot_milestones: dict[str, int] = {}
     for lot in lots:
-        node_id = get_or_create_item(project_id, lot["title"], existing_items)
-        lot_node_ids[lot["title"]] = node_id
-
-        if lot_field:
-            set_text_field(project_id, node_id, lot_field["id"], lot["title"])
-
-        print(f"   ✅ Lot: {lot['title']}")
+        ms_number = get_or_create_milestone(lot["title"])
+        lot_milestones[lot["title"]] = ms_number
+        print(f"   ✅ Milestone: {lot['title']} (#{ms_number})")
 
     print("\n🐛 Création/liaison des Issues GitHub pour les Epics...")
-    existing_issue_numbers = parse_existing_issue_numbers(ROADMAP_PATH)
     repo_id = get_repo_node_id()
     epic_node_ids: dict[str, str | None] = {}
     epic_issues: dict[str, int] = {}
+    epic_issue_numbers: dict[str, int] = {}
 
     for epic in epics:
         title = epic["title"]
@@ -705,13 +812,19 @@ def main() -> None:
             print(f"   ⏭️  Epic déjà terminé, pas d'issue: {title}")
             continue
 
-        if title in existing_issue_numbers:
-            issue_number = existing_issue_numbers[title]
+        existing_num = find_issue_by_title(title)
+        if existing_num is not None:
+            issue_number = existing_num
             print(f"   ℹ️  Epic déjà lié: {title} (#{issue_number})")
             epic_issues[title] = issue_number
+            epic_issue_numbers[title] = issue_number
             issue_node_id = get_issue_node_id(repo_id, issue_number)
             project_item_id = add_issue_to_project(project_id, issue_node_id)
             epic_node_ids[title] = project_item_id
+            # Tag existing issue with Lot milestone
+            parent_lot = epic.get("parent")
+            if parent_lot and parent_lot in lot_milestones:
+                set_issue_milestone(issue_number, lot_milestones[parent_lot])
             continue
 
         issue_title = title
@@ -726,17 +839,23 @@ def main() -> None:
             issue_number, issue_node_id = create_issue(repo_id, issue_title, issue_body)
             project_item_id = add_issue_to_project(project_id, issue_node_id)
             epic_issues[title] = issue_number
+            epic_issue_numbers[title] = issue_number
             epic_node_ids[title] = project_item_id
+            # Tag new issue with Lot milestone
+            parent_lot = epic.get("parent")
+            if parent_lot and parent_lot in lot_milestones:
+                set_issue_milestone(issue_number, lot_milestones[parent_lot])
             print(f"   ✅ Issue créée et ajoutée au Project: {title} (#{issue_number})")
         except Exception as exc:
             print(f"   ❌ Erreur création issue pour {title}: {exc}")
 
-    print("\n📦 Synchronisation des Epics...")
+    print("\n📦 Synchronisation des Epics (champs Project)...")
     for epic in epics:
         title = epic["title"]
         epic_node_id: str | None = epic_node_ids.get(title)
         if not epic_node_id:
-            epic_node_id = get_or_create_item(project_id, title, existing_items)
+            print(f"   ⚠️  Epic sans issue GitHub, skipped: {title}")
+            continue
 
         if epic["status"] and epic["status"] in status_opts:
             set_select_field(
@@ -746,9 +865,12 @@ def main() -> None:
                 status_opts[epic["status"]],
             )
 
+        # Ensure milestone is set (handles epics already linked before refactor)
         parent_lot = epic.get("parent")
-        if lot_field and parent_lot:
-            set_text_field(project_id, epic_node_id, lot_field["id"], parent_lot)
+        if parent_lot and parent_lot in lot_milestones:
+            issue_num = epic_issue_numbers.get(title) or epic_issues.get(title, 0)
+            if issue_num:
+                set_issue_milestone(issue_num, lot_milestones[parent_lot])
 
         if epic_field and epic.get("epic"):
             set_text_field(project_id, epic_node_id, epic_field["id"], epic["epic"])
@@ -765,26 +887,97 @@ def main() -> None:
 
         print(f"   ✅ Epic: {epic['title']} [{epic['status'] or 'N/A'}]")
 
-    print("\n📦 Synchronisation des Sprints...")
+    print("\n🐛 Création/liaison des Issues GitHub pour les Sprints...")
+    sprint_issues: dict[str, int] = {}
     for sprint in sprints:
-        node_id = get_or_create_item(project_id, sprint["title"], existing_items)
+        title = sprint["title"]
+        status = sprint.get("status")
+        parent_epic_title = sprint.get("parent")
+        parent_number = epic_issue_numbers.get(parent_epic_title) if parent_epic_title else None
 
-        if sprint["status"] and sprint["status"] in status_opts:
-            set_select_field(project_id, node_id, status_field["id"], status_opts[sprint["status"]])
+        if status == "Done":
+            print(f"   ⏭️  Sprint déjà terminé, pas d'issue: {title}")
+            continue
 
-        if priority_field and sprint["status"] and sprint["status"] in PRIORITY_FROM_STATUS:
-            prio = PRIORITY_FROM_STATUS[sprint["status"]]
-            if prio in priority_opts:
-                set_select_field(project_id, node_id, priority_field["id"], priority_opts[prio])
+        issue_title = title
+        issue_body = (
+            f"**Sprint:** {sprint.get('epic', 'N/A')}\n"
+            f"**Lot:** {sprint.get('lot', 'N/A')}\n"
+            f"**Status:** {status or 'N/A'}\n"
+        )
+        if parent_epic_title:
+            issue_body += f"\nParent: {parent_epic_title}"
 
-        print(f"   ✅ Sprint: {sprint['title']} [{sprint['status'] or 'N/A'}]")
+        # Check if issue already exists by title
+        existing_sprint_num = find_issue_by_title(issue_title)
+        if existing_sprint_num is not None:
+            issue_number = existing_sprint_num
+            print(f"   ℹ️  Sprint déjà existante: {title} (#{issue_number})")
+        else:
+            # Create new issue
+            try:
+                issue_number, issue_node_id = create_issue(repo_id, issue_title, issue_body)
+                print(f"   ✅ Issue créée: {title} (#{issue_number})")
+            except Exception as exc:
+                print(f"   ❌ Erreur création issue pour {title}: {exc}")
+                continue
 
-    if epic_issues:
-        update_roadmap_with_issues(ROADMAP_PATH, epic_issues)
+        # Add to Project
+        sprint_project_item_id: str | None = None
+        try:
+            sprint_project_item_id = add_issue_to_project(
+                project_id,
+                get_issue_node_id(repo_id, issue_number)
+            )
+        except Exception as exc:
+            print(f"   ⚠️  Issue non ajoutée au Project: {title}: {exc}")
+
+        # Tag with Lot milestone
+        if parent_epic_title:
+            epic_data = next((e for e in epics if e["title"] == parent_epic_title), None)
+            if epic_data:
+                lot_title = epic_data.get("parent")
+                if lot_title and lot_title in lot_milestones:
+                    set_issue_milestone(issue_number, lot_milestones[lot_title])
+
+        # Try to link as sub-issue to parent Epic
+        if parent_number and parent_number != issue_number:
+            try:
+                if is_sub_issue(parent_number, issue_number):
+                    print(f"   ✅ Sub-issue déjà liée à #{parent_number}: "
+                          f"{title} (#{issue_number})")
+                elif add_sub_issue(parent_number, issue_number):
+                    print(f"   ✅ Sub-issue liée à #{parent_number}: {title} (#{issue_number})")
+                else:
+                    print(f"   ⚠️  Sub-issue non activé, issue standalone: "
+                          f"{title} (#{issue_number})")
+            except Exception as exc:
+                print(f"   ⚠️  Sub-issue échouée, issue standalone: {title}: {exc}")
+
+        # Set Project fields
+        if sprint_project_item_id:
+            if sprint["status"] and sprint["status"] in status_opts:
+                set_select_field(
+                    project_id, sprint_project_item_id,
+                    status_field["id"], status_opts[sprint["status"]],
+                )
+
+            if priority_field and sprint["status"] and sprint["status"] in PRIORITY_FROM_STATUS:
+                prio = PRIORITY_FROM_STATUS[sprint["status"]]
+                if prio in priority_opts:
+                    set_select_field(
+                        project_id, sprint_project_item_id,
+                        priority_field["id"], priority_opts[prio],
+                    )
+
+        sprint_issues[title] = issue_number
+
+    if epic_issues or sprint_issues:
+        update_roadmap_with_issues(ROADMAP_PATH, epic_issues, sprint_issues)
 
     print("\n🎉 Synchronisation terminée !")
-    print(f"   → {len(lot_node_ids)} Lots, {len(epic_node_ids)} Epics, {len(sprints)} Sprints")
-    print(f"   → {len(epic_issues)} Issues GitHub créées/linkées")
+    print(f"   → {len(epic_issues)} Epics (vraies issues)")
+    print(f"   → {len(sprint_issues)} Sprints (vraies issues ou sub-issues)")
 
 
 if __name__ == "__main__":

@@ -10,10 +10,8 @@ Version: 1.0.0
 
 from __future__ import annotations
 
-import math
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 
-from whoosh.hooks import hookimpl
 from whoosh.plugins.manager import Plugin
 
 

@@ -125,11 +125,12 @@ pip install whoosh-ng[s3]
 
 ## SnapshotStorage
 
-Simple S3 snapshot storage without local cache. This is the simplest
-S3-backed storage strategy:
+Simple S3 snapshot storage. S3 remains the source of truth; on read, the object is
+downloaded from S3 and also persisted under `local_path` so subsequent reads of the same
+key can be served from the local scratch copy:
 
 - Write: upload segment directly to S3
-- Read: download segment from S3 to local temporary file
+- Read: download segment from S3, cache it under `local_path`
 
 Use this when you want S3 as a simple backup/restore target without the
 complexity of a local cache.
@@ -294,12 +295,12 @@ SearchApplication.build()
     │
     ├── source.discover_schema() ──► Whoosh Schema
     │
-    ├── storage._root resolution
+    ├── storage root resolution
     │       │
-    │       ├── HybridStorage/S3Storage/FileStorage
-    │       │   └── has _root? ──► whoosh.index.create_in(root, schema)
+    │       ├── FileStorageProvider (exposed as `FileStorage`)
+    │       │   └── exposes a public `root` ──► whoosh.index.create_in(root, schema)
     │       │
-    │       └── No _root (pure S3/SnapshotStorage)
+    │       └── Other providers (S3 / Snapshot / Hybrid, no filesystem root)
     │           └── tempfile.mkdtemp() ──► create_in(tmpdir, schema)
     │
     ├── Writer = index.writer()
@@ -391,7 +392,7 @@ with MiddlewareWriter(ix.writer(), chain) as writer:
 | `SyncStorageProvider` / `AsyncStorageProvider` | **Contract** defining `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
 | `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implementations** of the contract |
 | `StorageMiddleware` | **Integration layer** that calls the provider at specific lifecycle hooks (`before_index`, `on_commit`) |
-| `SearchApplication` | **Entry point** that extracts `_root` from the provider to create the Whoosh index directory |
+| `SearchApplication` | **Entry point** that delegates to `SearchView.build()`; when the storage is a `FileStorageProvider` (exposed as `FileStorage`) it uses its public `root` to create the Whoosh index directory, otherwise it falls back to a temporary directory |
 
 The provider itself does **not** intercept Whoosh's internal segment reads. Those reads go through Whoosh's built-in `FileStorage` (`whoosh.filedb.filestore`) which reads from the filesystem path given to `create_in()`. The Whoosh-NG storage provider abstraction is designed for:
 - Custom segment routing (S3, SQLite, hybrid cache)

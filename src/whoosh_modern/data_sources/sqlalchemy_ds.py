@@ -177,6 +177,11 @@ class SQLAlchemySource:
     def _map_sqlalchemy_type(self, col_type: Any, dialect: Any) -> Any:
         """Map SQLAlchemy type to Whoosh field.
 
+        Delegates to the canonical
+        :class:`whoosh_modern.models.base.TypeMapper`: the column's
+        ``python_type`` is mapped when available, otherwise the SQL type name
+        is mapped through :meth:`~whoosh_modern.models.base.TypeMapper.map_dtype`.
+
         Args:
             col_type: A SQLAlchemy column type instance.
             dialect: The SQLAlchemy ``Dialect`` in use.
@@ -185,30 +190,23 @@ class SQLAlchemySource:
             A Whoosh field instance matching the column type, or
             ``TEXT(stored=True)`` as a fallback.
         """
-        from sqlalchemy import (
-            BigInteger,
-            Boolean,
-            Date,
-            DateTime,
-            Float,
-            Integer,
-            String,
-        )
+        from whoosh.fields import STORED, TEXT
+        from whoosh_modern.models.base import TypeMapper
+        from whoosh_modern.models.types import SearchOptions
 
-        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
+        options = SearchOptions(stored=True)
+        try:
+            python_type = col_type.python_type
+        except Exception:
+            python_type = None
 
-        if isinstance(col_type, String):
-            return TEXT(stored=True)
-        if isinstance(col_type, Integer | BigInteger):
-            return NUMERIC(int, stored=True)
-        if isinstance(col_type, Float):
-            return NUMERIC(float, stored=True)
-        if isinstance(col_type, Boolean):
-            return BOOLEAN(stored=True)
-        if isinstance(col_type, Date | DateTime):
-            return DATETIME(stored=True)
+        if python_type is not None:
+            mapped = TypeMapper.map(python_type, options)
+            if mapped is not STORED:
+                return mapped
 
-        return TEXT(stored=True)
+        mapped = TypeMapper.map_dtype(type(col_type).__name__, options)
+        return mapped if mapped is not None else TEXT(stored=True)
 
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the SQLAlchemy query.

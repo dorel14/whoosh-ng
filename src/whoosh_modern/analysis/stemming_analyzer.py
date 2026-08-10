@@ -26,17 +26,17 @@ Version: 3.0.0
 
 from __future__ import annotations
 
+from whoosh.analysis import STOP_WORDS
 from whoosh.analysis import StemmingAnalyzer as WhooshStemmingAnalyzer
+from whoosh.analysis.tokenizers import default_pattern
 from whoosh_modern.analysis.stemmer_providers import (
     StemmerProvider,
     get_stemmer,
     list_available_backends,
 )
 
-_DEFAULT_PATTERN = __import__(
-    "whoosh.analysis.tokenizers", fromlist=["default_pattern"]
-).default_pattern
-_DEFAULT_STOP_WORDS = __import__("whoosh.analysis", fromlist=["STOP_WORDS"]).STOP_WORDS
+_DEFAULT_PATTERN = default_pattern
+_DEFAULT_STOP_WORDS = STOP_WORDS
 
 
 def stemming_analyzer(

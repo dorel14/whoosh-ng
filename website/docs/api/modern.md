@@ -198,7 +198,6 @@ pipeline = MiddlewarePipeline(
     CacheMiddleware(maxsize=128),
 )
 
-@pipeline.wrap
 def my_operation():
     return searcher.search(query)
 
@@ -207,7 +206,7 @@ result = pipeline.execute(my_operation)
 
 ### Middleware Types
 
-- **`Middleware`** (abstract): Subclass and implement `wrap(operation)`.
+- **`Middleware`**: The core base class (`whoosh.middleware.base.Middleware`, re-exported from `whoosh_modern.middleware`). Subclass it and implement the lifecycle hooks (`before_index`, `after_index`, `before_search`, `after_search`, `on_error`, `on_commit`). `RetryMiddleware`, `LoggingMiddleware`, and `CacheMiddleware` additionally keep a `wrap(operation)` helper for decorating callables.
 - **`RetryMiddleware`**: Retries failed operations with exponential or linear
   backoff, with optional jitter.
 - **`LoggingMiddleware`**: Logs execution time and errors.
@@ -240,7 +239,7 @@ view.evolve_schema({"new_field": fields.TEXT})  # Add fields without reindexing
 ## Optimized Writer
 
 ```python
-from whoosh_modern.writer import ModernIndex, ModernIndexWriter
+from whoosh_modern.writer import ModernIndex
 
 # Create or open an optimized index
 index = ModernIndex.create("indexdir", schema=my_schema)
@@ -395,7 +394,8 @@ from whoosh_modern.storage import (
 
 ### FileStorage
 
-Local filesystem storage. Keys are relative paths under ``root``.
+Local filesystem storage. `FileStorage` is an alias of `FileStorageProvider`. Keys are
+relative paths under ``root``.
 
 ```python
 from whoosh_modern.storage import FileStorage

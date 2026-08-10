@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from whoosh.analysis.analyzers import CompositeAnalyzer
 from whoosh_modern.analysis.stemming_analyzer import stemming_analyzer
 from whoosh_modern.linguistics.stemmers import (
     EnglishAnalyzer,
@@ -16,7 +17,7 @@ from whoosh_modern.linguistics.stemmers import (
 
 class TestLanguageAnalyzers:
     @pytest.mark.parametrize(
-        ("analyzer_cls", "language"),
+        ("analyzer", "language"),
         [
             (FrenchAnalyzer, "fr"),
             (EnglishAnalyzer, "en"),
@@ -25,43 +26,39 @@ class TestLanguageAnalyzers:
             (ItalianAnalyzer, "it"),
         ],
     )
-    def test_analyzer_returns_tokens(self, analyzer_cls, language):
-        analyzer = analyzer_cls()
-        tokens = analyzer("maison et ordinateur")
-        assert isinstance(tokens, list)
+    def test_analyzer_returns_tokens(self, analyzer, language):
+        assert isinstance(analyzer, CompositeAnalyzer)
+        tokens = [t.text for t in analyzer("maison et ordinateur")]
         assert len(tokens) > 0
 
-    def test_french_stems(self):
-        analyzer = FrenchAnalyzer()
-        tokens = analyzer("mangeons")
-        assert isinstance(tokens, list)
+    def test_french_stems_in_french(self):
+        # "maisons" -> "maison" requires the French stemmer, not English Porter.
+        assert [t.text for t in FrenchAnalyzer("maisons")] == ["maison"]
 
     def test_english_stems(self):
-        analyzer = EnglishAnalyzer()
-        tokens = analyzer("running")
-        assert isinstance(tokens, list)
+        assert [t.text for t in EnglishAnalyzer("running")] == ["run"]
 
     def test_german_stems(self):
-        analyzer = GermanAnalyzer()
-        tokens = analyzer("häuser")
-        assert isinstance(tokens, list)
+        tokens = [t.text for t in GermanAnalyzer("häuser")]
+        assert tokens == ["haus"]
 
     def test_spanish_stems(self):
-        analyzer = SpanishAnalyzer()
-        tokens = analyzer("jugando")
-        assert isinstance(tokens, list)
+        assert [t.text for t in SpanishAnalyzer("jugando")] == ["jug"]
 
     def test_italian_stems(self):
-        analyzer = ItalianAnalyzer()
-        tokens = analyzer("amano")
-        assert isinstance(tokens, list)
+        tokens = [t.text for t in ItalianAnalyzer("amano")]
+        assert len(tokens) == 1
+
+    def test_languages_differ(self):
+        # Same input must not be stemmed identically across languages.
+        word = "continuando"
+        assert [t.text for t in SpanishAnalyzer(word)] != [t.text for t in EnglishAnalyzer(word)]
 
 
 class TestStemmingAnalyzerLanguageFix:
     def test_stemming_analyzer_with_language(self):
-        analyzer = stemming_analyzer(stemmer="auto", language="french")
-        tokens = list(analyzer("voiture"))
-        assert isinstance(tokens, list)
+        analyzer = stemming_analyzer(stemmer="internal", language="french")
+        assert [t.text for t in analyzer("maisons")] == ["maison"]
 
     def test_stemming_analyzer_default_language(self):
         analyzer = stemming_analyzer(stemmer="auto")

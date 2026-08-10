@@ -106,6 +106,9 @@ class PandasSource:
     def _map_pandas_dtype(self, dtype: Any) -> Any:
         """Map pandas dtype to Whoosh field.
 
+        Delegates to the canonical
+        :meth:`whoosh_modern.models.base.TypeMapper.map_dtype`.
+
         Args:
             dtype: A pandas dtype instance.
 
@@ -113,22 +116,9 @@ class PandasSource:
             A Whoosh field instance (``NUMERIC``, ``BOOLEAN``,
             ``DATETIME``, or ``TEXT``) configured as stored.
         """
-        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
+        from whoosh_modern.models.base import TypeMapper
 
-        dtype_str = str(dtype).lower()
-
-        if "int" in dtype_str:
-            return NUMERIC(int, stored=True)
-        if "float" in dtype_str:
-            return NUMERIC(float, stored=True)
-        if "bool" in dtype_str:
-            return BOOLEAN(stored=True)
-        if "datetime" in dtype_str:
-            return DATETIME(stored=True)
-        if "object" in dtype_str or "string" in dtype_str:
-            return TEXT(stored=True)
-
-        return TEXT(stored=True)
+        return TypeMapper.map_dtype(dtype)
 
     def compile_mapper(self) -> Any:
         """Return a compiled document mapper for this source.

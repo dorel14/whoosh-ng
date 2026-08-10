@@ -221,33 +221,15 @@ class ParquetSource:
                 source="parquet",
             )
 
+        from whoosh_modern.models.base import TypeMapper
+
         try:
             import pyarrow.parquet as pq
 
             schema = pq.read_schema(self.path)
-            columns: dict[str, Any] = {}
-            for field in schema:
-                dtype_str = str(field.type).lower()
-                if "int" in dtype_str:
-                    from whoosh.fields import NUMERIC
-
-                    columns[str(field.name)] = NUMERIC(int, stored=True)
-                elif "float" in dtype_str or "double" in dtype_str:
-                    from whoosh.fields import NUMERIC
-
-                    columns[str(field.name)] = NUMERIC(float, stored=True)
-                elif "bool" in dtype_str:
-                    from whoosh.fields import BOOLEAN
-
-                    columns[str(field.name)] = BOOLEAN(stored=True)
-                elif "timestamp" in dtype_str or "date" in dtype_str:
-                    from whoosh.fields import DATETIME
-
-                    columns[str(field.name)] = DATETIME(stored=True)
-                else:
-                    from whoosh.fields import TEXT
-
-                    columns[str(field.name)] = TEXT(stored=True)
+            columns: dict[str, Any] = {
+                str(field.name): TypeMapper.map_dtype(field.type) for field in schema
+            }
 
             from whoosh.fields import Schema
 
@@ -257,30 +239,10 @@ class ParquetSource:
             pass
 
         df = self._read_parquet(sample=True)
-        columns = {}
-
-        for col_name, dtype in zip(df.columns, df.dtypes, strict=True):
-            dtype_str = str(dtype).lower()
-            if "int" in dtype_str:
-                from whoosh.fields import NUMERIC
-
-                columns[str(col_name)] = NUMERIC(int, stored=True)
-            elif "float" in dtype_str:
-                from whoosh.fields import NUMERIC
-
-                columns[str(col_name)] = NUMERIC(float, stored=True)
-            elif "bool" in dtype_str:
-                from whoosh.fields import BOOLEAN
-
-                columns[str(col_name)] = BOOLEAN(stored=True)
-            elif "datetime" in dtype_str:
-                from whoosh.fields import DATETIME
-
-                columns[str(col_name)] = DATETIME(stored=True)
-            else:
-                from whoosh.fields import TEXT
-
-                columns[str(col_name)] = TEXT(stored=True)
+        columns = {
+            str(col_name): TypeMapper.map_dtype(dtype)
+            for col_name, dtype in zip(df.columns, df.dtypes, strict=True)
+        }
 
         from whoosh.fields import Schema
 

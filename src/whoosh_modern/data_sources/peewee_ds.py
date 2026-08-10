@@ -160,6 +160,10 @@ class PeeweeSource:
     def _map_peewee_field(self, field: Any) -> Any:
         """Map Peewee field to Whoosh field.
 
+        Delegates to the canonical
+        :meth:`whoosh_modern.models.base.TypeMapper.map_dtype`, using the
+        Peewee field class name as the dtype name.
+
         Args:
             field: A Peewee field instance.
 
@@ -167,22 +171,9 @@ class PeeweeSource:
             A Whoosh field instance (``TEXT``, ``NUMERIC``,
             ``BOOLEAN``, or ``DATETIME``) configured as stored.
         """
-        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
+        from whoosh_modern.models.base import TypeMapper
 
-        field_type = type(field).__name__.lower()
-
-        if "char" in field_type or "text" in field_type:
-            return TEXT(stored=True)
-        if "int" in field_type or "auto" in field_type:
-            return NUMERIC(int, stored=True)
-        if "float" in field_type or "double" in field_type:
-            return NUMERIC(float, stored=True)
-        if "bool" in field_type:
-            return BOOLEAN(stored=True)
-        if "date" in field_type or "time" in field_type:
-            return DATETIME(stored=True)
-
-        return TEXT(stored=True)
+        return TypeMapper.map_dtype(type(field).__name__)
 
     def iter_documents(self) -> Iterator[Document]:
         """Yield documents from the Peewee query.

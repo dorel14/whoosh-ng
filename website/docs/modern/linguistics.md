@@ -250,8 +250,8 @@ from whoosh_modern.linguistics.stemmers import (
     ItalianAnalyzer,
 )
 
-# Each analyzer is callable and returns a list of tokens
-analyzer = EnglishAnalyzer()
+# Each analyzer is an instance of LanguageAnalyzer and is callable: it returns a list of tokens
+analyzer = EnglishAnalyzer
 tokens = analyzer("The running cats")
 # tokens are stemmed: ["run", "cat"] (stop words removed)
 ```

@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from whoosh_modern.models.base import TypeMapper
+
 
 class SchemaOptimizationReport:
     """Analyzes a schema and field usage to suggest optimizations.
@@ -63,6 +65,11 @@ class SchemaOptimizationReport:
     def _suggest_type(self, fieldname: str, fieldobj: Any, usage: dict[str, Any]) -> str | None:
         """Suggest an optimized field type based on usage statistics.
 
+        Delegates to the canonical
+        :meth:`whoosh_modern.models.base.TypeMapper.suggest_type` so that this
+        logic can no longer diverge from
+        :meth:`whoosh_modern.schema_discovery.SchemaDiscovery.from_sample_optimized`.
+
         Args:
             fieldname: The name of the field being analyzed.
             fieldobj: The Whoosh field object.
@@ -71,15 +78,7 @@ class SchemaOptimizationReport:
         Returns:
             The suggested type name, or None if no change is recommended.
         """
-        current = type(fieldobj).__name__
-        if current == "TEXT":
-            if usage.get("unique_values", 0) / max(usage.get("doc_count", 1), 1) > 0.8:
-                return "KEYWORD"
-            if usage.get("is_id", False) and usage.get("unique", True):
-                return "ID"
-        if current == "TEXT" and usage.get("is_datetime", False):
-            return "DATETIME"
-        return None
+        return TypeMapper.suggest_type(type(fieldobj).__name__, usage)
 
     def _confidence(self, fieldname: str, fieldobj: Any, usage: dict[str, Any]) -> str:
         """Compute the confidence level for a suggestion.
@@ -117,6 +116,8 @@ class SchemaOptimizationReport:
             return "Valeur unique par document ; ID est plus compact et plus rapide."
         if suggested == "DATETIME":
             return "Valeurs date/heure détectées ; DATETIME permet le tri et le filtrage efficace."
+        if suggested == "BOOLEAN":
+            return "Valeurs booléennes détectées ; BOOLEAN réduit fortement la taille de l'index."
         return ""
 
     def text(self) -> str:

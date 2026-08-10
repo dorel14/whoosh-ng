@@ -10,7 +10,7 @@ Version: 3.0.0
 
 from __future__ import annotations
 
-from whoosh_modern.application import FileStorage, SearchApplication
+from whoosh_modern.application import SearchApplication
 from whoosh_modern.autocomplete import FuzzySuggestProvider, NGramProvider, create_autocomplete
 from whoosh_modern.data_sources import DataSource, ObservableDataSource
 from whoosh_modern.data_sources.config import DataSourceConfig
@@ -37,12 +37,8 @@ from whoosh_modern.indexing import (
     BatchAnalyzer,
     BatchIndexWriter,
     CompiledDataSource,
-    LogMergePolicy,
-    MergePolicy,
     ModernIndexBuilder,
-    NoMergePolicy,
     ParallelIndexBuilder,
-    TieredMergePolicy,
 )
 from whoosh_modern.linguistics import (
     LANG_SYNONYMS,
@@ -95,13 +91,15 @@ from whoosh_modern.storage import (
     AsyncFileStorage,
     AsyncHybridStorage,
     CachedObjectStorage,
+    FileStorage,
+    FileStorageProvider,
     HybridStorage,
     S3Storage,
     SnapshotStorage,
 )
 from whoosh_modern.validation import ValidationFramework
 from whoosh_modern.views import SearchView
-from whoosh_modern.writer import ModernIndex, ModernIndexWriter
+from whoosh_modern.writer import ModernIndex
 
 __all__ = [
     "SearchApplication",
@@ -167,7 +165,6 @@ __all__ = [
     "DocumentIterationError",
     "ValidationError",
     "ModernIndex",
-    "ModernIndexWriter",
     "BatchIndexWriter",
     "BatchAnalyzer",
     "CompiledDataSource",
@@ -184,9 +181,5 @@ __all__ = [
     "AnalyzerCache",
     "FieldAnalyzerCache",
     "profile_commit",
-    "MergePolicy",
-    "NoMergePolicy",
-    "LogMergePolicy",
-    "TieredMergePolicy",
     "ParallelIndexBuilder",
 ]

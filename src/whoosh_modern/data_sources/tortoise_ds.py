@@ -111,6 +111,10 @@ class TortoiseSource:
     def _map_tortoise_field(self, field: Any) -> Any:
         """Map Tortoise ORM field to Whoosh field.
 
+        Delegates to the canonical
+        :meth:`whoosh_modern.models.base.TypeMapper.map_dtype`, using the
+        Tortoise field class name as the dtype name.
+
         Args:
             field: A Tortoise ORM field instance.
 
@@ -118,22 +122,9 @@ class TortoiseSource:
             A Whoosh field instance (``TEXT``, ``NUMERIC``,
             ``BOOLEAN``, or ``DATETIME``) configured as stored.
         """
-        from whoosh.fields import BOOLEAN, DATETIME, NUMERIC, TEXT
+        from whoosh_modern.models.base import TypeMapper
 
-        field_type = type(field).__name__.lower()
-
-        if "char" in field_type or "text" in field_type:
-            return TEXT(stored=True)
-        if "int" in field_type or "bigint" in field_type:
-            return NUMERIC(int, stored=True)
-        if "float" in field_type or "decimal" in field_type:
-            return NUMERIC(float, stored=True)
-        if "bool" in field_type:
-            return BOOLEAN(stored=True)
-        if "date" in field_type or "time" in field_type or "datetime" in field_type:
-            return DATETIME(stored=True)
-
-        return TEXT(stored=True)
+        return TypeMapper.map_dtype(type(field).__name__)
 
     async def _fetch_all(self) -> list[dict[str, Any]]:
         """Fetch all records from the Tortoise model.

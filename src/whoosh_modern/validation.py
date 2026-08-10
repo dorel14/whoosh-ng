@@ -4,11 +4,16 @@ Author: dorel14
 Version: 3.0.0
 """
 
+from __future__ import annotations
+
+import datetime as _dt
 from contextlib import suppress
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any
 
 from whoosh.fields import Schema
+from whoosh_modern.exceptions import ValidationError
 
 
 @dataclass
@@ -119,39 +124,108 @@ class ValidationFramework:
                     for field_name, field_type in schema.items():
                         if field_name in doc:
                             value = doc[field_name]
-                            if value is not None and not self._check_type(value, field_type):
-                                errors.append(
-                                    f"Document {count}, field '{field_name}': "
-                                    f"expected {type(field_type).__name__}, "
-                                    f"got {type(value).__name__}"
-                                )
+                            if value is None:
+                                continue
+                            try:
+                                self.coerce_value(value, field_type, field_name=field_name)
+                            except ValidationError as exc:
+                                errors.append(f"Document {count}, field '{field_name}': {exc}")
         except Exception as e:
             errors.append(f"Document iteration failed: {e}")
         return errors
 
     @staticmethod
+    def _normalize_value(value: Any, field_type: Any) -> Any:
+        """Normalize a Python value into a form the field can consume.
+
+        Only the small set of conversions Whoosh fields cannot perform
+        themselves is applied here (``date`` -> ``datetime`` for DATETIME
+        fields, ``Decimal`` -> ``float`` for NUMERIC fields declared without
+        ``decimal_places``).
+
+        Args:
+            value: The raw value coming from the data source.
+            field_type: The target Whoosh field type instance.
+
+        Returns:
+            The value, possibly adapted for the field's own converter.
+        """
+        from whoosh.fields import DATETIME, NUMERIC
+
+        if isinstance(field_type, DATETIME):
+            if isinstance(value, _dt.datetime):
+                return value
+            if isinstance(value, _dt.date):
+                return _dt.datetime(value.year, value.month, value.day)
+            if isinstance(value, int | float) and not isinstance(value, bool):
+                # Interpret plain numbers as POSIX timestamps.
+                return _dt.datetime.fromtimestamp(float(value), tz=_dt.UTC).replace(tzinfo=None)
+            return value
+
+        if (
+            isinstance(field_type, NUMERIC)
+            and isinstance(value, Decimal)
+            and not getattr(field_type, "decimal_places", 0)
+        ):
+            return float(value)
+
+        return value
+
+    @staticmethod
+    def coerce_value(value: Any, field_type: Any, field_name: str | None = None) -> Any:
+        """Coerce a value using the target field's own conversion mechanism.
+
+        Instead of re-implementing type checks with ``isinstance`` chains, this
+        delegates to the Whoosh field itself (``FieldType.to_bytes`` and, for
+        boolean fields, ``BOOLEAN._obj_to_bool``), which already implements the
+        correct coercion rules for ID, KEYWORD, TEXT, NUMERIC, DATETIME and
+        BOOLEAN fields.
+
+        Args:
+            value: The value to coerce.
+            field_type: The Whoosh field type instance.
+            field_name: Optional field name used in the error message.
+
+        Returns:
+            The value accepted by the field (possibly normalized).
+
+        Raises:
+            ValidationError: If the field cannot coerce the value.
+        """
+        from whoosh.fields import BOOLEAN
+
+        normalized = ValidationFramework._normalize_value(value, field_type)
+        try:
+            if isinstance(field_type, BOOLEAN):
+                field_type._obj_to_bool(normalized)
+            else:
+                to_bytes = getattr(field_type, "to_bytes", None)
+                if to_bytes is None:
+                    return normalized
+                to_bytes(normalized)
+        except Exception as exc:
+            raise ValidationError(
+                f"value {value!r} of type {type(value).__name__} is not compatible with "
+                f"{type(field_type).__name__} field: {exc}",
+                field=field_name,
+            ) from exc
+        return normalized
+
+    @staticmethod
     def _check_type(value: Any, field_type: Any) -> bool:
-        """Check if a value is compatible with a Whoosh field type.
+        """Check if a value can be coerced by a Whoosh field type.
 
         Args:
             value: The value to check.
             field_type: The Whoosh field type instance.
 
         Returns:
-            True if the value is compatible with the field type.
+            True if the field's own converter accepts the value.
         """
-        from whoosh.fields import DATETIME, ID, KEYWORD, NUMERIC, TEXT
-
-        if isinstance(field_type, ID):
-            return isinstance(value, str)
-        if isinstance(field_type, KEYWORD):
-            return isinstance(value, str)
-        if isinstance(field_type, NUMERIC):
-            return isinstance(value, int | float)
-        if isinstance(field_type, DATETIME):
-            return isinstance(value, int | float)
-        if isinstance(field_type, TEXT):
-            return isinstance(value, str | bytes)
+        try:
+            ValidationFramework.coerce_value(value, field_type)
+        except ValidationError:
+            return False
         return True
 
     def validate(self, source: Any) -> list[ValidationResult]:

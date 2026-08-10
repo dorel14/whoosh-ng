@@ -37,6 +37,15 @@ class FileStorageProvider(SyncStorageProvider):
     def __init__(self, root: str) -> None:
         self._root = os.path.abspath(root)
 
+    @property
+    def root(self) -> str:
+        """Absolute root directory used by this provider.
+
+        Returns:
+            The absolute filesystem path of the storage root.
+        """
+        return self._root
+
     def _path(self, key: str) -> str:
         """Normalize *key* to an absolute filesystem path.
 

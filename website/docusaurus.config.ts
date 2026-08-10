@@ -51,6 +51,11 @@ const config: Config = {
           position: 'left',
         },
         {
+          to: 'https://github.com/users/dorel14/projects/2/views/2?sliceBy%5BcolumnId%5D=Milestone',
+          label: 'Roadmap',
+          position: 'left',
+        },
+        {
           to: '/examples/basic-indexing',
           label: 'Examples',
           position: 'left',

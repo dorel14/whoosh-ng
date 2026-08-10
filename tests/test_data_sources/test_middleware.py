@@ -177,11 +177,16 @@ class TestMiddlewarePipeline:
 
 
 class TestMiddlewareBase:
-    def test_middleware_is_abstract(self):
-        with pytest.raises(TypeError):
-            Middleware()  # type: ignore[abstract]
+    def test_middleware_is_core_base_class(self):
+        from whoosh.middleware.base import Middleware as CoreMiddleware
 
-    def test_middleware_wrap_abstract(self):
+        assert Middleware is CoreMiddleware
+
+    def test_resilience_middlewares_subclass_core(self):
+        assert issubclass(RetryMiddleware, Middleware)
+        assert issubclass(LoggingMiddleware, Middleware)
+
+    def test_custom_middleware_can_wrap(self):
         class ConcreteMiddleware(Middleware):
             def wrap(self, operation: Callable) -> Callable:
                 return operation

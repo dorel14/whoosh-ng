@@ -1,10 +1,13 @@
 """Whoosh-NG modern middleware package.
 
-Re-exports the resilience pipeline (:class:`Middleware`, :class:`RetryMiddleware`,
-:class:`LoggingMiddleware`, :class:`CacheMiddleware`, :class:`MiddlewarePipeline`)
-and the hook-based business middleware (:class:`StorageMiddleware`,
-:class:`SearchMiddleware`, :class:`AnalyzerMiddleware` and friends) which subclass
-:class:`whoosh.middleware.base.Middleware`.
+Re-exports the core hook-based base class
+(:class:`whoosh.middleware.base.Middleware`) so that
+``from whoosh_modern.middleware import Middleware`` always resolves to the core
+class, plus the resilience middleware built on top of it
+(:class:`RetryMiddleware`, :class:`LoggingMiddleware`, :class:`CacheMiddleware`,
+:class:`MiddlewarePipeline`) and the business middleware
+(:class:`StorageMiddleware`, :class:`SearchMiddleware`,
+:class:`AnalyzerMiddleware` and friends).
 
 Author: dorel14
 Version: 3.0.0
@@ -12,15 +15,15 @@ Version: 3.0.0
 
 from __future__ import annotations
 
+from whoosh.middleware.base import Middleware
 from whoosh_modern.middleware.analyzer import (
     AnalyzerMiddleware,
     StemmingMiddleware,
     SynonymMiddleware,
 )
-from whoosh_modern.middleware.pipeline import (
+from whoosh_modern.middleware.resilience import (
     CacheMiddleware,
     LoggingMiddleware,
-    Middleware,
     MiddlewarePipeline,
     RetryMiddleware,
 )
@@ -37,8 +40,9 @@ from whoosh_modern.middleware.storage import (
 )
 
 __all__ = [
-    # resilience pipeline (legacy)
+    # core base class (re-export)
     "Middleware",
+    # resilience middleware
     "RetryMiddleware",
     "LoggingMiddleware",
     "CacheMiddleware",

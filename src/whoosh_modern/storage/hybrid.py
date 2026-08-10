@@ -10,6 +10,7 @@ import os
 from collections import OrderedDict
 
 from whoosh.plugins.storage_base import AsyncStorageProvider, SyncStorageProvider
+from whoosh_modern.middleware.storage import FileStorageProvider
 
 
 class HybridStorage(SyncStorageProvider):
@@ -60,38 +61,26 @@ class HybridStorage(SyncStorageProvider):
             max_cache_size_mb: Maximum cache size in megabytes before
                 evicting oldest entries.
         """
-        self._cache_root = os.path.abspath(local_cache)
+        self._cache_provider = FileStorageProvider(local_cache)
         self._remote = remote
+        os.makedirs(local_cache, exist_ok=True)
         self._max_cache_bytes = max_cache_size_mb * 1024 * 1024
         self._cache: OrderedDict[str, bytes] = OrderedDict()
         self._cache_size: int = 0
-        os.makedirs(self._cache_root, exist_ok=True)
-
-    def _cache_path(self, key: str) -> str:
-        """Return the local filesystem path for a cache key.
-
-        Args:
-            key: The storage key.
-
-        Returns:
-            Safe filesystem path for the key.
-        """
-        safe = key.replace("\\", os.sep).replace("/", os.sep)
-        return os.path.join(self._cache_root, safe)
 
     def _cache_file_exists(self, key: str) -> bool:
-        """Check whether the cache key exists on the local filesystem.
+        """Check whether the cache key exists in the local filesystem cache.
 
         Args:
             key: The storage key.
 
         Returns:
-            True if the file exists on disk, False otherwise.
+            True if the file exists in the cache, False otherwise.
         """
-        return os.path.exists(self._cache_path(key))
+        return self._cache_provider.exists(key)
 
     def _read_cache(self, key: str) -> bytes | None:
-        """Read cached data for a key from the local filesystem.
+        """Read cached data for a key from the local filesystem cache.
 
         Args:
             key: The storage key.
@@ -99,11 +88,9 @@ class HybridStorage(SyncStorageProvider):
         Returns:
             Cached bytes if present, None otherwise.
         """
-        path = self._cache_path(key)
-        if not os.path.exists(path):
+        if not self._cache_provider.exists(key):
             return None
-        with open(path, "rb") as fh:
-            data = fh.read()
+        data = self._cache_provider.read(key)
         self._cache[key] = data
         self._cache_size += len(data)
         self._enforce_cache_limit()
@@ -116,12 +103,7 @@ class HybridStorage(SyncStorageProvider):
             key: The storage key.
             data: Binary data to cache.
         """
-        path = self._cache_path(key)
-        parent = os.path.dirname(path)
-        if parent:
-            os.makedirs(parent, exist_ok=True)
-        with open(path, "wb") as fh:
-            fh.write(data)
+        self._cache_provider.write(key, data)
         self._cache[key] = data
         self._cache_size += len(data)
         self._enforce_cache_limit()
@@ -132,9 +114,8 @@ class HybridStorage(SyncStorageProvider):
         Args:
             key: The storage key to remove.
         """
-        path = self._cache_path(key)
-        if os.path.exists(path):
-            os.remove(path)
+        if self._cache_provider.exists(key):
+            self._cache_provider.delete(key)
         if key in self._cache:
             self._cache_size -= len(self._cache[key])
             del self._cache[key]
@@ -144,9 +125,8 @@ class HybridStorage(SyncStorageProvider):
         while self._cache_size > self._max_cache_bytes and self._cache:
             oldest_key, oldest_data = self._cache.popitem(last=False)
             self._cache_size -= len(oldest_data)
-            path = self._cache_path(oldest_key)
-            if os.path.exists(path):
-                os.remove(path)
+            if self._cache_provider.exists(oldest_key):
+                self._cache_provider.delete(oldest_key)
 
     def invalidate(self, key: str) -> None:
         """Remove ``key`` from the local cache.
@@ -228,12 +208,7 @@ class HybridStorage(SyncStorageProvider):
         """
         remote_keys = set(self._remote.list_keys())
         if include_cache:
-            cache_keys: set[str] = set()
-            for current, _dirs, files in os.walk(self._cache_root):
-                for name in files:
-                    full = os.path.join(current, name)
-                    rel = os.path.relpath(full, self._cache_root)
-                    cache_keys.add(rel.replace(os.sep, "/"))
+            cache_keys = set(self._cache_provider.list_keys())
             return sorted(remote_keys | cache_keys)
         return sorted(remote_keys)
 

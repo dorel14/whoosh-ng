@@ -1,8 +1,15 @@
 """Pydantic DataSource implementation for Pydantic model collections.
 
+Schema discovery delegates to the canonical
+:class:`whoosh_modern.models.base.TypeMapper`, so annotations are mapped to
+their real Whoosh field types (``int`` -> NUMERIC, ``bool`` -> BOOLEAN,
+``datetime`` -> DATETIME, ...) instead of always TEXT.
+
 Author: dorel14
 Version: 3.0.0
 """
+
+from __future__ import annotations
 
 import logging
 from collections.abc import Iterator, Mapping
@@ -10,11 +17,43 @@ from typing import Any
 
 from whoosh.fields import Schema
 from whoosh_modern.exceptions import DataSourceError
-from whoosh_modern.schema_discovery import SchemaDiscovery
+from whoosh_modern.models.base import TypeMapper
+from whoosh_modern.models.types import SearchOptions
 
 logger = logging.getLogger(__name__)
 
 Document = Mapping[str, Any]
+
+
+def _get_pydantic_model_annotations(model: Any) -> dict[str, Any]:
+    """Extract ``{field_name: annotation}`` from a Pydantic model (v1 or v2).
+
+    Args:
+        model: A Pydantic model class (v1 or v2).
+
+    Returns:
+        A mapping of field names to their type annotations. Fields whose
+        annotation cannot be resolved map to ``str``.
+
+    Raises:
+        DataSourceError: If the model has neither ``model_fields``
+            nor ``__fields__``.
+    """
+    fields = getattr(model, "model_fields", None)
+    if fields is None:
+        fields = getattr(model, "__fields__", None)
+    if fields is None:
+        raise DataSourceError(
+            f"Unsupported Pydantic model type: {type(model)}",
+            source="pydantic",
+        )
+    annotations: dict[str, Any] = {}
+    for name, field_info in fields.items():
+        annotation = getattr(field_info, "annotation", None)
+        if annotation is None:
+            annotation = getattr(field_info, "outer_type_", None)
+        annotations[name] = annotation if annotation is not None else str
+    return annotations
 
 
 def _get_pydantic_model_fields(model: Any) -> list[str]:
@@ -30,14 +69,7 @@ def _get_pydantic_model_fields(model: Any) -> list[str]:
         DataSourceError: If the model has neither ``model_fields``
             nor ``__fields__``.
     """
-    if hasattr(model, "model_fields"):
-        return list(model.model_fields.keys())
-    if hasattr(model, "__fields__"):
-        return list(model.__fields__.keys())
-    raise DataSourceError(
-        f"Unsupported Pydantic model type: {type(model)}",
-        source="pydantic",
-    )
+    return list(_get_pydantic_model_annotations(model).keys())
 
 
 def _model_to_dict(model: Any) -> dict[str, Any]:
@@ -122,18 +154,22 @@ class PydanticSource:
         return len(self._models) > 0
 
     def discover_schema(self) -> Schema:
-        """Discover schema from Pydantic model fields.
+        """Discover schema from Pydantic model annotations.
 
-        Inspects the model class's field definitions and infers
-        Whoosh field types for each.
+        Each model field annotation is mapped through the canonical
+        :class:`~whoosh_modern.models.base.TypeMapper`, so ``int`` becomes
+        NUMERIC, ``bool`` becomes BOOLEAN, ``datetime`` becomes DATETIME,
+        ``list``/``set`` become KEYWORD, and ``str`` stays TEXT.
 
         Returns:
             A Whoosh :class:`~whoosh.fields.Schema` derived from the
-            model's field names.
+            model's annotations.
         """
-        fields = {}
-        for field_name in _get_pydantic_model_fields(self._model_type):
-            fields[field_name] = SchemaDiscovery._infer_field_type(None)
+        options = SearchOptions(stored=True)
+        fields = {
+            name: TypeMapper.map_annotation(annotation, options)
+            for name, annotation in _get_pydantic_model_annotations(self._model_type).items()
+        }
 
         self._schema = Schema(**fields)
         return self._schema

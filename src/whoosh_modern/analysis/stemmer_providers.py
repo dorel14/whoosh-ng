@@ -36,6 +36,10 @@ import logging
 from collections.abc import Callable
 from typing import Any, Protocol, cast, runtime_checkable
 
+from whoosh.analysis.morph import PyStemmerFilter
+from whoosh.lang import stemmer_for_language
+from whoosh.lang.porter import stem as porter_stem
+
 logger = logging.getLogger(__name__)
 
 
@@ -89,28 +93,23 @@ class InternalStemmerProvider:
     def _load_stem_fn(self, language: str) -> Callable[[str], str]:
         """Load the appropriate stem function for the language.
 
-        Tries the Whoosh ``porter`` stemmer first, then falls back to
-        the legacy ``whoosh.analysis.stem``, and finally uses an
-        identity function if no stemmer is available.
+        Delegates to :func:`whoosh.lang.stemmer_for_language`, which resolves
+        the Snowball (or ISRI) stemmer matching the requested language. If no
+        stemmer exists for that language, the English Porter stemmer is used
+        as a fallback.
 
         Args:
-            language: Language code (currently informational; porter is English-only).
+            language: Language code or name (e.g. ``"fr"``, ``"french"``,
+                ``"en"``, ``"en_porter"``).
 
         Returns:
             A callable that stems a single word.
         """
         try:
-            from whoosh.lang import porter
-
-            return porter.stem
-        except ImportError:
-            try:
-                from whoosh.analysis import stem  # type: ignore[attr-defined]
-
-                return cast(Callable[[str], str], stem)
-            except ImportError:
-                logger.warning(f"No internal stemmer found for {language}, using identity")
-                return lambda x: x
+            return cast(Callable[[str], str], stemmer_for_language(language))
+        except Exception:  # NoStemmer and any lazy-import failure
+            logger.warning("No stemmer available for %r, falling back to English Porter", language)
+            return cast(Callable[[str], str], porter_stem)
 
     def stem(self, word: str) -> str:
         """Stem a word using the internal stemmer.
@@ -135,48 +134,52 @@ class InternalStemmerProvider:
 
 
 class PyStemmerProvider:
-    """Wrapper around PyStemmer.
+    """Wrapper around Whoosh's cache-aware ``PyStemmerFilter``.
+
+    Instead of re-implementing PyStemmer access, this provider reuses
+    :class:`whoosh.analysis.morph.PyStemmerFilter`, which configures the
+    ``Stemmer.Stemmer`` instance with an internal stem cache.
 
     Attributes:
         _language: The language code for this stemmer.
-        _stemmer: The underlying ``Stemmer.Stemmer`` instance.
+        _filter: The underlying ``PyStemmerFilter`` instance.
     """
 
-    def __init__(self, language: str = "english") -> None:
+    def __init__(self, language: str = "english", cachesize: int = 10000) -> None:
         """Initialize the PyStemmerProvider.
 
         Args:
             language: Language code for the stemmer (default: "english").
+            cachesize: Maximum number of stemmed words cached by PyStemmer.
 
         Raises:
             ImportError: If PyStemmer is not installed.
         """
         self._language = language
-        self._stemmer = self._load_stemmer(language)
+        self._filter = self._load_filter(language, cachesize)
 
-    def _load_stemmer(self, language: str):
-        """Load PyStemmer for the given language.
+    def _load_filter(self, language: str, cachesize: int) -> PyStemmerFilter:
+        """Build the cache-aware ``PyStemmerFilter`` for the given language.
 
         Args:
             language: Language code to load the stemmer for.
+            cachesize: Maximum number of stemmed words to cache.
 
         Returns:
-            A ``Stemmer.Stemmer`` instance.
+            A configured ``PyStemmerFilter`` instance.
 
         Raises:
             ImportError: If PyStemmer is not installed.
         """
         try:
-            import Stemmer
-
-            return Stemmer.Stemmer(language)
+            return PyStemmerFilter(lang=language, cachesize=cachesize)
         except ImportError:
             raise ImportError(
                 "PyStemmer is not installed. Install it with: pip install whoosh-ng[fast-stemming]"
             ) from None
 
     def stem(self, word: str) -> str:
-        """Stem a word using PyStemmer.
+        """Stem a word using the cache-aware PyStemmer filter.
 
         Args:
             word: The word to stem.
@@ -184,7 +187,7 @@ class PyStemmerProvider:
         Returns:
             The stemmed word.
         """
-        return cast(str, self._stemmer.stemWord(word))
+        return cast(str, self._filter._stem(word))
 
     @property
     def name(self) -> str:

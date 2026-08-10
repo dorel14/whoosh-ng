@@ -30,38 +30,16 @@ from __future__ import annotations
 import gc
 import logging
 import os
-import shutil
-import time
 from concurrent.futures import Future, ProcessPoolExecutor
 from typing import Any
 
 from whoosh.fields import Schema
 from whoosh.index import create_in, open_dir
+from whoosh_modern.indexing._utils import _build_segment_worker, _rmtree_retry
 from whoosh_modern.indexing.batch_writer import BatchIndexWriter
 from whoosh_modern.indexing.compiler import BatchAnalyzer, CompiledDataSource
 
 logger = logging.getLogger(__name__)
-
-
-def _rmtree_retry(path: str, retries: int = 20, delay: float = 0.5) -> None:
-    """Remove a directory tree, retrying on Windows permission errors.
-
-    On Windows, files created by worker processes can remain briefly
-    locked after the process pool shuts down. Retrying with small
-    delays avoids spurious failures in tests and cleanup paths.
-
-    Args:
-        path: Path to the directory tree to remove.
-        retries: Maximum number of retry attempts. Defaults to 20.
-        delay: Delay in seconds between retries. Defaults to 0.5.
-    """
-    for attempt in range(retries):
-        try:
-            shutil.rmtree(path)
-            return
-        except PermissionError:
-            if attempt < retries - 1:
-                time.sleep(delay)
 
 
 class ModernIndexBuilder:
@@ -248,43 +226,3 @@ class ModernIndexBuilder:
                 _rmtree_retry(segment_dir)
 
         return sum(len(batch) for batch in batches)
-
-
-def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -> str:
-    """Worker function that builds a single segment in a separate process.
-
-    Args:
-        args: A tuple of ``(temp_dir, schema, docs, docbase)`` where
-            ``temp_dir`` is the output directory, ``schema`` is the Whoosh
-            schema, ``docs`` is the list of document dicts, and ``docbase``
-            is the starting document ID (unused in this implementation).
-
-    Returns:
-        The path to the written segment directory.
-    """
-    import gc
-    import os
-
-    from whoosh.index import create_in
-
-    temp_dir, schema, docs, _docbase = args
-    os.makedirs(temp_dir, exist_ok=True)
-    ix = create_in(temp_dir, schema)
-    writer = ix.writer(limitmb=128, multisegment=True)
-    try:
-        for _doc in docs:
-            writer.add_document(**_doc)
-        writer.commit(merge=False)
-    except Exception:
-        writer.cancel()
-        raise
-    finally:
-        # Break reference cycles before dropping references so the cyclic
-        # GC can reclaim the writer and its open file handles on Windows.
-        if writer._searcher is not None:
-            writer._searcher._ix = None
-            writer._searcher = None
-        del writer
-        del ix
-        gc.collect()
-    return temp_dir
