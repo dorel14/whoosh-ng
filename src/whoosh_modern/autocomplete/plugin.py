@@ -25,7 +25,7 @@ class AutocompletePlugin(Plugin):
     """
 
     name = "whoosh_autocomplete"
-    version = "4.2.3"
+    version = "4.3.0"
 
     def register(self, manager: Any) -> None:
         """Register the autocomplete provider in the registry.

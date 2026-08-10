@@ -23,7 +23,7 @@ class VectorPlugin(Plugin):
     """
 
     name = "whoosh_vector"
-    version = "4.2.3"
+    version = "4.3.0"
 
     def register(self, manager: Any) -> None:
         """Register the NumPy vector provider in the registry.
