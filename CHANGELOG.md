@@ -46,6 +46,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Type annotations modernized: `mypy src/whoosh` reports 0 errors. `py.typed`
   marker shipped.
 
+### Fixed
+- **Security**: fixed a path traversal vulnerability in
+  `whoosh_modern.storage.s3.SnapshotStorage.read()` where a malicious S3
+  object key (e.g. `../../etc/passwd`) could write files outside the
+  configured `local_path`. Keys are now sanitized and validated before being
+  used to build local scratch file paths, raising `ValueError` for `..`
+  segments, absolute paths, or resolutions escaping `local_path`.
+
 ### In Progress (tracked in `.kilo/plans/1783617590838-whoosh-ng-consolidated-plan.md`)
 - Async ecosystem: `run_sync` bridge, async plugin registration,
   `AsyncStorageProvider`/`AsyncVectorProvider` bases, fully async FastAPI plugin.

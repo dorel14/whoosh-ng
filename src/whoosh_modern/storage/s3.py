@@ -111,6 +111,39 @@ class SnapshotStorage(S3StorageProvider):
         os.makedirs(self._local_path, exist_ok=True)
         super().__init__(bucket=bucket, prefix=prefix, client=client)
 
+    def _safe_local_path(self, key: str) -> str:
+        """Build a sanitized local filesystem path for ``key``.
+
+        The key is validated to reject directory traversal (``..``) segments
+        and absolute path components before being joined onto
+        ``local_path``. The resulting path is also verified to resolve to a
+        location inside ``local_path`` as a defense-in-depth measure against
+        symlink or normalization tricks.
+
+        Args:
+            key: The blob key.
+
+        Returns:
+            The absolute local filesystem path corresponding to ``key``.
+
+        Raises:
+            ValueError: If ``key`` contains a ``..`` path segment, an
+                absolute path component, or otherwise resolves outside of
+                ``local_path``.
+        """
+        normalized_key = key.replace("\\", "/")
+        segments = normalized_key.split("/")
+        if ".." in segments:
+            raise ValueError(f"Invalid key {key!r}: path traversal ('..') is not allowed")
+        if os.path.isabs(normalized_key) or (len(normalized_key) > 1 and normalized_key[1] == ":"):
+            raise ValueError(f"Invalid key {key!r}: absolute paths are not allowed")
+
+        candidate = os.path.normpath(os.path.join(self._local_path, normalized_key.replace("/", os.sep)))
+        local_root = os.path.normpath(self._local_path)
+        if candidate != local_root and not candidate.startswith(local_root + os.sep):
+            raise ValueError(f"Invalid key {key!r}: resolves outside of local_path")
+        return candidate
+
     def read(self, key: str) -> bytes:
         """Read the object for ``key`` from S3 and cache it locally.
 
@@ -120,9 +153,14 @@ class SnapshotStorage(S3StorageProvider):
         Returns:
             The raw bytes stored in the S3 object, also persisted under
             ``local_path``.
+
+        Raises:
+            ValueError: If ``key`` attempts to traverse outside of
+                ``local_path`` via ``..`` segments or absolute path
+                components.
         """
         data = super().read(key)
-        path = os.path.join(self._local_path, key.replace("/", os.sep))
+        path = self._safe_local_path(key)
         parent = os.path.dirname(path)
         if parent:
             os.makedirs(parent, exist_ok=True)
