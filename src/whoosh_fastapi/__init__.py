@@ -145,6 +145,36 @@ try:
             hits = autocomplete.search(q, limit=10)
             return {"suggestions": [hit.text for hit in hits]}
 
+        @app.websocket(f"{prefix}/autocomplete/ws")
+        async def autocomplete_ws(websocket: Any) -> None:
+            """WebSocket autocomplete endpoint.
+
+            Accepts persistent WebSocket connections. The client sends JSON
+            payloads with a ``q`` key containing the query prefix, and the
+            server responds with JSON payloads containing a ``suggestions``
+            list.
+
+            Example client message::
+
+                {"q": "pyth"}
+
+            Example server response::
+
+                {"suggestions": ["python", "pythagorean"]}
+            """
+            await websocket.accept()
+            try:
+                while True:
+                    payload = await websocket.receive_json()
+                    query = payload.get("q", "")
+                    if autocomplete is None:
+                        await websocket.send_json({"suggestions": []})
+                    else:
+                        hits = autocomplete.search(query, limit=10)
+                        await websocket.send_json({"suggestions": [hit.text for hit in hits]})
+            except Exception:
+                pass
+
         @app.get(f"{prefix}/suggest")
         async def suggest_endpoint(q: str) -> dict[str, Any]:
             """Suggest endpoint.
