@@ -18,6 +18,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from whoosh_modern.config.engines import (
+    AnalyzerEngine,
+    DataSourceEngine,
+    FacetEngine,
+    SchemaEngine,
+    StorageEngine,
+)
 from whoosh_modern.config.loader import load_json, load_yaml
 from whoosh_modern.config.models import WhooshNGConfig
 
@@ -33,7 +40,7 @@ class ConfigEngine:
         >>> engine = ConfigEngine()
         >>> engine.load("whoosh-ng.yml")
         >>> engine.load("whoosh-ng.local.yml", priority="instance")
-        >>> config = engine.get_config()
+        >>> app = engine.build()
 
     Attributes:
         _config: The current merged configuration.
@@ -97,6 +104,33 @@ class ConfigEngine:
             configuration from all loaded sources.
         """
         return self._config
+
+    def build(self) -> Any:
+        """Build a complete Whoosh-NG application from the merged configuration.
+
+        Orchestrates the specialized engines to construct a ready-to-use
+        :class:`whoosh_modern.application.SearchApplication`.
+
+        Returns:
+            A configured :class:`whoosh_modern.application.SearchApplication`
+            instance.
+
+        Raises:
+            ValueError: If the configuration cannot be resolved into a valid
+                application (e.g. unsupported data source or storage type).
+        """
+        schema_engine = SchemaEngine(self._config)
+        schema = schema_engine.build()
+
+        data_source_engine = DataSourceEngine(self._config)
+        source = data_source_engine.build()
+
+        storage_engine = StorageEngine(self._config)
+        storage = storage_engine.build()
+
+        from whoosh_modern.application import SearchApplication
+
+        return SearchApplication(source=source, storage=storage)
 
     def reset(self) -> None:
         """Reset the configuration engine to its default state."""

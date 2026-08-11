@@ -181,3 +181,11 @@ class TestConfigEngineIntegration:
         assert storage is not None
         facets = FacetEngine(config, schema).build()
         assert facets is not None
+
+    def test_build_returns_search_application(self, app_config: WhooshNGConfig) -> None:
+        from whoosh_modern.application import SearchApplication
+
+        engine = ConfigEngine()
+        engine.merge(app_config.model_dump(), priority="runtime")
+        app = engine.build()
+        assert isinstance(app, SearchApplication)
