@@ -1,7 +1,7 @@
 ---
 title: "Système de Plugins"
 nav_order: 51
-permalink: /fr/guides/plugins-sprint-c/
+permalink: /fr/guides/plugins-avances/
 lang: fr
 ---
 

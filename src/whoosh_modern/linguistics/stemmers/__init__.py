@@ -27,6 +27,9 @@ Version: 3.1.0
 
 from __future__ import annotations
 
+from re import Pattern
+from typing import Any
+
 from whoosh.analysis.analyzers import CompositeAnalyzer, LanguageAnalyzer
 from whoosh.analysis.tokenizers import default_pattern
 
@@ -49,7 +52,7 @@ class _LanguageAnalyzerAlias(CompositeAnalyzer):
     def __init__(
         self,
         lang: str,
-        expression: object = default_pattern,
+        expression: Pattern[str] = default_pattern,
         gaps: bool = False,
         cachesize: int = 50000,
     ) -> None:
@@ -63,11 +66,11 @@ class _LanguageAnalyzerAlias(CompositeAnalyzer):
             cachesize: Size of the stemmer cache used by the underlying
                 ``StemFilter``.
         """
-        self._lang_args: tuple[object, ...] = (lang, expression, gaps, cachesize)
+        self._lang_args: tuple[str, Pattern[str], bool, int] = (lang, expression, gaps, cachesize)
         composed = LanguageAnalyzer(lang, expression, gaps, cachesize)
         super().__init__(*composed.items)
 
-    def __call__(self, *args: object, **kwargs: object):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """Analyze text, or construct a fresh alias when called with no args.
 
         Args:

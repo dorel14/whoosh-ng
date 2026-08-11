@@ -36,23 +36,23 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[Glossary]({{ '/en/guides/glossary/' | relative_url }})** — Key terms and definitions
 - **[Migration]({{ '/en/guides/migration/' | relative_url }})** — Migrating from classic Whoosh
 - **[Legacy Cleanup]({{ '/en/guides/legacy-cleanup/' | relative_url }})** — Legacy code removal
-- **[Translation Status]({{ '/en/guides/translation-status/' | relative_url }})** — i18n progress
+- **[Translation Status]({{ '/en/guides/translation-progress/' | relative_url }})** — i18n progress
 
 ### Modern (New Features)
 
 - **[Middleware]({{ '/en/guides/middleware/' | relative_url }})** — Pipeline hooks and middleware
-- **[Middleware & Plugin Pipeline]({{ '/en/guides/middleware-sprint-c/' | relative_url }})** — Hook-based pipeline
+- **[Middleware & Plugin Pipeline]({{ '/en/guides/middleware-pipeline/' | relative_url }})** — Hook-based pipeline
 - **[Plugins]({{ '/en/guides/plugins/' | relative_url }})** — Extending Whoosh-NG
-- **[Plugin System]({{ '/en/guides/plugins-sprint-c/' | relative_url }})** — PluginManager API
+- **[Plugin System]({{ '/en/guides/plugins-advanced/' | relative_url }})** — PluginManager API
 - **[Autocomplete]({{ '/en/guides/autocomplete/' | relative_url }})** — Autocomplete providers
-- **[Autocomplete Providers]({{ '/en/guides/autocomplete-sprint-d/' | relative_url }})** — NGram, Fuzzy, InvertedIndex
+- **[Autocomplete Providers]({{ '/en/guides/autocomplete-providers/' | relative_url }})** — NGram, Fuzzy, InvertedIndex
 - **[Vector Search]({{ '/en/guides/vector/' | relative_url }})** — NumPy, HNSW, Faiss
 - **[Modern Indexing]({{ '/en/guides/modern-indexing/' | relative_url }})** — BatchIndexWriter, AnalyzerCache
 - **[Monitoring]({{ '/en/guides/monitoring/' | relative_url }})** — Metrics and observability
 - **[Performance]({{ '/en/guides/performance/' | relative_url }})** — Benchmarking and optimization
-- **[Linguistics & Synonyms]({{ '/en/guides/linguistics-sprint-d/' | relative_url }})** — SynonymManager
+- **[Linguistics & Synonyms]({{ '/en/guides/linguistics/' | relative_url }})** — SynonymManager
 - **[Stemming]({{ '/en/guides/stemming/' | relative_url }})** — Language stemmers
-- **[Stemmer Providers]({{ '/en/guides/stemming-sprint-d/' | relative_url }})** — PyStemmer backends
+- **[Stemmer Providers]({{ '/en/guides/stemming-providers/' | relative_url }})** — PyStemmer backends
 - **[N-grams]({{ '/en/guides/ngrams/' | relative_url }})** — N-gram tokenization
 - **[Storage Providers]({{ '/en/guides/storage-providers/' | relative_url }})** — Hybrid storage backends
 

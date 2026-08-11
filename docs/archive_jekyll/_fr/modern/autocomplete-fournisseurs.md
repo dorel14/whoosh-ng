@@ -1,7 +1,7 @@
 ---
 title: "Fournisseurs d'Autocomplétion"
 nav_order: 54
-permalink: /fr/guides/autocomplete-sprint-d/
+permalink: /fr/guides/autocomplete-fournisseurs/
 lang: fr
 ---
 

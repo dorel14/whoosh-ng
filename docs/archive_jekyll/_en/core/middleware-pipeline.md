@@ -1,7 +1,7 @@
 ---
 title: "Middleware & Plugin Pipeline"
 nav_order: 41
-permalink: /en/guides/middleware-sprint-c/
+permalink: /en/guides/middleware-pipeline/
 lang: en
 ---
 

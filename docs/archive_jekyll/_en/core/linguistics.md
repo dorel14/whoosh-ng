@@ -1,7 +1,7 @@
 ---
 title: "Synonyms & Linguistics"
 nav_order: 52
-permalink: /en/guides/linguistics-sprint-d/
+permalink: /en/guides/linguistics/
 lang: en
 ---
 

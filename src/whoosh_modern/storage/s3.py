@@ -135,10 +135,17 @@ class SnapshotStorage(S3StorageProvider):
         segments = normalized_key.split("/")
         if ".." in segments:
             raise ValueError(f"Invalid key {key!r}: path traversal ('..') is not allowed")
-        if os.path.isabs(normalized_key) or (len(normalized_key) > 1 and normalized_key[1] == ":"):
+        is_abs = (
+            os.path.isabs(normalized_key)
+            or normalized_key.startswith("/")
+            or (len(normalized_key) > 1 and normalized_key[1] == ":")
+        )
+        if is_abs:
             raise ValueError(f"Invalid key {key!r}: absolute paths are not allowed")
 
-        candidate = os.path.normpath(os.path.join(self._local_path, normalized_key.replace("/", os.sep)))
+        candidate = os.path.normpath(
+            os.path.join(self._local_path, normalized_key.replace("/", os.sep))
+        )
         local_root = os.path.normpath(self._local_path)
         if candidate != local_root and not candidate.startswith(local_root + os.sep):
             raise ValueError(f"Invalid key {key!r}: resolves outside of local_path")

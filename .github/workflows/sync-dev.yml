@@ -26,6 +26,8 @@ jobs:
 
       - name: Merge master into dev
         run: |
+          # Merge the latest master into dev to keep dev up-to-date.
+          # This creates a merge commit on dev for each master push.
           git merge --no-ff origin/master -m "chore: merge master into dev [skip ci]"
 
       - name: Push dev update

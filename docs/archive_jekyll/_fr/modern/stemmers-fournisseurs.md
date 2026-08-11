@@ -1,7 +1,7 @@
 ---
 title: "Fournisseurs de Stemmers"
 nav_order: 53
-permalink: /fr/guides/stemming-sprint-d/
+permalink: /fr/guides/stemmers-fournisseurs/
 lang: fr
 ---
 

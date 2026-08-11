@@ -14,7 +14,7 @@ body:
       options:
         - Feature
         - Enhancement
-        - Documentation
+        - Documentation Request
     validations:
       required: true
   - type: textarea
