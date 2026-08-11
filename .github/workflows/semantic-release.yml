@@ -2,15 +2,9 @@
 name: Semantic Release
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - "src/**"
-      - "pyproject.toml"
   workflow_dispatch:
   workflow_run:
-    workflows: ["CI", "Legacy Code Validation"]
+    workflows: ["CI"]
     types:
       - completed
 
@@ -149,3 +143,35 @@ jobs:
           fi
           echo "Publishing version $VERSION to PyPI..."
           uv publish --token "$PYPI_TOKEN"
+
+      - name: Sync version strings
+        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        run: python scripts/sync_version.py
+
+      - name: Generate changelog and docs
+        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          python scripts/generate_changelog.py
+          python scripts/generate_api_docs.py
+          python scripts/generate_llm_docs.py
+
+      - name: Commit changelog and docs updates
+        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add website/docs/core/changelog.md website/i18n/fr/docusaurus-plugin-content-docs/current/core/changelog.md
+          git add website/docs/api/reference.md website/i18n/fr/docusaurus-plugin-content-docs/current/api/reference.md
+          git add website/static/llms.txt website/static/llms-full.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update changelog and API docs [skip ci]" && git push)
+
+      - name: Trigger Pages deployment
+        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/dispatches \
+            -d '{"event_type":"deploy-pages"}'
