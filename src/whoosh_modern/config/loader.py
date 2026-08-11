@@ -102,8 +102,7 @@ def load_config(path: str | Path) -> WhooshNGConfig:
         raw = load_json(path)
     else:
         raise ValueError(
-            f"Unsupported configuration file format: {suffix!r}. "
-            "Use .yml, .yaml, or .json."
+            f"Unsupported configuration file format: {suffix!r}. Use .yml, .yaml, or .json."
         )
     return WhooshNGConfig(**raw)
 

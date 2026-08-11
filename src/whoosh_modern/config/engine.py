@@ -67,8 +67,7 @@ class ConfigEngine:
             raw = load_json(path)
         else:
             raise ValueError(
-                f"Unsupported configuration file format: {suffix!r}. "
-                "Use .yml, .yaml, or .json."
+                f"Unsupported configuration file format: {suffix!r}. Use .yml, .yaml, or .json."
             )
         self._layers.append((priority, raw))
         self._rebuild()
