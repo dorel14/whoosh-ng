@@ -7,8 +7,10 @@ Version: 3.0.0
 from __future__ import annotations
 
 import json
+import sys
 import textwrap
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -75,8 +77,19 @@ class TestLoadYaml:
         assert load_yaml(path) == {}
 
     def test_load_yaml_without_pyyaml(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr("whoosh_modern.config.loader.HAS_YAML", False)
-        with pytest.raises(ImportError):
+        import builtins
+        import sys
+
+        original_import = builtins.__import__
+
+        def failing_import(name: str, *args: Any, **kwargs: Any) -> Any:
+            if name == "yaml":
+                raise ImportError("No module named 'yaml'")
+            return original_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", failing_import)
+        monkeypatch.delitem(sys.modules, "yaml", raising=False)
+        with pytest.raises(ImportError, match="PyYAML is required"):
             load_yaml(yaml_config)
 
 

@@ -12,16 +12,6 @@ from typing import Any
 
 from whoosh_modern.config.models import WhooshNGConfig
 
-yaml: Any = None
-
-try:
-    import yaml as _yaml
-
-    yaml = _yaml
-    HAS_YAML = True
-except ImportError:
-    HAS_YAML = False
-
 
 def load_yaml(path: str | Path) -> dict[str, Any]:
     """Load a YAML configuration file.
@@ -37,8 +27,10 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
         FileNotFoundError: If the file does not exist.
         ValueError: If the file is not valid YAML.
     """
-    if not HAS_YAML:
-        raise ImportError("PyYAML is required to load YAML configuration files")
+    try:
+        import yaml
+    except ImportError as exc:
+        raise ImportError("PyYAML is required to load YAML configuration files") from exc
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"Configuration file not found: {path}")

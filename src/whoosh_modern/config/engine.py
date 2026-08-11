@@ -126,7 +126,10 @@ class ConfigEngine:
 
         Nested dictionaries are merged recursively. Scalar values and lists are
         replaced entirely by the override values; lists are NOT appended or
-        combined.
+        combined. For example, ``{"plugins": ["a"]}`` merged with
+        ``{"plugins": ["b"]}`` produces ``{"plugins": ["b"]}``, not
+        ``{"plugins": ["a", "b"]}``. If you need additive list behavior, handle
+        it at the application level before calling :meth:`merge`.
 
         Args:
             base: Base dictionary to merge into.
