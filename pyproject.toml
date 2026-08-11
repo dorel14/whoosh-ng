@@ -420,6 +420,7 @@ module = [
   "httpx",
   "re2",
   "psutil",
+  "yaml",
 ]
 ignore_missing_imports = true
 
