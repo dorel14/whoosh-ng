@@ -39,7 +39,7 @@ repos:
         language: system
         pass_filenames: false
         files: ^(pyproject\.toml|README\.md|src/whoosh/__init__\.py)$
-        stages: [pre-commit]
+        stages: [pre-push]
 
 # Never scan the CI pre-commit log artifact
 exclude: '^precommit\.log$'
