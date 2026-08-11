@@ -34,7 +34,7 @@ try:
         Raises:
             ImportError: If the ``fastapi`` package is not installed.
         """
-        app = FastAPI(title="Whoosh-NG Admin", version="5.0.0")
+        app = FastAPI(title="Whoosh-NG Admin", version="5.1.0")
 
         @app.get(f"{prefix}/", response_class=HTMLResponse)
         async def index_page() -> str:

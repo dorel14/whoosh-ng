@@ -119,7 +119,7 @@ try:
             A configured FastAPI application with search, autocomplete,
             suggest, and health routes mounted under the given prefix.
         """
-        app = FastAPI(title="Whoosh-NG API", version="5.0.0")
+        app = FastAPI(title="Whoosh-NG API", version="5.1.0")
 
         @app.get(f"{prefix}/health", response_model=HealthResponse)
         async def health_check() -> dict[str, str]:
