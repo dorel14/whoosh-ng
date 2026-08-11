@@ -41,6 +41,9 @@ stack configuration sources with the following precedence (highest wins):
 3. `application`
 4. `language`
 
+Invalid ``priority`` values raise ``ValueError`` immediately, so misconfigured
+layers cannot silently affect the merge order.
+
 Merging is deep: nested dictionaries are merged recursively, while scalar values
 and lists are replaced entirely.
 

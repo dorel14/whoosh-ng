@@ -79,6 +79,9 @@ phonetic = [
 lmdb = [
   "lmdb",
 ]
+yaml = [
+  "PyYAML",
+]
 api = [
   "fastapi",
   "uvicorn[standard]",

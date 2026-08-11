@@ -162,6 +162,10 @@ try:
 
                 {"q": "pyth"}
 
+            Example client message with custom limit::
+
+                {"q": "pyth", "limit": 5}
+
             Example server response::
 
                 {"suggestions": ["python", "pythagorean"]}
@@ -171,10 +175,11 @@ try:
                 while True:
                     payload = await websocket.receive_json()
                     query = payload.get("q", "")
+                    limit = int(payload.get("limit", 10))
                     if autocomplete is None:
                         await websocket.send_json({"suggestions": []})
                     else:
-                        hits = autocomplete.search(query, limit=10)
+                        hits = autocomplete.search(query, limit=limit)
                         await websocket.send_json({"suggestions": [hit.text for hit in hits]})
             except WebSocketDisconnect:
                 logger.info("WebSocket client disconnected from autocomplete.")

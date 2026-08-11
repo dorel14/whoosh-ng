@@ -167,6 +167,10 @@ const ws = new WebSocket("ws://localhost:8000/api/v1/autocomplete/ws");
 ws.onmessage = (event) => console.log(JSON.parse(event.data));
 ws.send(JSON.stringify({ q: "pyth" }));
 // {"suggestions": ["python", "pythagorean"]}
+
+// Custom limit
+ws.send(JSON.stringify({ q: "pyth", limit: 5 }));
+// {"suggestions": ["python", "pythagorean", ...]} // up to 5 suggestions
 ```
 
 When no autocomplete provider is configured, the endpoint returns an empty

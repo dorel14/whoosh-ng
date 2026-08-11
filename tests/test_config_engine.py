@@ -199,3 +199,13 @@ class TestConfigEngine:
         engine.merge({"search": {"fuzzy": {"distance": 10}}}, priority="runtime")
         config = engine.get_config()
         assert config.search.fuzzy.distance == 10
+
+    def test_load_invalid_priority(self, yaml_config: Path) -> None:
+        engine = ConfigEngine()
+        with pytest.raises(ValueError, match="Invalid priority"):
+            engine.load(yaml_config, priority="invalid")
+
+    def test_merge_invalid_priority(self) -> None:
+        engine = ConfigEngine()
+        with pytest.raises(ValueError, match="Invalid priority"):
+            engine.merge({}, priority="invalid")

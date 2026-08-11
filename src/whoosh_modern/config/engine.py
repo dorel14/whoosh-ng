@@ -56,9 +56,10 @@ class ConfigEngine:
                 ``"runtime"``. Higher priority layers override lower ones.
 
         Raises:
-            ValueError: If the file format is unsupported or the content is
-                invalid.
+            ValueError: If ``priority`` is not one of the accepted values, or if
+                the file format is unsupported or the content is invalid.
         """
+        self._validate_priority(priority)
         path = Path(path)
         suffix = path.suffix.lower()
         if suffix in (".yml", ".yaml"):
@@ -78,7 +79,11 @@ class ConfigEngine:
         Args:
             overrides: Configuration overrides as a dictionary.
             priority: Merge priority layer (see :meth:`load`).
+
+        Raises:
+            ValueError: If ``priority`` is not one of the accepted values.
         """
+        self._validate_priority(priority)
         self._layers.append((priority, overrides))
         self._rebuild()
 
@@ -95,6 +100,16 @@ class ConfigEngine:
         """Reset the configuration engine to its default state."""
         self._config = WhooshNGConfig()
         self._layers.clear()
+
+    @staticmethod
+    def _validate_priority(priority: str) -> None:
+        """Raise ``ValueError`` if ``priority`` is not an accepted layer name."""
+        accepted_priorities = {"language", "application", "instance", "runtime"}
+        if priority not in accepted_priorities:
+            raise ValueError(
+                f"Invalid priority: {priority!r}. Accepted values are: "
+                f"{sorted(accepted_priorities)}"
+            )
 
     def _rebuild(self) -> None:
         """Rebuild the merged configuration from all layers."""
