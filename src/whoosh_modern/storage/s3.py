@@ -166,8 +166,8 @@ class SnapshotStorage(S3StorageProvider):
                 ``local_path`` via ``..`` segments or absolute path
                 components.
         """
-        data = super().read(key)
         path = self._safe_local_path(key)
+        data = super().read(key)
         parent = os.path.dirname(path)
         if parent:
             os.makedirs(parent, exist_ok=True)

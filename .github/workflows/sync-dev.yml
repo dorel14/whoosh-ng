@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Required to fetch the full history of 'master' branch for the merge operation.
           ref: dev
           token: ${{ secrets.GITHUB_TOKEN }}
 
