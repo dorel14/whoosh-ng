@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0.dev0] - Unreleased
 
 ### Added
+- **Configuration Engine sub-engines** (`src/whoosh_modern/config/engines.py`):
+  `SchemaEngine`, `AnalyzerEngine`, `DataSourceEngine`, `StorageEngine`,
+  `SearchModelEngine`, `FacetEngine`, `PluginEngine`, and `APIEngine` to
+  build concrete Whoosh-NG components from a merged `WhooshNGConfig`.
 - **Plugin System** (`src/whoosh/plugins/`): `Plugin` base class and `PluginManager`
   with entry-point auto-discovery, version validation, conflict detection,
   enable/disable, and dependency management.
