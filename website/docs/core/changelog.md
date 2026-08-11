@@ -8,6 +8,267 @@ sidebars: changelogSidebar
 
 Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
 
+## v5.1.0 (2026-08-11)
+**Tag**: `v5.1.0`
+
+## v5.1.0 (2026-08-11)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **config,linguistics**: Resolve mypy/pyright issues in config loader and yaml provider ([`3f59f96`](https://github.com/dorel14/whoosh-ng/commit/3f59f9607398547225b090a2eddc0fc7e1f62efd))
+
+- **fastapi**: Correct WebSocket autocomplete test assertion ([`b9b1d57`](https://github.com/dorel14/whoosh-ng/commit/b9b1d57524b6f121bff60833c6b5563264bc4152))
+
+- **storage**: Validate SnapshotStorage key before remote read ([`3ec0b43`](https://github.com/dorel14/whoosh-ng/commit/3ec0b43120e05578a4191d25e0d66b10ab06b914))
+
+- **tests**: Import CoreStorageAdapter in test_storage_providers.py ([`18484b0`](https://github.com/dorel14/whoosh-ng/commit/18484b00c2e3f66e1baab76349d28694a3fde45a))
+
+### Documentation
+
+- Add Configuration Engine docs, update CHANGELOG, FastAPI WebSocket, CoreStorageAdapter, and SnapshotStorage fix ([`5e8ec4a`](https://github.com/dorel14/whoosh-ng/commit/5e8ec4ae49aaa64d66c554751f7cd67d9ca37f31))
+
+- Auto-update llms context files ([`916bb34`](https://github.com/dorel14/whoosh-ng/commit/916bb34e16c4b5adf7cf6cc7a1449864db60873a))
+
+- Auto-update llms context files ([`5b6b9a6`](https://github.com/dorel14/whoosh-ng/commit/5b6b9a63346559febe51c16a23bbe1602188a2c2))
+
+- Auto-update llms context files ([`25f4477`](https://github.com/dorel14/whoosh-ng/commit/25f4477091e5506c58bfe6787e2fa7a6fcc22943))
+
+- Auto-update llms context files [skip ci] ([`127bc4a`](https://github.com/dorel14/whoosh-ng/commit/127bc4aa3277c109f73d932e878be90807c4aafc))
+
+- **config**: Clarify list merge behavior, refactor PyYAML import, document pre-push hook rationale ([`3d122d5`](https://github.com/dorel14/whoosh-ng/commit/3d122d58b85d10b85bf079ad9d3d15acdeab09e2))
+
+- **config**: Clarify list merge rationale and make unsupported format error dynamic ([`25076b6`](https://github.com/dorel14/whoosh-ng/commit/25076b61ab91df44cd81327bf827732325fc1aab))
+
+- **fastapi,config**: Clarify optional FastAPI dependency and warn on list merge behavior ([`e917567`](https://github.com/dorel14/whoosh-ng/commit/e917567509d1b1d84bb27b7ceb75b1b8c15941a6))
+
+### Features
+
+- Add PyYAML extra, make WebSocket limit configurable, validate ConfigEngine priority ([`5fb4a38`](https://github.com/dorel14/whoosh-ng/commit/5fb4a382ccda5e6408ec93ce1e6e2efa8fd583d7))
+
+- **config**: Implement Configuration Engine core with Pydantic models, YAML/JSON loader, and hierarchical merging ([`de7bbca`](https://github.com/dorel14/whoosh-ng/commit/de7bbcadd384391adef090f1944865490b93d8fe))
+
+- **fastapi**: Make WebSocket limit configurable and run autocomplete off the event loop ([`c538ea6`](https://github.com/dorel14/whoosh-ng/commit/c538ea6af2195bd292035c5de3e520577f090bc4))
+
+- **storage**: Add CoreStorageAdapter wrapping core FileStorage for SyncStorageProvider ([`52ab7e6`](https://github.com/dorel14/whoosh-ng/commit/52ab7e614de1f92a7ac8d7afbf95bbc52aaba0e2))
+
+- **website**: Ajouter les fichiers de configuration du site statique ([`103fcff`](https://github.com/dorel14/whoosh-ng/commit/103fcff73199a4e8e126f7f887d0f31bcd003999))
+
+---
+
+**Detailed Changes**: [v5.0.0...v5.1.0](https://github.com/dorel14/whoosh-ng/compare/v5.0.0...v5.1.0)
+
+### Commits
+
+### Code Refactoring
+
+- Sprint D cleanup + P1-1/P3 dedup fixes
+- improve WebSocket error handling and document list merge behavior
+
+### Features
+
+- add CoreStorageAdapter wrapping core FileStorage for SyncStorageProvider
+- implement Configuration Engine core with Pydantic models, YAML/JSON loader, and hierarchical merging
+- ajouter les fichiers de configuration du site statique
+- add PyYAML extra, make WebSocket limit configurable, validate ConfigEngine priority
+- make WebSocket limit configurable and run autocomplete off the event loop
+
+### Bug Fixes
+
+- correct WebSocket autocomplete test assertion
+- validate SnapshotStorage key before remote read
+- import CoreStorageAdapter in test_storage_providers.py
+- resolve mypy/pyright issues in config loader and yaml provider
+
+### Other
+
+- .
+- Rename LICENSE.txt to LICENSE_OLD.txt
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #418 from dorel14/dev
+
+### Chores
+
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- apply pre-commit fixes
+- apply pre-commit fixes
+- v5.1.0 [skip ci]
+
+### Documentation
+
+- add Configuration Engine docs, update CHANGELOG, FastAPI WebSocket, CoreStorageAdapter, and SnapshotStorage fix
+- auto-update llms context files
+- auto-update llms context files
+- clarify list merge behavior, refactor PyYAML import, document pre-push hook rationale
+- auto-update llms context files
+- clarify list merge rationale and make unsupported format error dynamic
+- clarify optional FastAPI dependency and warn on list merge behavior
+- auto-update llms context files [skip ci]
+
+### CI/CD
+
+- regenerate LLM context files only on documentation changes
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.1.0)
+
+## v5.0.0 (2026-08-11)
+**Tag**: `v5.0.0`
+
+## v5.0.0 (2026-08-11)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **ci**: Ensure git push runs even when pre-commit commit is a no-op ([`b4fa710`](https://github.com/dorel14/whoosh-ng/commit/b4fa710bfb979a764373b1b9dc67e60f0a84ff0e))
+
+- **ci**: Restore || true suppression for git pull --rebase in test workflow ([`6b8ae46`](https://github.com/dorel14/whoosh-ng/commit/6b8ae46f08908aa132b55261643589993de11ba9))
+
+- **indexing**: Avoid NameError when ix.writer() fails in ParallelIndexBuilder ([`b629fed`](https://github.com/dorel14/whoosh-ng/commit/b629feda7398ece400636ef1ab7bf1df742c4255))
+
+- **linguistics**: Restore constructor-style calls for language analyzers ([`8307731`](https://github.com/dorel14/whoosh-ng/commit/8307731b5958654307f6014743fe1e39700ba547))
+
+- **s3**: Corriger l'ordre de validation des chemins dans SnapshotStorage ([`4fdf384`](https://github.com/dorel14/whoosh-ng/commit/4fdf384158249d66937f16976307db01f232ddf0))
+
+- **storage**: Sanitize S3 keys in SnapshotStorage.read to prevent path traversal ([`b57b00d`](https://github.com/dorel14/whoosh-ng/commit/b57b00d84e2adc8d73e83a93bdc9813eeeff69bf))
+
+### Documentation
+
+- Auto-update llms context files ([`6318ddd`](https://github.com/dorel14/whoosh-ng/commit/6318dddda1db67f1d9ffc1492038340eafd2b62e))
+
+- Auto-update llms context files ([`eb618ab`](https://github.com/dorel14/whoosh-ng/commit/eb618ab65aceb212b417a09d5c2ca74e3296bd0d))
+
+### Features
+
+- **workflows**: Amélioration des workflows CI et ajout de la section LLM Context ([`359e19a`](https://github.com/dorel14/whoosh-ng/commit/359e19a79002a1b67ea8faeef868a0cbe877612b))
+
+---
+
+**Detailed Changes**: [v4.3.0...v5.0.0](https://github.com/dorel14/whoosh-ng/compare/v4.3.0...v5.0.0)
+
+### Commits
+
+### Other
+
+- Merge pull request #15 from dorel14/master
+- Merge branch 'master' into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'master' into feat/last_updates
+- Merge pull request #417 from dorel14/feat/last_updates
+
+### Documentation
+
+- auto-update llms context files
+- rename sprint-c/d docs, add provider-integration guide, sync website docs
+- auto-update llms context files
+- auto-update llms context files
+- auto-update llms context files
+- auto-update llms context files
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- apply pre-commit fixes
+- synchronize version from pyproject.toml [skip ci]
+- v5.0.0 [skip ci]
+
+### Code Refactoring
+
+- modernisation architecturale et unification sur les composants core
+- améliorations de la sécurité S3 et du typage statique
+
+### CI/CD
+
+- ajout de la détection des doublons de code
+
+### Bug Fixes
+
+- sanitize S3 keys in SnapshotStorage.read to prevent path traversal
+- restore constructor-style calls for language analyzers
+- corriger l'ordre de validation des chemins dans SnapshotStorage
+- ensure git push runs even when pre-commit commit is a no-op
+- restore || true suppression for git pull --rebase in test workflow
+- avoid NameError when ix.writer() fails in ParallelIndexBuilder
+
+### Features
+
+- amélioration des workflows CI et ajout de la section LLM Context
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.0.0)
+
+## v4.3.0 (2026-08-09)
+**Tag**: `v4.3.0`
+
+## v4.3.0 (2026-08-09)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- Add actions: read permission to workflow_run triggers ([`d1cb49c`](https://github.com/dorel14/whoosh-ng/commit/d1cb49c7d5d84b4d790090d8b24250bb0bf5791b))
+
+- Normalize line endings to LF in workflow files ([`d68513b`](https://github.com/dorel14/whoosh-ng/commit/d68513b84b97115f1708412e731c6bfcc7a2b6b1))
+
+- Use repository_dispatch instead of workflow_run for Pages trigger ([`c601ccb`](https://github.com/dorel14/whoosh-ng/commit/c601ccbc6469b4048083ab71c334f937422b2b2f))
+
+- **pages**: Ensure Pages deploys on all master pushes + changelog sidebar fix ([`d5d297f`](https://github.com/dorel14/whoosh-ng/commit/d5d297f17ef941e5575f7f0ac7f5c99d0c188f76))
+
+### Features
+
+- **website**: Ajouter des sidebars dédiées et refondre la page de référence API ([`a69d3c9`](https://github.com/dorel14/whoosh-ng/commit/a69d3c9c9093fa78c246010f79d751ad36c8b9b0))
+
+- **website**: Ajouter des sidebars dédiées par section de documentation ([`ffaf1a9`](https://github.com/dorel14/whoosh-ng/commit/ffaf1a969c53c80fa2d968f5f733b40ae9e2cc00))
+
+---
+
+**Detailed Changes**: [v4.2.3...v4.3.0](https://github.com/dorel14/whoosh-ng/compare/v4.2.3...v4.3.0)
+
+### Commits
+
+### Chores
+
+- synchronize version from pyproject.toml [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- apply pre-commit fixes
+- synchronize version from pyproject.toml [skip ci]
+- v4.3.0 [skip ci]
+
+### CI/CD
+
+- restructurer la chaîne de déploiement CI/CD et optimiser les workflows
+- ajouter des garde-fous et corriger le script de synchronisation de version
+- améliorer la logique de déclenchement du déploiement GitHub Pages
+- ajouter un déclenchement push pour les modifications de documentation
+
+### Other
+
+- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
+
+### Features
+
+- ajouter des sidebars dédiées par section de documentation
+- ajouter des sidebars dédiées et refondre la page de référence API
+
+### Code Refactoring
+
+- simplifier la configuration des sidebars
+
+### Bug Fixes
+
+- normalize line endings to LF in workflow files
+- ensure Pages deploys on all master pushes + changelog sidebar fix
+- add actions: read permission to workflow_run triggers
+- use repository_dispatch instead of workflow_run for Pages trigger
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.3.0)
+
 ## v4.2.3 (2026-08-08)
 **Tag**: `v4.2.3`
 

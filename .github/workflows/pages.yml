@@ -13,15 +13,10 @@ name: Deploy GitHub Pages
 #   - repository_dispatch from "Generate Changelog" (primary — the changelog
 #     workflow explicitly dispatches this event when it finishes, ensuring
 #     Pages deploys after all version sync + changelog generation)
-#   - push to master (fallback — catches all pushes including bot commits
-#     from sync-version.yml and changelog.yml; the fetch-depth: 0 checkout
-#     ensures the latest master state is used)
 #   - workflow_dispatch (manual trigger for debugging)
 on:
   repository_dispatch:
     types: [deploy-pages]
-  push:
-    branches: [master]
   workflow_dispatch:
 
 permissions:
