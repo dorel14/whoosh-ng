@@ -29,8 +29,8 @@ from __future__ import annotations
 
 import re
 
-__version__ = (4, 3, 0)
-__version_string__ = "4.3.0"
+__version__ = (5, 1, 0)
+__version_string__ = "5.1.0"
 
 
 class WhooshError(Exception):
