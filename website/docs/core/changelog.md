@@ -59,59 +59,6 @@ _This release is published under the BSD-2-Clause License._
 
 **Detailed Changes**: [v5.0.0...v5.1.0](https://github.com/dorel14/whoosh-ng/compare/v5.0.0...v5.1.0)
 
-### Commits
-
-### Code Refactoring
-
-- Sprint D cleanup + P1-1/P3 dedup fixes
-- improve WebSocket error handling and document list merge behavior
-
-### Features
-
-- add CoreStorageAdapter wrapping core FileStorage for SyncStorageProvider
-- implement Configuration Engine core with Pydantic models, YAML/JSON loader, and hierarchical merging
-- ajouter les fichiers de configuration du site statique
-- add PyYAML extra, make WebSocket limit configurable, validate ConfigEngine priority
-- make WebSocket limit configurable and run autocomplete off the event loop
-
-### Bug Fixes
-
-- correct WebSocket autocomplete test assertion
-- validate SnapshotStorage key before remote read
-- import CoreStorageAdapter in test_storage_providers.py
-- resolve mypy/pyright issues in config loader and yaml provider
-
-### Other
-
-- .
-- Rename LICENSE.txt to LICENSE_OLD.txt
-- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
-- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
-- Merge pull request #418 from dorel14/dev
-
-### Chores
-
-- merge master into dev [skip ci]
-- synchronize version from pyproject.toml [skip ci]
-- apply pre-commit fixes
-- apply pre-commit fixes
-- v5.1.0 [skip ci]
-
-### Documentation
-
-- add Configuration Engine docs, update CHANGELOG, FastAPI WebSocket, CoreStorageAdapter, and SnapshotStorage fix
-- auto-update llms context files
-- auto-update llms context files
-- clarify list merge behavior, refactor PyYAML import, document pre-push hook rationale
-- auto-update llms context files
-- clarify list merge rationale and make unsupported format error dynamic
-- clarify optional FastAPI dependency and warn on list merge behavior
-- auto-update llms context files [skip ci]
-
-### CI/CD
-
-- regenerate LLM context files only on documentation changes
-
 
 [View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.1.0)
 
@@ -342,23 +289,6 @@ _This release is published under the BSD-2-Clause License._
 ---
 
 **Detailed Changes**: [v4.2.0...v4.2.1](https://github.com/dorel14/whoosh-ng/compare/v4.2.0...v4.2.1)
-
-### Commits
-
-### Bug Fixes
-
-- fix sync-changelog.yml YAML syntax error
-
-### Other
-
-- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
-- i18n(fr): translate nested.md, storage-providers.md, stemming.md, ngrams.md, glossary.md
-
-### Chores
-
-- synchronize version to 4.2.0 [skip ci]
-- synchronize version from pyproject.toml [skip ci]
-- v4.2.1 [skip ci]
 
 
 [View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.1)
@@ -788,20 +718,6 @@ _This release is published under the BSD-2-Clause License._
 ---
 
 **Detailed Changes**: [v1.3.2...v1.3.3](https://github.com/dorel14/whoosh-ng/compare/v1.3.2...v1.3.3)
-
-### Commits
-
-### Bug Fixes
-
-- reorganize nav_order for coherent navigation (Guides 1-90, API 100-190, Examples 200-270)
-
-### Other
-
-- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
-
-### Chores
-
-- v1.3.3 [skip ci]
 
 
 [View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.3.3)

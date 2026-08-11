@@ -382,21 +382,6 @@ _This release is published under the BSD-2-Clause License._
 
 **Detailed Changes**: [v4.1.0...v4.2.0](https://github.com/dorel14/whoosh-ng/compare/v4.1.0...v4.2.0)
 
-### Commits
-
-### Chores
-
-- synchronize version from pyproject.toml [skip ci]
-- v4.2.0 [skip ci]
-
-### Features
-
-- enable dark theme by default and remove edit button
-
-### Bug Fixes
-
-- fix changelog workflow typo and pages.yml checkout depth
-
 
 [View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v4.2.0)
 
@@ -721,60 +706,6 @@ _This release is published under the BSD-2-Clause License._
 
 **Detailed Changes**: [v1.3.3...v2.0.0](https://github.com/dorel14/whoosh-ng/compare/v1.3.3...v2.0.0)
 
-### Commits
-
-### Documentation
-
-- merge duplicate FastAPI example into fastapi-search.md
-- auto-update llms context files
-- auto-update llms context files
-- auto-update llms context files
-- auto-update llms context files
-
-### Other
-
-- Merge branch 'master' of https://github.com/dorel14/whoosh-ng
-- ..
-- Merge pull request #10 from dorel14/master
-- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
-- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
-- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
-- style(benchmark): ajouter un saut de ligne final manquant dans reuters_modern.py
-- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
-- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
-- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
-- Potential fix for pull request finding 'CodeQL / Workflow does not contain permissions'
-- .
-- .
-- .
-- Merge pull request #11 from dorel14/dev
-
-### Features
-
-- ✨ Introduce ModelIndex and SearchField for auto-mapping
-- ajouter AutoIndexer et améliorer la génération de schémas
-- add modern API with data sources, schema discovery, facets, validation, middleware, and SearchView
-- add sqlalchemy and sqlmodel to models extra and configure mypy overrides
-
-### Bug Fixes
-
-- address review findings in CI/CD workflows and documentation
-
-### Code Refactoring
-
-- moderniser les annotations de type avec la syntaxe union PEP 604
-- moderniser les annotations de type avec Coroutine et ajouter des ignores pyright
-- ajouter des annotations de retour aux méthodes replace des matchers
-- moderniser la vérification isinstance avec la syntaxe union PEP 604
-
-### CI/CD
-
-- ajouter des extras d'installation et simplifier la couverture
-
-### Chores
-
-- v2.0.0 [skip ci]
-
 
 [View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v2.0.0)
 
@@ -1000,20 +931,6 @@ _This release is published under the BSD-2-Clause License._
 ---
 
 **Detailed Changes**: [v1.2.0...v1.2.1](https://github.com/dorel14/whoosh-ng/compare/v1.2.0...v1.2.1)
-
-### Commits
-
-### Documentation
-
-- fix Jekyll links with relative_url and clean deploy workflow
-
-### Bug Fixes
-
-- restore front matter and add explicit nav config
-
-### Chores
-
-- v1.2.1
 
 
 [View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v1.2.1)
