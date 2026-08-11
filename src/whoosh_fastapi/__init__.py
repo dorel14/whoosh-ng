@@ -10,14 +10,18 @@ Version: 3.0.0
 
 from __future__ import annotations
 
+import logging
+from contextlib import suppress
 from typing import Any
 
 from whoosh.index import Index
 from whoosh.utils.async_utils import run_sync
 
+logger = logging.getLogger(__name__)
+
 try:
-    from fastapi import FastAPI  # pyright: ignore[reportMissingImports]
-    from pydantic import BaseModel  # pyright: ignore[reportMissingImports]
+    from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+    from pydantic import BaseModel
 
     class SearchRequest(BaseModel):
         """Request model for search endpoint.
@@ -146,7 +150,7 @@ try:
             return {"suggestions": [hit.text for hit in hits]}
 
         @app.websocket(f"{prefix}/autocomplete/ws")
-        async def autocomplete_ws(websocket: Any) -> None:
+        async def autocomplete_ws(websocket: WebSocket) -> None:
             """WebSocket autocomplete endpoint.
 
             Accepts persistent WebSocket connections. The client sends JSON
@@ -172,8 +176,12 @@ try:
                     else:
                         hits = autocomplete.search(query, limit=10)
                         await websocket.send_json({"suggestions": [hit.text for hit in hits]})
-            except Exception:
-                pass
+            except WebSocketDisconnect:
+                logger.info("WebSocket client disconnected from autocomplete.")
+            except Exception as exc:  # pragma: no cover - safety net
+                logger.error("Unexpected error in autocomplete WebSocket: %s", exc, exc_info=True)
+                with suppress(RuntimeError):
+                    await websocket.send_json({"error": "Internal server error"})
 
         @app.get(f"{prefix}/suggest")
         async def suggest_endpoint(q: str) -> dict[str, Any]:

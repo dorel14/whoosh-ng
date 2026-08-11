@@ -109,6 +109,10 @@ class ConfigEngine:
     def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> None:
         """Recursively merge ``override`` into ``base``.
 
+        Nested dictionaries are merged recursively. Scalar values and lists are
+        replaced entirely by the override values; lists are NOT appended or
+        combined.
+
         Args:
             base: Base dictionary to merge into.
             override: Override dictionary whose values take precedence.
