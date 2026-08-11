@@ -46,6 +46,14 @@ jobs:
       - name: Install pydoctor
         run: pip install pydoctor
 
+      - name: Ensure latest master
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git fetch origin master
+          git reset --hard origin/master
+          git checkout master
+
       - name: Generate changelog from releases and commits
         run: python scripts/generate_changelog.py
         env:
@@ -59,11 +67,6 @@ jobs:
 
       - name: Commit and push changelog updates
         run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          git fetch origin master
-          git reset --hard origin/master
-          git checkout master
           git add website/docs/core/changelog.md website/i18n/fr/docusaurus-plugin-content-docs/current/core/changelog.md
           git add website/docs/api/reference.md website/i18n/fr/docusaurus-plugin-content-docs/current/api/reference.md
           git add website/static/llms.txt website/static/llms-full.txt
