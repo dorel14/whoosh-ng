@@ -86,7 +86,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: 'Whoosh-NG Documentation v4.3.0 | Last updated: 2026-08-10',
+      copyright: 'Whoosh-NG Documentation v4.3.0 | Last updated: 2026-08-11',
     },
     prism: {
       theme: prismThemes.oneLight,
