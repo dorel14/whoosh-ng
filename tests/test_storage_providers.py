@@ -11,6 +11,7 @@ from whoosh.filedb.filestore import FileStorage
 from whoosh.plugins.storage_base import SyncStorageProvider
 from whoosh_modern.storage import (
     AsyncHybridStorage,
+    CoreStorageAdapter,
     FileStorage,
     HybridStorage,
     S3Storage,
