@@ -12499,10 +12499,36 @@ api.register_index_endpoint("/documents", schema)
 
 ## Key points
 
-- `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, and `/autocomplete` endpoints.
+- `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, `/autocomplete`, and `/suggest` endpoints.
 - All blocking calls run off the event loop via `run_sync`.
 - Use `BufferedWriter` for high-throughput indexing via POST.
 - `WhooshFastAPI` class offers per-endpoint registration for custom integrations.
+
+## WebSocket autocomplete
+
+Pass an ``AutocompleteProvider`` to ``create_app`` to enable the WebSocket
+autocomplete endpoint. The client sends JSON messages with a ``q`` key and
+receives ``{"suggestions": [...]}`` responses over a persistent connection.
+
+```python
+from whoosh_modern.autocomplete import EdgeNgramAutocomplete
+from whoosh_fastapi import create_app
+
+autocomplete = EdgeNgramAutocomplete(ix)
+app = create_app(ix, prefix="/api/v1", autocomplete=autocomplete)
+```
+
+Client example using JavaScript:
+
+```javascript
+const ws = new WebSocket("ws://localhost:8000/api/v1/autocomplete/ws");
+ws.onmessage = (event) => console.log(JSON.parse(event.data));
+ws.send(JSON.stringify({ q: "pyth" }));
+// {"suggestions": ["python", "pythagorean"]}
+```
+
+When no autocomplete provider is configured, the endpoint returns an empty
+suggestions list instead of raising.
 
 
 ## DOCUMENT: Middleware Pipeline
@@ -14271,6 +14297,143 @@ def suggest(query: str, limit: int = 5):
     hits = provider.search(query, limit=limit)
     return {"suggestions": [hit.text for hit in hits]}
 ```
+
+
+## DOCUMENT: Configuration Engine
+
+# Configuration Engine
+
+Whoosh-NG includes a **Configuration Engine** (`ConfigEngine`) that loads,
+validates, and merges application configuration from YAML or JSON files. It is
+built on Pydantic models and supports hierarchical layering so that environment-
+specific overrides can cleanly extend base settings.
+
+## Core concepts
+
+### Pydantic models
+
+All configuration is expressed through typed Pydantic models:
+
+- `WhooshNGConfig` — top-level application config
+- `FieldConfig` — per-field indexing options
+- `SearchConfig` / `FuzzyConfig` / `RankingConfig` / `AIConfig`
+- `DataSourceConfigModel` — data source connection and sync settings
+- `StorageConfigModel` — storage backend selection
+
+### Loaders
+
+Two loaders are provided:
+
+- `load_yaml(path)` — parse a YAML file into a `dict`
+- `load_json(path)` — parse a JSON file into a `dict`
+- `load_config(path)` — auto-detect format from extension and return a validated
+  `WhooshNGConfig`
+
+### Hierarchical merging
+
+`ConfigEngine.load(path, priority=...)` and `ConfigEngine.merge(overrides, priority=...)`
+stack configuration sources with the following precedence (highest wins):
+
+1. `runtime`
+2. `instance`
+3. `application`
+4. `language`
+
+Merging is deep: nested dictionaries are merged recursively, while scalar values
+and lists are replaced entirely.
+
+## Quick start
+
+```python
+from whoosh_modern.config import ConfigEngine
+
+engine = ConfigEngine()
+engine.load("whoosh-ng.yml", priority="application")
+engine.load("whoosh-ng.local.yml", priority="instance")
+engine.merge({"search": {"fuzzy": {"distance": 5}}}, priority="runtime")
+
+config = engine.get_config()
+print(config.index)
+print(config.fields["title"].stemming)
+print(config.search.fuzzy.distance)
+```
+
+## YAML example
+
+```yaml
+# whoosh-ng.yml
+index: products
+languages:
+  default: fr
+fields:
+  title:
+    type: text
+    language: fr
+    stemming: true
+    stored: true
+  price:
+    type: numeric
+    sortable: true
+search:
+  fuzzy:
+    enabled: true
+    distance: 2
+storage:
+  type: file
+  path: ./index
+```
+
+## JSON example
+
+```json
+{
+  "index": "products",
+  "languages": {"default": "en"},
+  "fields": {
+    "title": {"type": "text", "language": "en", "stemming": true},
+    "price": {"type": "numeric", "sortable": true}
+  },
+  "search": {"fuzzy": {"enabled": true, "distance": 2}},
+  "storage": {"type": "file", "path": "./index"}
+}
+```
+
+## Using ConfigEngine with SearchApplication
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.config import ConfigEngine
+from whoosh_modern.data_sources import CSVSource
+
+engine = ConfigEngine()
+engine.load("whoosh-ng.yml")
+config = engine.get_config()
+
+source = CSVSource(
+    path="products.csv",
+    delimiter=",",
+    encoding=config.data_source.encoding if config.data_source else "utf-8",
+)
+
+app = SearchApplication(
+    source=source,
+    index_name=config.index,
+)
+app.build()
+```
+
+## Module reference
+
+| Module | Purpose |
+|---|---|
+| `whoosh_modern.config.models` | Pydantic models for validation |
+| `whoosh_modern.config.loader` | YAML / JSON file loaders |
+| `whoosh_modern.config.engine` | `ConfigEngine` with hierarchical merging |
+
+## See Also
+
+- [Storage Providers](storage-providers.md) — Storage backends configurable via `StorageConfigModel`
+- [Data Sources](data-sources.md) — `DataSourceConfigModel` and provider configuration
 
 
 ## DOCUMENT: Linguistics
@@ -17557,6 +17720,7 @@ This is what many modern distributed search systems do.
 | `SnapshotStorage` | sync | S3-compatible | Simple backup/restore |
 | `HybridStorage` | sync | local cache + remote | **Production** (alias: `CachedObjectStorage`) |
 | `AsyncHybridStorage` | async | local cache + remote | Production async |
+| `CoreStorageAdapter` | sync | core `FileStorage` → modern `SyncStorageProvider` | Bridge legacy core backends into the modern pipeline |
 
 All providers are importable from `whoosh_modern.storage`.
 
@@ -17573,6 +17737,26 @@ assert storage.read("segment_1.dat") == b"data"
 assert storage.exists("segment_1.dat") is True
 storage.delete("segment_1.dat")
 keys = storage.list_keys()
+```
+
+## CoreStorageAdapter
+
+Wraps a core ``whoosh.filedb.filestore.FileStorage`` instance behind the modern
+``SyncStorageProvider`` interface. This lets you drop an existing core storage
+backend into a modern ``HybridStorage`` or ``StorageMiddleware`` chain without
+modifying the core class.
+
+```python
+from whoosh.filedb.filestore import FileStorage as CoreFileStorage
+from whoosh_modern.storage import CoreStorageAdapter
+
+core = CoreFileStorage("indexdir")
+adapter = CoreStorageAdapter(core)
+
+adapter.write("segment_1.dat", b"data")
+assert adapter.read("segment_1.dat") == b"data"
+assert adapter.exists("segment_1.dat") is True
+adapter.delete("segment_1.dat")
 ```
 
 ## AsyncFileStorage

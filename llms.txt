@@ -65,6 +65,7 @@
 - [Vector Search](https://dorel14.github.io/whoosh-ng/en/examples/vector-search/)
 - [Autocomplete Providers](https://dorel14.github.io/whoosh-ng/en/modern/autocomplete-providers/)
 - [Autocomplete](https://dorel14.github.io/whoosh-ng/en/modern/autocomplete/)
+- [Configuration Engine](https://dorel14.github.io/whoosh-ng/en/modern/configuration-engine/)
 - [Linguistics](https://dorel14.github.io/whoosh-ng/en/modern/linguistics/)
 - [Middleware Pipeline](https://dorel14.github.io/whoosh-ng/en/modern/middleware-pipeline/)
 - [Middleware](https://dorel14.github.io/whoosh-ng/en/modern/middleware/)
