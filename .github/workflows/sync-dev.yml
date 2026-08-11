@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Required to fetch the full history of 'master' branch for the merge operation.
           ref: dev
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -26,6 +27,8 @@ jobs:
 
       - name: Merge master into dev
         run: |
+          # Merge the latest master into dev to keep dev up-to-date.
+          # This creates a merge commit on dev for each master push.
           git merge --no-ff origin/master -m "chore: merge master into dev [skip ci]"
 
       - name: Push dev update

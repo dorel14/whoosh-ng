@@ -1,7 +1,7 @@
 ---
 title: "Autocomplete Providers"
 nav_order: 54
-permalink: /en/guides/autocomplete-sprint-d/
+permalink: /en/guides/autocomplete-providers/
 lang: en
 ---
 

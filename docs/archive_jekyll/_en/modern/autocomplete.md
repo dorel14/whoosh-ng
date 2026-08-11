@@ -42,4 +42,4 @@ print(suggestions)  # ["python", "pyramid", ...]
 
 ## Modern Autocomplete Providers (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduces multiple autocomplete provider strategies: `InvertedIndexAutocomplete`, `NGramProvider`, and `FuzzySuggestProvider`. For full details on creating, registering, and switching providers, see the [Autocomplete Providers Guide](autocomplete-sprint-d.md).
+Whoosh-NG 2.0 introduces multiple autocomplete provider strategies: `InvertedIndexAutocomplete`, `NGramProvider`, and `FuzzySuggestProvider`. For full details on creating, registering, and switching providers, see the [Autocomplete Providers Guide](autocomplete-providers.md).

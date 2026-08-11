@@ -1,7 +1,7 @@
 ---
 title: "Stemmer Providers"
 nav_order: 53
-permalink: /en/guides/stemming-sprint-d/
+permalink: /en/guides/stemming-providers/
 lang: en
 ---
 

@@ -107,4 +107,4 @@ Le `PluginManager` résout l'ordre de chargement et détecte les conflits.
 
 ## Système de Plugins Moderne (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 introduit un `PluginManager` amélioré avec support de registres pour les sources de données, les fournisseurs de vecteurs, les embeddings et le middleware. Pour plus de détails sur l'architecture moderne des plugins, les groupes d'entry points et le déploiement, consultez le [Guide Système de Plugins](plugins-sprint-c.md).
+Whoosh-NG 2.0 introduit un `PluginManager` amélioré avec support de registres pour les sources de données, les fournisseurs de vecteurs, les embeddings et le middleware. Pour plus de détails sur l'architecture moderne des plugins, les groupes d'entry points et le déploiement, consultez le [Guide Système de Plugins](plugins-avances.md).

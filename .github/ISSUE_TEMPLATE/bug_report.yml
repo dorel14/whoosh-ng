@@ -13,7 +13,7 @@ body:
       options:
         - Bug
         - Regression
-        - Documentation
+        - Documentation Bug
     validations:
       required: true
   - type: input

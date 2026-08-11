@@ -9,7 +9,12 @@ import pytest
 
 from whoosh.filedb.filestore import FileStorage
 from whoosh.plugins.storage_base import SyncStorageProvider
-from whoosh_modern.storage import AsyncHybridStorage, CoreStorageAdapter, FileStorage, HybridStorage, S3Storage
+from whoosh_modern.storage import (
+    AsyncHybridStorage,
+    FileStorage,
+    HybridStorage,
+    S3Storage,
+)
 from whoosh_modern.storage.s3 import SnapshotStorage
 
 # ---------------------------------------------------------------------------
@@ -243,7 +248,7 @@ def test_snapshot_storage_read_rejects_parent_traversal(
     snapshot_storage: SnapshotStorage, fake_s3_client
 ) -> None:
     fake_s3_client._store["segments/../../etc/passwd"] = b"malicious"
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"path traversal.*not allowed"):
         snapshot_storage.read("../../etc/passwd")
 
 
@@ -251,7 +256,7 @@ def test_snapshot_storage_read_rejects_embedded_traversal(
     snapshot_storage: SnapshotStorage, fake_s3_client
 ) -> None:
     fake_s3_client._store["segments/foo/../../../etc/passwd"] = b"malicious"
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"path traversal.*not allowed"):
         snapshot_storage.read("foo/../../../etc/passwd")
 
 
@@ -259,7 +264,7 @@ def test_snapshot_storage_read_rejects_absolute_path(
     snapshot_storage: SnapshotStorage, fake_s3_client
 ) -> None:
     fake_s3_client._store["segments/etc/passwd"] = b"malicious"
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"absolute paths are not allowed"):
         snapshot_storage.read("/etc/passwd")
 
 
