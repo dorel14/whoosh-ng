@@ -5,7 +5,7 @@
 
 # Whoosh-NG
 
-**Whoosh-NG** is a modern, pure-Python full-text indexing and search library. Version 5.0.0 brings a complete modernization with Python 3.11+ support, strict type annotations, optional feature profiles, and automated semantic releases.
+**Whoosh-NG** is a modern, pure-Python full-text indexing and search library. Version 5.1.0 brings a complete modernization with Python 3.11+ support, strict type annotations, optional feature profiles, and automated semantic releases.
 
 ## Quick Start
 
@@ -76,7 +76,7 @@ pip install "whoosh-ng[dev]"
 - **[French Documentation](https://dorel14.github.io/whoosh-ng/fr/core/quickstart)** — Documentation en français
 - **LLM-Friendly Docs**: [`llms.txt`](https://dorel14.github.io/whoosh-ng/llms.txt) (index) | [`llms-full.txt`](https://dorel14.github.io/whoosh-ng/llms-full.txt) (complete API)
 
-## Recent Changes in 5.0.0
+## Recent Changes in 5.1.0
 
 ### Performance Highlights
 
