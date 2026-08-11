@@ -67,8 +67,10 @@ class ConfigEngine:
         elif suffix == ".json":
             raw = load_json(path)
         else:
+            accepted_formats = [".yml", ".yaml", ".json"]
             raise ValueError(
-                f"Unsupported configuration file format: {suffix!r}. Use .yml, .yaml, or .json."
+                f"Unsupported configuration file format: {suffix!r}. "
+                f"Accepted formats are: {', '.join(accepted_formats)}."
             )
         self._layers.append((priority, raw))
         self._rebuild()
@@ -125,11 +127,14 @@ class ConfigEngine:
         """Recursively merge ``override`` into ``base``.
 
         Nested dictionaries are merged recursively. Scalar values and lists are
-        replaced entirely by the override values; lists are NOT appended or
-        combined. For example, ``{"plugins": ["a"]}`` merged with
-        ``{"plugins": ["b"]}`` produces ``{"plugins": ["b"]}``, not
-        ``{"plugins": ["a", "b"]}``. If you need additive list behavior, handle
-        it at the application level before calling :meth:`merge`.
+        replaced entirely by the override values. **Important**: lists are NOT
+        appended or combined; a higher-priority list will completely overwrite
+        a lower-priority one. For example, merging `{"plugins": ["a"]}` with
+        `{"plugins": ["b"]}` results in `{"plugins": ["b"]}`, not
+        `{"plugins": ["a", "b"]}`. This design ensures explicit control over
+        list contents across layers and avoids unpredictable merged states.
+        If additive list merging is required, handle it at the application level
+        before calling :meth:`merge` or implement a custom merge strategy.
 
         Args:
             base: Base dictionary to merge into.
