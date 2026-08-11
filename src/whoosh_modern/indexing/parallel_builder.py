@@ -93,12 +93,13 @@ class ParallelIndexBuilder:
         ix = create_in(self.index_path, self.schema)
 
         total = 0
-        writer = ix.writer(
-            procs=max(1, self.workers),
-            limitmb=self.limitmb,
-            multisegment=self.multisegment,
-        )
+        writer = None
         try:
+            writer = ix.writer(
+                procs=max(1, self.workers),
+                limitmb=self.limitmb,
+                multisegment=self.multisegment,
+            )
             for batch in batches:
                 if not batch:
                     continue
@@ -108,7 +109,8 @@ class ParallelIndexBuilder:
             writer.commit()
         except Exception as exc:
             logger.error("Parallel indexing failed: %s", exc)
-            writer.cancel()
+            if writer is not None:
+                writer.cancel()
             raise
         finally:
             ix.close()
