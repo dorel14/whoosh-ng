@@ -14346,8 +14346,12 @@ stack configuration sources with the following precedence (highest wins):
 Invalid ``priority`` values raise ``ValueError`` immediately, so misconfigured
 layers cannot silently affect the merge order.
 
-Merging is deep: nested dictionaries are merged recursively, while scalar values
-and lists are replaced entirely.
+Merging is deep: nested dictionaries are merged recursively. Scalar values and
+lists are **replaced entirely** by the override values; lists are NOT appended
+or combined. For example, a base config with ``{"plugins": ["a", "b"]}``
+overridden by ``{"plugins": ["c"]}`` produces ``{"plugins": ["c"]}``, not
+``{"plugins": ["a", "b", "c"]}``. If additive list merging is required, handle
+it at the application level before calling :meth:`ConfigEngine.merge`.
 
 ## Quick start
 
