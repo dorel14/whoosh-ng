@@ -12,6 +12,7 @@ Version: 3.0.0
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Callable, Sequence
 
 from whoosh.middleware.base import Middleware
@@ -112,6 +113,11 @@ class StemmingMiddleware(AnalyzerMiddleware):
 class SynonymMiddleware(AnalyzerMiddleware):
     """Expand queries / documents with synonyms (placeholder for Sprint D).
 
+    .. deprecated::
+        Use :class:`SynonymExpansionMiddleware` instead. This class is
+        preserved for backward compatibility and will be removed in a future
+        release.
+
     Args:
         expand: Callable ``str -> list[str]`` returning synonyms for a word.
             When ``None`` the middleware is a pass-through (the synonym engine
@@ -119,6 +125,11 @@ class SynonymMiddleware(AnalyzerMiddleware):
     """
 
     def __init__(self, expand: SynonymExpander | None = None) -> None:
+        warnings.warn(
+            "SynonymMiddleware is deprecated, use SynonymExpansionMiddleware instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._expand = expand
 
     @property

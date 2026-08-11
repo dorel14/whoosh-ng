@@ -2,6 +2,7 @@
 
 import pytest
 
+from whoosh import WhooshError
 from whoosh_modern.exceptions import (
     DataSourceError,
     DataSourceNotFoundError,
@@ -34,6 +35,9 @@ class TestDataSourceError:
         exc = DataSourceError("test", source="rest", field="url")
         assert exc.source == "rest"
         assert exc.field == "url"
+
+    def test_is_whoosh_error(self):
+        assert issubclass(DataSourceError, WhooshError)
 
 
 class TestSchemaDiscoveryError:
