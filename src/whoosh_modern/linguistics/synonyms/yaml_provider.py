@@ -49,7 +49,7 @@ class YAMLSynonymProvider(StaticSynonymProvider):
             ImportError: If PyYAML is not installed.
         """
         try:
-            import yaml  # type: ignore[import-untyped]
+            import yaml
         except ImportError as exc:
             raise ImportError(
                 "PyYAML is required for YAMLSynonymProvider. "

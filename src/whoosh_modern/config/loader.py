@@ -12,9 +12,12 @@ from typing import Any
 
 from whoosh_modern.config.models import WhooshNGConfig
 
-try:
-    import yaml
+yaml: Any = None
 
+try:
+    import yaml as _yaml
+
+    yaml = _yaml
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
