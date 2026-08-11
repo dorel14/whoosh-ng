@@ -171,4 +171,3 @@ ws.send(JSON.stringify({ q: "pyth" }));
 
 When no autocomplete provider is configured, the endpoint returns an empty
 suggestions list instead of raising.
-
