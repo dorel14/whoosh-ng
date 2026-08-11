@@ -6,6 +6,9 @@ Provides a complete optimized indexing pipeline that ties together:
 - Parallel segment building
 - Merge policies
 
+Author: dorel14
+Version: 3.0.0
+
 This is the recommended entry point for large-scale indexing.
 
 Example::
@@ -27,33 +30,16 @@ from __future__ import annotations
 import gc
 import logging
 import os
-import shutil
-import time
 from concurrent.futures import Future, ProcessPoolExecutor
 from typing import Any
 
 from whoosh.fields import Schema
 from whoosh.index import create_in, open_dir
+from whoosh_modern.indexing._utils import _build_segment_worker, _rmtree_retry
 from whoosh_modern.indexing.batch_writer import BatchIndexWriter
 from whoosh_modern.indexing.compiler import BatchAnalyzer, CompiledDataSource
 
 logger = logging.getLogger(__name__)
-
-
-def _rmtree_retry(path: str, retries: int = 20, delay: float = 0.5) -> None:
-    """Remove a directory tree, retrying on Windows permission errors.
-
-    On Windows, files created by worker processes can remain briefly
-    locked after the process pool shuts down. Retrying with small
-    delays avoids spurious failures in tests and cleanup paths.
-    """
-    for attempt in range(retries):
-        try:
-            shutil.rmtree(path)
-            return
-        except PermissionError:
-            if attempt < retries - 1:
-                time.sleep(delay)
 
 
 class ModernIndexBuilder:
@@ -86,6 +72,24 @@ class ModernIndexBuilder:
         multisegment: bool = True,
         merge_policy: Any | None = None,
     ) -> None:
+        """Initialize the modern index builder.
+
+        Args:
+            schema: The Whoosh schema defining the index structure.
+            index_path: Filesystem path where the index will be created.
+            source: The data source to index (must support ``iter_documents``
+                or ``stream_batches``).
+            batch_size: Number of documents per batch. Defaults to 5000.
+            limitmb: Memory limit in MB for the writer buffer. Defaults to 512.
+            workers: Number of worker processes for parallel building.
+                If 1, builds sequentially. Defaults to 1.
+            cache_size: Maximum LRU cache size for the batch analyzer.
+                Defaults to 10000.
+            multisegment: If True, write each batch as a separate segment.
+                Defaults to True.
+            merge_policy: Optional merge policy object. If ``None``, the
+                Whoosh default is used. Defaults to None.
+        """
         self.schema = schema
         self.index_path = index_path
         self.source = source
@@ -97,13 +101,21 @@ class ModernIndexBuilder:
         self.merge_policy = merge_policy
 
     def _compile_source(self) -> CompiledDataSource:
-        """Compile the data source for optimized batch processing."""
+        """Compile the data source for optimized batch processing.
+
+        Returns:
+            A ``CompiledDataSource`` wrapping the source.
+        """
         return CompiledDataSource(self.source)
 
     def build(self) -> int:
         """Build the index from the data source.
 
-        :returns: total number of documents indexed.
+        Delegates to parallel or sequential building depending on the
+        configured number of workers.
+
+        Returns:
+            The total number of documents indexed.
         """
         compiled = self._compile_source()
         ix = create_in(self.index_path, self.schema)
@@ -117,7 +129,15 @@ class ModernIndexBuilder:
         return total
 
     def _build_sequential(self, ix: Any, compiled: CompiledDataSource) -> int:
-        """Build the index sequentially with batch analysis."""
+        """Build the index sequentially with batch analysis.
+
+        Args:
+            ix: The open Whoosh index to write into.
+            compiled: The compiled data source providing batch iteration.
+
+        Returns:
+            The total number of documents indexed.
+        """
         with BatchIndexWriter(
             ix,
             batch_size=self.batch_size,
@@ -139,7 +159,18 @@ class ModernIndexBuilder:
         return total
 
     def _build_parallel(self, ix: Any, compiled: CompiledDataSource) -> int:
-        """Build the index in parallel using multiple workers."""
+        """Build the index in parallel using multiple workers.
+
+        Each batch is submitted to a separate worker process that builds
+        its own segment. Segments are then merged into the main index.
+
+        Args:
+            ix: The open Whoosh index to write into.
+            compiled: The compiled data source providing batch iteration.
+
+        Returns:
+            The total number of documents indexed.
+        """
         segments: list[str] = []
         batches = list(compiled.stream_batches(batch_size=self.batch_size))
 
@@ -195,33 +226,3 @@ class ModernIndexBuilder:
                 _rmtree_retry(segment_dir)
 
         return sum(len(batch) for batch in batches)
-
-
-def _build_segment_worker(args: tuple[str, Schema, list[dict[str, Any]], int]) -> str:
-    """Worker function that builds a single segment in a separate process."""
-    import gc
-    import os
-
-    from whoosh.index import create_in
-
-    temp_dir, schema, docs, _docbase = args
-    os.makedirs(temp_dir, exist_ok=True)
-    ix = create_in(temp_dir, schema)
-    writer = ix.writer(limitmb=128, multisegment=True)
-    try:
-        for _doc in docs:
-            writer.add_document(**_doc)
-        writer.commit(merge=False)
-    except Exception:
-        writer.cancel()
-        raise
-    finally:
-        # Break reference cycles before dropping references so the cyclic
-        # GC can reclaim the writer and its open file handles on Windows.
-        if writer._searcher is not None:
-            writer._searcher._ix = None
-            writer._searcher = None
-        del writer
-        del ix
-        gc.collect()
-    return temp_dir

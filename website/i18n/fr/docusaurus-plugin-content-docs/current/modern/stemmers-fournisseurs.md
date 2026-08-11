@@ -327,8 +327,180 @@ pip install whoosh-ng[fast-stemming]
 pip install whoosh-ng[modern]
 ```
 
+## Intégration des Fournisseurs de Stemmers dans le Pipeline
+
+Le système `StemmerProvider` s'intègre à **deux niveaux** : les analyseurs de niveau champ et le middleware de pipeline. Comprendre les deux est essentiel pour éviter le double-stemming.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  StemmingAnalyzer (niveau champ, dans Schema)                   │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │ RegexTokenizer() │ StopFilter │ StemmingAnalyzer          │  │
+│  │                    (mots vides)    │                       │  │
+│  │                                   ▼                       │  │
+│  │                         stemfn = provider.stem            │  │
+│  │                                   │                       │  │
+│  │                                   ▼                       │  │
+│  │                         Token(stemmed=True)                │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  Appliqué par Whoosh core à l'indexation ET à la recherche     │
+│  (via QueryParser). Automatique, aucun middleware nécessaire.   │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  StemmingMiddleware (niveau pipeline)                           │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │ before_index(context)                                     │  │
+│  │   └── stemmer toutes les valeurs str dans context.document  │  │
+│  │                                                             │  │
+│  │ before_search(context)                                     │  │
+│  │   └── stemmer context.query si stem_query=True             │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  Intégré dans MiddlewareChain. Activation manuelle.              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Niveau 1 : Niveau champ (automatique)
+
+Le `StemmingAnalyzer` encapsule le `StemmingAnalyzer` intégré de Whoosh et injecte
+la méthode `.stem` d'un `StemmerProvider` comme `stemfn`. Whoosh core l'applique
+automatiquement au champ à la fois à l'indexation et à la recherche.
+
+```python
+from whoosh.fields import Schema, TEXT
+from whoosh_modern.analysis import StemmingAnalyzer, get_stemmer
+
+# Détection automatique du meilleur stemmer (PyStemmer préféré)
+stemmer = get_stemmer("auto", "english")
+
+# Créer un analyseur avec la fonction de stem du provider
+analyzer = StemmingAnalyzer(stemmer=stemmer)
+
+schema = Schema(
+    title=TEXT(stored=True),
+    content=TEXT(analyzer=analyzer),
+)
+
+# À l'indexation : "running cats" → ["run", "cat"]
+# À la recherche : QueryParser utilise le même analyseur
+# donc "running cats" correspond aux documents contenant "run cat"
+```
+
+**Avantages** : Automatique, pas de configuration de middleware nécessaire, comportement cohérent index/recherche.
+
+**Inconvénients** : Nécessite que l'analyseur soit défini sur chaque champ TEXT. Plus difficile à changer à l'exécution.
+
+### Niveau 2 : Niveau middleware (activé manuellement)
+
+`StemmingMiddleware` applique le stemming au niveau du pipeline, opérant sur les
+valeurs de chaîne brutes dans `context.document` et `context.query` avant que
+Whoosh's analyzeurs ne les voient.
+
+```python
+from whoosh_modern.middleware import StemmingMiddleware
+from whoosh_modern.analysis import get_stemmer
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareWriter
+
+stemmer = get_stemmer("auto", "english")
+
+chain = MiddlewareChain([
+    StemmingMiddleware(
+        stemmer=stemmer.stem,
+        fields=["title", "content"],  # None = tous les champs str
+        stem_query=True,
+    ),
+])
+
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Running cats", content="Fast dogs")
+    # before_index stemme : "Running cats" → "run cat"
+    writer.commit()
+```
+
+**Avantages** : Fonctionne avec n'importe quel champ sans modifier le schéma. Peut être activé/désactivé à l'exécution.
+
+**Inconvénients** : Doit être connecté manuellement au pipeline. Risque de double-stemming si le champ utilise aussi `StemmingAnalyzer`.
+
+### Exemple de pipeline complet : indexation + recherche
+
+```python
+from whoosh import index, fields
+from whoosh.qparser import QueryParser
+from whoosh_modern.analysis import StemmingAnalyzer, get_stemmer
+from whoosh_modern.middleware import StemmingMiddleware
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh_modern.analysis import StemmingAnalyzer
+
+# 1. Schéma avec analyseur de niveau champ
+stemmer = get_stemmer("auto", "english")
+schema = fields.Schema(
+    title=fields.TEXT(stored=True, analyzer=StemmingAnalyzer(stemmer=stemmer)),
+    content=fields.TEXT(analyzer=StemmingAnalyzer(stemmer=stemmer)),
+)
+
+ix = index.create_in("indexdir", schema)
+
+# 2. Indexation (pas de double-stemming car
+#    on n'utilise pas StemmingMiddleware quand les champs ont StemmingAnalyzer)
+with ix.writer() as writer:
+    writer.add_document(title="Running cats", content="Fast dogs")
+    writer.commit()
+
+# 3. Recherche : QueryParser applique le même analyseur à la requête
+with ix.searcher() as searcher:
+    qp = QueryParser("content", schema)
+    q = qp.parse("running cats")
+    results = searcher.search(q)
+    # "running" est stemmé en "run" par l'analyseur
+    # "cats" est stemmé en "cat" par l'analyseur
+    # Correspond au document avec "run" et "cat"
+```
+
+### Éviter le double-stemming
+
+```python
+# FAUX : double stemming
+schema = Schema(
+    content=TEXT(analyzer=StemmingAnalyzer(stemmer="auto")),
+)
+chain = MiddlewareChain([
+    StemmingMiddleware(stemmer=get_stemmer("auto").stem),  # Ne pas faire ça !
+])
+# Résultat : "running" → "run" (analyseur) → "run" (middleware) — inoffensif mais gaspilleux
+
+# CORRECT : choisir UN niveau
+# Option A : niveau champ uniquement (recommandé pour schémas statiques)
+schema = Schema(content=TEXT(analyzer=StemmingAnalyzer(stemmer="auto")))
+# Aucun StemmingMiddleware nécessaire
+
+# Option B : middleware uniquement (pour champs dynamiques)
+schema = Schema(content=TEXT)  # Pas d'analyseur
+chain = MiddlewareChain([StemmingMiddleware(stemmer=get_stemmer("auto").stem)])
+```
+
+### Provider de stemmer personnalisé
+
+```python
+from whoosh_modern.analysis import register_stemmer, get_stemmer
+
+@register_stemmer("my_stemmer")
+class MyStemmer:
+    def stem(self, word: str) -> str:
+        return word.lower().rstrip("s")
+
+# Utilisez-le comme n'importe quel backend intégré
+stemmer = get_stemmer("my_stemmer", "english")
+analyzer = StemmingAnalyzer(stemmer=stemmer)
+```
+
 ## Voir Aussi
 
 - [Guide Stemming et Mots Vides](stemming.md) — Guide classique de stemming de Whoosh
-- [Guide Synonymes & Linguistique](linguistics-sprint-d.md) — Moteur d'expansion de synonymes
+- [Guide Synonymes & Linguistique](linguistique.md) — Moteur d'expansion de synonymes
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [API: Moderne](../api/modern.md) — Référence complète de l'API pour les extensions d'analyse

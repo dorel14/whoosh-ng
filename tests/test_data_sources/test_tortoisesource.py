@@ -10,7 +10,7 @@ from whoosh_modern.data_sources.tortoise_ds import TortoiseSource  # noqa: E402
 
 
 class Article(Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     title = fields.CharField(max_length=255)
     body = fields.TextField()
 

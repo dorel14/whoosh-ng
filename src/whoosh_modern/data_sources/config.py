@@ -1,4 +1,8 @@
-"""DataSource configuration DSL and factory."""
+"""DataSource configuration DSL and factory.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 from dataclasses import dataclass, field
 from typing import Any, Literal
@@ -15,6 +19,10 @@ from whoosh_modern.data_sources.sql import SQLSource
 class DataSourceConfig:
     """Declarative configuration for a DataSource.
 
+    Provides a simple dataclass-based DSL for describing a data source
+    and creating the appropriate DataSource implementation via
+    :meth:`create`.
+
     Example:
         config = DataSourceConfig(
             type="csv",
@@ -22,6 +30,34 @@ class DataSourceConfig:
             delimiter=",",
         )
         source = config.create()
+
+    Args:
+        type: The data source type (``"sql"``, ``"rest"``, ``"csv"``,
+            ``"json"``, ``"graphql"``, ``"pydantic"``, ``"pandas"``,
+            ``"polars"``, ``"parquet"``, ``"peewee"``, ``"sqlalchemy"``,
+            or ``"tortoise"``).
+        path: Filesystem path (used by CSV, JSON, Parquet).
+        url: Endpoint URL (used by REST, GraphQL).
+        query: SQL query string (used by SQL, SQLAlchemy).
+        connection: Database connection or engine (used by SQL,
+            SQLAlchemy, Peewee).
+        models: List of Pydantic model instances (used by Pydantic).
+        model: A Pydantic model class or Peewee/Tortoise model class.
+        dataframe: A pandas or Polars DataFrame.
+        delimiter: CSV delimiter (used by CSV).
+        encoding: File encoding (used by CSV, JSON).
+        document_path: Dotted path to documents in API/JSON response.
+        incremental_field: Optional field for incremental syncs.
+        id_field: Optional unique identifier field.
+        method: HTTP method (used by REST).
+        headers: HTTP headers (used by REST, GraphQL).
+        auth: Authentication config (used by REST, GraphQL).
+        pagination: Pagination strategy (used by REST).
+        page_size: Items per page (used by REST).
+        timeout: Request timeout in seconds (used by REST, GraphQL).
+        sample_size: Rows to sample during schema discovery.
+        engine: Parquet read engine (``"auto"``, ``"fastparquet"``,
+            ``"pyarrow"``).
     """
 
     type: str

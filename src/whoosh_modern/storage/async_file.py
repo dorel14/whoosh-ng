@@ -1,4 +1,14 @@
-"""Async filesystem storage provider bridging SyncStorageProvider via to_thread."""
+"""Async filesystem storage provider bridging SyncStorageProvider via to_thread.
+
+This module provides :class:`AsyncFileStorage`, an :class:`AsyncStorageProvider`
+that delegates all filesystem I/O to a core
+:class:`~whoosh_modern.middleware.storage.FileStorageProvider` running on a
+worker thread through :func:`asyncio.to_thread`, keeping the event loop
+unblocked. This removes the previous hand-rolled copy of the filesystem logic.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 from __future__ import annotations
 
@@ -6,67 +16,97 @@ import asyncio
 import os
 
 from whoosh.plugins.storage_base import AsyncStorageProvider
+from whoosh_modern.middleware.storage import FileStorageProvider
 
 
 class AsyncFileStorage(AsyncStorageProvider):
-    """Async filesystem storage provider.
+    """Async filesystem storage provider backed by the local OS filesystem.
 
-    All operations are executed on a worker thread via ``asyncio.to_thread`` so
-    the event loop is never blocked.
+    All read/write/delete/list operations are dispatched to a worker thread via
+    ``asyncio.to_thread`` so the event loop is never blocked by disk I/O. The
+    underlying work is performed by a core
+    :class:`~whoosh_modern.middleware.storage.FileStorageProvider`.
+
+    The provider is instantiated from a project root ``root`` directory; each
+    logical key is resolved to a physical path under that root by the wrapped
+    provider. Parent directories are created automatically on write.
+
+    Example::
+
+        from whoosh_modern.storage.async_file import AsyncFileStorage
+
+        storage = AsyncFileStorage(root="./index_segments")
+        await storage.awrite("segment_1.dat", b"binary-data")
+        data = await storage.aread("segment_1.dat")
     """
 
     def __init__(self, root: str) -> None:
-        self._root = os.path.abspath(root)
+        """Initialize the async file storage provider.
 
-    def _path(self, key: str) -> str:
-        safe = key.replace("\\", os.sep).replace("/", os.sep)
-        return os.path.join(self._root, safe)
+        Args:
+            root: Path to the directory used as the storage root. The path is
+                resolved to an absolute path by the wrapped
+                :class:`FileStorageProvider`.
+
+        Raises:
+            OSError: If ``root`` cannot be converted to an absolute path
+                (propagated from :func:`os.path.abspath`).
+        """
+        self._root = os.path.abspath(root)
+        self._provider = FileStorageProvider(root)
 
     async def awrite(self, key: str, data: bytes) -> None:
-        path = self._path(key)
-        parent = os.path.dirname(path)
-        if parent:
-            await asyncio.to_thread(os.makedirs, parent, exist_ok=True)
+        """Asynchronously write ``data`` to ``key``.
 
-        def _write() -> None:
-            with open(path, "wb") as fh:
-                fh.write(data)
-
-        await asyncio.to_thread(_write)
+        Args:
+            key: Logical key under the storage root.
+            data: Binary payload to persist.
+        """
+        await asyncio.to_thread(self._provider.write, key, data)
 
     async def aread(self, key: str) -> bytes:
-        def _read() -> bytes:
-            with open(self._path(key), "rb") as fh:
-                return fh.read()
+        """Asynchronously read the full binary content stored at ``key``.
 
-        return await asyncio.to_thread(_read)
+        Args:
+            key: Logical key to read.
+
+        Returns:
+            The complete byte payload stored under ``key``.
+
+        Raises:
+            FileNotFoundError: If ``key`` does not exist on disk.
+        """
+        return await asyncio.to_thread(self._provider.read, key)
 
     async def adelete(self, key: str) -> None:
-        path = self._path(key)
+        """Asynchronously delete the file stored at ``key``.
 
-        def _delete() -> None:
-            if os.path.exists(path):
-                os.remove(path)
+        If the key does not exist, the call is a no-op.
 
-        await asyncio.to_thread(_delete)
+        Args:
+            key: Logical key to delete.
+        """
+        await asyncio.to_thread(self._provider.delete, key)
 
     async def aexists(self, key: str) -> bool:
-        return await asyncio.to_thread(os.path.exists, self._path(key))
+        """Asynchronously check whether ``key`` exists on disk.
+
+        Args:
+            key: Logical key to test.
+
+        Returns:
+            ``True`` if a file exists at the resolved path, ``False`` otherwise.
+        """
+        return await asyncio.to_thread(self._provider.exists, key)
 
     async def alist_keys(self) -> list[str]:
-        def _list() -> list[str]:
-            keys: list[str] = []
-            root = self._root
-            if not os.path.isdir(root):
-                return keys
-            for current, _dirs, files in os.walk(root):
-                for name in files:
-                    full = os.path.join(current, name)
-                    rel = os.path.relpath(full, root)
-                    keys.append(rel.replace(os.sep, "/"))
-            return sorted(keys)
+        """Asynchronously list all logical keys present under the storage root.
 
-        return await asyncio.to_thread(_list)
+        Returns:
+            A sorted list of logical keys. Returns an empty list if the root
+            directory does not exist.
+        """
+        return await asyncio.to_thread(self._provider.list_keys)
 
 
 __all__ = ["AsyncFileStorage"]

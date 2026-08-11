@@ -1,4 +1,8 @@
-"""Fast CSV DataSource using csv.reader with pre-compiled column mapping."""
+"""Fast CSV DataSource using csv.reader with pre-compiled column mapping.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 import csv
 import logging
@@ -20,7 +24,17 @@ _DEFAULT_ENCODING = "utf-8"
 
 
 def _sanitize_field_name(name: str) -> str:
-    """Sanitize a CSV header into a valid Whoosh field name."""
+    """Sanitize a CSV header into a valid Whoosh field name.
+
+    Strips whitespace, replaces non-word characters with underscores,
+    and collapses consecutive underscores.
+
+    Args:
+        name: The raw header string.
+
+    Returns:
+        A sanitized field name string.
+    """
     name = name.strip()
     name = re.sub(r"[^\w]", "_", name)
     name = re.sub(r"_+", "_", name)
@@ -39,6 +53,16 @@ class FastCSVSource:
         source = FastCSVSource("data.csv")
         for batch in source.stream_batches(batch_size=5000):
             writer.add_batch(batch)
+
+    Args:
+        path: Filesystem path to the CSV file.
+        delimiter: Column delimiter (default ``","``).
+        encoding: File encoding (default ``"utf-8"``).
+        incremental_field: Optional field name for incremental syncs.
+        id_field: Optional field name that uniquely identifies a
+            document.
+        sample_size: Number of rows to sample during schema
+            discovery.
     """
 
     def __init__(
@@ -61,15 +85,30 @@ class FastCSVSource:
 
     @property
     def name(self) -> str:
-        """Return the data source name."""
+        """Return the data source name.
+
+        Returns:
+            A string in the form ``fast_csv:<path>``.
+        """
         return f"fast_csv:{self.path}"
 
     def health_check(self) -> bool:
-        """Return True if the CSV file exists and is readable."""
+        """Return True if the CSV file exists and is readable.
+
+        Returns:
+            ``True`` if the file is readable, ``False`` otherwise.
+        """
         return os.path.isfile(self.path) and os.access(self.path, os.R_OK)
 
     def _open_file(self) -> Any:
-        """Open the CSV file for reading."""
+        """Open the CSV file for reading.
+
+        Returns:
+            An open file handle.
+
+        Raises:
+            DataSourceError: If the file cannot be opened.
+        """
         try:
             return open(self.path, newline="", encoding=self.encoding)
         except OSError as e:
@@ -79,11 +118,27 @@ class FastCSVSource:
             ) from e
 
     def _build_column_map(self, headers: list[str]) -> list[tuple[int, str]]:
-        """Build a list of (column_index, sanitized_field_name) pairs."""
+        """Build a list of (column_index, sanitized_field_name) pairs.
+
+        Args:
+            headers: List of raw CSV header strings.
+
+        Returns:
+            A list of tuples pairing column indices with sanitized
+            field names.
+        """
         return [(i, _sanitize_field_name(name)) for i, name in enumerate(headers)]
 
     def _row_to_doc(self, row: list[str]) -> dict[str, Any]:
-        """Convert a csv.reader row to a document dict using the column map."""
+        """Convert a csv.reader row to a document dict using the column map.
+
+        Args:
+            row: A list of string values from a CSV row.
+
+        Returns:
+            A dictionary mapping sanitized field names to values.
+            If no column map has been built, returns an empty dict.
+        """
         column_map = self._column_map
         if column_map is None:
             return {}
@@ -92,7 +147,18 @@ class FastCSVSource:
         }
 
     def discover_schema(self) -> Schema:
-        """Discover schema from CSV header and sample rows."""
+        """Discover schema from CSV header and sample rows.
+
+        Reads the header row and up to ``sample_size`` data rows, then
+        uses :class:`SchemaDiscovery` to infer field types.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from the
+            sample data.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"CSV file not found or not readable: {self.path}",
@@ -116,7 +182,14 @@ class FastCSVSource:
         return self._schema
 
     def iter_documents(self) -> Iterator[Document]:
-        """Yield documents from the CSV file."""
+        """Yield documents from the CSV file.
+
+        Yields:
+            Document dictionaries, one per data row.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"CSV file not found or not readable: {self.path}",
@@ -133,7 +206,18 @@ class FastCSVSource:
                 yield self._row_to_doc(row)
 
     def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
-        """Yield documents from the CSV file in batches."""
+        """Yield documents from the CSV file in batches.
+
+        Args:
+            batch_size: Maximum number of documents per batch.
+
+        Yields:
+            Lists of document dictionaries, each list containing at
+            most ``batch_size`` items.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"CSV file not found or not readable: {self.path}",
@@ -156,11 +240,26 @@ class FastCSVSource:
                 yield batch
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
-        """Yield documents changed since a timestamp (not implemented for CSV)."""
+        """Yield documents changed since a timestamp (not implemented for CSV).
+
+        Args:
+            since: A timestamp or cursor value (accepted but ignored).
+
+        Yields:
+            Nothing — incremental changes are not supported for this
+            data source.
+        """
         return iter([])
 
     def document_count(self) -> int:
-        """Return total row count in the CSV file."""
+        """Return total row count in the CSV file.
+
+        Returns:
+            The number of data rows (excluding the header).
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"CSV file not found or not readable: {self.path}",
@@ -175,7 +274,13 @@ class FastCSVSource:
         return count
 
     def metadata(self) -> dict[str, Any]:
-        """Return metadata about this CSV source."""
+        """Return metadata about this CSV source.
+
+        Returns:
+            A dictionary with keys ``type``, ``path``,
+            ``delimiter``, ``encoding``, ``incremental_field``, and
+            ``id_field``.
+        """
         return {
             "type": "fast_csv",
             "path": self.path,

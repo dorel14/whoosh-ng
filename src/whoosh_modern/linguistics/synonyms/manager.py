@@ -1,4 +1,8 @@
-"""Synonym manager for CRUD operations and import/export."""
+"""Synonym manager for CRUD operations and import/export.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 from __future__ import annotations
 
@@ -15,43 +19,85 @@ logger = logging.getLogger(__name__)
 class SynonymManager:
     """Manage synonyms with CRUD operations and import/export.
 
-    :param mapping: optional initial synonym mapping
+    Args:
+        mapping: optional initial synonym mapping
     """
 
     def __init__(self, mapping: dict[str, list[str]] | None = None) -> None:
+        """Initialize the manager with an optional synonym mapping.
+
+        Args:
+            mapping: A dict mapping words to lists of synonym terms.
+                Defaults to an empty mapping.
+        """
         self._provider = StaticSynonymProvider(mapping)
 
     def get_synonyms(self, word: str) -> list[str]:
-        """Return synonyms for a word."""
+        """Return synonyms for a word.
+
+        Args:
+            word: The term whose synonyms should be retrieved.
+
+        Returns:
+            A list of synonymous terms for ``word``.
+        """
         return self._provider.get_synonyms(word)
 
     def add_synonyms(self, word: str, synonyms: list[str]) -> None:
-        """Add synonyms for a word."""
+        """Add synonyms for a word.
+
+        Args:
+            word: The term to associate synonyms with.
+            synonyms: The list of synonym terms to add.
+        """
         self._provider.add_synonym(word, synonyms)
 
     def remove_synonym(self, word: str, synonym: str) -> None:
-        """Remove a synonym for a word."""
+        """Remove a synonym for a word.
+
+        Args:
+            word: The term whose synonym should be removed.
+            synonym: The synonym term to remove.
+        """
         self._provider.remove_synonym(word, synonym)
 
     def import_yaml(self, path: str) -> None:
-        """Import synonyms from a YAML file."""
+        """Import synonyms from a YAML file.
+
+        Args:
+            path: Filesystem path to the YAML synonym file.
+        """
         provider = YAMLSynonymProvider(path)
         self._merge(provider)
 
     def import_json(self, path: str) -> None:
-        """Import synonyms from a JSON file."""
+        """Import synonyms from a JSON file.
+
+        Args:
+            path: Filesystem path to the JSON synonym file.
+        """
         from whoosh_modern.linguistics.synonyms.json_provider import JSONSynonymProvider
 
         provider = JSONSynonymProvider(path)
         self._merge(provider)
 
     def export_json(self, path: str) -> None:
-        """Export synonyms to a JSON file."""
+        """Export synonyms to a JSON file.
+
+        Args:
+            path: Filesystem path where the JSON file will be written.
+        """
         data = self._provider.to_dict()
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
     def _merge(self, provider: Any) -> None:
+        """Merge another provider's synonyms into this manager's provider.
+
+        Args:
+            provider: A synonym provider instance that either has a
+                ``to_dict`` method or a ``_mapping`` attribute.
+        """
         if hasattr(provider, "to_dict"):
             self._provider.update_from_dict(provider.to_dict())
         elif hasattr(provider, "_mapping"):

@@ -125,11 +125,12 @@ pip install whoosh-ng[s3]
 
 ## SnapshotStorage
 
-Simple S3 snapshot storage without local cache. This is the simplest
-S3-backed storage strategy:
+Simple S3 snapshot storage. S3 remains the source of truth; on read, the object is
+downloaded from S3 and also persisted under `local_path` so subsequent reads of the same
+key can be served from the local scratch copy:
 
 - Write: upload segment directly to S3
-- Read: download segment from S3 to local temporary file
+- Read: download segment from S3, cache it under `local_path`
 
 Use this when you want S3 as a simple backup/restore target without the
 complexity of a local cache.
@@ -279,3 +280,126 @@ python benchmark/s3_storage_benchmark.py
 # Run real Whoosh index benchmark (requires customers CSV)
 python benchmark/s3_storage_benchmark_real.py
 ```
+
+## How Storage Providers Integrate into the Indexing and Search Pipeline
+
+The storage provider participates in two distinct phases: **index creation** (determining where segments live) and **runtime pipeline integration** (via `StorageMiddleware`).
+
+### Full indexing flow with a storage provider
+
+```text
+DataSource.stream_batches()
+    │
+    ▼
+SearchApplication.build()
+    │
+    ├── source.discover_schema() ──► Whoosh Schema
+    │
+    ├── storage root resolution
+    │       │
+    │       ├── FileStorageProvider (exposed as `FileStorage`)
+    │       │   └── exposes a public `root` ──► whoosh.index.create_in(root, schema)
+    │       │
+    │       └── Other providers (S3 / Snapshot / Hybrid, no filesystem root)
+    │           └── tempfile.mkdtemp() ──► create_in(tmpdir, schema)
+    │
+    ├── Writer = index.writer()
+    │       │
+    │       ├── MiddlewareChain.before_index()
+    │       │   └── StorageMiddleware.before_index()
+    │       │       ├── context.labels["storage_backend"] = provider.__class__.__name__
+    │       │       └── context.metadata["storage_provider"] = self
+    │       │
+    │       ├── for batch in source.stream_batches():
+    │       │       for doc in batch:
+    │       │           writer.add_document(**doc)
+    │       │
+    │       └── writer.commit()
+    │           │
+    │           └── StorageMiddleware.on_commit()
+    │               └── provider.write("commits/{name}/{timestamp}", b"1")
+    │
+    ▼
+Index persisted on disk / S3 / hybrid cache
+```
+
+### Full search flow with a storage provider
+
+```text
+SearchApplication.search(query)
+    │
+    ├── index.searcher()
+    │       │
+    │       └── Whoosh core opens segment files from:
+    │           ├── local filesystem (FileStorageProvider root)
+    │           ├── SQLite DB (SQLiteStorageProvider)
+    │           └── S3 / hybrid cache (S3StorageProvider / HybridStorage)
+    │
+    ├── QueryParser.parse(query) ──► Query object
+    │
+    └── searcher.search(query)
+        │
+        └── Whoosh core reads posting lists from segment files
+            └── Returns Results (Hits)
+```
+
+### StorageMiddleware hooks in detail
+
+`StorageMiddleware` (`whoosh_modern.middleware.storage`) is the integration point
+that routes index persistence through any `SyncStorageProvider` without modifying
+the writer.
+
+| Hook | When | What it does |
+|------|------|--------------|
+| `before_index(context)` | Before each document is added | Tags the context with `storage_backend` label and `storage_provider` metadata |
+| `on_commit(context)` | After `writer.commit()` | Writes a commit checkpoint marker (`commits/{name}/{timestamp}`) to the provider |
+
+### Example: StorageMiddleware with a custom chain
+
+```python
+from whoosh_modern.middleware import (
+    StorageMiddleware,
+    FileStorageProvider,
+    StemmingMiddleware,
+)
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh_modern.analysis import get_stemmer
+
+# Storage provider
+storage = FileStorageProvider("/data/index")
+
+# Create middleware chain
+chain = MiddlewareChain([
+    StorageMiddleware(storage, name="primary"),
+    StemmingMiddleware(stemmer=get_stemmer("auto", "english").stem),
+])
+
+# Apply to writer
+from whoosh.middleware.wrappers import MiddlewareWriter
+
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Hello", content="World")
+    # StorageMiddleware.before_index() tags the context
+    # StemmingMiddleware stems the fields
+    # writer.commit() triggers StorageMiddleware.on_commit()
+    writer.commit()
+```
+
+### Key insight: StorageProvider vs StorageMiddleware
+
+| Component | Role |
+|-----------|------|
+| `SyncStorageProvider` / `AsyncStorageProvider` | **Contract** defining `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
+| `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implementations** of the contract |
+| `StorageMiddleware` | **Integration layer** that calls the provider at specific lifecycle hooks (`before_index`, `on_commit`) |
+| `SearchApplication` | **Entry point** that delegates to `SearchView.build()`; when the storage is a `FileStorageProvider` (exposed as `FileStorage`) it uses its public `root` to create the Whoosh index directory, otherwise it falls back to a temporary directory |
+
+The provider itself does **not** intercept Whoosh's internal segment reads. Those reads go through Whoosh's built-in `FileStorage` (`whoosh.filedb.filestore`) which reads from the filesystem path given to `create_in()`. The Whoosh-NG storage provider abstraction is designed for:
+- Custom segment routing (S3, SQLite, hybrid cache)
+- Commit checkpointing via middleware
+- Future: segment-level read/write interception
+
+## See Also
+
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
+- [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters

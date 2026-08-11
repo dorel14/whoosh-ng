@@ -128,6 +128,8 @@ whoosh-ng/
 - [Git](https://git-scm.com/)
 - [Ruff](https://docs.astral.sh/ruff/) for linting/formatting
 - [Mypy](https://mypy.readthedocs.io/) and [Pyright](https://microsoft.github.io/pyright/) for type checking
+- Windows  => Powershell
+- .venv at project root
 
 ### Environment
 

@@ -8,7 +8,13 @@ from typing import Any
 import pytest
 
 from whoosh.plugins.storage_base import SyncStorageProvider
-from whoosh_modern.storage import AsyncHybridStorage, FileStorage, HybridStorage, S3Storage
+from whoosh_modern.storage import (
+    AsyncHybridStorage,
+    FileStorage,
+    HybridStorage,
+    S3Storage,
+)
+from whoosh_modern.storage.s3 import SnapshotStorage
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -149,6 +155,63 @@ def test_s3_prefix(fake_s3_client) -> None:
     storage = S3Storage(bucket="b", prefix="pre", client=fake_s3_client)
     storage.write("k.dat", b"v")
     assert fake_s3_client._store["pre/k.dat"] == b"v"
+
+
+# ---------------------------------------------------------------------------
+# SnapshotStorage
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def snapshot_storage(tmp_path, fake_s3_client):
+    return SnapshotStorage(
+        local_path=str(tmp_path / "scratch"),
+        bucket="test-bucket",
+        prefix="segments",
+        client=fake_s3_client,
+    )
+
+
+def test_snapshot_storage_read_caches_locally(snapshot_storage: SnapshotStorage, tmp_path) -> None:
+    snapshot_storage.write("segment_1.dat", b"segdata")
+    data = snapshot_storage.read("segment_1.dat")
+    assert data == b"segdata"
+    cached_path = tmp_path / "scratch" / "segment_1.dat"
+    assert cached_path.read_bytes() == b"segdata"
+
+
+def test_snapshot_storage_read_rejects_parent_traversal(
+    snapshot_storage: SnapshotStorage, fake_s3_client
+) -> None:
+    fake_s3_client._store["segments/../../etc/passwd"] = b"malicious"
+    with pytest.raises(ValueError, match=r"path traversal.*not allowed"):
+        snapshot_storage.read("../../etc/passwd")
+
+
+def test_snapshot_storage_read_rejects_embedded_traversal(
+    snapshot_storage: SnapshotStorage, fake_s3_client
+) -> None:
+    fake_s3_client._store["segments/foo/../../../etc/passwd"] = b"malicious"
+    with pytest.raises(ValueError, match=r"path traversal.*not allowed"):
+        snapshot_storage.read("foo/../../../etc/passwd")
+
+
+def test_snapshot_storage_read_rejects_absolute_path(
+    snapshot_storage: SnapshotStorage, fake_s3_client
+) -> None:
+    fake_s3_client._store["segments/etc/passwd"] = b"malicious"
+    with pytest.raises(ValueError, match=r"absolute paths are not allowed"):
+        snapshot_storage.read("/etc/passwd")
+
+
+def test_snapshot_storage_read_does_not_escape_local_path(
+    snapshot_storage: SnapshotStorage, tmp_path
+) -> None:
+    snapshot_storage.write("safe/segment.dat", b"ok")
+    snapshot_storage.read("safe/segment.dat")
+    cached_path = tmp_path / "scratch" / "safe" / "segment.dat"
+    assert cached_path.read_bytes() == b"ok"
+    assert not (tmp_path / "etc").exists()
 
 
 # ---------------------------------------------------------------------------

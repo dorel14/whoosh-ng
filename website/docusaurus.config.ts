@@ -51,6 +51,11 @@ const config: Config = {
           position: 'left',
         },
         {
+          to: 'https://github.com/users/dorel14/projects/2/views/2?sliceBy%5BcolumnId%5D=Milestone',
+          label: 'Roadmap',
+          position: 'left',
+        },
+        {
           to: '/examples/basic-indexing',
           label: 'Examples',
           position: 'left',
@@ -76,6 +81,13 @@ const config: Config = {
             { label: 'Modern', to: '/modern/middleware' },
             { label: 'API Reference', to: '/api/overview' },
             { label: 'Examples', to: '/examples/basic-indexing' },
+          ],
+        },
+        {
+          title: 'LLM Context',
+          items: [
+            { label: 'llms.txt', to: '/llms.txt' },
+            { label: 'llms-full.txt', to: '/llms-full.txt' },
           ],
         },
         {

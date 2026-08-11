@@ -1,4 +1,8 @@
-"""Whoosh-NG linguistic engine: synonyms, stemmers, and language-specific analyzers."""
+"""Whoosh-NG linguistic engine: synonyms, stemmers, and language-specific analyzers.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 from __future__ import annotations
 

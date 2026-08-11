@@ -282,6 +282,7 @@ Builds and returns a `MiddlewareChain` from all plugins that declare `middleware
 
 ## See Also
 
-- [Middleware Guide](middleware-sprint-c.md) — Pipeline hooks and custom middleware
+- [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and custom middleware
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [Plugin Development Example](../examples/plugin-dev.md) — Step-by-step plugin tutorial
 - [API: Plugins](../api/plugins.md) — Full API reference

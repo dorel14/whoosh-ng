@@ -47,9 +47,11 @@ jobs:
               if [ $second_status -eq 0 ]; then
                 git config user.email "action@github.com"
                 git config user.name "github-actions[bot]"
-                git add -A
-                git commit -m "chore: apply pre-commit fixes"
-                git push origin HEAD:${{ github.head_ref || github.ref_name }}
+              git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+              git pull --rebase origin ${{ github.head_ref || github.ref_name }} || true
+              git add -A
+              git commit -m "chore: apply pre-commit fixes" || true
+              git push origin HEAD:${{ github.head_ref || github.ref_name }} || true
               else
                 echo "Pre-commit still failing after fixes."
                 exit $second_status

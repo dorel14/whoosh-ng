@@ -250,10 +250,15 @@ from whoosh_modern.linguistics.stemmers import (
     ItalianAnalyzer,
 )
 
-# Each analyzer is callable and returns a list of tokens
-analyzer = EnglishAnalyzer()
+# Each analyzer is an instance of LanguageAnalyzer and is callable: it returns a list of tokens
+analyzer = EnglishAnalyzer
 tokens = analyzer("The running cats")
 # tokens are stemmed: ["run", "cat"] (stop words removed)
+
+# Backward-compatible "class-style" usage also works: calling the analyzer
+# with no arguments returns a fresh analyzer instance, so historical code
+# written as EnglishAnalyzer()(text) keeps working unchanged.
+tokens = EnglishAnalyzer()("The running cats")
 ```
 
 ### Stemmer Backend Selection
@@ -324,6 +329,7 @@ with MiddlewareSearcher(ix.searcher(), chain) as searcher:
 
 ## See Also
 
-- [Stemming Guide](stemming-sprint-d.md) — Stemmer providers and language analyzers
-- [Middleware Guide](middleware-sprint-c.md) — Middleware pipeline integration
+- [Stemming Guide](stemming-providers.md) — Stemmer providers and language analyzers
+- [Middleware Guide](middleware-pipeline.md) — Middleware pipeline integration
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [API: Linguistics](../api/modern.md) — Full API reference

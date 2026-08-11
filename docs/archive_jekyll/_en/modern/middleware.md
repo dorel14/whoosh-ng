@@ -213,4 +213,4 @@ class ResilientMiddleware(Middleware):
 
 ## Modern Middleware (Whoosh-NG 2.0)
 
-Whoosh-NG 2.0 adds a modern middleware package (`whoosh_modern.middleware`) with wrap-style resilience middleware (retry, caching, logging) and hook-based middleware for storage, search, and analysis. For full details on the modern middleware architecture, plugin integration, and deployment, see the [Middleware & Plugin Pipeline Guide](middleware-sprint-c.md).
+Whoosh-NG 2.0 adds a modern middleware package (`whoosh_modern.middleware`) with wrap-style resilience middleware (retry, caching, logging) and hook-based middleware for storage, search, and analysis. For full details on the modern middleware architecture, plugin integration, and deployment, see the [Middleware & Plugin Pipeline Guide](middleware-pipeline.md).

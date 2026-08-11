@@ -1,7 +1,7 @@
 ---
 title: "Middleware & Pipeline de Plugins"
 nav_order: 41
-permalink: /fr/guides/middleware-sprint-c/
+permalink: /fr/guides/middleware-pipeline/
 lang: fr
 ---
 
@@ -383,7 +383,7 @@ chain = manager.get_middleware_chain()
 
 ## Voir Aussi
 
-- [Guide Système de Plugins](plugins-sprint-c.md) — Enregistrement et entry points des plugins
+- [Guide Système de Plugins](plugins-avances.md) — Enregistrement et entry points des plugins
 - [Exemples: Middleware](../examples/middleware.md) — Patterns de middleware pratiques
 - [API: Middleware](../api/middleware.md) — Référence complète de l'API
 - [API: Middleware Pipeline (moderne)](../api/modern.md) — Extensions middleware modernes

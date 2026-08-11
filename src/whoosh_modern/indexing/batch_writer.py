@@ -3,6 +3,9 @@
 Provides a modern batch writing path that optimizes document ingestion
 for large datasets without modifying the whoosh core library.
 
+Author: dorel14
+Version: 3.0.0
+
 Key optimizations:
 - Pre-filters document fields to only those in the schema
 - Uses multisegment mode to avoid merge overhead during indexing
@@ -54,6 +57,22 @@ class BatchIndexWriter:
         commit_profiler: Any = None,
         **writer_kwargs: Any,
     ) -> None:
+        """Initialize the batch index writer.
+
+        Args:
+            index: The Whoosh index to write documents into.
+            batch_size: Number of documents processed per batch. Defaults to 5000.
+            limitmb: Memory limit in MB for the writer's buffer. Defaults to 512.
+            commit_every: If set, commit every N batches. If ``None``, no
+                intermediate commits occur until ``close``. Defaults to None.
+            multisegment: If True, writes each batch as a separate segment to
+                defer merging. Defaults to True.
+            callback: Optional callback invoked after each commit. Defaults to None.
+            commit_profiler: Optional profiler object called before each commit.
+                Defaults to None.
+            **writer_kwargs: Additional keyword arguments forwarded to
+                ``index.writer()``.
+        """
         self._index = index
         self._batch_size = batch_size
         self._limitmb = limitmb
@@ -68,18 +87,33 @@ class BatchIndexWriter:
         self._schema_fields: set[str] | None = None
 
     def _get_schema_fields(self) -> set[str]:
-        """Return the set of field names in the index schema."""
+        """Return the set of field names in the index schema.
+
+        Returns:
+            A set of field name strings from the index schema.
+        """
         if self._schema_fields is None:
             self._schema_fields = set(self._index.schema.names())
         return self._schema_fields
 
     def _filter_doc(self, doc: dict[str, Any]) -> dict[str, Any]:
-        """Filter a document to only include fields in the schema."""
+        """Filter a document to only include fields in the schema.
+
+        Args:
+            doc: The document dict to filter.
+
+        Returns:
+            A new dict containing only the keys present in the schema.
+        """
         schema_fields = self._get_schema_fields()
         return {k: v for k, v in doc.items() if k in schema_fields}
 
     def _ensure_writer(self) -> None:
-        """Open a writer if one is not already open."""
+        """Open a writer if one is not already open.
+
+        Lazily creates a ``SegmentWriter`` using the configured ``limitmb``,
+        ``multisegment`` and additional writer keyword arguments.
+        """
         if self._writer is None:
             self._writer = self._index.writer(
                 limitmb=self._limitmb,
@@ -93,8 +127,15 @@ class BatchIndexWriter:
         Filters each document to only include fields present in the
         schema, then adds them to the index.
 
-        :param docs: list of document dicts.
-        :returns: number of documents added.
+        Args:
+            docs: List of document dicts to index.
+
+        Returns:
+            The number of documents successfully added.
+
+        Raises:
+            RuntimeError: If the internal writer is not open when attempting
+                to add documents.
         """
         if not docs:
             return 0
@@ -130,8 +171,11 @@ class BatchIndexWriter:
     def add_batches(self, batches: Iterator[list[dict[str, Any]]]) -> int:
         """Add multiple batches of documents.
 
-        :param batches: iterable of document lists.
-        :returns: total number of documents added.
+        Args:
+            batches: Iterable of document lists to index.
+
+        Returns:
+            Total number of documents added across all batches.
         """
         total = 0
         for batch in batches:
@@ -139,7 +183,12 @@ class BatchIndexWriter:
         return total
 
     def close(self) -> int:
-        """Close the writer and return total documents added."""
+        """Close the writer and commit any pending documents.
+
+        Returns:
+            Total number of documents added across all batches since the
+            last call to ``close`` (or since initialization if never closed).
+        """
         if self._writer is not None:
             if self._commit_profiler is not None:
                 self._commit_profiler.profile(self._writer)
@@ -152,6 +201,11 @@ class BatchIndexWriter:
         return total
 
     def __enter__(self) -> BatchIndexWriter:
+        """Enter context manager, returning this writer instance.
+
+        Returns:
+            The ``BatchIndexWriter`` instance.
+        """
         return self
 
     def __exit__(
@@ -160,14 +214,22 @@ class BatchIndexWriter:
         exc_val: BaseException | None,
         exc_tb: Any,
     ) -> None:
+        """Exit context manager, ensuring the writer is closed.
+
+        Args:
+            exc_type: The exception type if an exception was raised in the
+                ``with`` block, otherwise ``None``.
+            exc_val: The exception instance if raised, otherwise ``None``.
+            exc_tb: The traceback if an exception was raised, otherwise ``None``.
+        """
         self.close()
 
     @property
     def doc_count(self) -> int:
-        """Return the total number of documents added so far."""
+        """int: The total number of documents added so far."""
         return self._doc_count
 
     @property
     def batch_count(self) -> int:
-        """Return the total number of batches added so far."""
+        """int: The total number of batches added so far."""
         return self._batch_count

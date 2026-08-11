@@ -1,3 +1,13 @@
+"""Module d'intégration de modèles pour Whoosh-NG.
+
+Fournit l'indexation automatique de modèles Python (dataclass, Pydantic,
+SQLAlchemy, SQLModel, msgspec) vers Whoosh. Le ModelIndex mappe automatiquement
+les types Python vers les types de champs Whoosh.
+
+Auteur: SoniqueBay Team
+Version: 1.0.0
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -28,10 +38,24 @@ __all__ = [
 
 
 def index_document(index: Any, instance: Any, on_error: str = "raise") -> None:
+    """Indexe un document modèle dans un index Whoosh.
+
+    Args:
+        index: L'index Whoosh cible.
+        instance: L'instance de modèle à indexer.
+        on_error: Stratégie de gestion des erreurs ("raise", "log", "skip").
+    """
     auto = AutoIndexer(index, on_error=on_error)
     auto.index(instance)
 
 
 def remove_document(index: Any, instance: Any, on_error: str = "raise") -> None:
+    """Supprime un document modèle de l'index Whoosh.
+
+    Args:
+        index: L'index Whoosh cible.
+        instance: L'instance de modèle à supprimer.
+        on_error: Stratégie de gestion des erreurs ("raise", "log", "skip").
+    """
     auto = AutoIndexer(index, on_error=on_error)
     auto.remove(instance)

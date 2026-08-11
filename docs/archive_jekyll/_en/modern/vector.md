@@ -155,3 +155,168 @@ indexer.commit()
 3. **Hybrid search**: Combine vector and keyword search for best results
 4. **Cache embeddings**: Pre-compute and store to avoid recomputation
 5. **Batch indexing**: Index vectors in batches for efficiency
+
+## Vector Provider Integration in the Pipeline
+
+The vector search system integrates through Whoosh's plugin registry and segment
+format. The provider is stored in the index segment and resolved at search time.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│  Registration (startup)                                            │
+│                                                                     │
+│  VectorPlugin.register(PluginManager)                              │
+│    └── VectorRegistry.register("numpy", NumpyProvider(), owner)     │
+│                                                                     │
+│  The provider is now available for any VECTOR field                │
+│  that specifies provider="numpy"                                   │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Indexation                                                         │
+│                                                                     │
+│  VECTOR(dimensions=384, provider="numpy")                          │
+│       │                                                             │
+│       ▼                                                             │
+│  PerDocWriter.add_vector_items(fieldname, field, items)            │
+│       │                                                             │
+│       ▼                                                             │
+│  Segment file contains:                                            │
+│    - vector bytes (raw)                                            │
+│    - provider name ("numpy")                                        │
+│    - metric ("cosine")                                              │
+│       │                                                             │
+│       ▼                                                             │
+│  writer.commit() → segments written to disk                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  Recherche                                                          │
+│                                                                     │
+│  searcher.vector_search("embedding", query_vec, k=10)              │
+│       │                                                             │
+│       ▼                                                             │
+│  Whoosh core reads segment                                         │
+│    └── retrieves provider name ("numpy")                            │
+│       │                                                             │
+│       ▼                                                             │
+│  VectorRegistry.get("numpy")                                        │
+│       │                                                             │
+│       ▼                                                             │
+│  NumpyProvider.search(query_vec, k, filter_ids)                    │
+│       │                                                             │
+│       ▼                                                             │
+│  VectorHit[] sorted by cosine similarity                           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Full indexing flow
+
+```python
+from whoosh import index, fields
+from whoosh_modern.vector.plugin import VectorPlugin
+from whoosh.plugins.manager import PluginManager
+from whoosh_modern.storage import FileStorage
+import numpy as np
+
+# 1. Register vector plugin (startup)
+manager = PluginManager()
+VectorPlugin().register(manager)
+
+# 2. Define schema with VECTOR field
+schema = fields.Schema(
+    title=fields.TEXT(stored=True),
+    embedding=fields.VECTOR(dimensions=384, provider="numpy", stored=True),
+)
+
+# 3. Create index (storage determines where segments live)
+ix = index.create_in("indexdir", schema)
+
+# 4. Index documents with vectors
+np.random.seed(42)
+embeddings = {
+    "doc1": np.random.rand(384).astype(np.float32).tolist(),
+    "doc2": np.random.rand(384).astype(np.float32).tolist(),
+}
+
+with ix.writer() as writer:
+    for doc_id, vec in embeddings.items():
+        writer.add_document(
+            title=f"Document {doc_id}",
+            embedding=vec,
+        )
+    writer.commit()
+    # Whoosh core serializes vectors to segment files
+    # Provider name "numpy" is stored in the segment
+```
+
+### Full search flow
+
+```python
+from whoosh.qparser import QueryParser
+import numpy as np
+
+with ix.searcher() as searcher:
+    # 1. Keyword search
+    qp = QueryParser("title", schema)
+    keyword_results = searcher.search(qp.parse("Document"))
+
+    # 2. Vector search
+    query_vec = np.random.rand(384).astype(np.float32).tolist()
+    vector_results = searcher.vector_search(
+        "embedding",
+        query_vec,
+        limit=10,
+    )
+
+    # 3. Hybrid: combine both
+    # Example: Reciprocal Rank Fusion (RRF)
+    def rrf(results_list, k=60):
+        scores = {}
+        for results in results_list:
+            for rank, hit in enumerate(results):
+                doc_id = hit.doc_id if hasattr(hit, "doc_id") else hit["doc_id"]
+                scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank + 1)
+        return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+    combined = rrf([keyword_results, vector_results])
+```
+
+### Standalone usage (no schema)
+
+```python
+from whoosh_modern.vector import NumpyProvider
+
+# Create provider directly
+provider = NumpyProvider()
+
+# Add vectors
+provider.add([
+    ("doc1", [0.1, 0.2, 0.3]),
+    ("doc2", [0.4, 0.5, 0.6]),
+])
+
+# Search
+query_vec = [0.1, 0.2, 0.3]
+hits = provider.search(query_vec, k=5)
+
+for hit in hits:
+    print(f"doc_id={hit.doc_id}, score={hit.score:.4f}")
+```
+
+### Provider resolution chain
+
+When `searcher.vector_search()` is called, Whoosh core:
+
+1. Reads the `VECTOR` field configuration from the schema
+2. Opens the segment file containing the vector data
+3. Extracts the provider name stored in the segment (e.g., `"numpy"`)
+4. Looks up the provider in `VectorRegistry`
+5. Calls `provider.search(query_vector, k, filter_ids)`
+6. Returns `list[VectorHit]`
+
+If the provider is not registered, the search fails with a registry miss. This
+is why `VectorPlugin().register(manager)` (or manual registration) is required
+at startup.

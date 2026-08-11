@@ -1,3 +1,13 @@
+"""Pydantic model registration for Whoosh indexing.
+
+Provides a convenience wrapper that registers a Pydantic ``BaseModel``
+subclass with the Whoosh-NG indexing machinery, mapping Pydantic field
+annotations to Whoosh field types.
+
+Author: dorel14
+Version: 3.0.0
+"""
+
 from __future__ import annotations
 
 from .base import ModelIndex, TypeMapper
@@ -5,7 +15,26 @@ from .types import SearchOptions
 
 
 def register_model(model: type) -> ModelIndex:
-    """Register a Pydantic model and return a ModelIndex."""
+    """Register a Pydantic model and return a ModelIndex.
+
+    Inspects each field declared on the Pydantic model, extracts any
+    embedded search metadata (via a ``search`` attribute or within
+    ``json_schema_extra``), and constructs a
+    :class:`~whoosh_modern.models.base.ModelIndex` with a corresponding
+    Whoosh :class:`~whoosh.fields.Schema`.
+
+    Args:
+        model: A Pydantic ``BaseModel`` subclass to register.
+
+    Returns:
+        A :class:`~whoosh_modern.models.base.ModelIndex` wrapping the model
+        with its auto-generated Whoosh schema.
+
+    Raises:
+        ImportError: If the ``pydantic`` package is not installed.
+        TypeError: If ``model`` is not a subclass of
+            :class:`pydantic.BaseModel`.
+    """
     try:
         from pydantic import BaseModel  # pyright: ignore[reportMissingImports]
     except ImportError as exc:

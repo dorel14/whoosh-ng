@@ -198,16 +198,26 @@ prom = PrometheusMiddleware()
 
 ### Middleware Moderne (`whoosh_modern.middleware`)
 
-#### Pipeline de Résilience (`whoosh_modern.middleware.pipeline`)
+#### Middleware de Résilience (sous-classes du core)
 
-Ces middleware utilisent un **API de type wrapper** (pattern décorateur) plutôt que des hooks :
+`RetryMiddleware`, `LoggingMiddleware` et `CacheMiddleware` sont désormais des **sous-classes
+du core `whoosh.middleware.base.Middleware`** (la même classe de base ré-exportée sous
+`whoosh_modern.middleware.Middleware`). Ils participent au pipeline de hooks standard
+(`before_index` / `after_index` / `before_search` / `after_search` / `on_error` /
+`on_commit`) et conservent en plus un helper `wrap(operation)` permettant de décorer de
+simples callables.
+
+`MiddlewarePipeline` est un fin wrapper autour de `whoosh.middleware.chain.MiddlewareChain`
+qui exécute un callable à travers les hooks de la chaîne et renvoie son résultat. L'ancien
+module `whoosh_modern.middleware.pipeline` a été supprimé — importez ces noms directement
+depuis `whoosh_modern.middleware`.
 
 | Classe                  | Description                              |
 |------------------------|------------------------------------------|
 | `RetryMiddleware`      | Réessaie les opérations échouées avec backoff exponentiel |
 | `LoggingMiddleware`    | Journalise le temps d'exécution et les erreurs |
 | `CacheMiddleware`      | Met en cache les résultats d'opérations (éviction LRU) |
-| `MiddlewarePipeline`   | Enchaîne plusieurs middleware de type wrapper |
+| `MiddlewarePipeline`   | Enchaîne plusieurs middleware via `MiddlewareChain` |
 
 ```python
 from whoosh_modern.middleware import MiddlewarePipeline, RetryMiddleware, LoggingMiddleware
@@ -283,30 +293,32 @@ class RequestLoggingMiddleware(Middleware):
         return context
 ```
 
-### Middleware de Type Wrapper
+### Middleware Personnalisé (Basé sur des Hooks)
+
+La classe de base `Middleware` est `whoosh.middleware.base.Middleware`, ré-exportée depuis
+`whoosh_modern.middleware`. Sous-classez-la et implémentez les hooks du cycle de vie :
 
 ```python
-from whoosh_modern.middleware.pipeline import Middleware as WrapMiddleware
+from whoosh_modern.middleware import Middleware
+from whoosh.middleware.context import MiddlewareContext
 
-class RetryMiddleware(WrapMiddleware):
-    """Réessaie les opérations échouées avec backoff."""
+class RetryMiddleware(Middleware):
+    """Réessaie les opérations échouées avec backoff (illustratif)."""
 
     def __init__(self, attempts: int = 3) -> None:
         self._attempts = attempts
 
-    def wrap(self, operation):
-        def wrapped(*args, **kwargs):
-            last_exc = None
-            for attempt in range(self._attempts):
-                try:
-                    return operation(*args, **kwargs)
-                except Exception as e:
-                    last_exc = e
-                    if attempt < self._attempts - 1:
-                        time.sleep(2 ** attempt)
-            raise last_exc
-        return wrapped
+    def on_error(self, context: MiddlewareContext, exc: Exception) -> None:
+        # Les middleware de résilience intégrés implémentent déjà ce pattern.
+        context.metadata.setdefault("retry_errors", 0)
+        context.metadata["retry_errors"] += 1
+        raise exc
 ```
+
+> Note : les `RetryMiddleware`, `LoggingMiddleware` et `CacheMiddleware` intégrés exposent
+> aussi un helper `wrap(operation)` (préservé pour compatibilité ascendante) leur permettant
+> de décorer de simples callables, mais leur mécanisme principal reste le pipeline de hooks
+> ci-dessus.
 
 ### Middleware avec Intégration de Plugin
 
@@ -318,7 +330,7 @@ from whoosh.plugins.manager import Plugin
 class LoggingPlugin(Plugin):
     name = "logging"
     version = "1.0.0"
-    middleware = ["whoosh_modern.middleware.pipeline.LoggingMiddleware"]
+    middleware = ["whoosh_modern.middleware.LoggingMiddleware"]
 
     def register(self, manager):
         manager.register_middleware(
@@ -381,7 +393,8 @@ chain = manager.get_middleware_chain()
 
 ## Voir Aussi
 
-- [Guide Système de Plugins](plugins-sprint-c.md) — Enregistrement et entry points des plugins
+- [Guide Système de Plugins](plugins-avances.md) — Enregistrement et entry points des plugins
+- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [Exemples: Middleware](../examples/middleware.md) — Patterns de middleware pratiques
 - [API: Middleware](../api/middleware.md) — Référence complète de l'API
 - [API: Middleware Pipeline (moderne)](../api/modern.md) — Extensions middleware modernes

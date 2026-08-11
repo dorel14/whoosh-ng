@@ -1,6 +1,9 @@
 """SearchApplication: unified entry point for Whoosh-NG.
 
-Orchestrates DataSource → SchemaDiscovery → Index → search/autocomplete/synonyms/plugins.
+Orchestrates DataSource -> SchemaDiscovery -> Index -> search/autocomplete/synonyms/plugins.
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations
@@ -10,33 +13,8 @@ from typing import Any
 from whoosh.index import Index
 from whoosh.plugins.storage_base import SyncStorageProvider
 from whoosh_modern.data_sources import DataSource
-
-
-class FileStorage(SyncStorageProvider):
-    """Local filesystem storage provider (alias for FileStorageProvider).
-
-    Keys are interpreted as relative paths under ``root``.
-    """
-
-    def __init__(self, root: str) -> None:
-        from whoosh_modern.middleware.storage import FileStorageProvider
-
-        self._provider = FileStorageProvider(root)
-
-    def write(self, key: str, data: bytes) -> None:
-        self._provider.write(key, data)
-
-    def read(self, key: str) -> bytes:
-        return self._provider.read(key)
-
-    def delete(self, key: str) -> None:
-        self._provider.delete(key)
-
-    def exists(self, key: str) -> bool:
-        return self._provider.exists(key)
-
-    def list_keys(self) -> list[str]:
-        return self._provider.list_keys()
+from whoosh_modern.middleware.storage import FileStorageProvider
+from whoosh_modern.views import SearchView
 
 
 class SearchApplication:
@@ -53,6 +31,12 @@ class SearchApplication:
         )
         app.build()
         results = app.index.search("laptop")
+
+    Attributes:
+        _source: Optional DataSource providing documents.
+        _storage: Optional storage provider for index files.
+        _index: The built Whoosh Index (None until ``build`` is called).
+        _schema: The Whoosh Schema discovered from the data source.
     """
 
     def __init__(
@@ -60,6 +44,12 @@ class SearchApplication:
         source: DataSource | None = None,
         storage: SyncStorageProvider | None = None,
     ) -> None:
+        """Initialize the SearchApplication.
+
+        Args:
+            source: Optional DataSource providing documents for indexing.
+            storage: Optional storage provider for index files.
+        """
         self._source = source
         self._storage = storage
         self._index: Index | None = None
@@ -67,7 +57,14 @@ class SearchApplication:
 
     @property
     def index(self) -> Index:
-        """Return the built index."""
+        """Return the built index.
+
+        Returns:
+            The Whoosh Index object.
+
+        Raises:
+            RuntimeError: If ``build()`` has not been called yet.
+        """
         if self._index is None:
             raise RuntimeError("Call build() before accessing the index")
         return self._index
@@ -75,49 +72,57 @@ class SearchApplication:
     def build(self) -> SearchApplication:
         """Build the index from the data source.
 
-        :returns: self for chaining
+        Returns:
+            self for chaining.
+
+        Raises:
+            ValueError: If no data source was provided.
         """
         if self._source is None:
             raise ValueError("A source is required to build the index")
 
-        schema = self._source.discover_schema()
-        self._schema = schema
+        index_path = self._resolve_index_path()
 
-        if self._storage is not None:
-            storage_path = getattr(self._storage, "_provider", self._storage)
-            root = getattr(storage_path, "_root", None)
-            if root is not None:
-                from whoosh.index import create_in
-
-                self._index = create_in(root, schema)
-            else:
-                import tempfile
-
-                from whoosh.index import create_in
-
-                tmp = tempfile.mkdtemp()
-                self._index = create_in(tmp, schema)
-        else:
-            import tempfile
-
-            from whoosh.index import create_in
-
-            tmp = tempfile.mkdtemp()
-            self._index = create_in(tmp, schema)
-
-        writer = self._index.writer()
-        for batch in self._source.stream_batches():
-            for doc in batch:
-                writer.add_document(**doc)
-        writer.commit()
+        view = SearchView(name="search_application", source=self._source)
+        self._index = view.build(index_path)
+        self._schema = view._schema
+        self._view = view
 
         return self
+
+    def _resolve_index_path(self) -> str:
+        """Resolve a filesystem path where the index will be built.
+
+        The path is derived from the configured storage provider when it is
+        filesystem-backed (exposing a public ``root``), otherwise a temporary
+        directory is used. This avoids reaching into provider internals.
+
+        Returns:
+            An absolute directory path suitable for ``create_in``.
+        """
+        if self._storage is None:
+            import tempfile
+
+            return tempfile.mkdtemp()
+        if isinstance(self._storage, FileStorageProvider):
+            return self._storage.root
+        import tempfile
+
+        return tempfile.mkdtemp()
 
     def search(self, query: Any, **kwargs: Any) -> Any:
         """Search the index.
 
-        :param query: query string or Query object
-        :returns: search results
+        Args:
+            query: Query string or pre-parsed Query object.
+            **kwargs: Additional keyword arguments forwarded to
+                ``Searcher.search()``.
+
+        Returns:
+            Search results object from the Whoosh searcher.
+
+        Raises:
+            RuntimeError: If ``build()`` has not been called yet.
         """
         if self._index is None:
             raise RuntimeError("Call build() before searching")
@@ -131,4 +136,4 @@ class SearchApplication:
             return searcher.search(query, **kwargs)
 
 
-__all__ = ["SearchApplication", "FileStorage"]
+__all__ = ["SearchApplication"]

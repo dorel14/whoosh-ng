@@ -2,7 +2,7 @@ name: Gemini PR Review
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
 
 jobs:
   review:
@@ -73,7 +73,7 @@ jobs:
 
               Fournis une revue claire et bien structurée :
               1. **Résumé des changements**
-              2. **Points d'attention / Bugs potentiels / Problèmes de performance**
+              2. **Points d'attention / Bugs potentiels / Problèmes de performance / Doublons de code ou de fonctionnalités**
               3. **Suggestions de corrections concrètes** (s'il y en a, utilise les blocs de code Markdown pour les montrer).
 
               Voici le diff :

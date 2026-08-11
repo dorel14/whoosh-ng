@@ -3,6 +3,9 @@
 Provides HTTP endpoints for search, autocomplete, suggest, health, and metrics.
 All blocking core calls are executed off the event loop via
 :func:`whoosh.utils.async_utils.run_sync` so the async server stays responsive.
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations
@@ -17,14 +20,27 @@ try:
     from pydantic import BaseModel  # pyright: ignore[reportMissingImports]
 
     class SearchRequest(BaseModel):
-        """Request model for search endpoint."""
+        """Request model for search endpoint.
+
+        Attributes:
+            q: The search query string.
+            limit: Maximum number of hits to return.
+            offset: Number of initial hits to skip.
+        """
 
         q: str
         limit: int = 10
         offset: int = 0
 
     class SearchResponse(BaseModel):
-        """Response model for search endpoint."""
+        """Response model for search endpoint.
+
+        Attributes:
+            hits: List of matching document hits.
+            total: Total number of matching documents.
+            limit: Maximum number of hits requested.
+            offset: Number of hits skipped.
+        """
 
         hits: list[dict[str, Any]]
         total: int
@@ -32,16 +48,37 @@ try:
         offset: int
 
     class AutocompleteResponse(BaseModel):
-        """Response model for autocomplete endpoint."""
+        """Response model for autocomplete endpoint.
+
+        Attributes:
+            suggestions: List of autocomplete suggestion strings.
+        """
 
         suggestions: list[str]
 
     class HealthResponse(BaseModel):
-        """Response model for health endpoint."""
+        """Response model for health endpoint.
+
+        Attributes:
+            status: Current service health status.
+        """
 
         status: str
 
     def _run_search(index: Index, query: str, **kwargs: Any) -> tuple[list[dict[str, Any]], int]:
+        """Execute a Whoosh search query and return hits with total count.
+
+        Args:
+            index: An open Whoosh Index instance to search.
+            query: The query string to parse and execute.
+            **kwargs: Additional keyword arguments forwarded to the searcher
+                (e.g. ``limit``, ``offset``).
+
+        Returns:
+            A tuple of ``(hits, total)`` where ``hits`` is a list of dicts
+            containing ``docnum``, ``score``, and ``fields`` keys, and
+            ``total`` is the total number of matching documents.
+        """
         from whoosh.qparser import QueryParser
 
         with index.searcher() as searcher:
@@ -62,25 +99,47 @@ try:
     ) -> FastAPI:
         """Create a FastAPI application for Whoosh-NG.
 
-        :param index: An Index instance to expose via API
-        :param prefix: API endpoint prefix (default: /api/v1)
-        :param autocomplete: Optional AutocompleteProvider for the autocomplete endpoint
-        :returns: Configured FastAPI application
+        Args:
+            index: An Index instance to expose via API.
+            prefix: API endpoint prefix (default: ``/api/v1``).
+            autocomplete: Optional AutocompleteProvider for the autocomplete
+                endpoint.
+
+        Returns:
+            A configured FastAPI application with search, autocomplete,
+            suggest, and health routes mounted under the given prefix.
         """
         app = FastAPI(title="Whoosh-NG API", version="4.3.0")
 
         @app.get(f"{prefix}/health", response_model=HealthResponse)
         async def health_check() -> dict[str, str]:
+            """Health check endpoint.
+
+            summary: Health Check
+            description: Returns the current health status of the Whoosh-NG API service.
+            """
             return {"status": "ok"}
 
         @app.post(f"{prefix}/search", response_model=SearchResponse)
         async def search_endpoint(request: SearchRequest) -> dict[str, Any]:
+            """Search endpoint.
+
+            summary: Search
+            description: Executes a search query against the configured Whoosh-NG
+                index and returns matching documents with scores and total count.
+            """
             kwargs: dict[str, Any] = {"limit": request.limit}
             hits, total = await run_sync(_run_search, index, request.q, **kwargs)
             return {"hits": hits, "total": total, "limit": request.limit, "offset": request.offset}
 
         @app.get(f"{prefix}/autocomplete", response_model=AutocompleteResponse)
         async def autocomplete_endpoint(q: str) -> dict[str, Any]:
+            """Autocomplete endpoint.
+
+            summary: Autocomplete
+            description: Returns autocomplete suggestions for the given query
+                prefix using the configured AutocompleteProvider.
+            """
             if autocomplete is None:
                 return {"suggestions": []}
             hits = autocomplete.search(q, limit=10)
@@ -88,6 +147,12 @@ try:
 
         @app.get(f"{prefix}/suggest")
         async def suggest_endpoint(q: str) -> dict[str, Any]:
+            """Suggest endpoint.
+
+            summary: Suggest
+            description: Returns spelling suggestions for the given query term
+                using the Whoosh-NG spell-checker.
+            """
             try:
                 with index.searcher() as searcher:
                     fieldname = index.schema.names()[0] if index.schema.names() else "content"
@@ -101,9 +166,10 @@ try:
     def mount(app: FastAPI, index: Index, *, prefix: str = "/api/v1") -> None:
         """Mount Whoosh-NG API routes onto an existing FastAPI application.
 
-        :param app: Existing FastAPI application
-        :param index: Index instance to expose
-        :param prefix: API endpoint prefix (default: /api/v1)
+        Args:
+            app: Existing FastAPI application to mount routes on.
+            index: Index instance to expose via the mounted routes.
+            prefix: API endpoint prefix (default: ``/api/v1``).
         """
         api_app = create_app(index, prefix=prefix)
         app.mount(prefix, api_app)

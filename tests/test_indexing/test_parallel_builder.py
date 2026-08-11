@@ -142,3 +142,32 @@ class TestParallelIndexBuilder:
                 assert ix.doc_count() == 6
             finally:
                 ix.close()
+
+    def test_build_uses_core_multiprocess_writer(self, monkeypatch):
+        """The builder must delegate to ``Index.writer(procs=N)``."""
+        from whoosh.index import FileIndex
+
+        seen = {}
+        original = FileIndex.writer
+
+        def _spy(self, procs=1, **kwargs):
+            seen["procs"] = procs
+            seen["multisegment"] = kwargs.get("multisegment")
+            # Run single-process to keep the test fast and sandbox-safe.
+            return original(self, procs=1, **kwargs)
+
+        monkeypatch.setattr(FileIndex, "writer", _spy)
+
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            index_path = os.path.join(tmpdir, "idx")
+            builder = ParallelIndexBuilder(
+                schema=_schema(),
+                index_path=index_path,
+                workers=3,
+                batch_size=2,
+            )
+            total = builder.build(iter([[{"id": "1", "title": "a", "body": "b"}]]))
+
+        assert total == 1
+        assert seen["procs"] == 3
+        assert seen["multisegment"] is True

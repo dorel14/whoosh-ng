@@ -2,6 +2,9 @@
 
 Provides a management interface for index exploration and queries.
 Consumes only public APIs (no direct access to internal core objects).
+
+Author: dorel14
+Version: 3.0.0
 """
 
 from __future__ import annotations
@@ -15,20 +18,41 @@ try:
     from fastapi.responses import HTMLResponse  # pyright: ignore[reportMissingImports]
 
     def create_admin_app(index: Index, *, prefix: str = "/admin") -> FastAPI:
-        """Create admin UI FastAPI application.
+        """Create the Admin UI FastAPI application.
 
-        :param index: An Index instance to manage
-        :param prefix: API endpoint prefix
-        :returns: Configured FastAPI application
+        Builds and configures a FastAPI application that exposes endpoints for
+        browsing the index schema, viewing statistics, exploring documents,
+        executing ad-hoc queries, and managing synonyms.
+
+        Args:
+            index: An Index instance to manage.
+            prefix: API endpoint prefix.
+
+        Returns:
+            A configured FastAPI application with admin routes registered.
+
+        Raises:
+            ImportError: If the ``fastapi`` package is not installed.
         """
         app = FastAPI(title="Whoosh-NG Admin", version="4.3.0")
 
         @app.get(f"{prefix}/", response_class=HTMLResponse)
         async def index_page() -> str:
+            """Render the admin landing page.
+
+            Returns:
+                HTML string for the admin home page.
+            """
             return "<h1>Whoosh-NG Admin</h1>"
 
         @app.get(f"{prefix}/stats")
         async def stats() -> dict[str, Any]:
+            """Retrieve high-level index statistics.
+
+            Returns:
+                A dictionary containing the document count and a list of
+                schema field names.
+            """
             return {
                 "index_stats": {
                     "doc_count": index.doc_count(),
@@ -38,6 +62,11 @@ try:
 
         @app.get(f"{prefix}/explore")
         async def explore() -> dict[str, Any]:
+            """Browse documents in the index.
+
+            Returns:
+                A dictionary with up to 100 documents from the index.
+            """
             from whoosh.query import Every
 
             with index.searcher() as searcher:
@@ -48,6 +77,11 @@ try:
 
         @app.get(f"{prefix}/schema")
         async def schema_explorer() -> dict[str, Any]:
+            """Inspect the index schema.
+
+            Returns:
+                A dictionary listing each field name and its type.
+            """
             return {
                 "fields": [
                     {"name": name, "type": str(field)} for name, field in index.schema.items()
@@ -56,6 +90,17 @@ try:
 
         @app.post(f"{prefix}/query")
         async def query_playground(request: dict[str, Any]) -> dict[str, Any]:
+            """Execute a query against the index.
+
+            Args:
+                request: A dictionary with keys ``q`` (query string),
+                    ``field`` (optional target field), and ``limit``
+                    (optional maximum number of hits).
+
+            Returns:
+                A dictionary with matching hits (including docnum, score,
+                and field values) and the total hit count.
+            """
             from whoosh.qparser import QueryParser
 
             query_string = request.get("q", "")
@@ -74,6 +119,11 @@ try:
 
         @app.get(f"{prefix}/synonyms")
         async def synonym_manager() -> dict[str, Any]:
+            """List synonyms for a default word.
+
+            Returns:
+                A dictionary with the queried word and its synonyms.
+            """
             from whoosh_modern.linguistics.synonyms.manager import SynonymManager
 
             manager = SynonymManager()
@@ -82,6 +132,16 @@ try:
 
         @app.post(f"{prefix}/synonyms")
         async def synonym_manager_add(request: dict[str, Any]) -> dict[str, Any]:
+            """Add synonyms for a given word.
+
+            Args:
+                request: A dictionary with keys ``word`` (the target word)
+                    and ``synonyms`` (a list of synonyms to add).
+
+            Returns:
+                A dictionary confirming the operation and listing the
+                updated synonyms for the word.
+            """
             from whoosh_modern.linguistics.synonyms.manager import SynonymManager
 
             manager = SynonymManager()

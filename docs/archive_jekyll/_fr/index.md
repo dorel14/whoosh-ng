@@ -40,33 +40,23 @@ with ix.searcher() as s:
 
 ## Structure de la documentation
 
-### Core (Whoosh classique)
+### Guides utilisateur
 
-- **[Démarrage rapide]({{ '/fr/quickstart/' | relative_url }})** — Tutoriel en 5 minutes
-- **[Installation]({{ '/fr/guides/installation/' | relative_url }})** — Instructions d'installation
-- **[Concepts fondamentaux]({{ '/fr/guides/core-concepts/' | relative_url }})** — Schémas, champs, recherche
-- **[Indexation]({{ '/fr/guides/indexing/' | relative_url }})** — Ajout et mise à jour de documents
-- **[Recherche]({{ '/fr/guides/searching/' | relative_url }})** — Analyse de requêtes et résultats
-- **[Conception de schéma]({{ '/fr/guides/schema/' | relative_url }})** — Types de champs et stockage
-- **[Langage de requête]({{ '/fr/guides/query/' | relative_url }})** — Syntaxe de requête style Lucene
-- **[Backends]({{ '/fr/guides/backends/' | relative_url }})** — Stockage fichier, SQLite, mémoire
-- **[Migration]({{ '/fr/guides/migration/' | relative_url }})** — Migration depuis Whoosh classique
-- **[Nettoyage legacy]({{ '/fr/guides/legacy-cleanup/' | relative_url }})** — Suppression du code legacy
-
-### Modern (Nouvelles fonctionnalités)
-
-- **[Middleware]({{ '/fr/guides/middleware/' | relative_url }})** — Hooks de pipeline et middleware
-- **[Middleware & Pipeline de Plugins]({{ '/fr/guides/middleware-sprint-c/' | relative_url }})** — Pipeline basé sur hooks
-- **[Plugins]({{ '/fr/guides/plugins/' | relative_url }})** — Extension de Whoosh-NG
-- **[Système de Plugins]({{ '/fr/guides/plugins-sprint-c/' | relative_url }})** — API PluginManager
-- **[Autocomplétion]({{ '/fr/guides/autocomplete/' | relative_url }})** — Fournisseurs d'autocomplétion
-- **[Fournisseurs d'Autocomplétion]({{ '/fr/guides/autocomplete-sprint-d/' | relative_url }})** — NGram, Fuzzy, InvertedIndex
-- **[Recherche vectorielle]({{ '/fr/guides/vector/' | relative_url }})** — NumPy, HNSW, Faiss
-- **[Indexation moderne]({{ '/fr/guides/modern-indexing/' | relative_url }})** — BatchIndexWriter, AnalyzerCache
-- **[Monitoring]({{ '/fr/guides/monitoring/' | relative_url }})** — Métriques et observabilité
-- **[Performance]({{ '/fr/guides/performance/' | relative_url }})** — Benchmarking et optimisation
-- **[Synonymes & Linguistique]({{ '/fr/guides/linguistics-sprint-d/' | relative_url }})** — SynonymManager
-- **[Fournisseurs de Stemmers]({{ '/fr/guides/stemming-sprint-d/' | relative_url }})** — Backends PyStemmer
+- **[Indexation]({{ '/fr/guides/indexing/' | relative_url }})** — Ajouter, mettre à jour et supprimer des documents
+- **[Recherche]({{ '/fr/guides/searching/' | relative_url }})** — Analyse de requêtes, surbrillance et facettes
+- **[Conception de schéma]({{ '/fr/guides/schema/' | relative_url }})** — Types de champs, stockage et options d'indexation
+    - **[Middleware]({{ '/fr/guides/middleware/' | relative_url }})** — Hooks de pipeline et middleware personnalisé
+    - **[Middleware & Pipeline de Plugins]({{ '/fr/guides/middleware-pipeline/' | relative_url }})** — Hooks de middleware et intégration PluginManager
+    - **[Plugins]({{ '/fr/guides/plugins/' | relative_url }})** — Étendre Whoosh-NG avec des plugins
+    - **[Système de Plugins]({{ '/fr/guides/plugins-avances/' | relative_url }})** — API PluginManager, entry points et déploiement
+    - **[Autocomplétion]({{ '/fr/guides/autocomplete/' | relative_url }})** — Fournisseurs d'autocomplétion
+    - **[Fournisseurs d'Autocomplétion]({{ '/fr/guides/autocomplete-fournisseurs/' | relative_url }})** — NGramProvider, FuzzySuggestProvider, InvertedIndexAutocomplete
+    - **[Recherche vectorielle]({{ '/fr/guides/vector/' | relative_url }})** — Intégration NumPy, HNSW et Faiss
+    - **[Performance]({{ '/fr/guides/performance/' | relative_url }})** — Outils de benchmarking et résultats d'optimisation
+    - **[Indexation moderne]({{ '/fr/guides/modern-indexing/' | relative_url }})** — BatchIndexWriter, AnalyzerCache, FieldAnalyzerCache
+    - **[Synonymes & Linguistique]({{ '/fr/guides/linguistics/' | relative_url }})** — SynonymManager, fournisseurs, middleware
+    - **[Fournisseurs de Stemmers]({{ '/fr/guides/stemmers-fournisseurs/' | relative_url }})** — Backends de stemmers, PyStemmer, analyseurs linguistiques
+    - **[Intégration des Providers]({{ '/en/guides/provider-integration/' | relative_url }})** — Guide complet du pipeline pour tous les providers
 
 ### API Reference
 

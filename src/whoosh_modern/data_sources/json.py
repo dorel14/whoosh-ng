@@ -1,4 +1,8 @@
-"""JSON DataSource implementation with streaming and schema discovery."""
+"""JSON DataSource implementation with streaming and schema discovery.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 import json
 import logging
@@ -22,6 +26,17 @@ class JSONSource:
     - JSON array of objects: [{"id": 1, "title": "..."}, ...]
     - JSON object with array field: {"results": [{"id": 1, ...}]}
     - Line-delimited JSON (JSONL): one JSON object per line
+
+    Args:
+        path: Filesystem path to the JSON or JSONL file.
+        document_path: Optional dotted path within the JSON object
+            that points to the array of documents.
+        encoding: File encoding (default ``"utf-8"``).
+        incremental_field: Optional field name for incremental syncs.
+        id_field: Optional field name that uniquely identifies a
+            document.
+        sample_size: Number of documents to sample during schema
+            discovery.
     """
 
     def __init__(
@@ -45,15 +60,33 @@ class JSONSource:
 
     @property
     def name(self) -> str:
-        """Return the data source name."""
+        """Return the data source name.
+
+        Returns:
+            A string in the form ``json:<path>``.
+        """
         return f"json:{self.path}"
 
     def health_check(self) -> bool:
-        """Return True if the JSON file exists and is readable."""
+        """Return True if the JSON file exists and is readable.
+
+        Returns:
+            ``True`` if the file is readable, ``False`` otherwise.
+        """
         return os.path.isfile(self.path) and os.access(self.path, os.R_OK)
 
     def _read_file(self) -> Any:
-        """Read and parse the JSON file."""
+        """Read and parse the JSON file.
+
+        Caches the parsed result so subsequent reads are fast.
+
+        Returns:
+            The parsed JSON content (usually a list or dict).
+
+        Raises:
+            DataSourceError: If the file cannot be read or contains
+                invalid JSON.
+        """
         if self._cached_data is not None:
             return self._cached_data
         try:
@@ -72,7 +105,18 @@ class JSONSource:
             ) from e
 
     def _extract_documents(self, data: Any) -> list[dict[str, Any]]:
-        """Extract document list from parsed JSON data."""
+        """Extract document list from parsed JSON data.
+
+        If ``document_path`` is set, navigates the data using the
+        dotted path. Otherwise looks for ``"results"`` or ``"data"``
+        keys.
+
+        Args:
+            data: The parsed JSON content.
+
+        Returns:
+            A list of document dictionaries.
+        """
         if isinstance(data, list):
             return [item for item in data if isinstance(item, dict)]
         if isinstance(data, dict):
@@ -92,7 +136,12 @@ class JSONSource:
         return []
 
     def _is_jsonl(self) -> bool:
-        """Check if the file is line-delimited JSON (JSONL)."""
+        """Check if the file is line-delimited JSON (JSONL).
+
+        Returns:
+            ``True`` if the file appears to be JSONL, ``False``
+            otherwise.
+        """
         try:
             with open(self.path, encoding=self.encoding) as f:
                 first_line = f.readline().strip()
@@ -106,7 +155,11 @@ class JSONSource:
             return False
 
     def _iter_jsonl(self) -> Iterator[dict[str, Any]]:
-        """Iterate over line-delimited JSON (JSONL) efficiently."""
+        """Iterate over line-delimited JSON (JSONL) efficiently.
+
+        Yields:
+            Each line parsed as a JSON object, as a dictionary.
+        """
         with open(self.path, encoding=self.encoding) as f:
             for line in f:
                 line = line.strip()
@@ -125,6 +178,10 @@ class JSONSource:
         The mapper is a callable that transforms raw data into
         Whoosh documents. For JSON, this is the _extract_documents
         function bound with the document_path.
+
+        Returns:
+            A callable that accepts parsed JSON data and returns a
+            list of document dictionaries.
         """
         if self._compiled_mapper is not None:
             return self._compiled_mapper
@@ -159,7 +216,18 @@ class JSONSource:
         return self._compiled_mapper
 
     def discover_schema(self) -> Schema:
-        """Discover schema from sample documents in the JSON file."""
+        """Discover schema from sample documents in the JSON file.
+
+        Reads up to ``sample_size`` documents and uses
+        :class:`SchemaDiscovery` to infer the Whoosh schema.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from
+            sample documents.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"JSON file not found or not readable: {self.path}",
@@ -179,7 +247,17 @@ class JSONSource:
         return self._schema
 
     def iter_documents(self) -> Iterator[Document]:
-        """Yield documents from the JSON file."""
+        """Yield documents from the JSON file.
+
+        Automatically detects JSONL format and streams line by line,
+        or parses the full JSON document otherwise.
+
+        Yields:
+            Document dictionaries from the JSON file.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"JSON file not found or not readable: {self.path}",
@@ -201,7 +279,18 @@ class JSONSource:
         yield from documents
 
     def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
-        """Yield documents from the JSON file in batches."""
+        """Yield documents from the JSON file in batches.
+
+        Args:
+            batch_size: Maximum number of documents per batch.
+
+        Yields:
+            Lists of document dictionaries, each list containing at
+            most ``batch_size`` items.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"JSON file not found or not readable: {self.path}",
@@ -244,11 +333,26 @@ class JSONSource:
             yield batch
 
     def iter_changes(self, since: Any) -> Iterator[Document]:
-        """Yield documents changed since a timestamp (not implemented for JSON)."""
+        """Yield documents changed since a timestamp (not implemented for JSON).
+
+        Args:
+            since: A timestamp or cursor value (accepted but ignored).
+
+        Yields:
+            Nothing — incremental changes are not supported for this
+            data source.
+        """
         return iter([])
 
     def document_count(self) -> int:
-        """Return total document count."""
+        """Return total document count.
+
+        Returns:
+            The number of documents in the JSON file.
+
+        Raises:
+            DataSourceError: If the file is not found or not readable.
+        """
         if not self.health_check():
             raise DataSourceError(
                 f"JSON file not found or not readable: {self.path}",
@@ -261,7 +365,13 @@ class JSONSource:
         return sum(1 for _ in self.iter_documents())
 
     def metadata(self) -> dict[str, Any]:
-        """Return metadata about this JSON source."""
+        """Return metadata about this JSON source.
+
+        Returns:
+            A dictionary with keys ``type``, ``path``,
+            ``document_path``, ``encoding``, ``incremental_field``,
+            and ``id_field``.
+        """
         return {
             "type": "json",
             "path": self.path,

@@ -292,6 +292,7 @@ pip install whoosh-ng[modern]
 
 ## See Also
 
-- [Plugin System Guide](plugins-sprint-c.md) — Plugin registration and discovery
-- [Middleware Guide](middleware-sprint-c.md) — Middleware pipeline integration
+- [Plugin System Guide](plugins-advanced.md) — Plugin registration and discovery
+- [Middleware Guide](middleware-pipeline.md) — Middleware pipeline integration
+- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [API: Modern](../api/modern.md) — Full API reference for autocomplete extensions

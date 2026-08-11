@@ -8,7 +8,15 @@ Data sources backed by **strongly-typed systems** (Pandas, Polars,
 PyArrow, SQLAlchemy, Peewee, Tortoise ORM) implement their own
 ``discover_schema()`` directly from the native type system and do not
 need ``SchemaDiscovery``.
+
+Type mapping itself is **not** duplicated here: every inference delegates
+to the canonical :class:`whoosh_modern.models.base.TypeMapper`.
+
+Author: dorel14
+Version: 3.0.0
 """
+
+from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Sequence
@@ -16,10 +24,15 @@ from typing import Any
 
 from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT, Schema
 from whoosh_modern.exceptions import SchemaDiscoveryError
+from whoosh_modern.models.base import TypeMapper
 
 
 class SchemaDiscovery:
-    """Infers Whoosh Schema from data source results."""
+    """Infers Whoosh Schema from data source results.
+
+    Provides static methods to build a Whoosh ``Schema`` from SQL column
+    metadata, sample documents, or optimized field type detection.
+    """
 
     SQL_TYPE_MAP: dict[str, type] = {
         "VARCHAR": TEXT,
@@ -141,11 +154,16 @@ class SchemaDiscovery:
             current = type(field).__name__
             if current == "TEXT" and name not in searchable:
                 continue
-            if current == "TEXT" and SchemaDiscovery._looks_like_id(name):
-                optimized[name] = ID(stored=True)
-                continue
-            if current == "TEXT" and SchemaDiscovery._looks_like_bool(documents, name):
+            usage = {
+                "is_id": SchemaDiscovery._looks_like_id(name),
+                "is_bool": SchemaDiscovery._looks_like_bool(documents, name),
+            }
+            suggested = TypeMapper.suggest_type(current, usage)
+            if suggested == "BOOLEAN":
                 optimized[name] = BOOLEAN(stored=True)
+                continue
+            if suggested == "ID":
+                optimized[name] = ID(stored=True)
                 continue
             optimized[name] = field
         return Schema(**optimized)
@@ -167,32 +185,57 @@ class SchemaDiscovery:
 
     @staticmethod
     def _map_type(sql_type: str) -> Any:
-        """Map a SQL type string to a Whoosh field class."""
+        """Map a SQL type string to a Whoosh field class.
+
+        Args:
+            sql_type: SQL type name (e.g. ``"VARCHAR"``, ``"INTEGER"``).
+
+        Returns:
+            A Whoosh field class (TEXT, NUMERIC, BOOLEAN, DATETIME, ID, KEYWORD).
+        """
         upper = (sql_type or "UNKNOWN").upper().strip()
         return SchemaDiscovery.SQL_TYPE_MAP.get(upper, TEXT)
 
     @staticmethod
     def _infer_field_type(value: Any) -> Any:
-        """Infer a Whoosh field type from a Python value."""
-        if isinstance(value, bool):
-            return BOOLEAN
-        if isinstance(value, int):
-            return NUMERIC
-        if isinstance(value, float):
-            return NUMERIC
-        if isinstance(value, dict):
-            return KEYWORD
-        if isinstance(value, list):
-            return KEYWORD
-        return TEXT
+        """Infer a Whoosh field class from a Python value.
+
+        Delegates to the canonical
+        :meth:`whoosh_modern.models.base.TypeMapper.map_value`.
+
+        Args:
+            value: A sample Python value to infer the type from.
+
+        Returns:
+            A Whoosh field class (BOOLEAN, NUMERIC, KEYWORD, TEXT).
+        """
+        return type(TypeMapper.map_value(value))
 
     @staticmethod
     def _looks_like_id(name: str) -> bool:
+        """Check if a field name looks like an identifier.
+
+        Args:
+            name: The field name to check.
+
+        Returns:
+            True if the name ends with ``"id"`` or equals ``"id"`` (case-insensitive).
+        """
         lower = name.lower()
         return lower.endswith("id") or lower == "id"
 
     @staticmethod
     def _looks_like_bool(documents: Sequence[Any], field: str, sample_size: int = 20) -> bool:
+        """Check if a TEXT field's values resemble boolean values.
+
+        Args:
+            documents: Sequence of document dicts to sample.
+            field: The field name to inspect.
+            sample_size: Maximum number of documents to sample.
+
+        Returns:
+            True if all sampled values are recognized as boolean-like.
+        """
         sample = [doc.get(field) for doc in documents[:sample_size] if field in doc]
         if not sample:
             return False

@@ -1,5 +1,9 @@
 """SQL DataSource implementation with GROUP BY, JOIN, incremental support,
-and connection pooling."""
+and connection pooling.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 import asyncio
 import logging
@@ -24,7 +28,18 @@ _SQL_KEYWORD_PATTERN = re.compile(
 
 
 def _validate_identifier(name: str) -> None:
-    """Validate that an identifier name is safe for SQL interpolation."""
+    """Validate that an identifier name is safe for SQL interpolation.
+
+    Ensures the given identifier does not contain characters or
+    keywords that could be used for SQL injection.
+
+    Args:
+        name: The identifier to validate.
+
+    Raises:
+        DataSourceError: If the identifier is empty or contains
+            disallowed characters or SQL keywords.
+    """
     if not name:
         raise DataSourceError("Incremental field name cannot be empty")
     if '"' in name or " " in name or ";" in name or "'" in name:
@@ -38,7 +53,19 @@ def _validate_identifier(name: str) -> None:
 
 
 class _ConnectionPool:
-    """Simple connection pool for SQLite or DB-API 2.0 connections."""
+    """Simple connection pool for SQLite or DB-API 2.0 connections.
+
+    Maintains a small list of reusable connections to avoid the overhead
+    of creating a new connection per operation. When the pool is empty
+    a new connection is created from the base connection (if supported)
+    or the singleton connection is returned.
+
+    Args:
+        connection: A DB-API 2.0 connection or a factory object that
+            supports ``connect()``.
+        max_size: Maximum number of idle connections to retain in the
+            pool.
+    """
 
     def __init__(self, connection: Any, max_size: int = 5) -> None:
         self._connection = connection
@@ -46,7 +73,11 @@ class _ConnectionPool:
         self._available: list[Any] = [connection]
 
     def acquire(self) -> Any:
-        """Acquire a connection from the pool."""
+        """Acquire a connection from the pool.
+
+        Returns:
+            A usable connection, either from the pool or newly created.
+        """
         if self._available:
             return self._available.pop()
         if hasattr(self._connection, "connect"):
@@ -54,12 +85,22 @@ class _ConnectionPool:
         return self._connection
 
     def release(self, connection: Any) -> None:
-        """Release a connection back to the pool."""
+        """Release a connection back to the pool.
+
+        Args:
+            connection: The connection to return to the pool. If the
+                pool is at capacity the connection is silently
+                discarded.
+        """
         if len(self._available) < self._max_size:
             self._available.append(connection)
 
     def close_all(self) -> None:
-        """Close all pooled connections."""
+        """Close all pooled connections.
+
+        Iterates through and closes every connection currently held in
+        the pool.
+        """
         while self._available:
             conn = self._available.pop()
             if hasattr(conn, "close"):
@@ -67,7 +108,22 @@ class _ConnectionPool:
 
 
 class SQLSource:
-    """SQL data source implementing the DataSource protocol."""
+    """SQL data source implementing the DataSource protocol.
+
+    Executes a user-provided SQL query and yields each row as a
+    document. Supports optional incremental syncing, connection
+    pooling, and both sync and async iteration.
+
+    Args:
+        connection: A DB-API 2.0 connection or a SQLAlchemy-style
+            engine that supports ``cursor()``.
+        query: SQL ``SELECT`` statement whose results are iterated.
+        incremental_field: Optional column name used for incremental
+            syncs.
+        id_field: Optional column name that uniquely identifies a
+            document.
+        pool_size: Maximum number of connections in the internal pool.
+    """
 
     def __init__(
         self,
@@ -90,11 +146,20 @@ class SQLSource:
 
     @property
     def name(self) -> str:
-        """Return the data source name."""
+        """Return the data source name.
+
+        Returns:
+            A string in the form ``sql:<query_prefix>``.
+        """
         return f"sql:{self.query[:50]}"
 
     def health_check(self) -> bool:
-        """Return True if the database connection is healthy."""
+        """Return True if the database connection is healthy.
+
+        Returns:
+            ``True`` if a trivial ``SELECT 1`` succeeds, ``False``
+            otherwise.
+        """
         try:
             cursor = self.connection.cursor()
             cursor.execute("SELECT 1")
@@ -104,13 +169,25 @@ class SQLSource:
             return False
 
     def _get_connection(self) -> Any:
-        """Get a connection, using the pool if available."""
+        """Get a connection, using the pool if available.
+
+        Lazily initialises the internal :class:`_ConnectionPool` on
+        first call.
+
+        Returns:
+            A connection obtained from the pool.
+        """
         if self._pool is None:
             self._pool = _ConnectionPool(self.connection, max_size=self.pool_size)
         return self._pool.acquire()
 
     def _get_columns(self) -> list[str]:
-        """Get column names from the query result, cached."""
+        """Get column names from the query result, cached.
+
+        Returns:
+            A list of column name strings extracted from the cursor
+            description.
+        """
         if self._columns is not None:
             return self._columns
 
@@ -123,6 +200,10 @@ class SQLSource:
         """Return a compiled document mapper for this source.
 
         Pre-computes column names for fast row-to-doc mapping.
+
+        Returns:
+            A callable that accepts a raw database row (tuple/list)
+            and returns a dictionary mapping column names to values.
         """
         if self._compiled_mapper is not None:
             return self._compiled_mapper
@@ -136,7 +217,22 @@ class SQLSource:
         return self._compiled_mapper
 
     def discover_schema(self) -> Schema:
-        """Discover schema from query result metadata."""
+        """Discover schema from query result metadata.
+
+        Applies ``LIMIT 0`` to the query for fast metadata-only
+        introspection, then uses :class:`SchemaDiscovery` to infer
+        Whoosh field types from the column descriptions.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from the
+            query's column metadata.
+
+        Raises:
+            DataSourceError: If the incremental field is invalid or
+                not found in the query results.
+            SchemaDiscoveryError: If duplicate column names are
+                detected.
+        """
         schema_query = self.query.rstrip(";")
         if not schema_query.upper().endswith("LIMIT"):
             schema_query = self._append_limit_zero(schema_query)
@@ -168,12 +264,24 @@ class SQLSource:
 
     @staticmethod
     def _append_limit_zero(query: str) -> str:
-        """Append LIMIT 0 to a query for metadata-only introspection."""
+        """Append LIMIT 0 to a query for metadata-only introspection.
+
+        Args:
+            query: The original SQL query string.
+
+        Returns:
+            The query with `` LIMIT 0`` appended, stripped of any
+            trailing semicolon.
+        """
         stripped = query.rstrip().rstrip(";").strip()
         return f"{stripped} LIMIT 0"
 
     def iter_documents(self) -> Iterator[Document]:
-        """Yield documents from the SQL query result."""
+        """Yield documents from the SQL query result.
+
+        Yields:
+            Document dictionaries, one per row in the result set.
+        """
         cursor = self.connection.cursor()
         cursor.execute(self.query)
         columns = self._get_columns()
@@ -185,6 +293,13 @@ class SQLSource:
         """Yield documents from the SQL query result in batches.
 
         Uses fetchmany() for efficient batch reading from the database.
+
+        Args:
+            batch_size: Maximum number of rows per batch.
+
+        Yields:
+            Lists of document dictionaries, each list containing at
+            most ``batch_size`` items.
         """
         cursor = self.connection.cursor()
         cursor.execute(self.query)
@@ -197,7 +312,23 @@ class SQLSource:
             yield [dict(zip(columns, row, strict=True)) for row in rows]
 
     def iter_changes(self, since: datetime) -> Iterator[Document]:
-        """Yield documents changed since a timestamp."""
+        """Yield documents changed since a timestamp.
+
+        Appends ``AND <incremental_field> > :since`` (or a ``WHERE``
+        clause if none exists) to the base query.
+
+        Args:
+            since: A ``datetime`` value to compare against the
+                ``incremental_field``.
+
+        Yields:
+            Document dictionaries whose ``incremental_field`` value
+            is greater than ``since``.
+
+        Raises:
+            DataSourceError: If the incremental field is not set or
+                not found in the schema.
+        """
         if not self.incremental_field:
             return
 
@@ -224,7 +355,17 @@ class SQLSource:
             yield dict(zip(columns, row, strict=True))
 
     def document_count(self) -> int:
-        """Return total document count."""
+        """Return total document count.
+
+        Wraps the query in ``SELECT COUNT(*) FROM (...)``.
+
+        Returns:
+            The number of rows returned by the base query.
+
+        Raises:
+            DataSourceError: If the query is not a ``SELECT``
+                statement.
+        """
         _validate_query_is_select(self.query)
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT COUNT(*) FROM ({self.query})")
@@ -232,16 +373,30 @@ class SQLSource:
         return result[0] if result else 0
 
     async def adiscover_schema(self) -> Schema:
-        """Async equivalent of :meth:`discover_schema` via ``asyncio.to_thread``."""
+        """Async equivalent of :meth:`discover_schema` via ``asyncio.to_thread``.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from the
+            query's column metadata.
+        """
         return await asyncio.to_thread(self.discover_schema)
 
     async def aiter_documents(self) -> AsyncIterator[Document]:
-        """Async document streaming via ``asyncio.to_thread``."""
+        """Async document streaming via ``asyncio.to_thread``.
+
+        Yields:
+            Document dictionaries, one per row in the result set.
+        """
         for doc in await asyncio.to_thread(list, self.iter_documents()):
             yield doc
 
     def metadata(self) -> dict[str, Any]:
-        """Return metadata about this source."""
+        """Return metadata about this source.
+
+        Returns:
+            A dictionary with keys ``type``, ``query``,
+            ``incremental_field``, ``id_field``, and ``pool_size``.
+        """
         return {
             "type": "sql",
             "query": self.query,
@@ -252,7 +407,14 @@ class SQLSource:
 
 
 def _validate_query_is_select(query: str) -> None:
-    """Validate that a query is a SELECT statement before wrapping it."""
+    """Validate that a query is a SELECT statement before wrapping it.
+
+    Args:
+        query: The SQL query string to validate.
+
+    Raises:
+        DataSourceError: If the query does not start with ``SELECT``.
+    """
     stripped = query.strip().lstrip("(").strip()
     if not stripped.upper().startswith("SELECT"):
         raise DataSourceError(

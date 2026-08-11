@@ -224,6 +224,124 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
+## How Storage Providers Integrate into the Indexing and Search Pipeline
+
+The storage provider participates in two distinct phases: **index creation** (determining where segments live) and **runtime pipeline integration** (via `StorageMiddleware`).
+
+### Full indexing flow with a storage provider
+
+```text
+DataSource.stream_batches()
+    │
+    ▼
+SearchApplication.build()
+    │
+    ├── source.discover_schema() ──► Whoosh Schema
+    │
+    ├── storage._root resolution
+    │       │
+    │       ├── HybridStorage/S3Storage/FileStorage
+    │       │   └── has _root? ──► whoosh.index.create_in(root, schema)
+    │       │
+    │       └── No _root (pure S3/SnapshotStorage)
+    │           └── tempfile.mkdtemp() ──► create_in(tmpdir, schema)
+    │
+    ├── Writer = index.writer()
+    │       │
+    │       ├── MiddlewareChain.before_index()
+    │       │   └── StorageMiddleware.before_index()
+    │       │       ├── context.labels["storage_backend"] = provider.__class__.__name__
+    │       │       └── context.metadata["storage_provider"] = self
+    │       │
+    │       ├── for batch in source.stream_batches():
+    │       │       for doc in batch:
+    │       │           writer.add_document(**doc)
+    │       │
+    │       └── writer.commit()
+    │           │
+    │           └── StorageMiddleware.on_commit()
+    │               └── provider.write("commits/{name}/{timestamp}", b"1")
+    │
+    ▼
+Index persisted on disk / S3 / hybrid cache
+```
+
+### Full search flow with a storage provider
+
+```text
+SearchApplication.search(query)
+    │
+    ├── index.searcher()
+    │       │
+    │       └── Whoosh core opens segment files from:
+    │           ├── local filesystem (FileStorageProvider root)
+    │           ├── SQLite DB (SQLiteStorageProvider)
+    │           └── S3 / hybrid cache (S3StorageProvider / HybridStorage)
+    │
+    ├── QueryParser.parse(query) ──► Query object
+    │
+    └── searcher.search(query)
+        │
+        └── Whoosh core reads posting lists from segment files
+            └── Returns Results (Hits)
+```
+
+### StorageMiddleware hooks in detail
+
+`StorageMiddleware` (`whoosh_modern.middleware.storage`) is the integration point
+that routes index persistence through any `SyncStorageProvider` without modifying
+the writer.
+
+| Hook | When | What it does |
+|------|------|--------------|
+| `before_index(context)` | Before each document is added | Tags the context with `storage_backend` label and `storage_provider` metadata |
+| `on_commit(context)` | After `writer.commit()` | Writes a commit checkpoint marker (`commits/{name}/{timestamp}`) to the provider |
+
+### Example: StorageMiddleware with a custom chain
+
+```python
+from whoosh_modern.middleware import (
+    StorageMiddleware,
+    FileStorageProvider,
+    StemmingMiddleware,
+)
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh_modern.analysis import get_stemmer
+
+# Storage provider
+storage = FileStorageProvider("/data/index")
+
+# Create middleware chain
+chain = MiddlewareChain([
+    StorageMiddleware(storage, name="primary"),
+    StemmingMiddleware(stemmer=get_stemmer("auto", "english").stem),
+])
+
+# Apply to writer
+from whoosh.middleware.wrappers import MiddlewareWriter
+
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Hello", content="World")
+    # StorageMiddleware.before_index() tags the context
+    # StemmingMiddleware stems the fields
+    # writer.commit() triggers StorageMiddleware.on_commit()
+    writer.commit()
+```
+
+### Key insight: StorageProvider vs StorageMiddleware
+
+| Component | Role |
+|-----------|------|
+| `SyncStorageProvider` / `AsyncStorageProvider` | **Contract** defining `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
+| `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implementations** of the contract |
+| `StorageMiddleware` | **Integration layer** that calls the provider at specific lifecycle hooks (`before_index`, `on_commit`) |
+| `SearchApplication` | **Entry point** that extracts `_root` from the provider to create the Whoosh index directory |
+
+The provider itself does **not** intercept Whoosh's internal segment reads. Those reads go through Whoosh's built-in `FileStorage` (`whoosh.filedb.filestore`) which reads from the filesystem path given to `create_in()`. The Whoosh-NG storage provider abstraction is designed for:
+- Custom segment routing (S3, SQLite, hybrid cache)
+- Commit checkpointing via middleware
+- Future: segment-level read/write interception (EPIC 4.5)
+
 ## Using storage with SearchApplication
 
 ```python

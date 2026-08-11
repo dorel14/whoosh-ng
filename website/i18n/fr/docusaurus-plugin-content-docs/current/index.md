@@ -56,17 +56,18 @@ with ix.searcher() as s:
 ### Modern (Nouvelles fonctionnalités)
 
 - **[Middleware](/modern/middleware)** — Hooks de pipeline et middleware
-- **[Middleware & Pipeline de Plugins](/modern/middleware-sprint-c)** — Pipeline basé sur hooks
+- **[Middleware & Pipeline de Plugins](/modern/middleware-pipeline)** — Pipeline basé sur hooks
 - **[Plugins](/modern/plugins)** — Extension de Whoosh-NG
-- **[Système de Plugins](/modern/plugins-sprint-c)** — API PluginManager
+- **[Système de Plugins](/modern/plugins-avances)** — API PluginManager
 - **[Autocomplétion](/modern/autocomplete)** — Fournisseurs d'autocomplétion
-- **[Fournisseurs d'Autocomplétion](/modern/autocomplete-sprint-d)** — NGram, Fuzzy, InvertedIndex
+- **[Fournisseurs d'Autocomplétion](/modern/autocomplete-fournisseurs)** — NGram, Fuzzy, InvertedIndex
 - **[Recherche vectorielle](/modern/vector)** — NumPy, HNSW, Faiss
 - **[Indexation moderne](/modern/modern-indexing)** — BatchIndexWriter, AnalyzerCache
 - **[Monitoring](/modern/monitoring)** — Métriques et observabilité
 - **[Performance](/modern/performance)** — Benchmarking et optimisation
-- **[Synonymes & Linguistique](/modern/linguistics-sprint-d)** — SynonymManager
-- **[Fournisseurs de Stemmers](/modern/stemming-sprint-d)** — Backends PyStemmer
+- **[Synonymes & Linguistique](/modern/linguistique)** — SynonymManager
+- **[Fournisseurs de Stemmers](/modern/stemmers-fournisseurs)** — Backends PyStemmer
+- **[Intégration des Providers](/modern/provider-integration)** — Guide complet du pipeline pour tous les providers
 
 ### API Reference
 

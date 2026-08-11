@@ -1,7 +1,7 @@
 ---
 title: "Système de Plugins"
 nav_order: 51
-permalink: /fr/guides/plugins-sprint-c/
+permalink: /fr/guides/plugins-avances/
 lang: fr
 ---
 
@@ -284,6 +284,6 @@ Construit et retourne une `MiddlewareChain` à partir de tous les plugins qui d�
 
 ## Voir Aussi
 
-- [Guide Middleware](middleware-sprint-c.md) — Pipeline hooks et middleware personnalisé
+- [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et middleware personnalisé
 - [Exemple: Développement de Plugin](../examples/plugin-dev.md) — Tutoriel pas à pas
 - [API: Plugins](../api/plugins.md) — Référence complète de l'API

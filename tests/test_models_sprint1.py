@@ -102,11 +102,19 @@ def test_type_mapper_registers_custom():
     def factory(opt):
         return KEYWORD(stored=opt.stored)
 
-    TypeMapper.register(str, factory)
-    opts = SearchOptions(stored=True)
-    field = TypeMapper.map(str, opts)
-    assert isinstance(field, KEYWORD)
-    assert field.stored is True
+    previous = TypeMapper._registry.get(str)
+    try:
+        TypeMapper.register(str, factory)
+        opts = SearchOptions(stored=True)
+        field = TypeMapper.map(str, opts)
+        assert isinstance(field, KEYWORD)
+        assert field.stored is True
+    finally:
+        # The registry is global: restore it so other tests are not polluted.
+        if previous is not None:
+            TypeMapper.register(str, previous)
+        else:  # pragma: no cover - defensive
+            TypeMapper._registry.pop(str, None)
 
 
 def test_model_index_dataclass_document():

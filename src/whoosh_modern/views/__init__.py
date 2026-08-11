@@ -1,4 +1,8 @@
-"""SearchView that integrates all data source components."""
+"""SearchView that integrates all data source components.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 import logging
 import os
@@ -19,7 +23,22 @@ _SCHEMA_UPDATED_AT_FIELD = "_schema_updated_at"
 
 
 class SearchView:
-    """View that integrates a DataSource with Whoosh indexing."""
+    """View that integrates a DataSource with Whoosh indexing.
+
+    Provides a high-level interface for building, refreshing, and reindexing
+    a Whoosh index from any DataSource implementation. Supports incremental
+    refreshes, schema evolution, and multi-level validation.
+
+    Attributes:
+        name: Human-readable name for this search view.
+        source: The DataSource providing documents for indexing.
+        fields: Optional field type overrides applied during schema building.
+        facets: Facet configuration dict keyed by field name.
+        incremental_field: Field name used for incremental refresh tracking.
+        strict: If True, raises on validation errors instead of logging.
+        middleware: List of Middleware instances applied during processing.
+        schema_version: Schema version string stored in index metadata.
+    """
 
     def __init__(
         self,
@@ -32,6 +51,18 @@ class SearchView:
         middleware: list[Middleware] | None = None,
         schema_version: str | None = None,
     ) -> None:
+        """Initialize a SearchView.
+
+        Args:
+            name: Human-readable name for this search view.
+            source: The DataSource providing documents for indexing.
+            fields: Optional field type overrides applied during schema building.
+            facets: Facet configuration dict keyed by field name.
+            incremental_field: Field name used for incremental refresh tracking.
+            strict: If True, raises ValidationError on failed validation.
+            middleware: List of Middleware instances applied during processing.
+            schema_version: Schema version string; defaults to "1.0".
+        """
         self.name = name
         self.source = source
         self.fields = fields or {}
@@ -50,11 +81,17 @@ class SearchView:
     def build(self, index_path: str) -> Any:
         """Create and populate index from source.
 
+        Discover the schema from the data source, apply field overrides,
+        run validation, and create or open a Whoosh index at ``index_path``.
+
         Args:
             index_path: Path to the Whoosh index directory.
 
         Returns:
             The Whoosh Index object.
+
+        Raises:
+            ValidationError: If validation fails in strict mode.
         """
         self._index_path = index_path
 
@@ -93,7 +130,17 @@ class SearchView:
         return self._index
 
     def refresh(self) -> int:
-        """Incremental refresh, returns count of updated documents."""
+        """Perform an incremental refresh of the index.
+
+        Uses the ``incremental_field`` to fetch only changed documents
+        since the last sync and updates them in the index.
+
+        Returns:
+            The count of documents that were updated.
+
+        Raises:
+            RuntimeError: If the index has not been built yet.
+        """
         if self._index is None or self._index_path is None:
             raise RuntimeError("Index not built yet, call build() first")
 
@@ -116,7 +163,14 @@ class SearchView:
         return count
 
     def reindex(self) -> int:
-        """Full reindex, returns count of indexed documents."""
+        """Perform a full reindex of all documents from the source.
+
+        Returns:
+            The count of documents that were indexed.
+
+        Raises:
+            RuntimeError: If the index has not been built yet.
+        """
         if self._index_path is None:
             raise RuntimeError("Index not built yet, call build() first")
         assert self._index is not None
@@ -133,11 +187,22 @@ class SearchView:
         return count
 
     def validate(self) -> list[ValidationResult]:
-        """Run all validation levels."""
+        """Run all validation levels against the data source.
+
+        Returns:
+            A list of ValidationResult objects, one per validation level.
+        """
         return self._validator.validate(self.source)
 
     def _apply_field_overrides(self, schema: Schema) -> Schema:
-        """Apply field type overrides from the fields parameter."""
+        """Apply field type overrides from the fields parameter.
+
+        Args:
+            schema: The original discovered Whoosh Schema.
+
+        Returns:
+            A new Schema with overridden field types where specified.
+        """
         if not self.fields:
             return schema
 

@@ -1,4 +1,8 @@
-"""REST DataSource implementation with pagination and authentication."""
+"""REST DataSource implementation with pagination and authentication.
+
+Author: dorel14
+Version: 3.0.0
+"""
 
 import asyncio
 import json
@@ -22,14 +26,30 @@ try:
     import requests as _requests
 
     class _HTTPClient:
-        """HTTP client using the requests library."""
+        """HTTP client using the requests library.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
 
         def __init__(self, timeout: int = DEFAULT_TIMEOUT) -> None:
             self._session = _requests.Session()
             self._timeout = timeout
 
         def fetch(self, url: str, headers: dict[str, str]) -> dict[str, Any]:
-            """Fetch a URL and return parsed JSON."""
+            """Fetch a URL and return parsed JSON.
+
+            Args:
+                url: The fully-qualified URL to request.
+                headers: HTTP headers to include in the request.
+
+            Returns:
+                The parsed JSON response body as a dictionary.
+
+            Raises:
+                requests.HTTPError: If the server returns an error
+                    status code.
+            """
             response = self._session.get(url, headers=headers, timeout=self._timeout)
             response.raise_for_status()
             result: dict[str, Any] = response.json()
@@ -40,13 +60,30 @@ except ImportError:
 
 
 class _UrllibHttpClient:
-    """HTTP client using urllib.request as fallback."""
+    """HTTP client using urllib.request as fallback.
+
+    Used when the ``requests`` library is not installed.
+
+    Args:
+        timeout: Request timeout in seconds.
+    """
 
     def __init__(self, timeout: int = DEFAULT_TIMEOUT) -> None:
         self._timeout = timeout
 
     def fetch(self, url: str, headers: dict[str, str]) -> dict[str, Any]:
-        """Fetch a URL and return parsed JSON."""
+        """Fetch a URL and return parsed JSON.
+
+        Args:
+            url: The fully-qualified URL to request.
+            headers: HTTP headers to include in the request.
+
+        Returns:
+            The parsed JSON response body as a dictionary.
+
+        Raises:
+            urllib.error.URLError: If the request fails.
+        """
         request = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(request, timeout=self._timeout) as response:
             result: dict[str, Any] = json.loads(response.read().decode("utf-8"))
@@ -54,14 +91,45 @@ class _UrllibHttpClient:
 
 
 def _get_http_client(timeout: int) -> Any:
-    """Return the best available HTTP client."""
+    """Return the best available HTTP client.
+
+    Prefers ``requests`` if installed, falls back to ``urllib``.
+
+    Args:
+        timeout: Request timeout in seconds.
+
+    Returns:
+        An HTTP client instance with a matching ``fetch`` method.
+    """
     if _HTTPClient is not None:
         return _HTTPClient(timeout)
     return _UrllibHttpClient(timeout)
 
 
 class RESTSource:
-    """REST API data source implementing the DataSource protocol."""
+    """REST API data source implementing the DataSource protocol.
+
+    Fetches documents from a REST endpoint, supporting page-based,
+    offset-based, or cursor-based pagination, plus bearer/basic/API-key
+    authentication.
+
+    Args:
+        url: Base URL of the REST endpoint.
+        method: HTTP method (default ``"GET"``).
+        params: Optional query parameters sent with every request.
+        headers: Optional static HTTP headers.
+        auth: Optional authentication configuration. May be a dict
+            with ``type`` set to ``"bearer"`` and ``token``,
+            ``"basic"`` and ``username``/``password``, or
+            ``"api_key"`` and an ``api_key`` value.
+        pagination: Pagination strategy — ``"page"``, ``"offset"``,
+            ``"cursor"``, or ``None`` (no pagination).
+        page_size: Number of items requested per page.
+        document_path: Dotted path within the JSON response that
+            points to the list of documents.
+        incremental_field: Optional field name for incremental syncs.
+        timeout: Request timeout in seconds.
+    """
 
     def __init__(
         self,
@@ -92,11 +160,23 @@ class RESTSource:
 
     @property
     def name(self) -> str:
-        """Return the data source name."""
+        """Return the data source name.
+
+        Returns:
+            A string in the form ``rest:<url>``.
+        """
         return f"rest:{self.url}"
 
     def discover_schema(self) -> Schema:
-        """Discover schema from first page of results."""
+        """Discover schema from first page of results.
+
+        Fetches the first page of documents and uses
+        :class:`SchemaDiscovery` to infer the Whoosh schema.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from
+            sample documents.
+        """
         documents = list(self.iter_documents())
         if not documents:
             return Schema()
@@ -104,7 +184,18 @@ class RESTSource:
         return self._schema
 
     def _extract_results(self, data: dict[str, Any]) -> list[Any]:
-        """Extract results list from API response."""
+        """Extract results list from API response.
+
+        If ``document_path`` is set, navigates the response using the
+        dotted path. Otherwise looks for ``"results"`` or ``"data"``
+        keys.
+
+        Args:
+            data: The parsed JSON response body.
+
+        Returns:
+            A list of result items (may contain non-dict entries).
+        """
         if not isinstance(data, dict):
             return []
 
@@ -128,7 +219,19 @@ class RESTSource:
         offset: int = 0,
         cursor: str | None = None,
     ) -> str:
-        """Build URL with pagination parameters."""
+        """Build URL with pagination parameters.
+
+        Args:
+            page: Page number (used when ``pagination`` is
+                ``"page"``).
+            offset: Offset value (used when ``pagination`` is
+                ``"offset"``).
+            cursor: Cursor string (used when ``pagination`` is
+                ``"cursor"``).
+
+        Returns:
+            The full URL with query parameters appended.
+        """
         from urllib.parse import urlencode
 
         url = self.url
@@ -149,7 +252,14 @@ class RESTSource:
         return url
 
     def _get_headers(self) -> dict[str, str]:
-        """Build headers including auth."""
+        """Build headers including auth.
+
+        Merges user-supplied headers with authentication headers
+        derived from the ``auth`` configuration.
+
+        Returns:
+            A dictionary of HTTP headers for outgoing requests.
+        """
         result = dict(self.headers)
 
         if isinstance(self.auth, dict):
@@ -166,7 +276,19 @@ class RESTSource:
         return result
 
     def iter_documents(self) -> Iterator[Document]:
-        """Yield documents from the REST API with pagination."""
+        """Yield documents from the REST API with pagination.
+
+        Iterates through pages using the configured pagination
+        strategy until no more results are returned or the
+        ``MAX_PAGES`` limit is reached.
+
+        Yields:
+            Individual document dictionaries from the API response.
+
+        Raises:
+            DataSourceError: On HTTP errors (non-429) or connection
+                failures.
+        """
         page = 1
         offset = 0
         cursor: str | None = None
@@ -234,6 +356,18 @@ class RESTSource:
         """Yield documents from the REST API in batches.
 
         Batches documents per page for efficient bulk indexing.
+
+        Args:
+            batch_size: Maximum number of documents per batch. Each
+                batch may contain fewer items if a page boundary is
+                reached.
+
+        Yields:
+            Lists of document dictionaries.
+
+        Raises:
+            DataSourceError: On HTTP errors (non-429) or connection
+                failures.
         """
         page = 1
         offset = 0
@@ -298,7 +432,14 @@ class RESTSource:
                 has_more = False
 
     def document_count(self) -> int:
-        """Return approximate document count."""
+        """Return approximate document count.
+
+        Returns the cached total (if the API provided one) or falls
+        back to counting documents via iteration.
+
+        Returns:
+            An approximate or exact document count.
+        """
         if hasattr(self, "_total_count") and self._total_count is not None:
             return self._total_count
         count = 0
@@ -309,7 +450,12 @@ class RESTSource:
         return count
 
     def health_check(self) -> bool:
-        """Return True if the REST endpoint is reachable."""
+        """Return True if the REST endpoint is reachable.
+
+        Returns:
+            ``True`` if the first page request succeeds, ``False``
+            otherwise.
+        """
         try:
             url = self._build_url(page=1, offset=0, cursor=None)
             self._http_client.fetch(url, self._get_headers())
@@ -318,16 +464,30 @@ class RESTSource:
             return False
 
     async def adiscover_schema(self) -> Schema:
-        """Async equivalent of :meth:`discover_schema` via ``asyncio.to_thread``."""
+        """Async equivalent of :meth:`discover_schema` via ``asyncio.to_thread``.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from
+            sample documents.
+        """
         return await asyncio.to_thread(self.discover_schema)
 
     async def aiter_documents(self) -> AsyncIterator[Document]:
-        """Async document streaming via ``asyncio.to_thread``."""
+        """Async document streaming via ``asyncio.to_thread``.
+
+        Yields:
+            Document dictionaries from the REST API.
+        """
         for doc in await asyncio.to_thread(list, self.iter_documents()):
             yield doc
 
     def metadata(self) -> dict[str, Any]:
-        """Return metadata about this REST source."""
+        """Return metadata about this REST source.
+
+        Returns:
+            A dictionary with keys ``type``, ``url``, ``method``,
+            ``pagination``, ``page_size``, and ``timeout``.
+        """
         return {
             "type": "rest",
             "url": self.url,
