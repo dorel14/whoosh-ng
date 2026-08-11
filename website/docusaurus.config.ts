@@ -84,6 +84,13 @@ const config: Config = {
           ],
         },
         {
+          title: 'LLM Context',
+          items: [
+            { label: 'llms.txt', to: '/llms.txt' },
+            { label: 'llms-full.txt', to: '/llms-full.txt' },
+          ],
+        },
+        {
           title: 'Community',
           items: [
             { label: 'GitHub', href: 'https://github.com/dorel14/whoosh-ng' },

@@ -36,5 +36,5 @@ jobs:
           # Root-level files (for direct repo consumption)
           cp llms.txt docs/llms.txt
           cp llms-full.txt docs/llms-full.txt
-          git add llms.txt llms-full.txt docs/llms.txt docs/llms-full.txt
+          git add llms.txt llms-full.txt docs/llms.txt docs/llms-full.txt website/static/llms.txt website/static/llms-full.txt
           git diff --quiet && git diff --staged --quiet || (git commit -m "docs: auto-update llms context files" && git push origin dev)
