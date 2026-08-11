@@ -4,6 +4,12 @@ Provides HTTP endpoints for search, autocomplete, suggest, health, and metrics.
 All blocking core calls are executed off the event loop via
 :func:`whoosh.utils.async_utils.run_sync` so the async server stays responsive.
 
+This module is part of the optional ``api`` extra. ``fastapi`` and ``pydantic``
+are **not** installed by default. The ``try/except ImportError`` guard ensures
+that importing ``whoosh_fastapi`` without the extra produces a clear error
+message pointing to ``pip install whoosh-ng[api]``. This keeps the core
+``whoosh``/``whoosh_modern`` packages free of mandatory ASG/HTTP dependencies.
+
 Author: dorel14
 Version: 3.0.0
 """

@@ -51,6 +51,15 @@ overridden by ``{"plugins": ["c"]}`` produces ``{"plugins": ["c"]}``, not
 ``{"plugins": ["a", "b", "c"]}``. If additive list merging is required, handle
 it at the application level before calling :meth:`ConfigEngine.merge`.
 
+> [!WARNING]
+> **List replacement behavior**: When merging configurations, lists are
+> **completely overwritten** by higher-priority layers. They are not appended,
+> concatenated, or deduplicated. This is an intentional design choice that
+> ensures explicit control over list contents across layers and avoids
+> unpredictable merged states. If you need additive behavior (e.g., extending
+> a list of plugins or middlewares), perform the merge logic in your application
+> code before passing the final dictionary to :meth:`ConfigEngine.merge`.
+
 ## Quick start
 
 ```python
