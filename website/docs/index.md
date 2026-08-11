@@ -6,7 +6,7 @@ sidebars: docs
 
 # Whoosh-NG Documentation
 
-> **Latest release**: v4.3.0 | [View releases on GitHub](https://github.com/dorel14/whoosh-ng/releases) | Last updated: 2026-08-11
+> **Latest release**: v5.0.0 | [View releases on GitHub](https://github.com/dorel14/whoosh-ng/releases) | Last updated: 2026-08-11
 
 Welcome to the official documentation for **Whoosh-NG**, a pure-Python full-text indexing and search library modernized for 2025+.
 
