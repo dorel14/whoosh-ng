@@ -58,6 +58,7 @@ const sidebars: SidebarsConfig = {
       'modern/ngrams',
       'modern/storage-providers',
       'modern/provider-integration',
+      'modern/configuration-engine',
     ],
   },
   // Dedicated sidebar for Changelog — shows ONLY the changelog entry

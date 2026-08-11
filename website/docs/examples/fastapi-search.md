@@ -141,7 +141,34 @@ api.register_index_endpoint("/documents", schema)
 
 ## Key points
 
-- `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, and `/autocomplete` endpoints.
+- `create_app()` from `whoosh_fastapi` provides `/health`, `/search`, `/autocomplete`, and `/suggest` endpoints.
 - All blocking calls run off the event loop via `run_sync`.
 - Use `BufferedWriter` for high-throughput indexing via POST.
 - `WhooshFastAPI` class offers per-endpoint registration for custom integrations.
+
+## WebSocket autocomplete
+
+Pass an ``AutocompleteProvider`` to ``create_app`` to enable the WebSocket
+autocomplete endpoint. The client sends JSON messages with a ``q`` key and
+receives ``{"suggestions": [...]}`` responses over a persistent connection.
+
+```python
+from whoosh_modern.autocomplete import EdgeNgramAutocomplete
+from whoosh_fastapi import create_app
+
+autocomplete = EdgeNgramAutocomplete(ix)
+app = create_app(ix, prefix="/api/v1", autocomplete=autocomplete)
+```
+
+Client example using JavaScript:
+
+```javascript
+const ws = new WebSocket("ws://localhost:8000/api/v1/autocomplete/ws");
+ws.onmessage = (event) => console.log(JSON.parse(event.data));
+ws.send(JSON.stringify({ q: "pyth" }));
+// {"suggestions": ["python", "pythagorean"]}
+```
+
+When no autocomplete provider is configured, the endpoint returns an empty
+suggestions list instead of raising.
+

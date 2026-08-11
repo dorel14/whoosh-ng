@@ -118,7 +118,7 @@ class DataSourceConfigModel(BaseModel):
     encoding: str = "utf-8"
     document_path: str | None = None
     method: str = "GET"
-    headers: dict[str, str] | None = None
+    headers: dict[str, str] = Field(default_factory=dict)
     pagination: str | None = None
     page_size: int = 100
     timeout: int = 30

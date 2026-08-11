@@ -61,12 +61,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   raising `TypeError`, so historical class-style usage
   (`FrenchAnalyzer()(text)`) keeps working.
 
-### In Progress (tracked in `.kilo/plans/1783617590838-whoosh-ng-consolidated-plan.md`)
-- Async ecosystem: `run_sync` bridge, async plugin registration,
-  `AsyncStorageProvider`/`AsyncVectorProvider` bases, fully async FastAPI plugin.
-- Relocation of `CompressionMiddleware`/`EncryptionMiddleware` to the backend/store
-  layer (per architecture decision).
-- `pyright` added to CI and progressive strict typing.
-- Jekyll documentation (EN/FR) finalization and publication.
+### Added
+- **Configuration Engine** (`src/whoosh_modern/config/`): `ConfigEngine` with
+  hierarchical merging (language → application → instance → runtime), Pydantic
+  models (`WhooshNGConfig`, `FieldConfig`, `SearchConfig`, `DataSourceConfigModel`,
+  `StorageConfigModel`), and YAML/JSON loaders with validation.
+- **FastAPI WebSocket autocomplete**: persistent `WS /api/v1/autocomplete/ws`
+  endpoint accepting `{"q":"..."}` messages and returning `{"suggestions":[...]}`.
+- **CoreStorageAdapter** (`src/whoosh_modern/storage/core_adapter.py`): bridges
+  core `whoosh.filedb.filestore.FileStorage` to the modern `SyncStorageProvider`
+  interface, exported from `whoosh_modern.storage`.
+
+### Fixed
+- **SnapshotStorage regression**: removed duplicated `_safe_local_path()` call
+  and redundant S3 read in `SnapshotStorage.read()` that caused path-traversal
+  validation to execute twice and the remote object to be fetched twice per read.
+- **BatchAnalyzer docstring**: corrected to reflect that the cache stores
+  filtered documents, not analysis results.
+- **Exception hierarchy**: `DataSourceError` now inherits from `WhooshError`
+  (`src/whoosh/__init__.py`), providing a common root for core and modern errors.
+- **ModernIndexBuilder**: unused `merge_policy` parameter is now wired to
+  `writer.commit(mergetype=...)` in `_build_parallel()`.
+
+### In Progress (tracked in `.kilo/plans/1786003980063-whoosh-ng-roadmap.md`)
+- Configuration Engine: `SchemaEngine`, `AnalyzerEngine`, `DataSourceEngine`,
+  `StorageEngine`, `SearchModelEngine`, `FacetEngine`, `PluginEngine`, `APIEngine`.
+- Sprint F: Admin Studio (NiceGUI) + Synonym Manager remain.
 
 [4.0.0.dev0]: https://github.com/dorel14/whoosh-NG/releases/tag/v4.0.0.dev0
