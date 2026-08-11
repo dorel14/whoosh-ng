@@ -37,9 +37,11 @@ repos:
         name: Sync version from pyproject.toml
         entry: python scripts/sync_version.py
         language: system
+        # Kept in pre-push (instead of pre-commit) to avoid blocking local
+        # commits when version files are intentionally mid-update.
         pass_filenames: false
         files: ^(pyproject\.toml|README\.md|src/whoosh/__init__\.py)$
-        stages: [pre-commit]
+        stages: [pre-push]
 
 # Never scan the CI pre-commit log artifact
 exclude: '^precommit\.log$'

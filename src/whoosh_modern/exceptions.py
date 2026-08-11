@@ -4,8 +4,10 @@ Author: dorel14
 Version: 3.0.0
 """
 
+from whoosh import WhooshError
 
-class DataSourceError(Exception):
+
+class DataSourceError(WhooshError):
     """Base exception for DataSource errors.
 
     Attributes:

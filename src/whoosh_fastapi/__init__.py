@@ -4,20 +4,30 @@ Provides HTTP endpoints for search, autocomplete, suggest, health, and metrics.
 All blocking core calls are executed off the event loop via
 :func:`whoosh.utils.async_utils.run_sync` so the async server stays responsive.
 
+This module is part of the optional ``api`` extra. ``fastapi`` and ``pydantic``
+are **not** installed by default. The ``try/except ImportError`` guard ensures
+that importing ``whoosh_fastapi`` without the extra produces a clear error
+message pointing to ``pip install whoosh-ng[api]``. This keeps the core
+``whoosh``/``whoosh_modern`` packages free of mandatory ASG/HTTP dependencies.
+
 Author: dorel14
 Version: 3.0.0
 """
 
 from __future__ import annotations
 
+import logging
+from contextlib import suppress
 from typing import Any
 
 from whoosh.index import Index
 from whoosh.utils.async_utils import run_sync
 
+logger = logging.getLogger(__name__)
+
 try:
-    from fastapi import FastAPI  # pyright: ignore[reportMissingImports]
-    from pydantic import BaseModel  # pyright: ignore[reportMissingImports]
+    from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+    from pydantic import BaseModel
 
     class SearchRequest(BaseModel):
         """Request model for search endpoint.
@@ -144,6 +154,53 @@ try:
                 return {"suggestions": []}
             hits = autocomplete.search(q, limit=10)
             return {"suggestions": [hit.text for hit in hits]}
+
+        @app.websocket(f"{prefix}/autocomplete/ws")
+        async def autocomplete_ws(websocket: WebSocket) -> None:
+            """WebSocket autocomplete endpoint.
+
+            Accepts persistent WebSocket connections. The client sends JSON
+            payloads with a ``q`` key containing the query prefix, and the
+            server responds with JSON payloads containing a ``suggestions``
+            list.
+
+            Example client message::
+
+                {"q": "pyth"}
+
+            Example client message with custom limit::
+
+                {"q": "pyth", "limit": 5}
+
+            Example server response::
+
+                {"suggestions": ["python", "pythagorean"]}
+            """
+            await websocket.accept()
+            try:
+                while True:
+                    payload = await websocket.receive_json()
+                    query = payload.get("q", "")
+                    limit_raw = payload.get("limit", 10)
+                    try:
+                        limit = int(limit_raw)
+                    except (TypeError, ValueError):
+                        logger.warning("Invalid 'limit' value in WebSocket: %s", limit_raw)
+                        await websocket.send_json(
+                            {"error": "Invalid 'limit' value. Must be an integer."}
+                        )
+                        continue
+                    if autocomplete is None:
+                        await websocket.send_json({"suggestions": []})
+                    else:
+                        hits = await run_sync(autocomplete.search, query, limit=limit)
+                        await websocket.send_json({"suggestions": [hit.text for hit in hits]})
+            except WebSocketDisconnect:
+                logger.info("WebSocket client disconnected from autocomplete.")
+            except Exception as exc:  # pragma: no cover - safety net
+                logger.error("Unexpected error in autocomplete WebSocket: %s", exc, exc_info=True)
+                with suppress(RuntimeError):
+                    await websocket.send_json({"error": "Internal server error"})
 
         @app.get(f"{prefix}/suggest")
         async def suggest_endpoint(q: str) -> dict[str, Any]:

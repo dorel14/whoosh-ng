@@ -33,6 +33,10 @@ __version__ = (5, 0, 0)
 __version_string__ = "5.0.0"
 
 
+class WhooshError(Exception):
+    """Base class for all Whoosh exceptions."""
+
+
 def versionstring(build=True, extra=True):
     """Returns the version number of Whoosh as a string.
 

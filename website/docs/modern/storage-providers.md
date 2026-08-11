@@ -57,6 +57,7 @@ This is what many modern distributed search systems do.
 | `SnapshotStorage` | sync | S3-compatible | Simple backup/restore |
 | `HybridStorage` | sync | local cache + remote | **Production** (alias: `CachedObjectStorage`) |
 | `AsyncHybridStorage` | async | local cache + remote | Production async |
+| `CoreStorageAdapter` | sync | core `FileStorage` → modern `SyncStorageProvider` | Bridge legacy core backends into the modern pipeline |
 
 All providers are importable from `whoosh_modern.storage`.
 
@@ -73,6 +74,26 @@ assert storage.read("segment_1.dat") == b"data"
 assert storage.exists("segment_1.dat") is True
 storage.delete("segment_1.dat")
 keys = storage.list_keys()
+```
+
+## CoreStorageAdapter
+
+Wraps a core ``whoosh.filedb.filestore.FileStorage`` instance behind the modern
+``SyncStorageProvider`` interface. This lets you drop an existing core storage
+backend into a modern ``HybridStorage`` or ``StorageMiddleware`` chain without
+modifying the core class.
+
+```python
+from whoosh.filedb.filestore import FileStorage as CoreFileStorage
+from whoosh_modern.storage import CoreStorageAdapter
+
+core = CoreFileStorage("indexdir")
+adapter = CoreStorageAdapter(core)
+
+adapter.write("segment_1.dat", b"data")
+assert adapter.read("segment_1.dat") == b"data"
+assert adapter.exists("segment_1.dat") is True
+adapter.delete("segment_1.dat")
 ```
 
 ## AsyncFileStorage

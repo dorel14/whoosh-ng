@@ -50,24 +50,28 @@ def test_analyzer_middleware_is_base() -> None:
 
 
 def test_synonym_middleware_placeholder_noop_without_expander() -> None:
-    mw = SynonymMiddleware()
+    with pytest.warns(DeprecationWarning, match="SynonymMiddleware is deprecated"):
+        mw = SynonymMiddleware()
     ctx = MiddlewareContext("search")
     ctx.query = "car"
     assert mw.before_search(ctx).query == "car"
 
 
 def test_synonym_middleware_expands_query() -> None:
-    mw = SynonymMiddleware(expand=lambda w: ["auto"] if w == "car" else [])
+    with pytest.warns(DeprecationWarning, match="SynonymMiddleware is deprecated"):
+        mw = SynonymMiddleware(expand=lambda w: ["auto"] if w == "car" else [])
     ctx = MiddlewareContext("search")
     ctx.query = "car"
     assert mw.before_search(ctx).query == "car auto"
 
 
 def test_analyzer_middleware_in_chain() -> None:
+    with pytest.warns(DeprecationWarning, match="SynonymMiddleware is deprecated"):
+        synonym_mw = SynonymMiddleware(expand=lambda w: ["auto"] if w == "car" else [])
     chain = MiddlewareChain(
         [
             StemmingMiddleware(stemmer=_dummy_stemmer, fields=["title"]),
-            SynonymMiddleware(expand=lambda w: ["auto"] if w == "car" else []),
+            synonym_mw,
         ]
     )
     ctx = MiddlewareContext("search")

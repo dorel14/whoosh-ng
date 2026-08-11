@@ -79,6 +79,9 @@ phonetic = [
 lmdb = [
   "lmdb",
 ]
+yaml = [
+  "PyYAML",
+]
 api = [
   "fastapi",
   "uvicorn[standard]",
@@ -420,6 +423,7 @@ module = [
   "httpx",
   "re2",
   "psutil",
+  "yaml",
 ]
 ignore_missing_imports = true
 

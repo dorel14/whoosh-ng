@@ -130,9 +130,8 @@ class CompiledDataSource:
 class BatchAnalyzer:
     """Analyzes documents in batches with LRU caching.
 
-    Processes documents in batches and caches analysis results
-    for repeated field values to avoid redundant tokenization,
-    lowercasing, and stemming.
+    Processes documents in batches and caches filtered documents for repeated
+    field values to avoid redundant field extraction and caching lookups.
 
     Example::
 

@@ -212,7 +212,10 @@ class ModernIndexBuilder:
                         segment_reader.close()
                 finally:
                     segment_ix.close()
-            writer.commit(merge=True)
+            if self.merge_policy is not None:
+                writer.commit(mergetype=self.merge_policy)
+            else:
+                writer.commit(merge=True)
         except Exception:
             writer.cancel()
             raise

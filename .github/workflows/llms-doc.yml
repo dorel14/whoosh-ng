@@ -8,7 +8,6 @@ on:
       - 'website/docs/**'
       - 'website/i18n/**'
       - 'README.md'
-      - 'src/**'
       - '.github/workflows/llms-doc.yml'
 
 jobs:
@@ -37,4 +36,4 @@ jobs:
           cp llms.txt docs/llms.txt
           cp llms-full.txt docs/llms-full.txt
           git add llms.txt llms-full.txt docs/llms.txt docs/llms-full.txt website/static/llms.txt website/static/llms-full.txt
-          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: auto-update llms context files" && git push origin dev)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: auto-update llms context files [skip ci]" && git push origin dev)

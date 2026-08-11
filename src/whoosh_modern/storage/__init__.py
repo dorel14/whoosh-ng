@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from whoosh_modern.middleware.storage import FileStorageProvider
 from whoosh_modern.storage.async_file import AsyncFileStorage
+from whoosh_modern.storage.core_adapter import CoreStorageAdapter
 from whoosh_modern.storage.hybrid import AsyncHybridStorage, HybridStorage
 from whoosh_modern.storage.s3 import S3Storage, SnapshotStorage
 
@@ -20,6 +21,7 @@ __all__ = [
     "AsyncFileStorage",
     "AsyncHybridStorage",
     "CachedObjectStorage",
+    "CoreStorageAdapter",
     "FileStorage",
     "FileStorageProvider",
     "HybridStorage",

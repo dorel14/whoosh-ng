@@ -7,9 +7,11 @@ from typing import Any
 
 import pytest
 
+from whoosh.filedb.filestore import FileStorage
 from whoosh.plugins.storage_base import SyncStorageProvider
 from whoosh_modern.storage import (
     AsyncHybridStorage,
+    CoreStorageAdapter,
     FileStorage,
     HybridStorage,
     S3Storage,
@@ -118,6 +120,69 @@ def test_file_storage_list_keys(tmp_path) -> None:
     assert "a.txt" in keys
     assert "b.txt" in keys
     assert "sub/c.txt" in keys
+
+
+# ---------------------------------------------------------------------------
+# CoreStorageAdapter
+# ---------------------------------------------------------------------------
+
+
+def test_core_adapter_round_trip(tmp_path) -> None:
+    from whoosh.filedb.filestore import FileStorage as CoreFileStorage
+
+    core = CoreFileStorage(str(tmp_path))
+    adapter = CoreStorageAdapter(core)
+    adapter.write("segment.dat", b"segdata")
+    assert adapter.read("segment.dat") == b"segdata"
+
+
+def test_core_adapter_exists(tmp_path) -> None:
+    from whoosh.filedb.filestore import FileStorage as CoreFileStorage
+
+    core = CoreFileStorage(str(tmp_path))
+    adapter = CoreStorageAdapter(core)
+    adapter.write("exists.dat", b"x")
+    assert adapter.exists("exists.dat") is True
+    assert adapter.exists("missing.dat") is False
+
+
+def test_core_adapter_delete(tmp_path) -> None:
+    from whoosh.filedb.filestore import FileStorage as CoreFileStorage
+
+    core = CoreFileStorage(str(tmp_path))
+    adapter = CoreStorageAdapter(core)
+    adapter.write("del.dat", b"tmp")
+    assert adapter.exists("del.dat") is True
+    adapter.delete("del.dat")
+    assert adapter.exists("del.dat") is False
+
+
+def test_core_adapter_delete_missing_is_noop(tmp_path) -> None:
+    from whoosh.filedb.filestore import FileStorage as CoreFileStorage
+
+    core = CoreFileStorage(str(tmp_path))
+    adapter = CoreStorageAdapter(core)
+    adapter.delete("missing.dat")  # should not raise
+
+
+def test_core_adapter_list_keys(tmp_path) -> None:
+    from whoosh.filedb.filestore import FileStorage as CoreFileStorage
+
+    core = CoreFileStorage(str(tmp_path))
+    adapter = CoreStorageAdapter(core)
+    adapter.write("a.dat", b"1")
+    adapter.write("b.dat", b"2")
+    keys = adapter.list_keys()
+    assert "a.dat" in keys
+    assert "b.dat" in keys
+
+
+def test_core_adapter_is_sync_provider() -> None:
+    from whoosh.filedb.filestore import RamStorage
+
+    core = RamStorage()
+    adapter = CoreStorageAdapter(core)
+    assert isinstance(adapter, SyncStorageProvider)
 
 
 # ---------------------------------------------------------------------------
