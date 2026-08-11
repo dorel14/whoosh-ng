@@ -4042,6 +4042,9 @@ vector = [
 watch = [
     { name = "watchdog" },
 ]
+yaml = [
+    { name = "pyyaml" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -4075,6 +4078,7 @@ requires-dist = [
     { name = "pytest-benchmark", marker = "extra == 'benchmark'", specifier = ">=4" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6" },
     { name = "python-semantic-release", marker = "extra == 'dev'", specifier = ">=10.5" },
+    { name = "pyyaml", marker = "extra == 'yaml'" },
     { name = "rapidfuzz", marker = "extra == 'fuzzy'" },
     { name = "re2", marker = "extra == 'profiling'" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11" },
@@ -4085,7 +4089,7 @@ requires-dist = [
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'api'" },
     { name = "watchdog", marker = "extra == 'watch'" },
 ]
-provides-extras = ["models", "vector", "hnsw", "faiss", "embeddings", "fastembed", "async", "sqlite", "postgres", "s3", "watch", "fuzzy", "phonetic", "lmdb", "api", "metrics", "dev", "benchmark", "profiling", "fast-stemming"]
+provides-extras = ["models", "vector", "hnsw", "faiss", "embeddings", "fastembed", "async", "sqlite", "postgres", "s3", "watch", "fuzzy", "phonetic", "lmdb", "yaml", "api", "metrics", "dev", "benchmark", "profiling", "fast-stemming"]
 
 [[package]]
 name = "win32-setctime"

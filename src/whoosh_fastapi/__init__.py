@@ -175,11 +175,19 @@ try:
                 while True:
                     payload = await websocket.receive_json()
                     query = payload.get("q", "")
-                    limit = int(payload.get("limit", 10))
+                    limit_raw = payload.get("limit", 10)
+                    try:
+                        limit = int(limit_raw)
+                    except (TypeError, ValueError):
+                        logger.warning("Invalid 'limit' value in WebSocket: %s", limit_raw)
+                        await websocket.send_json(
+                            {"error": "Invalid 'limit' value. Must be an integer."}
+                        )
+                        continue
                     if autocomplete is None:
                         await websocket.send_json({"suggestions": []})
                     else:
-                        hits = autocomplete.search(query, limit=limit)
+                        hits = await run_sync(autocomplete.search, query, limit=limit)
                         await websocket.send_json({"suggestions": [hit.text for hit in hits]})
             except WebSocketDisconnect:
                 logger.info("WebSocket client disconnected from autocomplete.")
