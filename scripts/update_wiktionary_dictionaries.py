@@ -133,20 +133,27 @@ def _stream_jsonl(source: str):
                 yield json.loads(raw_line)
 
 
-def _extract_synonyms(entry: dict[str, Any]) -> tuple[str, str, list[str]] | None:
-    """Extract a single (word, lang, synonyms) triple from a kaikki.org entry.
+def _clean_str_list(values: Any) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    return [str(v) for v in values if isinstance(v, str) and v and " " not in v]
 
-    Args:
-        entry: A parsed JSON object from the kaikki.org JSON Lines file.
+
+def _extract_entry(entry: dict[str, Any]) -> dict[str, Any] | None:
+    """Extract a normalized dictionary entry from a kaikki.org JSON object.
 
     Returns:
-        A tuple of (word, lang_code, synonyms) or None if the entry should
+        A normalized dict with ``word``, ``lang``, ``pos``, ``s``, ``n``,
+        ``definition``, and ``forms`` keys, or ``None`` if the entry should
         be skipped.
     """
     word = entry.get("word")
     lang = entry.get("lang")
     pos = entry.get("pos")
     synonyms = entry.get("s")
+    antonyms = entry.get("n")
+    definition = entry.get("gloss") or entry.get("definition")
+    forms = entry.get("forms")
 
     if not word or not isinstance(word, str):
         return None
@@ -157,21 +164,29 @@ def _extract_synonyms(entry: dict[str, Any]) -> tuple[str, str, list[str]] | Non
     if lang not in SUPPORTED_LANGS:
         return None
 
-    if pos not in _ALLOWED_POS:
+    if pos is not None and pos not in _ALLOWED_POS:
         return None
 
-    if not synonyms or not isinstance(synonyms, list):
+    clean_synonyms = _clean_str_list(synonyms)
+    clean_antonyms = _clean_str_list(antonyms)
+    clean_forms = _clean_str_list(forms)
+
+    if not clean_synonyms and not clean_antonyms:
         return None
 
-    clean_synonyms = [str(s) for s in synonyms if isinstance(s, str) and s and " " not in s]
-    if not clean_synonyms:
-        return None
-
-    return str(word), str(lang), clean_synonyms
+    return {
+        "word": str(word),
+        "lang": str(lang),
+        "pos": str(pos) if pos else "",
+        "s": clean_synonyms,
+        "n": clean_antonyms,
+        "definition": str(definition) if definition else "",
+        "forms": clean_forms,
+    }
 
 
 def _update_language(lang: str, output_dir: str, source: str) -> dict[str, Any]:
-    """Process the JSONL source and write the synonym file for ``lang``.
+    """Process the JSONL source and write the dictionary file for ``lang``.
 
     Args:
         lang: Two-letter language code (e.g. ``"fr"``).
@@ -182,35 +197,29 @@ def _update_language(lang: str, output_dir: str, source: str) -> dict[str, Any]:
         A manifest entry dict for the language.
     """
     output_path = os.path.join(output_dir, f"{lang}.json")
-    word_map: dict[str, list[str]] = {}
+    entries: list[dict[str, Any]] = []
     entry_count = 0
     skipped_count = 0
 
-    for entry in _stream_jsonl(source):
-        result = _extract_synonyms(entry)
-        if result is None:
+    for raw_entry in _stream_jsonl(source):
+        entry = _extract_entry(raw_entry)
+        if entry is None:
             skipped_count += 1
             continue
-        word, entry_lang, synonyms = result
-        if entry_lang != lang:
+        if entry["lang"] != lang:
             skipped_count += 1
             continue
-        if word not in word_map:
-            word_map[word] = []
-        word_map[word].extend(synonyms)
+        entries.append(entry)
         entry_count += 1
-
-    # Deduplicate synonyms per word
-    deduped = {word: sorted(set(syns)) for word, syns in word_map.items()}
 
     os.makedirs(output_dir, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
-        for word, syns in deduped.items():
-            f.write(json.dumps({"word": word, "s": syns}, ensure_ascii=False) + "\n")
+        for entry in entries:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
     logger.info(
         "Wrote %d entries to %s (%d skipped)",
-        len(deduped),
+        len(entries),
         output_path,
         skipped_count,
     )
@@ -220,7 +229,7 @@ def _update_language(lang: str, output_dir: str, source: str) -> dict[str, Any]:
         "lang": lang,
         "name": SUPPORTED_LANGS[lang],
         "file": f"{lang}.json",
-        "entries": len(deduped),
+        "entries": len(entries),
         "size_bytes": file_size,
         "updated_at": datetime.now(UTC).isoformat(),
     }

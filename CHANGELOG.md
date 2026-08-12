@@ -51,8 +51,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `it.json` sample dictionaries and `manifest.json` for the Wiktionary provider.
 - **SynonymManager.import_wiktionary()**: import synonyms from a Wiktionary
   JSON Lines dictionary file via `SynonymManager.import_wiktionary(path)`.
-- **Documentation** (`website/docs/modern/synonyms.md`): dedicated synonyms guide
-  covering all providers, the Wiktionary update workflow, and integration examples.
+ - **Documentation** (`website/docs/modern/synonyms.md`): dedicated synonyms guide
+   covering all providers, the Wiktionary update workflow, and integration examples.
+- **Wiktionary dictionary indexer** (`src/whoosh_modern/linguistics/wiktionary_indexer.py`):
+  `WiktionaryIndexer` builds a Whoosh-NG full-text index from any `DataSource`
+  (e.g. `JSONSource`), with a fixed schema exposing `word`, `definition`,
+  `synonyms`, `antonyms`, `forms`, `pos`, and `language` fields, plus
+  `build_index(source, language)` and `search(query, language, limit)`.
+- **Extended dictionary format**: `update_wiktionary_dictionaries.py` now writes
+  `definition`, `n` (antonyms), and `forms` alongside synonyms, producing
+  richer JSON Lines dictionaries for the indexer.
+- **Updated sample dictionaries**: `fr.json`, `en.json`, `de.json`, `es.json`,
+  `it.json` now include definitions, antonyms, and forms.
+- **Tests** (`tests/linguistics/test_wiktionary_indexer.py`): 5 tests covering
+  build+search, language filtering, metadata returned, empty results, and
+  all-languages indexing.
 
 ### Changed
 - Renamed distribution from `whoosh-reloaded` to **`whoosh-ng`**. The import

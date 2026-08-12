@@ -1,4 +1,4 @@
-"""Whoosh-NG linguistic engine: synonyms, stemmers, and language-specific analyzers.
+"""Whoosh-NG linguistic engine: synonyms, stemmers, language detection, and dictionary indexing.
 
 Author: dorel14
 Version: 3.0.0
@@ -24,6 +24,7 @@ from whoosh_modern.linguistics.synonyms import (
     SynonymProvider,
     YAMLSynonymProvider,
 )
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
 
 __all__ = [
     "SynonymProvider",
@@ -35,6 +36,7 @@ __all__ = [
     "SynonymManager",
     "SynonymExpansionMiddleware",
     "LANG_SYNONYMS",
+    "WiktionaryIndexer",
     "FrenchAnalyzer",
     "EnglishAnalyzer",
     "GermanAnalyzer",

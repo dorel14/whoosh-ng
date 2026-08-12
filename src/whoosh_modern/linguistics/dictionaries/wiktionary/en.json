@@ -1,5 +1,5 @@
-{"word": "car", "s": ["automobile", "vehicle"]}
-{"word": "house", "s": ["home", "residence"]}
-{"word": "computer", "s": ["pc", "machine"]}
-{"word": "book", "s": ["publication", "work"]}
-{"word": "job", "s": ["employment", "work"]}
+{"word": "car", "lang": "en", "pos": "noun", "s": ["automobile", "vehicle"], "n": [], "definition": "A road vehicle powered by an engine.", "forms": ["cars"]}
+{"word": "house", "lang": "en", "pos": "noun", "s": ["home", "residence"], "n": [], "definition": "A building for human habitation.", "forms": ["houses"]}
+{"word": "computer", "lang": "en", "pos": "noun", "s": ["pc", "machine"], "n": [], "definition": "An electronic device for storing and processing data.", "forms": ["computers"]}
+{"word": "book", "lang": "en", "pos": "noun", "s": ["publication", "work"], "n": [], "definition": "A written or printed work consisting of pages.", "forms": ["books"]}
+{"word": "job", "lang": "en", "pos": "noun", "s": ["employment", "work"], "n": [], "definition": "A paid position of regular employment.", "forms": ["jobs"]}

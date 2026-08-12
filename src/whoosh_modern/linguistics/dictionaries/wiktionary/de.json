@@ -1,4 +1,4 @@
-{"word": "auto", "s": ["wagen", "fahrzeug"]}
-{"word": "haus", "s": ["wohnung", "gebäude"]}
-{"word": "buch", "s": ["werk", "publikation"]}
-{"word": "arbeit", "s": ["job", "beruf"]}
+{"word": "auto", "lang": "de", "pos": "noun", "s": ["wagen", "fahrzeug"], "n": [], "definition": "Ein Kraftfahrzeug mit vier Rädern.", "forms": ["autos"]}
+{"word": "haus", "lang": "de", "pos": "noun", "s": ["wohnung", "gebäude"], "n": [], "definition": "Ein Gebäude zum Wohnen.", "forms": ["häuser"]}
+{"word": "buch", "lang": "de", "pos": "noun", "s": ["werk", "publikation"], "n": [], "definition": "Ein gebundenes Buch aus bedruckten Seiten.", "forms": ["bücher"]}
+{"word": "arbeit", "lang": "de", "pos": "noun", "s": ["job", "beruf"], "n": [], "definition": "Eine bezahlte berufliche Tätigkeit.", "forms": ["arbeiten"]}

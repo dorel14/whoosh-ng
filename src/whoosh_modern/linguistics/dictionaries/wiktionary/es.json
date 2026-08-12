@@ -1,4 +1,4 @@
-{"word": "coche", "s": ["automóvil", "vehículo"]}
-{"word": "casa", "s": ["hogar", "residencia"]}
-{"word": "libro", "s": ["obra", "publicación"]}
-{"word": "trabajo", "s": ["empleo", "ocupación"]}
+{"word": "coche", "lang": "es", "pos": "noun", "s": ["automóvil", "vehículo"], "n": [], "definition": "Vehículo de motor con cuatro ruedas.", "forms": ["coches"]}
+{"word": "casa", "lang": "es", "pos": "noun", "s": ["hogar", "residencia"], "n": [], "definition": "Edificio para habitar.", "forms": ["casas"]}
+{"word": "libro", "lang": "es", "pos": "noun", "s": ["obra", "publicación"], "n": [], "definition": "Conjunto de páginas impresas y encuadernadas.", "forms": ["libros"]}
+{"word": "trabajo", "lang": "es", "pos": "noun", "s": ["empleo", "ocupación"], "n": [], "definition": "Actividad laboral remunerada.", "forms": ["trabajos"]}

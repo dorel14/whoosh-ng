@@ -1,5 +1,5 @@
-{"word": "voiture", "s": ["automobile", "véhicule"]}
-{"word": "ordinateur", "s": ["pc", "machine"]}
-{"word": "maison", "s": ["domicile", "résidence"]}
-{"word": "livre", "s": ["ouvrage", "bouquin"]}
-{"word": "travail", "s": ["emploi", "job"]}
+{"word": "voiture", "lang": "fr", "pos": "noun", "s": ["automobile", "véhicule"], "n": [], "definition": "Véhicule à quatre roues pour le transport de personnes.", "forms": ["voitures"]}
+{"word": "ordinateur", "lang": "fr", "pos": "noun", "s": ["pc", "machine"], "n": [], "definition": "Appareil électronique de traitement de l'information.", "forms": ["ordinateurs"]}
+{"word": "maison", "lang": "fr", "pos": "noun", "s": ["domicile", "résidence"], "n": [], "definition": "Bâtiment destiné à l'habitation.", "forms": ["maisons"]}
+{"word": "livre", "lang": "fr", "pos": "noun", "s": ["ouvrage", "bouquin"], "n": [], "definition": "Ensemble de pages imprimées reliées.", "forms": ["livres"]}
+{"word": "travail", "lang": "fr", "pos": "noun", "s": ["emploi", "job"], "n": [], "definition": "Activité professionnelle rémunérée.", "forms": ["travaux", "travaille"]}
