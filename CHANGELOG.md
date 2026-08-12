@@ -37,8 +37,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   autocomplete, vector, and health endpoints.
 - **Admin UI plugin** (`whoosh_admin`): dashboard app factory `create_admin_app`.
 - **Observability**: `PrometheusMiddleware` exposed via the `metrics` extra.
-- Entry points under `whoosh.plugins` for autocomplete, vector, fastapi,
-  observability, and admin.
+ - Entry points under `whoosh.plugins` for autocomplete, vector, fastapi,
+   observability, and admin.
+- **Wiktionary synonym provider** (`src/whoosh_modern/linguistics/synonyms/wiktionary_provider.py`):
+  `WiktionarySynonymProvider` loads large-scale multilingual synonym dictionaries
+  from kaikki.org JSON Lines files, with POS filtering and space-in-word
+  exclusion.
+- **Wiktionary dictionary update script** (`scripts/update_wiktionary_dictionaries.py`):
+  downloads `kaikki.org-dictionary-all.jsonl`, extracts synonyms by language, and
+  writes compact per-language JSON Lines files into
+  `src/whoosh_modern/linguistics/dictionaries/wiktionary/`.
+- **Pre-generated dictionaries**: `fr.json`, `en.json`, `de.json`, `es.json`,
+  `it.json` sample dictionaries and `manifest.json` for the Wiktionary provider.
+- **SynonymManager.import_wiktionary()**: import synonyms from a Wiktionary
+  JSON Lines dictionary file via `SynonymManager.import_wiktionary(path)`.
+- **Documentation** (`website/docs/modern/synonyms.md`): dedicated synonyms guide
+  covering all providers, the Wiktionary update workflow, and integration examples.
 
 ### Changed
 - Renamed distribution from `whoosh-reloaded` to **`whoosh-ng`**. The import

@@ -184,6 +184,45 @@ class TestSynonymManager:
         assert "en" in LANG_SYNONYMS
         assert "car" in LANG_SYNONYMS["en"]
 
+    def test_import_wiktionary(self):
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False, encoding="utf-8"
+        ) as f:
+            f.write(
+                json.dumps(
+                    {"word": "voiture", "pos": "noun", "s": ["automobile", "véhicule"]}
+                )
+                + "\n"
+            )
+            f.write(json.dumps({"word": "maison", "pos": "noun", "s": ["domicile"]}) + "\n")
+            path = f.name
+        try:
+            manager = SynonymManager()
+            manager.import_wiktionary(path)
+            assert set(manager.get_synonyms("voiture")) == {"automobile", "véhicule"}
+            assert manager.get_synonyms("maison") == ["domicile"]
+        finally:
+            os.unlink(path)
+
+    def test_import_wiktionary_skips_invalid_entries(self):
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False, encoding="utf-8"
+        ) as f:
+            f.write(json.dumps({"word": "my car", "pos": "noun", "s": ["automobile"]}) + "\n")
+            f.write(json.dumps({"word": "", "pos": "noun", "s": ["x"]}) + "\n")
+            f.write(json.dumps({"word": "run", "pos": "suffix", "s": ["race"]}) + "\n")
+            f.write(json.dumps({"word": "voiture", "pos": "noun", "s": ["automobile"]}) + "\n")
+            path = f.name
+        try:
+            manager = SynonymManager()
+            manager.import_wiktionary(path)
+            assert manager.get_synonyms("my car") == []
+            assert manager.get_synonyms("") == []
+            assert manager.get_synonyms("run") == []
+            assert set(manager.get_synonyms("voiture")) == {"automobile"}
+        finally:
+            os.unlink(path)
+
 
 class TestSynonymExpansionMiddleware:
     def test_expand_query(self):

@@ -5,6 +5,7 @@ Provides:
 - StaticSynonymProvider (in-memory)
 - YAMLSynonymProvider (YAML file)
 - JSONSynonymProvider (JSON file)
+- WiktionarySynonymProvider (kaikki.org JSON Lines)
 - SQLiteSynonymStore (persistent SQLite-backed)
 - SynonymCompiler (precompile raw synonym data)
 - SynonymManager (CRUD + import/export)
@@ -27,6 +28,9 @@ from whoosh_modern.linguistics.synonyms.provider import (
     SynonymProvider,
 )
 from whoosh_modern.linguistics.synonyms.store import SQLiteSynonymStore
+from whoosh_modern.linguistics.synonyms.wiktionary_provider import (
+    WiktionarySynonymProvider,
+)
 from whoosh_modern.linguistics.synonyms.yaml_provider import YAMLSynonymProvider
 
 __all__ = [
@@ -34,6 +38,7 @@ __all__ = [
     "StaticSynonymProvider",
     "YAMLSynonymProvider",
     "JSONSynonymProvider",
+    "WiktionarySynonymProvider",
     "SQLiteSynonymStore",
     "SynonymCompiler",
     "SynonymManager",

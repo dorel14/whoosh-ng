@@ -329,6 +329,7 @@ with MiddlewareSearcher(ix.searcher(), chain) as searcher:
 
 ## See Also
 
+- [Synonyms](synonyms.md) — Synonym providers, manager, and Wiktionary dictionaries
 - [Stemming Guide](stemming-providers.md) — Stemmer providers and language analyzers
 - [Middleware Guide](middleware-pipeline.md) — Middleware pipeline integration
 - [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers

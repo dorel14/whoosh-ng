@@ -81,6 +81,21 @@ class SynonymManager:
         provider = JSONSynonymProvider(path)
         self._merge(provider)
 
+    def import_wiktionary(self, path: str) -> None:
+        """Import synonyms from a Wiktionary JSON Lines dictionary.
+
+        Args:
+            path: Filesystem path to the kaikki.org JSON Lines dictionary
+                file for a given language (e.g.
+                ``dictionaries/wiktionary/fr.json``).
+        """
+        from whoosh_modern.linguistics.synonyms.wiktionary_provider import (
+            WiktionarySynonymProvider,
+        )
+
+        provider = WiktionarySynonymProvider(path)
+        self._merge(provider)
+
     def export_json(self, path: str) -> None:
         """Export synonyms to a JSON file.
 
