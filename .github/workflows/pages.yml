@@ -4,13 +4,12 @@ name: Deploy GitHub Pages
 # generation has completed.
 #
 # Workflow chain on master:
-#   1. Semantic Release → version bump + tag → pushes to master
-#   2. Sync Version → syncs version strings → pushes to master
-#   3. Generate Changelog → changelog + API docs → pushes to master
-#   4. Deploy GitHub Pages (this workflow) → builds & deploys LAST
+#   1. CI completes on dev PR or dev push
+#   2. Semantic Release (unified) → version bump + tag + sync + changelog + API docs + llms → pushes to master
+#   3. Deploy GitHub Pages (this workflow) → builds & deploys LAST
 #
 # Triggers:
-#   - repository_dispatch from "Generate Changelog" (primary — the changelog
+#   - repository_dispatch from "Semantic Release" (primary — the release
 #     workflow explicitly dispatches this event when it finishes, ensuring
 #     Pages deploys after all version sync + changelog generation)
 #   - workflow_dispatch (manual trigger for debugging)

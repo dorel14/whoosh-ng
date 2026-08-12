@@ -14680,28 +14680,171 @@ storage:
 }
 ```
 
-## Using ConfigEngine with SearchApplication
+## Complete YAML examples
+
+### Minimal config
+
+```yaml
+# whoosh-ng.yml
+index: my_index
+fields:
+  title:
+    type: text
+    stored: true
+storage:
+  type: file
+  path: ./index
+```
+
+### E-commerce catalog with CSV source
+
+```yaml
+# whoosh-ng.yml
+index: products
+fields:
+  sku:
+    type: text
+    stored: true
+    unique: true
+  name:
+    type: text
+    language: fr
+    stemming: true
+    stored: true
+  description:
+    type: text
+    language: fr
+    stemming: true
+  price:
+    type: numeric
+    sortable: true
+    faceted: true
+  category:
+    type: text
+    faceted: true
+  published_at:
+    type: datetime
+    faceted: true
+search:
+  fuzzy:
+    enabled: true
+    distance: 2
+data_source:
+  type: csv
+  path: Datas/products.csv
+  delimiter: ","
+  encoding: utf-8
+  id_field: sku
+storage:
+  type: file
+  path: ./index
+```
+
+### Layered configuration (base + instance + runtime)
+
+```yaml
+# whoosh-ng.yml  (application layer)
+index: app
+fields:
+  title:
+    type: text
+    stemming: true
+search:
+  fuzzy:
+    enabled: true
+    distance: 2
+storage:
+  type: file
+  path: ./index
+```
+
+```yaml
+# whoosh-ng.local.yml  (instance layer)
+index: app-staging
+storage:
+  type: file
+  path: ./index-staging
+```
 
 ```python
-from whoosh_modern import SearchApplication
+# runtime override in code
+engine = ConfigEngine()
+engine.load("whoosh-ng.yml", priority="application")
+engine.load("whoosh-ng.local.yml", priority="instance")
+engine.merge({"search": {"fuzzy": {"distance": 3}}}, priority="runtime")
+app = engine.build()
+```
+
+## Complete JSON examples
+
+### Minimal config
+
+```json
+{
+  "index": "my_index",
+  "fields": {
+    "title": {"type": "text", "stored": true}
+  },
+  "storage": {"type": "file", "path": "./index"}
+}
+```
+
+### Full-stack config with SQL source and hybrid storage
+
+```json
+{
+  "index": "customers",
+  "fields": {
+    "customer_id": {"type": "numeric", "stored": true, "sortable": true},
+    "first_name": {"type": "text", "language": "en", "stemming": true, "stored": true},
+    "last_name": {"type": "text", "language": "en", "stemming": true, "stored": true},
+    "city": {"type": "text", "language": "en", "stemming": true, "stored": true},
+    "country": {"type": "text", "stored": true},
+    "signup_date": {"type": "datetime", "faceted": true}
+  },
+  "search": {
+    "fuzzy": {"enabled": true, "distance": 2},
+    "highlight": {"enabled": true, "fragment_size": 200}
+  },
+  "data_source": {
+    "type": "sql",
+    "connection_string": "sqlite:///benchmark_data.db",
+    "query": "SELECT * FROM customers",
+    "id_field": "customer_id"
+  },
+  "storage": {
+    "type": "hybrid",
+    "local_path": "./index-cache",
+    "remote": {
+      "type": "s3",
+      "bucket": "my-bucket",
+      "prefix": "whoosh-indexes/"
+    }
+  }
+}
+```
+
+## Using ConfigEngine.build() for zero-code setup
+
+```python
 from whoosh_modern.config import ConfigEngine
-from whoosh_modern.data_sources import CSVSource
 
 engine = ConfigEngine()
 engine.load("whoosh-ng.yml")
-config = engine.get_config()
-
-source = CSVSource(
-    path="products.csv",
-    delimiter=",",
-    encoding=config.data_source.encoding if config.data_source else "utf-8",
-)
-
-app = SearchApplication(
-    source=source,
-    index_name=config.index,
-)
+app = engine.build()
 app.build()
+
+# Index documents through the underlying writer/view API
+app._view.index([
+    {"title": "Premier cours de Python", "body": "..."},
+    {"title": "Whoosh-NG avancé", "body": "..."},
+])
+
+# Or use the source directly for streaming/batch indexing
+for doc in app._source.iter_documents():
+    app._view.index(doc)
+
+results = app._searcher.search("python")
 ```
 
 ## Module reference

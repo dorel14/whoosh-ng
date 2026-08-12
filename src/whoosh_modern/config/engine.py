@@ -18,6 +18,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from whoosh_modern.config.engines import (
+    DataSourceEngine,
+    StorageEngine,
+)
 from whoosh_modern.config.loader import load_json, load_yaml
 from whoosh_modern.config.models import WhooshNGConfig
 
@@ -33,7 +37,7 @@ class ConfigEngine:
         >>> engine = ConfigEngine()
         >>> engine.load("whoosh-ng.yml")
         >>> engine.load("whoosh-ng.local.yml", priority="instance")
-        >>> config = engine.get_config()
+        >>> app = engine.build()
 
     Attributes:
         _config: The current merged configuration.
@@ -45,6 +49,7 @@ class ConfigEngine:
         """Initialize an empty configuration engine."""
         self._config: WhooshNGConfig = WhooshNGConfig()
         self._layers: list[tuple[str, dict[str, Any]]] = []
+        self._app_cache: Any = None
 
     def load(self, path: str | Path, priority: str = "application") -> None:
         """Load a configuration file and merge it into the current config.
@@ -98,10 +103,34 @@ class ConfigEngine:
         """
         return self._config
 
+    def build(self) -> Any:
+        """Build a complete Whoosh-NG application from the merged configuration.
+
+        Orchestrates the specialized engines to construct a ready-to-use
+        :class:`whoosh_modern.application.SearchApplication`.
+
+        Returns:
+            A configured :class:`whoosh_modern.application.SearchApplication`
+            instance.
+
+        Raises:
+            ValueError: If the configuration cannot be resolved into a valid
+                application (e.g. unsupported data source or storage type).
+        """
+        if self._app_cache is not None:
+            return self._app_cache
+        source = DataSourceEngine(self._config).build()
+        storage = StorageEngine(self._config).build()
+        from whoosh_modern.application import SearchApplication
+
+        self._app_cache = SearchApplication(source=source, storage=storage)
+        return self._app_cache
+
     def reset(self) -> None:
         """Reset the configuration engine to its default state."""
         self._config = WhooshNGConfig()
         self._layers.clear()
+        self._app_cache = None
 
     @staticmethod
     def _validate_priority(priority: str) -> None:
@@ -121,6 +150,7 @@ class ConfigEngine:
         for _, layer in sorted_layers:
             self._deep_merge(merged, layer)
         self._config = WhooshNGConfig(**merged)
+        self._app_cache = None
 
     @staticmethod
     def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> None:

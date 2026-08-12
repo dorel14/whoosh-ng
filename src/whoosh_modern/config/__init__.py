@@ -1,11 +1,31 @@
 """Whoosh-NG modern configuration package.
 
-Author: dorel14
+Author: SoniqueBay Team
 Version: 3.0.0
 """
 
 from __future__ import annotations
 
 from whoosh_modern.config.engine import ConfigEngine
+from whoosh_modern.config.engines import (
+    AnalyzerEngine,
+    APIEngine,
+    DataSourceEngine,
+    FacetEngine,
+    PluginEngine,
+    SchemaEngine,
+    SearchModelEngine,
+    StorageEngine,
+)
 
-__all__ = ["ConfigEngine"]
+__all__ = [
+    "AnalyzerEngine",
+    "APIEngine",
+    "ConfigEngine",
+    "DataSourceEngine",
+    "FacetEngine",
+    "PluginEngine",
+    "SchemaEngine",
+    "SearchModelEngine",
+    "StorageEngine",
+]
