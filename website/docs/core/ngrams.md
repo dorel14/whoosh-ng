@@ -1,6 +1,8 @@
 ---
 title: "N-grams"
-sidebar_position: 33
+sidebar_position: 8
+Module: whoosh.analysis
+Version: 2.7.4
 ---
 
 # N-grams

@@ -1,8 +1,20 @@
-"""Update Wiktionary synonym dictionaries from kaikki.org.
+"""Update Wiktionary dictionaries from kaikki.org.
 
 Downloads ``kaikki.org-dictionary-all.jsonl`` from https://kaikki.org/,
-extracts synonyms by language, and writes compact per-language JSON Lines
-files into ``src/whoosh_modern/linguistics/dictionaries/wiktionary/``.
+extracts dictionary entries by language, and writes compact per-language
+JSON Lines files into ``src/whoosh_modern/linguistics/dictionaries/wiktionary/``.
+
+Each output line contains:
+
+    {
+        "word": "<headword>",
+        "lang": "<lang_code>",
+        "pos": "<part_of_speech>",
+        "s": ["<synonym>", ...],
+        "n": ["<antonym>", ...],
+        "definition": "<gloss text>",
+        "forms": ["<inflection>", ...]
+    }
 
 Usage::
 

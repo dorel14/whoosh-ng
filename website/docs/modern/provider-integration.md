@@ -342,7 +342,7 @@ The provider operates independently of Whoosh's index/searcher.
 ## See Also
 
 - [Storage Providers Guide](storage-providers.md) — Storage backend integration
-- [Stemming Guide](stemming.md) — Stemmer provider integration
+- [Stemming Guide](../core/stemming.md) — Stemmer provider integration
 - [Vector Search Guide](vector.md) — Vector provider integration
 - [Autocomplete Guide](autocomplete.md) — Autocomplete provider integration
 - [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters

@@ -343,7 +343,7 @@ Le provider fonctionne indépendamment de l'index/searcher Whoosh.
 ## Voir Aussi
 
 - [Guide des Fournisseurs de Stockage](storage-providers.md) — Intégration des backends de stockage
-- [Guide des Stemmers](stemming-providers.md) — Intégration des fournisseurs de stemmers
+- [Guide des Stemmers](stemmers-fournisseurs.md) — Intégration des fournisseurs de stemmers
 - [Guide de Recherche Vectorielle](vector.md) — Intégration des fournisseurs de vecteurs
 - [Guide d'Autocomplétion](autocomplete-providers.md) — Intégration des fournisseurs d'autocomplétion
 - [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers

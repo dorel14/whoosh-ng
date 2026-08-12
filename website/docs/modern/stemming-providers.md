@@ -501,7 +501,7 @@ analyzer = StemmingAnalyzer(stemmer=stemmer)
 
 ## See Also
 
-- [Stemming and Stop Words Guide](stemming.md) — Classic Whoosh stemming guide
+- [Stemming and Stop Words Guide](../core/stemming.md) — Classic Whoosh stemming guide
 - [Synonyms & Linguistics Guide](linguistics.md) — Synonym expansion engine
 - [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [API: Modern](../api/modern.md) — Full API reference for analysis extensions

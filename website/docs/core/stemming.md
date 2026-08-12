@@ -1,6 +1,8 @@
 ---
 title: "Stemming and Stop Words"
-sidebar_position: 32
+sidebar_position: 7
+Module: whoosh.analysis, whoosh.lang
+Version: 2.7.4
 ---
 
 # Stemming and Stop Words

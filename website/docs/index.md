@@ -51,9 +51,9 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[Monitoring](/modern/monitoring)** — Metrics and observability
 - **[Performance](/modern/performance)** — Benchmarking and optimization
 - **[Linguistics & Synonyms](/modern/linguistics)** — SynonymManager
-- **[Stemming](/modern/stemming)** — Language stemmers
+- **[Stemming](/core/stemming)** — Language stemmers
 - **[Stemmer Providers](/modern/stemming-providers)** — PyStemmer backends
-- **[N-grams](/modern/ngrams)** — N-gram tokenization
+- **[N-grams](/core/ngrams)** — N-gram tokenization
 - **[Storage Providers](/modern/storage-providers)** — Hybrid storage backends
 - **[Provider Integration](/modern/provider-integration)** — Complete pipeline guide for all providers
 
