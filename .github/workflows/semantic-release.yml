@@ -34,6 +34,9 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GH_TOKEN }}
+        # GH_TOKEN is a personal access token (PAT) with repo/contents:write scopes.
+        # GITHUB_TOKEN is GitHub's built-in token with more limited permissions.
+        # We use GH_TOKEN here because semantic-release needs to push tags and commits.
 
       # For workflow_run triggers: verify that src/ or pyproject.toml changed
       # in the commit that triggered CI. This prevents semantic-release from
@@ -87,8 +90,8 @@ jobs:
       - name: Set up UV
         uses: astral-sh/setup-uv@v5
 
-      - name: Install semantic-release
-        run: uv pip install --system python-semantic-release
+      - name: Install semantic-release and pydoctor
+        run: uv pip install --system python-semantic-release pydoctor
 
       - name: Determine release version
         id: version
