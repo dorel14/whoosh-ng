@@ -12,8 +12,9 @@ and generates HTML documentation from docstrings.
 
 :::note
 If the embedded documentation does not display, the API docs may not have
-been generated yet in this deployment. [View on GitHub](https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs) for the full API documentation, or check the
-[API modules list](#api-modules) below for a structured overview.
+been generated yet in this deployment. [View on GitHub](https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs)
+for the full API documentation, or check the
+[API modules list](#api-modules) below.
 :::
 
 ## API Modules
