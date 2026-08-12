@@ -38,9 +38,7 @@ def app_config() -> WhooshNGConfig:
     return WhooshNGConfig(
         index="products",
         fields={
-            "title": FieldConfig(
-                type="text", language="fr", stemming=True, stored=True
-            ),
+            "title": FieldConfig(type="text", language="fr", stemming=True, stored=True),
             "price": FieldConfig(type="numeric", sortable=True),
             "published": FieldConfig(type="datetime", faceted=True),
         },
@@ -168,8 +166,7 @@ class TestAPIEngine:
     @pytest.mark.skipif(
         True,
         reason=(
-            "FastAPI is installed in the test environment; "
-            "test the endpoint registration instead."
+            "FastAPI is installed in the test environment; test the endpoint registration instead."
         ),
     )
     def test_build_requires_fastapi(self, app_config: WhooshNGConfig) -> None:

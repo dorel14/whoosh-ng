@@ -4,7 +4,8 @@ on the real customers CSV, using the exact same indexing/searching path as
 
 Run with the same options as ``customers_csv``::
 
-    python -m benchmark --spec customers_config_engine --index --search --report csv --upto 100000 --batch-size 500 --profile
+    python -m benchmark --spec customers_config_engine --index --search --report csv --upto 100000 \
+      --batch-size 500 --profile
 """
 
 from __future__ import annotations

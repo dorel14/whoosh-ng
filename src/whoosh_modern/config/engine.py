@@ -125,6 +125,7 @@ class ConfigEngine:
         source = DataSourceEngine(self._config).build()
         storage = StorageEngine(self._config).build()
         from whoosh_modern.application import SearchApplication
+
         self._app_cache = SearchApplication(source=source, storage=storage)
         return self._app_cache
 

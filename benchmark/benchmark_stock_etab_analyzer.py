@@ -87,6 +87,7 @@ class BenchmarkStockEtabAnalyzer:
     def benchmark_indexing_default_analyzer(self, benchmark) -> None:
         """Indexing throughput with default analyzer."""
         import tempfile
+
         from whoosh import index
 
         source = SQLSource(
@@ -112,6 +113,7 @@ class BenchmarkStockEtabAnalyzer:
     def benchmark_indexing_french_stemmer(self, benchmark) -> None:
         """Indexing throughput with French stemmer on main text fields."""
         import tempfile
+
         from whoosh import index
 
         source = SQLSource(
@@ -121,7 +123,11 @@ class BenchmarkStockEtabAnalyzer:
             id_field="siret",
         )
         schema = source.discover_schema()
-        french_fields = ["denominationUsuelleEtablissement", "libelleCommuneEtablissement", "libellePaysEtrangerEtablissement"]
+        french_fields = [
+            "denominationUsuelleEtablissement",
+            "libelleCommuneEtablissement",
+            "libellePaysEtrangerEtablissement",
+        ]
         for name in french_fields:
             if name in schema:
                 schema[name].analyzer = FrenchAnalyzer()
@@ -177,6 +183,7 @@ class BenchmarkStockEtabAnalyzer:
     def benchmark_search_french_stemmer(self, benchmark) -> None:
         """Search latency with French stemmer."""
         import tempfile
+
         from whoosh import index, qparser
 
         source = SQLSource(
@@ -186,7 +193,11 @@ class BenchmarkStockEtabAnalyzer:
             id_field="siret",
         )
         schema = source.discover_schema()
-        french_fields = ["denominationUsuelleEtablissement", "libelleCommuneEtablissement", "libellePaysEtrangerEtablissement"]
+        french_fields = [
+            "denominationUsuelleEtablissement",
+            "libelleCommuneEtablissement",
+            "libellePaysEtrangerEtablissement",
+        ]
         for name in french_fields:
             if name in schema:
                 schema[name].analyzer = FrenchAnalyzer()
