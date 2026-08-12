@@ -200,7 +200,7 @@ class DataSourceEngine:
                 headers=ds_config.headers or None,
             )
         if source_type == "pandas":
-            return PandasSource(dataframe=None)
+            raise ValueError("Pandas data source requires an explicit dataframe configuration")
         if source_type == "parquet":
             path = ds_config.path
             if not path:

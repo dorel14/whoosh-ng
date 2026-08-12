@@ -10,6 +10,7 @@ from typing import Any
 
 import pytest
 
+from whoosh.fields import Schema
 from whoosh_modern.config.engine import ConfigEngine
 from whoosh_modern.config.engines import (
     AnalyzerEngine,
@@ -68,7 +69,7 @@ class TestSchemaEngine:
     def test_default_schema(self) -> None:
         engine = SchemaEngine(WhooshNGConfig())
         schema = engine.build()
-        assert isinstance(schema, type(schema))
+        assert isinstance(schema, Schema)
 
 
 class TestAnalyzerEngine:
@@ -163,17 +164,6 @@ class TestPluginEngine:
 
 
 class TestAPIEngine:
-    @pytest.mark.skipif(
-        True,
-        reason=(
-            "FastAPI is installed in the test environment; test the endpoint registration instead."
-        ),
-    )
-    def test_build_requires_fastapi(self, app_config: WhooshNGConfig) -> None:
-        engine = APIEngine(app_config)
-        with pytest.raises(ImportError, match="FastAPI plugin requires fastapi"):
-            engine.build(None)
-
     def test_build_app_registers_routes(self, app_config: WhooshNGConfig) -> None:
         pytest.importorskip("fastapi")
         engine = APIEngine(app_config)
