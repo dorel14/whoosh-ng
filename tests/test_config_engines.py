@@ -6,8 +6,6 @@ Version: 3.0.0
 
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
 
 from whoosh.fields import Schema

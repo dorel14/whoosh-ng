@@ -35,7 +35,6 @@ from whoosh_modern.config.models import WhooshNGConfig
 from whoosh_modern.data_sources import DataSource
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
 from whoosh_modern.data_sources.json import JSONSource
-from whoosh_modern.data_sources.pandas_ds import PandasSource
 from whoosh_modern.data_sources.parquet_ds import ParquetSource
 from whoosh_modern.data_sources.rest import RESTSource
 from whoosh_modern.data_sources.sql import SQLSource
@@ -68,19 +67,19 @@ class SchemaEngine:
         for name, field_config in self._config.fields.items():
             field_type = field_config.type.lower()
             if field_type == "text":
-                fields[name] = TEXT(stored=field_config.stored, sortable=field_config.sortable)
+                fields[name] = TEXT(stored=field_config.stored)
             elif field_type == "keyword":
-                fields[name] = KEYWORD(stored=field_config.stored, sortable=field_config.sortable)
+                fields[name] = KEYWORD(stored=field_config.stored)
             elif field_type == "numeric":
-                fields[name] = NUMERIC(stored=field_config.stored, sortable=field_config.sortable)
+                fields[name] = NUMERIC(stored=field_config.stored)
             elif field_type == "datetime":
-                fields[name] = DATETIME(stored=field_config.stored, sortable=field_config.sortable)
+                fields[name] = DATETIME(stored=field_config.stored)
             elif field_type == "boolean":
-                fields[name] = BOOLEAN(stored=field_config.stored, sortable=field_config.sortable)
+                fields[name] = BOOLEAN(stored=field_config.stored)
             elif field_type == "id":
-                fields[name] = ID(stored=field_config.stored, sortable=field_config.sortable)
+                fields[name] = ID(stored=field_config.stored)
             else:
-                fields[name] = TEXT(stored=field_config.stored, sortable=field_config.sortable)
+                fields[name] = TEXT(stored=field_config.stored)
         return Schema(**fields)
 
 
@@ -123,7 +122,7 @@ class AnalyzerEngine:
             return None
         if field_config.stopwords:
             return StandardAnalyzer()
-        return StandardAnalyzer(stoplist=[])
+        return StandardAnalyzer(stoplist=frozenset())
 
 
 class DataSourceEngine:

@@ -19,10 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from whoosh_modern.config.engines import (
-    AnalyzerEngine,
     DataSourceEngine,
-    FacetEngine,
-    SchemaEngine,
     StorageEngine,
 )
 from whoosh_modern.config.loader import load_json, load_yaml
