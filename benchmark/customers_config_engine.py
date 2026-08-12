@@ -10,24 +10,23 @@ Run with the same options as ``customers_csv``::
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import Any
 
 from benchmark import WhooshLikeSpec
 from whoosh_modern.config.engine import ConfigEngine as DirectConfigEngine
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
 
-BENCHMARK_DIR = os.path.dirname(os.path.abspath(__file__))
-CSV_PATH = os.path.join(BENCHMARK_DIR, "Datas", "customers-2000000.csv")
-YAML_PATH = os.path.join(BENCHMARK_DIR, "benchmark_data", "customers-whoosh-ng.yml")
+BENCHMARK_DIR = Path(__file__).resolve().parent
+CSV_PATH = BENCHMARK_DIR / "Datas" / "customers-2000000.csv"
+YAML_PATH = BENCHMARK_DIR / "benchmark_data" / "customers-whoosh-ng.yml"
 
 
 def _ensure_yaml() -> None:
-    os.makedirs(os.path.dirname(YAML_PATH), exist_ok=True)
-    if not os.path.exists(YAML_PATH):
-        with open(YAML_PATH, "w", encoding="utf-8") as f:
-            f.write(
-                f"""\
+    YAML_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if not YAML_PATH.exists():
+        YAML_PATH.write_text(
+            f"""\
 index: customers_config_engine
 fields:
   Customer_Id:
@@ -80,7 +79,7 @@ data_source:
   delimiter: ","
   encoding: utf-8
 """
-            )
+        )
 
 
 class CustomersConfigEngine(WhooshLikeSpec):
@@ -100,7 +99,7 @@ class CustomersConfigEngine(WhooshLikeSpec):
         ds_config = config.data_source
         assert ds_config is not None
         self._source = FastCSVSource(
-            path=ds_config.path or CSV_PATH,
+            path=ds_config.path or str(CSV_PATH),
             delimiter=ds_config.delimiter,
             encoding=ds_config.encoding,
             id_field="Customer Id",
