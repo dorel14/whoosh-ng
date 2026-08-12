@@ -121,7 +121,9 @@ class AnalyzerEngine:
         """
         if not field_config.stemming and not field_config.stopwords:
             return None
-        return StandardAnalyzer(stoplist=field_config.stopwords)
+        if field_config.stopwords:
+            return StandardAnalyzer()
+        return StandardAnalyzer(stoplist=[])
 
 
 class DataSourceEngine:
