@@ -105,8 +105,25 @@ jobs:
             echo "No release required: ${VERSION}"
           fi
 
+      - name: Should release?
+        id: should_release
+        run: |
+          if [ "${{ steps.skip.outputs.skip }}" == "true" ]; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping: release commit detected"
+          elif [ "${{ steps.skip_src.outputs.skip }}" == "true" ]; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping: no source changes in workflow_run"
+          elif [ "${{ steps.version.outputs.version }}" == "" ]; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping: no version detected"
+          else
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "Proceeding with release ${{ steps.version.outputs.version }}"
+          fi
+
       - name: Update docs & Release
-        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        if: steps.should_release.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -131,7 +148,7 @@ jobs:
           python -m semantic_release version --vcs-release
 
       - name: Publish to PyPI
-        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        if: steps.should_release.outputs.should_release == 'true'
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
@@ -148,11 +165,11 @@ jobs:
           uv publish --token "$PYPI_TOKEN"
 
       - name: Sync version strings
-        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        if: steps.should_release.outputs.should_release == 'true'
         run: python scripts/sync_version.py
 
       - name: Generate changelog and docs
-        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        if: steps.should_release.outputs.should_release == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -161,17 +178,27 @@ jobs:
           python scripts/generate_llm_docs.py
 
       - name: Commit changelog and docs updates
-        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        if: steps.should_release.outputs.should_release == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add website/docs/core/changelog.md website/i18n/fr/docusaurus-plugin-content-docs/current/core/changelog.md
-          git add website/docs/api/reference.md website/i18n/fr/docusaurus-plugin-content-docs/current/api/reference.md
+
+          # Core docs
+          git add website/docs/core/changelog.md
+          git add website/docs/api/reference.md
           git add website/static/llms.txt website/static/llms-full.txt
+
+          # Discover i18n translations dynamically
+          LANG_DIRS=$(find website/i18n -mindepth 1 -maxdepth 1 -type d -printf '%f ')
+          for lang in $LANG_DIRS; do
+            git add "website/i18n/$lang/docusaurus-plugin-content-docs/current/core/changelog.md" || true
+            git add "website/i18n/$lang/docusaurus-plugin-content-docs/current/api/reference.md" || true
+          done
+
           git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update changelog and API docs [skip ci]" && git push)
 
       - name: Trigger Pages deployment
-        if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
+        if: steps.should_release.outputs.should_release == 'true'
         run: |
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
