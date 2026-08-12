@@ -34,9 +34,8 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-        # GH_TOKEN is a personal access token (PAT) with repo/contents:write scopes.
-        # GITHUB_TOKEN is GitHub's built-in token with more limited permissions.
-        # We use GH_TOKEN here because semantic-release needs to push tags and commits.
+        # GITHUB_TOKEN is a personal access token (PAT) with repo/contents:write scopes.
+        # We use GITHUB_TOKEN here because semantic-release needs to push tags and commits.
 
       # For workflow_run triggers: verify that src/ or pyproject.toml changed
       # in the commit that triggered CI. This prevents semantic-release from
