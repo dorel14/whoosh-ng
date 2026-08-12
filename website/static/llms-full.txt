@@ -8765,6 +8765,110 @@ Choose a backend based on your use case:
 
 Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
 
+## v5.2.0 (2026-08-12)
+**Tag**: `v5.2.0`
+
+## v5.2.0 (2026-08-12)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **config**: Corriger le passage de booléen à StandardAnalyzer.stoplist ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`7c3649c`](https://github.com/dorel14/whoosh-ng/commit/7c3649c268d0551793c52f5855b6f1b7cab06a01))
+
+- **config**: Corriger les bugs et améliorer les tests et la documentation ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`377a531`](https://github.com/dorel14/whoosh-ng/commit/377a531a9e20c7534bb8c54803fd91910b8e2323))
+
+- **config**: Corriger pyright, unused imports et StandardAnalyzer.stoplist ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`10192bb`](https://github.com/dorel14/whoosh-ng/commit/10192bbd8c7824c3ccd89807c5bc6699c52a29b7))
+
+### Documentation
+
+- Auto-update llms context files [skip ci] ([`d188581`](https://github.com/dorel14/whoosh-ng/commit/d188581f5ca7fd71182ac26f71d06e0d045c2f0f))
+
+- Auto-update llms context files [skip ci] ([`599c979`](https://github.com/dorel14/whoosh-ng/commit/599c979675149203172e73efa587578ffa4dab4f))
+
+- Auto-update llms context files [skip ci] ([`7405bd0`](https://github.com/dorel14/whoosh-ng/commit/7405bd03e8445f547830b461de274d1f73a84cb9))
+
+- Update changelog and API docs [skip ci] ([`9bc3cfd`](https://github.com/dorel14/whoosh-ng/commit/9bc3cfd033c2999aa6dd73ff15bc992c9883dccf))
+
+- Update changelog and API docs [skip ci] ([`2920f65`](https://github.com/dorel14/whoosh-ng/commit/2920f653921efae2075911bd0f9c9a3de43c6808))
+
+- Update changelog and API docs [skip ci] ([`dc32e6f`](https://github.com/dorel14/whoosh-ng/commit/dc32e6fb7b16659c2757ce86ed38c6ee43b8b9df))
+
+### Features
+
+- **config**: Add ConfigEngine sub-engines for Sprint CFG-1 ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`47c59b4`](https://github.com/dorel14/whoosh-ng/commit/47c59b4d0d66f2105de4de3e0dee5501133ff96e))
+
+- **config**: Add ConfigEngine.build() orchestration for Sprint CFG-1 ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`1329b42`](https://github.com/dorel14/whoosh-ng/commit/1329b4296a35e2b115580bcad95ac83a394e8911))
+
+- **config**: Ajouter la mise en cache et valider les sources de données ([`add4bb8`](https://github.com/dorel14/whoosh-ng/commit/add4bb8cc4b8d7fcaf4ed06b5c20b93bd3fa312c))
+
+---
+
+**Detailed Changes**: [v5.1.0...v5.2.0](https://github.com/dorel14/whoosh-ng/compare/v5.1.0...v5.2.0)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- merge master into dev [skip ci]
+- merge master into dev [skip ci]
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- apply pre-commit fixes
+- v5.2.0 [skip ci]
+
+### Other
+
+- Delete LICENSE_OLD.txt
+- Add MIT License to the project
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #424 from dorel14/dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- style(codebase): uniformiser le formatage du code et améliorer la lisibilité
+- .
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- .
+- Merge pull request #428 from dorel14/dev
+
+### CI/CD
+
+- restructurer la génération du changelog et simplifier Pages
+- documenter le jeton GH_TOKEN et ajouter pydoctor
+- documenter le jeton GH_TOKEN et ajouter pydoctor (#422)
+- ajouter pydoctor, documenter GH_TOKEN et ignorer les benchmarks JSON (#422)
+- factoriser should_release et rendre l'i18n dynamique (#422)
+
+### Documentation
+
+- auto-update llms context files [skip ci]
+- update changelog and API docs [skip ci]
+- update changelog and API docs [skip ci]
+- update changelog and API docs [skip ci]
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+
+### Code Refactoring
+
+- restructurer la chaîne de déploiement et supprimer les workflows obsolètes
+- supprimer le benchmark stemmer français et moderniser les chemins
+
+### Features
+
+- add ConfigEngine sub-engines for Sprint CFG-1 (#422)
+- add ConfigEngine.build() orchestration for Sprint CFG-1 (#422)
+- ajouter la mise en cache et valider les sources de données
+
+### Bug Fixes
+
+- corriger le passage de booléen à StandardAnalyzer.stoplist (#422)
+- corriger les bugs et améliorer les tests et la documentation (#422)
+- corriger pyright, unused imports et StandardAnalyzer.stoplist (#422)
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.2.0)
+
 ## v5.1.0 (2026-08-11)
 **Tag**: `v5.1.0`
 
@@ -26237,6 +26341,110 @@ backend = MemoryBackend()  # Utile pour les tests
 # Historique des modifications
 
 Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
+
+## v5.2.0 (2026-08-12)
+**Tag**: `v5.2.0`
+
+## v5.2.0 (2026-08-12)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **config**: Corriger le passage de booléen à StandardAnalyzer.stoplist ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`7c3649c`](https://github.com/dorel14/whoosh-ng/commit/7c3649c268d0551793c52f5855b6f1b7cab06a01))
+
+- **config**: Corriger les bugs et améliorer les tests et la documentation ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`377a531`](https://github.com/dorel14/whoosh-ng/commit/377a531a9e20c7534bb8c54803fd91910b8e2323))
+
+- **config**: Corriger pyright, unused imports et StandardAnalyzer.stoplist ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`10192bb`](https://github.com/dorel14/whoosh-ng/commit/10192bbd8c7824c3ccd89807c5bc6699c52a29b7))
+
+### Documentation
+
+- Auto-update llms context files [skip ci] ([`d188581`](https://github.com/dorel14/whoosh-ng/commit/d188581f5ca7fd71182ac26f71d06e0d045c2f0f))
+
+- Auto-update llms context files [skip ci] ([`599c979`](https://github.com/dorel14/whoosh-ng/commit/599c979675149203172e73efa587578ffa4dab4f))
+
+- Auto-update llms context files [skip ci] ([`7405bd0`](https://github.com/dorel14/whoosh-ng/commit/7405bd03e8445f547830b461de274d1f73a84cb9))
+
+- Update changelog and API docs [skip ci] ([`9bc3cfd`](https://github.com/dorel14/whoosh-ng/commit/9bc3cfd033c2999aa6dd73ff15bc992c9883dccf))
+
+- Update changelog and API docs [skip ci] ([`2920f65`](https://github.com/dorel14/whoosh-ng/commit/2920f653921efae2075911bd0f9c9a3de43c6808))
+
+- Update changelog and API docs [skip ci] ([`dc32e6f`](https://github.com/dorel14/whoosh-ng/commit/dc32e6fb7b16659c2757ce86ed38c6ee43b8b9df))
+
+### Features
+
+- **config**: Add ConfigEngine sub-engines for Sprint CFG-1 ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`47c59b4`](https://github.com/dorel14/whoosh-ng/commit/47c59b4d0d66f2105de4de3e0dee5501133ff96e))
+
+- **config**: Add ConfigEngine.build() orchestration for Sprint CFG-1 ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`1329b42`](https://github.com/dorel14/whoosh-ng/commit/1329b4296a35e2b115580bcad95ac83a394e8911))
+
+- **config**: Ajouter la mise en cache et valider les sources de données ([`add4bb8`](https://github.com/dorel14/whoosh-ng/commit/add4bb8cc4b8d7fcaf4ed06b5c20b93bd3fa312c))
+
+---
+
+**Detailed Changes**: [v5.1.0...v5.2.0](https://github.com/dorel14/whoosh-ng/compare/v5.1.0...v5.2.0)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- merge master into dev [skip ci]
+- merge master into dev [skip ci]
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- apply pre-commit fixes
+- v5.2.0 [skip ci]
+
+### Other
+
+- Delete LICENSE_OLD.txt
+- Add MIT License to the project
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #424 from dorel14/dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- style(codebase): uniformiser le formatage du code et améliorer la lisibilité
+- .
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- .
+- Merge pull request #428 from dorel14/dev
+
+### CI/CD
+
+- restructurer la génération du changelog et simplifier Pages
+- documenter le jeton GH_TOKEN et ajouter pydoctor
+- documenter le jeton GH_TOKEN et ajouter pydoctor (#422)
+- ajouter pydoctor, documenter GH_TOKEN et ignorer les benchmarks JSON (#422)
+- factoriser should_release et rendre l'i18n dynamique (#422)
+
+### Documentation
+
+- auto-update llms context files [skip ci]
+- update changelog and API docs [skip ci]
+- update changelog and API docs [skip ci]
+- update changelog and API docs [skip ci]
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+
+### Code Refactoring
+
+- restructurer la chaîne de déploiement et supprimer les workflows obsolètes
+- supprimer le benchmark stemmer français et moderniser les chemins
+
+### Features
+
+- add ConfigEngine sub-engines for Sprint CFG-1 (#422)
+- add ConfigEngine.build() orchestration for Sprint CFG-1 (#422)
+- ajouter la mise en cache et valider les sources de données
+
+### Bug Fixes
+
+- corriger le passage de booléen à StandardAnalyzer.stoplist (#422)
+- corriger les bugs et améliorer les tests et la documentation (#422)
+- corriger pyright, unused imports et StandardAnalyzer.stoplist (#422)
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.2.0)
 
 ## v5.1.0 (2026-08-11)
 **Tag**: `v5.1.0`
