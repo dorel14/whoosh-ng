@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 
 from benchmark import WhooshLikeSpec
-from whoosh import fields
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
 
 

@@ -20,10 +20,27 @@ from __future__ import annotations
 
 from typing import Any
 
-from whoosh.fields import Schema
+from whoosh.analysis import StandardAnalyzer
+from whoosh.fields import (
+    BOOLEAN,
+    DATETIME,
+    ID,
+    KEYWORD,
+    NUMERIC,
+    TEXT,
+    Schema,
+)
+from whoosh.plugins.manager import PluginManager
 from whoosh_modern.config.models import WhooshNGConfig
+from whoosh_modern.data_sources import DataSource
+from whoosh_modern.data_sources.fast_csv import FastCSVSource
+from whoosh_modern.data_sources.json import JSONSource
+from whoosh_modern.data_sources.pandas_ds import PandasSource
+from whoosh_modern.data_sources.parquet_ds import ParquetSource
+from whoosh_modern.data_sources.rest import RESTSource
+from whoosh_modern.data_sources.sql import SQLSource
 from whoosh_modern.facets import FacetManager
-from whoosh_modern.storage import FileStorage, HybridStorage, S3Storage
+from whoosh_modern.storage import FileStorage, HybridStorage
 
 
 class SchemaEngine:
@@ -47,16 +64,6 @@ class SchemaEngine:
         Returns:
             A configured Whoosh ``Schema`` instance.
         """
-        from whoosh.fields import (
-            BOOLEAN,
-            DATETIME,
-            ID,
-            KEYWORD,
-            NUMERIC,
-            TEXT,
-            Schema,
-        )
-
         fields: dict[str, Any] = {}
         for name, field_config in self._config.fields.items():
             field_type = field_config.type.lower()
@@ -114,12 +121,7 @@ class AnalyzerEngine:
         """
         if not field_config.stemming and not field_config.stopwords:
             return None
-        try:
-            from whoosh.analysis import StandardAnalyzer
-
-            return StandardAnalyzer(stoplist=field_config.stopwords)  # type: ignore[no-untyped-call]
-        except ImportError:
-            return None
+        return StandardAnalyzer(stoplist=field_config.stopwords)
 
 
 class DataSourceEngine:
@@ -137,7 +139,7 @@ class DataSourceEngine:
         """
         self._config = config
 
-    def build(self) -> Any | None:
+    def build(self) -> DataSource | None:
         """Build a DataSource from the configured data source.
 
         Returns:
@@ -148,7 +150,7 @@ class DataSourceEngine:
             return None
         return self._build_data_source(ds_config)
 
-    def _build_data_source(self, ds_config: Any) -> Any:
+    def _build_data_source(self, ds_config: Any) -> DataSource:
         """Build a concrete DataSource from a DataSourceConfigModel.
 
         Args:
@@ -156,43 +158,52 @@ class DataSourceEngine:
 
         Returns:
             A DataSource instance.
+
+        Raises:
+            ValueError: If the configuration is invalid for the chosen source type.
         """
         source_type = ds_config.type.lower()
         if source_type == "csv":
-            from whoosh_modern.data_sources.fast_csv import FastCSVSource
-
+            path = ds_config.path
+            if not path:
+                raise ValueError("CSV data source requires a non-empty 'path'")
             return FastCSVSource(
-                path=ds_config.path or "",
+                path=path,
                 delimiter=ds_config.delimiter,
                 encoding=ds_config.encoding,
             )
         if source_type == "json":
-            from whoosh_modern.data_sources.json import JSONSource
-
-            return JSONSource(path=ds_config.path or "")
+            path = ds_config.path
+            if not path:
+                raise ValueError("JSON data source requires a non-empty 'path'")
+            return JSONSource(path=path)
         if source_type == "sql":
-            from whoosh_modern.data_sources.sql import SQLSource
-
+            connection = ds_config.connection
+            query = ds_config.query
+            if not connection:
+                raise ValueError("SQL data source requires a non-empty 'connection'")
+            if not query:
+                raise ValueError("SQL data source requires a non-empty 'query'")
             return SQLSource(
-                connection=ds_config.connection or "",
-                query=ds_config.query or "",
+                connection=connection,
+                query=query,
             )
         if source_type == "rest":
-            from whoosh_modern.data_sources.rest import RESTSource
-
+            url = ds_config.url
+            if not url:
+                raise ValueError("REST data source requires a non-empty 'url'")
             return RESTSource(
-                url=ds_config.url or "",
+                url=url,
                 method=ds_config.method,
                 headers=ds_config.headers or None,
             )
         if source_type == "pandas":
-            from whoosh_modern.data_sources.pandas_ds import PandasSource
-
             return PandasSource(dataframe=None)
         if source_type == "parquet":
-            from whoosh_modern.data_sources.parquet_ds import ParquetSource
-
-            return ParquetSource(path=ds_config.path or "")
+            path = ds_config.path
+            if not path:
+                raise ValueError("Parquet data source requires a non-empty 'path'")
+            return ParquetSource(path=path)
         raise ValueError(f"Unsupported data source type: {source_type}")
 
 
@@ -216,6 +227,9 @@ class StorageEngine:
 
         Returns:
             A SyncStorageProvider instance.
+
+        Raises:
+            ValueError: If the storage configuration is invalid.
         """
         storage_config = self._config.storage
         storage_type = storage_config.type.lower()
@@ -223,22 +237,36 @@ class StorageEngine:
             path = storage_config.path or "./index"
             return FileStorage(path)
         if storage_type == "s3":
-            from whoosh_modern.storage import S3Storage
-
+            try:
+                from whoosh_modern.storage import S3Storage
+            except ImportError as exc:
+                raise ImportError(
+                    "S3 storage requires boto3. Install with: pip install whoosh-ng[s3]"
+                ) from exc
+            bucket = storage_config.bucket
+            if not bucket:
+                raise ValueError("S3 storage requires a non-empty 'bucket'")
             return S3Storage(
-                bucket=storage_config.bucket or "",
+                bucket=bucket,
                 prefix=storage_config.prefix,
             )
         if storage_type == "hybrid":
-            from whoosh_modern.storage import S3Storage
-
+            try:
+                from whoosh_modern.storage import S3Storage
+            except ImportError as exc:
+                raise ImportError(
+                    "Hybrid storage requires boto3. Install with: pip install whoosh-ng[s3]"
+                ) from exc
+            bucket = storage_config.bucket
+            if not bucket:
+                raise ValueError("Hybrid storage requires a non-empty 'bucket'")
             local_cache = storage_config.path or "./cache"
             remote = S3Storage(
-                bucket=storage_config.bucket or "",
+                bucket=bucket,
                 prefix=storage_config.prefix,
             )
             return HybridStorage(local_cache=local_cache, remote=remote)
-        return FileStorage("./index")
+        raise ValueError(f"Unsupported storage type: {storage_type}")
 
 
 class SearchModelEngine:
@@ -330,8 +358,6 @@ class PluginEngine:
             A PluginManager instance, or ``None`` if the plugin system is not available.
         """
         try:
-            from whoosh.plugins.manager import PluginManager
-
             return PluginManager()
         except ImportError:
             return None

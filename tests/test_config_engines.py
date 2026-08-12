@@ -21,7 +21,16 @@ from whoosh_modern.config.engines import (
     SearchModelEngine,
     StorageEngine,
 )
-from whoosh_modern.config.models import WhooshNGConfig
+from whoosh_modern.config.models import (
+    AIConfig,
+    DataSourceConfigModel,
+    FieldConfig,
+    FuzzyConfig,
+    RankingConfig,
+    SearchConfig,
+    StorageConfigModel,
+    WhooshNGConfig,
+)
 
 
 @pytest.fixture
@@ -29,22 +38,24 @@ def app_config() -> WhooshNGConfig:
     return WhooshNGConfig(
         index="products",
         fields={
-            "title": {"type": "text", "language": "fr", "stemming": True, "stored": True},
-            "price": {"type": "numeric", "sortable": True},
-            "published": {"type": "datetime", "faceted": True},
+            "title": FieldConfig(
+                type="text", language="fr", stemming=True, stored=True
+            ),
+            "price": FieldConfig(type="numeric", sortable=True),
+            "published": FieldConfig(type="datetime", faceted=True),
         },
-        search={
-            "fuzzy": {"enabled": True, "distance": 2},
-            "ranking": {"title_boost": 1.5},
-            "ai": {"enabled": False},
-        },
-        data_source={
-            "type": "csv",
-            "path": "products.csv",
-            "delimiter": ",",
-            "encoding": "utf-8",
-        },
-        storage={"type": "file", "path": "./index"},
+        search=SearchConfig(
+            fuzzy=FuzzyConfig(enabled=True, distance=2),
+            ranking=RankingConfig(title_boost=1.5),
+            ai=AIConfig(enabled=False),
+        ),
+        data_source=DataSourceConfigModel(
+            type="csv",
+            path="products.csv",
+            delimiter=",",
+            encoding="utf-8",
+        ),
+        storage=StorageConfigModel(type="file", path="./index"),
     )
 
 
@@ -69,7 +80,7 @@ class TestAnalyzerEngine:
         assert "title" in analyzers
 
     def test_no_stemming(self) -> None:
-        config = WhooshNGConfig(fields={"title": {"type": "text", "stemming": False}})
+        config = WhooshNGConfig(fields={"title": FieldConfig(type="text", stemming=False)})
         engine = AnalyzerEngine(config)
         analyzers = engine.build()
         assert analyzers["title"] is None
@@ -86,7 +97,7 @@ class TestDataSourceEngine:
         assert engine.build() is None
 
     def test_unsupported_source_type(self) -> None:
-        config = WhooshNGConfig(data_source={"type": "unknown"})
+        config = WhooshNGConfig(data_source=DataSourceConfigModel(type="unknown"))
         engine = DataSourceEngine(config)
         with pytest.raises(ValueError, match="Unsupported data source type"):
             engine.build()
@@ -99,17 +110,25 @@ class TestStorageEngine:
         assert storage is not None
 
     def test_build_s3_storage(self) -> None:
-        config = WhooshNGConfig(storage={"type": "s3", "bucket": "my-bucket", "prefix": "idx"})
+        config = WhooshNGConfig(
+            storage=StorageConfigModel(type="s3", bucket="my-bucket", prefix="idx")
+        )
         engine = StorageEngine(config)
-        storage = engine.build()
+        try:
+            storage = engine.build()
+        except ImportError as exc:
+            pytest.skip(str(exc))
         assert storage is not None
 
     def test_build_hybrid_storage(self) -> None:
         config = WhooshNGConfig(
-            storage={"type": "hybrid", "path": "./cache", "bucket": "my-bucket"}
+            storage=StorageConfigModel(type="hybrid", path="./cache", bucket="my-bucket")
         )
         engine = StorageEngine(config)
-        storage = engine.build()
+        try:
+            storage = engine.build()
+        except ImportError as exc:
+            pytest.skip(str(exc))
         assert storage is not None
 
 
@@ -125,17 +144,13 @@ class TestSearchModelEngine:
 
 class TestFacetEngine:
     def test_build_facet_manager(self, app_config: WhooshNGConfig) -> None:
-        from whoosh.fields import Schema
-
         schema = SchemaEngine(app_config).build()
         engine = FacetEngine(app_config, schema)
         manager = engine.build()
         assert manager is not None
 
     def test_no_faceted_fields(self) -> None:
-        config = WhooshNGConfig(fields={"title": {"type": "text", "faceted": False}})
-        from whoosh.fields import Schema
-
+        config = WhooshNGConfig(fields={"title": FieldConfig(type="text", faceted=False)})
         schema = SchemaEngine(config).build()
         engine = FacetEngine(config, schema)
         manager = engine.build()

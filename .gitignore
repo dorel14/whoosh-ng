@@ -30,6 +30,8 @@ eggs/
 *_index/
 benchmark_report*
 /benchmark/Datas/
+/benchmark/benchmark_data/
+/benchmark_indexes/
 .gitignore
 
 # Cruft / local scratch

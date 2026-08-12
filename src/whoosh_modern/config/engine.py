@@ -52,6 +52,7 @@ class ConfigEngine:
         """Initialize an empty configuration engine."""
         self._config: WhooshNGConfig = WhooshNGConfig()
         self._layers: list[tuple[str, dict[str, Any]]] = []
+        self._app_cache: Any = None
 
     def load(self, path: str | Path, priority: str = "application") -> None:
         """Load a configuration file and merge it into the current config.
@@ -119,23 +120,19 @@ class ConfigEngine:
             ValueError: If the configuration cannot be resolved into a valid
                 application (e.g. unsupported data source or storage type).
         """
-        schema_engine = SchemaEngine(self._config)
-        schema = schema_engine.build()
-
-        data_source_engine = DataSourceEngine(self._config)
-        source = data_source_engine.build()
-
-        storage_engine = StorageEngine(self._config)
-        storage = storage_engine.build()
-
+        if self._app_cache is not None:
+            return self._app_cache
+        source = DataSourceEngine(self._config).build()
+        storage = StorageEngine(self._config).build()
         from whoosh_modern.application import SearchApplication
-
-        return SearchApplication(source=source, storage=storage)
+        self._app_cache = SearchApplication(source=source, storage=storage)
+        return self._app_cache
 
     def reset(self) -> None:
         """Reset the configuration engine to its default state."""
         self._config = WhooshNGConfig()
         self._layers.clear()
+        self._app_cache = None
 
     @staticmethod
     def _validate_priority(priority: str) -> None:
@@ -155,6 +152,7 @@ class ConfigEngine:
         for _, layer in sorted_layers:
             self._deep_merge(merged, layer)
         self._config = WhooshNGConfig(**merged)
+        self._app_cache = None
 
     @staticmethod
     def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> None:
