@@ -32,7 +32,8 @@ benchmark_report*
 /benchmark/Datas/
 /benchmark/benchmark_data/
 /benchmark_indexes/
-benchmark/benchmark_config_engine*.json
++benchmark/benchmark_config_engine*.json
++benchmark/benchmark_config_engine_real.json
 benchmark_report*
 
 # Cruft / local scratch

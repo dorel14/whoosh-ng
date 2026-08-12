@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
         # GH_TOKEN is a personal access token (PAT) with repo/contents:write scopes.
         # GITHUB_TOKEN is GitHub's built-in token with more limited permissions.
         # We use GH_TOKEN here because semantic-release needs to push tags and commits.
@@ -108,7 +108,7 @@ jobs:
       - name: Update docs & Release
         if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
 
@@ -154,7 +154,7 @@ jobs:
       - name: Generate changelog and docs
         if: steps.version.outputs.version != '' && steps.skip.outputs.skip != 'true' && steps.skip_src.outputs.skip != 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python scripts/generate_changelog.py
           python scripts/generate_api_docs.py
@@ -175,6 +175,6 @@ jobs:
         run: |
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/dispatches \
             -d '{"event_type":"deploy-pages"}'
