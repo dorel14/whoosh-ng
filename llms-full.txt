@@ -14794,7 +14794,7 @@ app = engine.build()
 {
   "index": "customers",
   "fields": {
-    "customer_id": {"type": numeric, "stored": true, "sortable": true},
+    "customer_id": {"type": "numeric", "stored": true, "sortable": true},
     "first_name": {"type": "text", "language": "en", "stemming": true, "stored": true},
     "last_name": {"type": "text", "language": "en", "stemming": true, "stored": true},
     "city": {"type": "text", "language": "en", "stemming": true, "stored": true},
@@ -14831,14 +14831,19 @@ from whoosh_modern.config import ConfigEngine
 engine = ConfigEngine()
 engine.load("whoosh-ng.yml")
 app = engine.build()
+app.build()
 
-# app is a fully initialized SearchApplication ready for indexing/searching
-with app:
-    app.index([
-        {"title": "Premier cours de Python", "body": "..."},
-        {"title": "Whoosh-NG avancé", "body": "..."},
-    ])
-    results = app.search("python")
+# Index documents through the underlying writer/view API
+app._view.index([
+    {"title": "Premier cours de Python", "body": "..."},
+    {"title": "Whoosh-NG avancé", "body": "..."},
+])
+
+# Or use the source directly for streaming/batch indexing
+for doc in app._source.iter_documents():
+    app._view.index(doc)
+
+results = app._searcher.search("python")
 ```
 
 ## Module reference
