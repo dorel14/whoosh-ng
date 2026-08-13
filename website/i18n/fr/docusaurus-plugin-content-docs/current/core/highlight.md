@@ -259,4 +259,3 @@ excerpts = highlight(
 
 - [Searching](/core/searching) â€” The `search()` method and `Hit` objects
 - [API: highlight](../api/highlight) â€” Full `whoosh.highlight` reference
-

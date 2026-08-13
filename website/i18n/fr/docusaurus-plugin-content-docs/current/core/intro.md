@@ -62,4 +62,3 @@ Whoosh 1.x/2.x.
 You can view outstanding issues on the
 [Whoosh-NG GitHub page](https://github.com/dorel14/whoosh-ng) and get help by
 opening an issue or discussion there.
-

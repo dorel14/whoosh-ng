@@ -126,4 +126,3 @@ corrected = s.correct_query(q, qstring, formatter=hf)
 - [Highlighting](/core/highlight) â€” Format corrected query strings with a formatter
 - [Query Language](/core/query) â€” Parsing user queries
 - [API: spelling](../api/spelling) â€” Full `whoosh.spelling` reference
-

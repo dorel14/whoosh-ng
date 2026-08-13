@@ -445,8 +445,7 @@ class VectorEngine:
                 )
             except ImportError as exc:
                 raise ImportError(
-                    "HnswlibProvider requires hnswlib. "
-                    "Install with: pip install whoosh-ng[hnsw]"
+                    "HnswlibProvider requires hnswlib. Install with: pip install whoosh-ng[hnsw]"
                 ) from exc
         raise ValueError(f"Unsupported vector provider: {provider_type}")
 

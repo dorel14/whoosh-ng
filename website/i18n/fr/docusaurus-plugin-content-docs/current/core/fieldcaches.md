@@ -60,4 +60,3 @@ searcher.set_caching_policy(MyPolicy())
 
 - [Sorting](/core/sorting) â€” Facets and sort keys
 - [API: sorting](../api/sorting) â€” Sorting and faceting reference
-

@@ -190,9 +190,7 @@ class TestSynonymManager:
             mode="w", suffix=".json", delete=False, encoding="utf-8"
         ) as f:
             f.write(
-                json.dumps(
-                    {"word": "voiture", "pos": "noun", "s": ["automobile", "véhicule"]}
-                )
+                json.dumps({"word": "voiture", "pos": "noun", "s": ["automobile", "véhicule"]})
                 + "\n"
             )
             f.write(json.dumps({"word": "maison", "pos": "noun", "s": ["domicile"]}) + "\n")
@@ -228,9 +226,7 @@ class TestSynonymManager:
         from whoosh_modern.data_sources.json import JSONSource
         from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
 
-        source = JSONSource(
-            "src/whoosh_modern/linguistics/dictionaries/wiktionary/fr.json"
-        )
+        source = JSONSource("src/whoosh_modern/linguistics/dictionaries/wiktionary/fr.json")
         index_dir = str(tmp_path / "index")
         indexer = WiktionaryIndexer(index_dir)
         indexer.build_index(source, language="fr")
@@ -270,9 +266,7 @@ class TestSearchApplicationWiktionaryIntegration:
         from whoosh_modern.data_sources.json import JSONSource
         from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
 
-        source = JSONSource(
-            "src/whoosh_modern/linguistics/dictionaries/wiktionary/fr.json"
-        )
+        source = JSONSource("src/whoosh_modern/linguistics/dictionaries/wiktionary/fr.json")
         index_dir = str(tmp_path / "index")
         indexer = WiktionaryIndexer(index_dir)
         indexer.build_index(source, language="fr")
