@@ -47,7 +47,9 @@ class SentenceTransformersProvider:
         Returns:
             A sequence of floats representing the embedding vector.
         """
-        from sentence_transformers import SentenceTransformer  # pyright: ignore[reportMissingImports]
+        from sentence_transformers import (
+            SentenceTransformer,  # pyright: ignore[reportMissingImports]
+        )
 
         model = SentenceTransformer(self._model_name)
         embedding = model.encode(text, convert_to_numpy=True)

@@ -34,6 +34,11 @@ class MultiLanguageAnalyzer:
 
     def __init__(self, languages: list[str] | None = None) -> None:
         self._languages = languages or ["fr", "en", "de", "es", "it"]
+        unsupported = [lang for lang in self._languages if lang not in _LANG_ALIASES]
+        if unsupported:
+            supported = ", ".join(sorted(_LANG_ALIASES))
+            msg = f"Unsupported language(s): {unsupported}. Supported languages are: {supported}."
+            raise ValueError(msg)
         self._analyzers = [_LANG_ALIASES[lang] for lang in self._languages]
 
     def __call__(self, text: str) -> Any:

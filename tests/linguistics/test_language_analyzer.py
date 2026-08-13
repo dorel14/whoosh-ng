@@ -23,3 +23,7 @@ class TestMultiLanguageAnalyzer:
         analyzer = MultiLanguageAnalyzer(languages=["fr"])
         tokens = analyzer("bonjour")
         assert isinstance(tokens, list)
+
+    def test_unsupported_language_raises(self) -> None:
+        with pytest.raises(ValueError, match="Unsupported language"):
+            MultiLanguageAnalyzer(languages=["pt"])

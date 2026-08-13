@@ -10,41 +10,40 @@ from typing import Any
 
 
 class CachedStemmingAnalyzer:
-    """Stemming analyzer wrapper with LRU cache.
+    """Analyzer wrapper with result cache.
 
-    Caches stemmer results to avoid redundant stemming of the same token.
+    Caches analysis results per input text to avoid redundant processing
+    of the same text by the underlying analyzer.
 
     Args:
         analyzer: The underlying analyzer to wrap.
-        cache_size: Maximum number of cached stemmed tokens.
+        cache_size: Maximum number of cached analysis results.
     """
 
     def __init__(self, analyzer: Any = None, cache_size: int = 50000) -> None:
         self._analyzer = analyzer
         self._cache_size = cache_size
-        self._stem_cache: dict[str, str] = {}
+        self._cache: dict[str, list[str]] = {}
 
     def __call__(self, text: str) -> Any:
-        """Analyze text with cached stemming.
+        """Analyze text with cached results.
 
         Args:
             text: Input text.
 
         Returns:
-            Generator of analyzed tokens.
+            List of analyzed token strings.
         """
         if self._analyzer is None:
             return []
+        if text in self._cache:
+            return self._cache[text]
         tokens = list(self._analyzer(text))
-        cached = []
-        for token in tokens:
-            text_value = token.text
-            if text_value not in self._stem_cache:
-                self._stem_cache[text_value] = text_value
-                if len(self._stem_cache) > self._cache_size:
-                    self._stem_cache.pop(next(iter(self._stem_cache)))
-            cached.append(text_value)
-        return cached
+        result = [token.text for token in tokens]
+        self._cache[text] = result
+        if len(self._cache) > self._cache_size:
+            self._cache.pop(next(iter(self._cache)))
+        return result
 
 
 __all__ = ["CachedStemmingAnalyzer"]

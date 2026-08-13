@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
-
 from whoosh_modern.analysis.cached_stemming_analyzer import CachedStemmingAnalyzer
-from whoosh_modern.linguistics.explain import AnalysisExplanation, ExplainAnalyzer, TokenExplanation
+from whoosh_modern.linguistics.explain import AnalysisExplanation, ExplainAnalyzer
 
 
 class TestExplainAnalyzer:
@@ -43,4 +41,20 @@ class TestCachedStemmingAnalyzer:
         cached = CachedStemmingAnalyzer(StandardAnalyzer(), cache_size=100)
         cached("hello world")
         cached("hello world")
-        assert len(cached._stem_cache) > 0
+        assert len(cached._cache) > 0
+
+    def test_cache_hit_returns_same_result(self) -> None:
+        from whoosh.analysis.analyzers import StandardAnalyzer
+
+        cached = CachedStemmingAnalyzer(StandardAnalyzer(), cache_size=100)
+        first = cached("hello world")
+        second = cached("hello world")
+        assert first == second
+
+    def test_cache_miss_analyzes_again(self) -> None:
+        from whoosh.analysis.analyzers import StandardAnalyzer
+
+        cached = CachedStemmingAnalyzer(StandardAnalyzer(), cache_size=100)
+        cached("hello world")
+        cached("goodbye world")
+        assert len(cached._cache) == 2

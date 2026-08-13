@@ -17,8 +17,13 @@ class StemmerProfilerReport:
 
     Attributes:
         original_tokens: Number of original tokens.
-        stemmed_tokens: Number of unique stemmed tokens.
-        reduction_ratio: Ratio of stemmed to original tokens.
+        stemmed_tokens: Number of stemmed token outputs. A stemmer is expected
+            to return a single string per token. If a stemmer returns a list of
+            forms (expansion rather than reduction), every output form is
+            counted, which may exceed ``original_tokens``.
+        reduction_ratio: Ratio of stemmed to original tokens, always bounded to
+            ``[0, 1]``. A value of ``1.0`` means no vocabulary reduction (for
+            example when a stemmer expands tokens into multiple forms).
         estimated_size_reduction: Estimated index size reduction percentage.
         avg_stem_time_ms: Average stemming time per token in milliseconds.
     """
@@ -68,13 +73,15 @@ class StemmerProfiler:
                 stemmed_tokens += len(set(stemmed)) if isinstance(stemmed, list) else 1
         elapsed = time.perf_counter() - start
 
+        ratio = stemmed_tokens / original_tokens if original_tokens else 0.0
+        # A "reduction" ratio above 1.0 (e.g. a stemmer that expands tokens into
+        # multiple forms) contradicts the metric name, so it is clamped to 1.0.
+        reduction_ratio = min(1.0, ratio)
         report = StemmerProfilerReport(
             original_tokens=original_tokens,
             stemmed_tokens=stemmed_tokens,
-            reduction_ratio=stemmed_tokens / original_tokens if original_tokens else 0.0,
-            estimated_size_reduction=max(0.0, 1.0 - stemmed_tokens / original_tokens) * 100
-            if original_tokens
-            else 0.0,
+            reduction_ratio=reduction_ratio,
+            estimated_size_reduction=(1.0 - reduction_ratio) * 100,
             avg_stem_time_ms=(elapsed / original_tokens * 1000) if original_tokens else 0.0,
         )
         return report

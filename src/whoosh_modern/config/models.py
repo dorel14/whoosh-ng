@@ -44,25 +44,31 @@ class FieldConfig(BaseModel):
     faceted: bool = False
     dictionary_stem_overrides: dict[str, str] = Field(default_factory=dict)
 
-    def effective_language(self, detector: LanguageDetector | None = None) -> str | None:
+    def effective_language(
+        self,
+        detector: LanguageDetector | None = None,
+        sample_text: str | None = None,
+    ) -> str | None:
         """Return the effective language for this field.
 
-        If ``language`` is ``"auto"`` and a ``detector`` is provided, the
-        detector is used to guess the language from the field name. If the
-        language cannot be determined, ``None`` is returned and the caller
-        should fall back to a default.
+        If ``language`` is ``"auto"`` and a ``detector`` is provided with
+        ``sample_text``, the detector is used to guess the language from the
+        provided text. Without sample text, ``None`` is returned and the
+        caller should fall back to runtime detection on document content.
 
         Args:
             detector: Optional ``LanguageDetector`` instance used when
+                ``language == "auto"``.
+            sample_text: Optional text sample used for language detection when
                 ``language == "auto"``.
 
         Returns:
             The resolved language code, or ``None``.
         """
         if self.language == "auto":
-            if detector is None:
+            if detector is None or not sample_text:
                 return None
-            return detector.detect(self.type)
+            return detector.detect(sample_text)
         return self.language
 
 

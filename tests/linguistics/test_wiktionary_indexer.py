@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import os
 
-import pytest
-
 from whoosh_modern.data_sources.json import JSONSource
 from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
 
@@ -70,3 +68,14 @@ class TestWiktionaryIndexer:
         indexer = WiktionaryIndexer(index_dir)
         count = indexer.build_index(source)
         assert count > 0
+
+    def test_build_index_recreates_index(self, tmp_path):
+        source = JSONSource(os.path.join(_DICT_DIR, "fr.json"))
+        index_dir = str(tmp_path / "index")
+        indexer = WiktionaryIndexer(index_dir)
+
+        count1 = indexer.build_index(source, language="fr")
+        count2 = indexer.build_index(source, language="fr")
+
+        assert count1 == count2
+        assert len(indexer.iter_documents(language="fr")) == count1

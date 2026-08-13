@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 from typing import Any
 
 from whoosh.fields import ID, KEYWORD, TEXT, Schema
@@ -82,11 +83,10 @@ class WiktionaryIndexer:
         """
         os.makedirs(self._index_dir, exist_ok=True)
         if exists_in(self._index_dir):
-            self._index = open_dir(self._index_dir)
-            writer = self._index.writer()
-        else:
-            self._index = create_in(self._index_dir, _WIKTIONARY_SCHEMA)
-            writer = self._index.writer()
+            shutil.rmtree(self._index_dir)
+            os.makedirs(self._index_dir, exist_ok=True)
+        self._index = create_in(self._index_dir, _WIKTIONARY_SCHEMA)
+        writer = self._index.writer()
 
         indexed = 0
         for doc in source.iter_documents():

@@ -11,16 +11,21 @@ from whoosh_modern.linguistics.detection.stopword_detector import StopwordDetect
 class TestFieldConfigEffectiveLanguage:
     def test_auto_with_detector(self):
         detector = StopwordDetector(["fr", "en"])
-        field = FieldConfig(type="le chat mange la souris", language="auto")
-        result = field.effective_language(detector)
+        field = FieldConfig(type="text", language="auto")
+        result = field.effective_language(detector, sample_text="le chat mange la souris")
         assert result == "fr"
 
     def test_auto_without_detector(self):
-        field = FieldConfig(type="hello world", language="auto")
+        field = FieldConfig(type="text", language="auto")
         assert field.effective_language(None) is None
 
+    def test_auto_without_sample_text(self):
+        field = FieldConfig(type="text", language="auto")
+        detector = StopwordDetector(["fr", "en"])
+        assert field.effective_language(detector) is None
+
     def test_explicit_language_passthrough(self):
-        field = FieldConfig(type="hello world", language="en")
+        field = FieldConfig(type="text", language="en")
         assert field.effective_language(StopwordDetector()) == "en"
 
 
