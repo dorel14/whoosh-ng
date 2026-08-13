@@ -63,9 +63,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   richer JSON Lines dictionaries for the indexer.
 - **Updated sample dictionaries**: `fr.json`, `en.json`, `de.json`, `es.json`,
   `it.json` now include definitions, antonyms, and forms.
-- **Tests** (`tests/linguistics/test_wiktionary_indexer.py`): 5 tests covering
-  build+search, language filtering, metadata returned, empty results, and
-  all-languages indexing.
+ - **Tests** (`tests/linguistics/test_wiktionary_indexer.py`): 5 tests covering
+   build+search, language filtering, metadata returned, empty results, and
+   all-languages indexing.
+- **Wiktionary indexer integration** (`SynonymManager.import_wiktionary_index`,
+   `SearchApplication(wiktionary_indexer=...)`):
+  `SynonymManager` can now import synonyms from a built `WiktionaryIndexer`,
+  and `SearchApplication` exposes a lazily populated `synonym_manager`
+  property when a `WiktionaryIndexer` is provided, ready for
+  `SynonymExpansionMiddleware` wiring.
+- **Documentation** (`website/docs/modern/synonyms.md`): added Wiktionary
+  Indexing Integration section covering `import_wiktionary_index()`,
+  `SearchApplication` integration, and middleware wiring.
 
 ### Changed
 - Renamed distribution from `whoosh-reloaded` to **`whoosh-ng`**. The import

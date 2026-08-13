@@ -252,6 +252,52 @@ with MiddlewareSearcher(ix.searcher(), chain) as searcher:
     results = searcher.search("search")
 ```
 
+## Wiktionary Indexing Integration
+
+`WiktionaryIndexer` can feed synonyms directly into `SynonymManager` and `SearchApplication`.
+
+### SynonymManager.import_wiktionary_index()
+
+Populate a manager from a built Whoosh index:
+
+```python
+from whoosh_modern.linguistics.synonyms import SynonymManager
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+indexer = WiktionaryIndexer("indexdir")
+# ... build_index() called earlier ...
+
+manager = SynonymManager()
+manager.import_wiktionary_index("indexdir", language="fr")
+print(manager.get_synonyms("voiture"))
+# ['automobile', 'véhicule']
+```
+
+### SearchApplication integration
+
+Pass a `WiktionaryIndexer` to `SearchApplication` to expose a pre-populated `synonym_manager`:
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+indexer = WiktionaryIndexer("indexdir")
+app = SearchApplication(wiktionary_indexer=indexer)
+
+# synonym_manager is lazily populated from the index
+manager = app.synonym_manager
+```
+
+### SynonymExpansionMiddleware wiring
+
+Combine with the middleware to expand queries at search time:
+
+```python
+from whoosh_modern.linguistics.synonyms import SynonymExpansionMiddleware
+
+middleware = SynonymExpansionMiddleware(app.synonym_manager)
+```
+
 ## See Also
 
 - [Linguistics Overview](linguistics.md) — Stemmers, language analyzers, and full pipeline integration

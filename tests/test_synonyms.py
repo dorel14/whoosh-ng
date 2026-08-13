@@ -9,6 +9,7 @@ import tempfile
 import pytest
 
 from whoosh.middleware.context import MiddlewareContext
+from whoosh_modern.application import SearchApplication
 from whoosh_modern.linguistics import (
     LANG_SYNONYMS,
     JSONSynonymProvider,
@@ -223,6 +224,21 @@ class TestSynonymManager:
         finally:
             os.unlink(path)
 
+    def test_import_wiktionary_index(self, tmp_path):
+        from whoosh_modern.data_sources.json import JSONSource
+        from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+        source = JSONSource(
+            "src/whoosh_modern/linguistics/dictionaries/wiktionary/fr.json"
+        )
+        index_dir = str(tmp_path / "index")
+        indexer = WiktionaryIndexer(index_dir)
+        indexer.build_index(source, language="fr")
+
+        manager = SynonymManager()
+        manager.import_wiktionary_index(index_dir, language="fr")
+        assert set(manager.get_synonyms("voiture")) == {"automobile", "véhicule"}
+
 
 class TestSynonymExpansionMiddleware:
     def test_expand_query(self):
@@ -247,3 +263,21 @@ class TestSynonymExpansionMiddleware:
         ctx.query = "hello"
         ctx = middleware.before_search(ctx)
         assert ctx.query == "hello"
+
+
+class TestSearchApplicationWiktionaryIntegration:
+    def test_synonym_manager_populated_from_indexer(self, tmp_path):
+        from whoosh_modern.data_sources.json import JSONSource
+        from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+        source = JSONSource(
+            "src/whoosh_modern/linguistics/dictionaries/wiktionary/fr.json"
+        )
+        index_dir = str(tmp_path / "index")
+        indexer = WiktionaryIndexer(index_dir)
+        indexer.build_index(source, language="fr")
+
+        app = SearchApplication(wiktionary_indexer=indexer)
+
+        manager = app.synonym_manager
+        assert set(manager.get_synonyms("voiture")) == {"automobile", "véhicule"}

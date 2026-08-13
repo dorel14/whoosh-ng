@@ -162,3 +162,35 @@ class WiktionaryIndexer:
                 results.append(result)
 
         return results
+
+    def iter_documents(self, language: str | None = None) -> list[dict[str, Any]]:
+        """Iterate over all indexed documents.
+
+        Args:
+            language: Optional language filter.
+
+        Returns:
+            A list of document dicts from the index.
+        """
+        if self._index is None:
+            self._index = open_dir(self._index_dir)
+
+        documents: list[dict[str, Any]] = []
+        with self._index.searcher() as searcher:
+            for hit in searcher.documents():
+                entry_lang = hit.get("language", "")
+                if language and entry_lang != language:
+                    continue
+                doc: dict[str, Any] = {
+                    "word": hit["word"],
+                    "definition": hit["definition"],
+                    "language": entry_lang,
+                    "pos": hit.get("pos", ""),
+                }
+                for field in ("synonyms", "antonyms", "forms"):
+                    raw_value = hit.get(field, "")
+                    if raw_value:
+                        doc[field] = raw_value.split()
+                documents.append(doc)
+
+        return documents
