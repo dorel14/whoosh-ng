@@ -111,6 +111,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CoreStorageAdapter** (`src/whoosh_modern/storage/core_adapter.py`): bridges
   core `whoosh.filedb.filestore.FileStorage` to the modern `SyncStorageProvider`
   interface, exported from `whoosh_modern.storage`.
+- **EPIC 6.7 — Language Auto-Detection & Multilingual Indexing**:
+  - `whoosh_modern.linguistics.detection`: `StopwordDetector` and `LangDetectProvider` for automatic language detection with configurable supported languages.
+  - `whoosh_modern.linguistics.registry`: `LanguageRegistry`, `StemmerRegistry`, and `LanguageProfile` for centralized language/analyzer/stemmer/synonym provider resolution with `get_default_registry()`.
+  - `whoosh_modern.linguistics.analyzers`: `MultiLanguageAnalyzer` applies multiple language analyzers simultaneously for multilingual indexing.
+  - `whoosh_modern.analysis.stemmer_presets`: `AnalyzerPresets.documentation()`, `.ecommerce()`, `.blog()`, `.multilingual()` presets for common search scenarios.
+  - `whoosh_modern.linguistics.explain`: `ExplainAnalyzer`, `AnalysisExplanation`, and `TokenExplanation` expose the tokenization/stemming pipeline for Search Studio visualization.
+  - `whoosh_modern.analysis.cached_stemming_analyzer`: `CachedStemmingAnalyzer` wraps language analyzers with LRU caching (`cache_size=50000`) for repeated tokens.
+  - `whoosh_modern.linguistics.dictionary_stem_override`: `DictionaryStemOverride` allows overriding Snowball stemming with business dictionaries (JSON/Wiktionary).
+  - `whoosh_modern.profiling.stemmer_profiler`: `StemmerProfiler` and `StemmerProfilerReport` measure vocabulary reduction, estimated index size reduction, and average stemming time per token.
+  - `whoosh_modern.application.SearchApplication`: now accepts `language_detector` and `dictionary_stem_overrides` parameters; `FieldConfig` supports `language="auto"` with detector resolution.
 
 ### Fixed
 - **SnapshotStorage regression**: removed duplicated `_safe_local_path()` call

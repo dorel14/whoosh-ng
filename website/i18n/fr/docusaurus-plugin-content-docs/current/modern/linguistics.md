@@ -341,6 +341,182 @@ with MiddlewareSearcher(ix.searcher(), chain) as searcher:
     results = searcher.search("search")
 ```
 
+## Registre de langues
+
+`LanguageRegistry` mappe les codes de langue vers des instances `LanguageProfile`, centralisant la résolution d'analyzer, de stemmer, de provider de synonymes et de détecteur de langue.
+
+```python
+from whoosh_modern.linguistics.registry import (
+    LanguageRegistry,
+    LanguageProfile,
+    StemmerRegistry,
+    get_default_registry,
+)
+
+# Utilise le registry pré-peuplé par défaut (FR/EN/DE/ES/IT)
+registry = get_default_registry()
+
+# Résout un profil de langue
+profile = registry.resolve("fr")
+print(profile.language)   # "fr"
+print(profile.analyzer)   # instance de FrenchAnalyzer
+
+# Enregistre un profil de langue personnalisé
+custom = LanguageProfile(
+    language="pt",
+    analyzer=...,  # votre analyzer
+    stemmer=...,   # votre stemmer
+)
+registry.register(custom)
+
+# StemmerRegistry ajoute des helpers spécifiques aux stemmers
+stem_registry = StemmerRegistry(registry._profiles.values())
+stemmer = stem_registry.get_stemmer("fr")
+```
+
+## Analyseur multilingue
+
+`MultiLanguageAnalyzer` applique plusieurs analyseurs de langue simultanément pour l'indexation multilingue.
+
+```python
+from whoosh_modern.linguistics.analyzers import MultiLanguageAnalyzer
+
+# Par défaut : FR/EN/DE/ES/IT
+analyzer = MultiLanguageAnalyzer()
+
+# Ensemble de langues personnalisé
+analyzer = MultiLanguageAnalyzer(languages=["fr", "en"])
+
+tokens = analyzer("hello bonjour")
+# Retourne les tokens combinés de tous les analyseurs configurés
+```
+
+## Auto-détection de langue
+
+`StopwordDetector` et `LangDetectProvider` permettent la détection automatique de langue :
+
+```python
+from whoosh_modern.linguistics.detection import StopwordDetector
+
+detector = StopwordDetector(supported_languages=["fr", "en", "de"])
+lang = detector.detect("Ceci est un texte en français")
+print(lang)  # "fr"
+```
+
+Utilisation avec `SearchApplication` pour la résolution automatique de langue :
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.linguistics.detection import StopwordDetector
+
+app = SearchApplication(
+    source=my_source,
+    language_detector=StopwordDetector(),
+)
+
+# FieldConfig supporte language="auto"
+# Le détecteur résout la langue par document
+```
+
+## Analyseur Explain
+
+`ExplainAnalyzer` expose le pipeline de tokenization/stemming pour Search Studio :
+
+```python
+from whoosh_modern.linguistics.explain import ExplainAnalyzer
+
+explainer = ExplainAnalyzer(EnglishAnalyzer)
+result = explainer.explain("The running cats")
+
+print(result.text)       # "The running cats"
+print(result.tokens)     # ["run", "cat"]
+```
+
+## Override de stem par dictionnaire
+
+Remplace le stemming Snowball par des dictionnaires métier :
+
+```python
+from whoosh_modern.linguistics.dictionary_stem_override import DictionaryStemOverride
+
+override = DictionaryStemOverride({
+    "voiture": "voitur",
+    "maison": "maison",
+})
+
+print(override.stem("voiture"))  # "voitur"
+print(override.stem("maison"))   # "maison"
+
+# Ajoute des règles dynamiquement
+override.add_rule("chien", "chien")
+```
+
+Utilisation avec `SearchApplication` :
+
+```python
+from whoosh_modern import SearchApplication
+
+app = SearchApplication(
+    source=my_source,
+    dictionary_stem_overrides={"voiture": "voitur"},
+)
+```
+
+## Analyseur de stemming avec cache
+
+`CachedStemmingAnalyzer` encapsule les analyseurs de langue avec un cache LRU :
+
+```python
+from whoosh_modern.analysis.cached_stemming_analyzer import CachedStemmingAnalyzer
+from whoosh_modern.linguistics.stemmers import FrenchAnalyzer
+
+cached = CachedStemmingAnalyzer(FrenchAnalyzer, cache_size=50000)
+tokens = cached("les maisons")
+```
+
+## Profileur de stemmer
+
+Mesure l'impact du stemming sur le vocabulaire et les performances :
+
+```python
+from whoosh_modern.profiling.stemmer_profiler import StemmerProfiler
+
+profiler = StemmerProfiler(stemmer=my_stemmer)
+report = profiler.profile(["document 1", "document 2", ...])
+
+print(report.original_tokens)        # Tokens totaux avant stemming
+print(report.stemmed_tokens)         # Tokens uniques après stemming
+print(report.reduction_ratio)        # Ratio de réduction du vocabulaire
+print(report.estimated_size_reduction)  # Réduction estimée de la taille d'index %
+print(report.avg_stem_time_ms)       # Temps moyen de stemming par token
+```
+
+## Préréglages d'analyseurs
+
+Analyseurs préconfigurés pour des scénarios de recherche courants :
+
+```python
+from whoosh_modern.analysis.stemmer_presets import AnalyzerPresets
+
+# Autocomplétion
+autocomplete_analyzer = AnalyzerPresets.autocomplete()
+
+# Correspondance partielle
+partial_analyzer = AnalyzerPresets.partial_match()
+
+# E-commerce
+ecommerce_analyzer = AnalyzerPresets.ecommerce()
+
+# Blog
+blog_analyzer = AnalyzerPresets.blog()
+
+# Multilingue
+multilingual_analyzer = AnalyzerPresets.multilingual()
+
+# Accès par nom
+analyzer = AnalyzerPresets.get("autocomplete")
+```
+
 ## Voir aussi
 
 - [Synonymes](synonyms.md) — Providers de synonymes, manager et dictionnaires Wiktionary

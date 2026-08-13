@@ -110,6 +110,15 @@ pip install "whoosh-ng[dev]"
 - **SearchView** (`whoosh_modern.views`): Unified interface integrating data sources, schema discovery, facets, validation, and middleware with `build()`, `refresh()`, `reindex()`, `validate()`, `evolve_schema()`, and strict mode
 - **Stemmer Provider System** (`whoosh_modern.analysis`): `get_stemmer()`, `register_stemmer()`, auto-detection between internal Porter stemmer and PyStemmer C backend
 - **Enhanced StemmingAnalyzer** (`whoosh_modern.analysis`): Accepts `stemmer="auto"|"internal"|"pystemmer"|provider` parameter
+- **Language Auto-Detection** (`whoosh_modern.linguistics.detection`): `StopwordDetector` and `LangDetectProvider` for automatic language detection with configurable supported languages
+- **Language Registry** (`whoosh_modern.linguistics.registry`): `LanguageRegistry`, `StemmerRegistry`, and `LanguageProfile` for centralized language/analyzer/stemmer resolution with `get_default_registry()`
+- **Multi-Language Analyzer** (`whoosh_modern.linguistics.analyzers`): `MultiLanguageAnalyzer` applies multiple language analyzers simultaneously for multilingual indexing
+- **Analyzer Presets** (`whoosh_modern.analysis.stemmer_presets`): `AnalyzerPresets.documentation()`, `.ecommerce()`, `.blog()`, `.multilingual()` for common search scenarios
+- **Explain Analyzer** (`whoosh_modern.linguistics.explain`): `ExplainAnalyzer`, `AnalysisExplanation`, and `TokenExplanation` expose the tokenization/stemming pipeline for Search Studio
+- **Cached Stemming Analyzer** (`whoosh_modern.analysis.cached_stemming_analyzer`): `CachedStemmingAnalyzer` wraps language analyzers with LRU caching (default `cache_size=50000`) for repeated tokens
+- **Dictionary Stem Override** (`whoosh_modern.linguistics.dictionary_stem_override`): `DictionaryStemOverride` allows overriding Snowball stemming with business dictionaries (JSON/Wiktionary)
+- **Stemmer Profiler** (`whoosh_modern.profiling.stemmer_profiler`): `StemmerProfiler` and `StemmerProfilerReport` measure vocabulary reduction, estimated index size reduction, and average stemming time
+- **Multilingual SearchApplication** (`whoosh_modern.application`): `SearchApplication` now accepts `language_detector` and `dictionary_stem_overrides` parameters; `FieldConfig` supports `language="auto"` with detector resolution
 
 ### Breaking Changes
 
