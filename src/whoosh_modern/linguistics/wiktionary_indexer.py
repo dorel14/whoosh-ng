@@ -26,7 +26,6 @@ from typing import Any
 from whoosh.fields import ID, KEYWORD, TEXT, Schema
 from whoosh.index import create_in, exists_in, open_dir
 from whoosh.qparser import QueryParser
-from whoosh.searching import Searcher
 from whoosh_modern.data_sources import DataSource
 
 logger = logging.getLogger(__name__)

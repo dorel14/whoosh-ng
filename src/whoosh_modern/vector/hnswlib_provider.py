@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from contextlib import suppress
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 
@@ -32,7 +32,7 @@ class HnswlibProvider(VectorProvider):
     def __init__(
         self,
         dimension: int,
-        space: str = "l2",
+        space: Literal["l2", "ip", "cosine"] = "l2",
         max_elements: int = 10000,
         ef_construction: int = 200,
         m: int = 16,
@@ -50,14 +50,14 @@ class HnswlibProvider(VectorProvider):
             ImportError: If ``hnswlib`` is not installed.
         """
         try:
-            import hnswlib  # noqa: F401
+            import hnswlib  # pyright: ignore[reportMissingImports,reportUnusedImport,reportMissingModuleSource]
         except ImportError as exc:
             raise ImportError(
                 "HnswlibProvider requires hnswlib. "
                 "Install it with: pip install whoosh-ng[hnsw]"
             ) from exc
         self._dimension = dimension
-        self._space = space
+        self._space: Literal["l2", "ip", "cosine"] = space
         self._max_elements = max_elements
         self._ef_construction = ef_construction
         self._m = m
@@ -72,7 +72,7 @@ class HnswlibProvider(VectorProvider):
             The initialized ``hnswlib.Index`` instance.
         """
         if self._index is None:
-            import hnswlib
+            import hnswlib  # pyright: ignore[reportMissingImports,reportMissingModuleSource]
 
             self._index = hnswlib.Index(space=self._space, dim=self._dimension)
             self._index.init_index(

@@ -54,7 +54,7 @@ class LangDetectProvider(LanguageDetector):
         Returns:
             An ISO 639-1 language code (e.g. ``"fr"``).
         """
-        import langdetect
+        import langdetect  # pyright: ignore[reportMissingImports]
 
         langs = langdetect.detect_langs(text)
         if not langs:

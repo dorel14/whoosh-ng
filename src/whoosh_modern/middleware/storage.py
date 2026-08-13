@@ -254,7 +254,7 @@ class S3StorageProvider(SyncStorageProvider):
             self._client = client
         else:
             try:
-                import boto3
+                import boto3  # pyright: ignore[reportMissingImports]
             except ImportError as exc:
                 raise ImportError(
                     "S3StorageProvider requires boto3. Install with: pip install whoosh-ng[s3]"

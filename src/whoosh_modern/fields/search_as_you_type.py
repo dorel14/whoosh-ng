@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from whoosh.fields import TEXT, Schema
+from whoosh.fields import TEXT
 
 
 class SEARCH_AS_YOU_TYPE(TEXT):  # noqa: N801

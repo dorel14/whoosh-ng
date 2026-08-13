@@ -6,10 +6,10 @@ Version: 3.1.0
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from whoosh.analysis.analyzers import StandardAnalyzer
-from whoosh.analysis.filters import LowercaseFilter
 from whoosh.analysis.tokenizers import RegexTokenizer
 from whoosh_modern.analysis.autocomplete_analyzer import AutoCompleteAnalyzer
 from whoosh_modern.analysis.edge_ngram_analyzer import EdgeNgramAnalyzer
@@ -66,7 +66,7 @@ class AnalyzerPresets:
         Returns:
             A case-sensitive analyzer for code identifiers.
         """
-        return RegexTokenizer(r"\w+")
+        return RegexTokenizer(re.compile(r"\w+"))
 
     @staticmethod
     def documentation() -> Any:
@@ -75,7 +75,7 @@ class AnalyzerPresets:
         Returns:
             An analyzer with stopwords and light stemming.
         """
-        return StandardAnalyzer(stoplist=set())
+        return StandardAnalyzer(stoplist=frozenset())
 
     @staticmethod
     def ecommerce() -> Any:
@@ -84,7 +84,7 @@ class AnalyzerPresets:
         Returns:
             An analyzer preserving case and special characters.
         """
-        return RegexTokenizer(r"\w+")
+        return RegexTokenizer(re.compile(r"\w+"))
 
     @staticmethod
     def blog() -> Any:

@@ -124,8 +124,8 @@ class ConfigEngine:
             return self._app_cache
         source = DataSourceEngine(self._config).build()
         storage = StorageEngine(self._config).build()
-        vector_provider = VectorEngine(self._config).build()
-        embedding_provider = EmbeddingEngine(self._config).build()
+        _vector_provider = VectorEngine(self._config).build()
+        _embedding_provider = EmbeddingEngine(self._config).build()
         language_detector = LanguageEngine(self._config).build()
         from whoosh_modern.application import SearchApplication
 

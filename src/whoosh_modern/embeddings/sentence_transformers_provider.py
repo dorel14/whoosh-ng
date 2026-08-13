@@ -12,8 +12,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from whoosh_modern.embeddings.protocol import EmbeddingProvider
-
 
 class SentenceTransformersProvider:
     """Embedding provider using ``sentence-transformers``.
@@ -32,7 +30,7 @@ class SentenceTransformersProvider:
             ImportError: If ``sentence-transformers`` is not installed.
         """
         try:
-            import sentence_transformers
+            import sentence_transformers  # pyright: ignore[reportMissingImports,reportUnusedImport]
         except ImportError as exc:
             raise ImportError(
                 "SentenceTransformersProvider requires sentence-transformers. "
@@ -49,7 +47,7 @@ class SentenceTransformersProvider:
         Returns:
             A sequence of floats representing the embedding vector.
         """
-        from sentence_transformers import SentenceTransformer
+        from sentence_transformers import SentenceTransformer  # pyright: ignore[reportMissingImports]
 
         model = SentenceTransformer(self._model_name)
         embedding = model.encode(text, convert_to_numpy=True)

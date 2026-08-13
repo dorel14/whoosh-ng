@@ -9,7 +9,7 @@ Version: 3.0.0
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from whoosh.analysis.ngrams import NgramWordAnalyzer
@@ -68,7 +68,7 @@ class NgramProfiler:
             tokens = list(self._analyzer(text))
             total_tokens += len(tokens)
             total_ngrams += sum(1 for _ in tokens)
-        elapsed = time.perf_counter() - start
+        _elapsed = time.perf_counter() - start
 
         report = NgramProfilerReport(
             ngrams_generated=total_ngrams,

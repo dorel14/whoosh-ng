@@ -74,7 +74,7 @@ class FuzzySuggestProvider(AutocompleteProvider):
         if not self._phrases:
             return []
         try:
-            from rapidfuzz import fuzz, process
+            from rapidfuzz import fuzz, process  # pyright: ignore[reportMissingImports]
         except ImportError:
             return self._corrector_hits(prefix, limit)
         results = process.extract(

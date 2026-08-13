@@ -63,7 +63,6 @@ __all__ = [
     "GermanAnalyzer",
     "SpanishAnalyzer",
     "ItalianAnalyzer",
-    "LanguageAnalyzer",
     "MultiLanguageAnalyzer",
     "AnalysisExplanation",
     "ExplainAnalyzer",

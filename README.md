@@ -131,10 +131,14 @@ pip install "whoosh-ng[dev]"
 - `Token` now uses `__slots__`: code that iterates `token.__dict__` should use `token.copy()` or slot introspection instead
 - `finish_postings()` signature changed: `allow_compact=True` keyword added
 - **`whoosh_modern` package structure changed**: Import paths for data sources have been updated. For example, `from whoosh_modern.data_sources import SQLSource` should now be `from whoosh_modern.data_sources.sql import SQLSource`. Please update your import statements accordingly.
+- **Import path change**: The project was renamed from `whoosh-reloaded` to `whoosh-ng`.
+  The modern extension modules previously available under `whoosh_reloaded` are now importable under `whoosh_modern`.
+  Existing code using `whoosh_reloaded` must be updated to `whoosh_modern`. Core Whoosh
+  components remain available under the `whoosh` namespace.
 
 ### Changed
 
-- Distribution renamed from `whoosh-reloaded` to **`whoosh-ng`** (import namespace remains `whoosh`)
+- Distribution is now **`whoosh-ng`** (import namespace remains `whoosh` for core components, `whoosh_modern` for extensions)
 - Documentation links now absolute (GitHub Pages): `https://dorel14.github.io/whoosh-ng/en/...`
 - **Python 3.11+ required** (dropped Python 3.9/3.10 support)
 - Packaging cleaned: consolidated extras in `pyproject.toml`
