@@ -181,6 +181,7 @@
 - [Provider Integration](https://dorel14.github.io/whoosh-ng/fr/modern/provider-integration/)
 - [Stemming Providers](https://dorel14.github.io/whoosh-ng/fr/modern/stemming-providers/)
 - [Storage Providers](https://dorel14.github.io/whoosh-ng/fr/modern/storage-providers/)
+- [Synonyms](https://dorel14.github.io/whoosh-ng/fr/modern/synonyms/)
 - [Vector](https://dorel14.github.io/whoosh-ng/fr/modern/vector/)
 
 ## Code Examples & Recipes
