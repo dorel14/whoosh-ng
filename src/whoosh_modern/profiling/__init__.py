@@ -23,6 +23,8 @@ from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
 from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
 from whoosh_modern.profiling.unified_pipeline_profiler import UnifiedPipelineProfiler
 
+from whoosh_modern.profiling.ngram_profiler import NgramProfiler, NgramProfilerReport
+
 __all__ = [
     "AnalyzerCache",
     "AnalyzerComparator",
@@ -41,6 +43,8 @@ __all__ = [
     "IndexingPipelineProfiler",
     "MemoryProfiler",
     "MetricsCollector",
+    "NgramProfiler",
+    "NgramProfilerReport",
     "PerDocWriterProfiler",
     "PipelineReconcilerV2",
     "PostingPoolProfiler",
