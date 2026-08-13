@@ -11131,6 +11131,12 @@ writer.add_document(
 )
 ```
 
+> **Note**: The underscore prefix (`_stored_<field>`, `_<field>_boost`) is a
+> Whoosh convention for per-document overrides. It lets you store a different
+> value for display (`_stored_title`) without changing what is indexed, or
+> boost a specific field for a single document (`_title_boost`) without
+> affecting the schema-level boost.
+
 ### Field Boosts
 
 Boost individual fields at document level:
@@ -16089,6 +16095,9 @@ def suggest(query: str, limit: int = 5):
 
 # Configuration Engine
 
+Module: `whoosh_modern.config`
+Version: 3.1.0
+
 Whoosh-NG includes a **Configuration Engine** (`ConfigEngine`) that loads,
 validates, and merges application configuration from YAML or JSON files. It is
 built on Pydantic models and supports hierarchical layering so that environment-
@@ -16798,6 +16807,57 @@ result = explainer.explain("The running cats")
 print(result.text)       # "The running cats"
 print(result.tokens)     # ["run", "cat"]
 ```
+
+## Debugging Analysis with ExplainAnalyzer
+
+`ExplainAnalyzer` wraps any existing analyzer and returns an
+`AnalysisExplanation` describing how a text is transformed. It is useful
+for debugging complex analyzer chains, especially when mixing multilingual
+analyzers, stopword filters, or dictionary stem overrides.
+
+```python
+from whoosh_modern.linguistics.explain import ExplainAnalyzer
+from whoosh.analysis import StandardAnalyzer
+
+explainer = ExplainAnalyzer(StandardAnalyzer())
+explanation = explainer.explain("A quick brown fox jumps over the lazy dog")
+
+print(f"Original text: {explanation.text}")
+print(f"Final tokens : {explanation.tokens}")
+
+print("\nStep-by-step explanations:")
+for step in explanation.explanations:
+    print(
+        f"  - {step.step}: '{step.original}' -> '{step.result}'"
+    )
+```
+
+Example output:
+
+```text
+Original text: A quick brown fox jumps over the lazy dog
+Final tokens : ['quick', 'brown', 'fox', 'jumps', 'lazy', 'dog']
+
+Step-by-step explanations:
+  - tokenize: 'A' -> 'A'
+  - lowercase: 'A' -> 'a'
+  - stop: 'a' -> ''
+  - tokenize: 'quick' -> 'quick'
+  - lowercase: 'quick' -> 'quick'
+  ...
+```
+
+### Interpreting the output
+
+- `explanation.text` — the original input text.
+- `explanation.tokens` — the final token list after all analyzer steps.
+- `explanation.explanations` — a chronological list of
+  `TokenExplanation` objects showing each transformation step.
+
+Use this when:
+- an analyzer pipeline behaves differently than expected,
+- you need to verify which stopwords or stemming rules are applied,
+- you want to compare behavior across languages with `MultiLanguageAnalyzer`.
 
 ## Dictionary Stem Override
 
@@ -18615,7 +18675,7 @@ Whoosh-NG 2.0 introduces an enhanced `PluginManager` with registry support for d
 # Provider Integration: Complete Pipeline Guide
 
 Module: `whoosh_modern.storage`, `whoosh_modern.analysis.stemmer_providers`, `whoosh_modern.linguistics.synonyms`, `whoosh_modern.vector`, `whoosh_modern.autocomplete`
-Version: 2.0.0
+Version: 3.0.0
 
 This guide explains how all Whoosh-NG providers integrate into the indexing and
 search pipeline. It is the definitive reference for understanding the data flow
@@ -18964,7 +19024,7 @@ The provider operates independently of Whoosh's index/searcher.
 # Stemmer Providers
 
 Module: `whoosh_modern.analysis.stemmer_providers`, `whoosh_modern.analysis.stemming_analyzer`, `whoosh_modern.linguistics.stemmers`
-Version: 2.0.0
+Version: 3.0.0
 
 The stemmer provider system gives you flexible control over which stemming backend is used for text analysis. It supports auto-detection, explicit backend selection, and custom stemmer registration—all with a clean plugin-style API.
 
@@ -20197,6 +20257,9 @@ middleware = SynonymExpansionMiddleware(app.synonym_manager)
 ## DOCUMENT: Vector
 
 # Vector Search
+
+Module: `whoosh_modern.vector`
+Version: 2.1.0
 
 Whoosh-NG supports semantic search through vector embeddings. This guide covers setting up and using vector fields.
 
@@ -30348,6 +30411,70 @@ writer.commit()
 - Utilisez `BufferedWriter` en environnement multi-processus
 - Libérez toujours le verrou avec `commit()` ou `cancel()`
 
+## Valeurs stockées vs indexées
+
+Pour les champs qui sont à la fois indexés et stockés, vous pouvez stocker une valeur différente :
+
+```python
+writer.add_document(
+    title="Title to be indexed",
+    _stored_title="Display title to show in results"
+)
+```
+
+> **Note** : Le préfixe underscore (`_stored_<field>`, `_<field>_boost`) est une
+> convention Whoosh pour les overrides par document. Il vous permet de stocker
+> une valeur différente pour l'affichage (`_stored_title`) sans modifier ce qui
+> est indexé, ou de booster un champ spécifique pour un seul document
+> (`_title_boost`) sans affecter le boost au niveau du schéma.
+
+## Boosts de champs
+
+Booster des champs individuels au niveau du document :
+
+```python
+writer.add_document(
+    title="Important title",
+    _title_boost=2.0,   # Double weight for title terms
+    content="Body content"
+)
+```
+
+## Mettre à jour les documents
+
+Utilisez `update_document` pour remplacer les documents correspondant à des champs uniques :
+
+```python
+schema = Schema(path=ID(unique=True, stored=True), content=TEXT)
+ix = index.create_in("indexdir", schema)
+
+with ix.writer() as writer:
+    writer.add_document(path="/doc1", content="Original content")
+    writer.commit()
+
+with ix.writer() as writer:
+    # Remplace tout document avec path="/doc1"
+    writer.update_document(path="/doc1", content="Updated content")
+    writer.commit()
+```
+
+## Supprimer des documents
+
+```python
+# Par numéro de document
+writer.delete_document(docnum=42)
+
+# Par terme
+writer.delete_by_term("path", "/doc1")
+
+# Par requête
+from whoosh.query import Term
+q = Term("tags", "deprecated")
+writer.delete_by_query(q)
+
+writer.commit()
+```
+
 
 ## DOCUMENT (FR): Installation
 
@@ -36459,6 +36586,60 @@ print(result.text)       # "The running cats"
 print(result.tokens)     # ["run", "cat"]
 ```
 
+## Débogage d'analyse avec ExplainAnalyzer
+
+`ExplainAnalyzer` encapsule n'importe quel analyseur existant et retourne une
+`AnalysisExplanation` décrivant comment un texte est transformé. C'est un outil
+utile pour déboguer des chaînes d'analyseurs complexes, surtout lors de l'utilisation
+d'analyseurs multilingues, de filtres stopwords ou de remplacements de stemming
+par dictionnaire.
+
+```python
+from whoosh_modern.linguistics.explain import ExplainAnalyzer
+from whoosh.analysis import StandardAnalyzer
+
+explainer = ExplainAnalyzer(StandardAnalyzer())
+explanation = explainer.explain(
+    "A quick brown fox jumps over the lazy dog"
+)
+
+print(f"Texte original : {explanation.text}")
+print(f"Tokens finaux : {explanation.tokens}")
+
+print("\nExplications étape par étape :")
+for step in explanation.explanations:
+    print(
+        f"  - {step.step} : '{step.original}' -> '{step.result}'"
+    )
+```
+
+Exemple de sortie :
+
+```text
+Texte original : A quick brown fox jumps over the lazy dog
+Tokens finaux : ['quick', 'brown', 'fox', 'jumps', 'lazy', 'dog']
+
+Explications étape par étape :
+  - tokenize : 'A' -> 'A'
+  - lowercase : 'A' -> 'a'
+  - stop : 'a' -> ''
+  - tokenize : 'quick' -> 'quick'
+  - lowercase : 'quick' -> 'quick'
+  ...
+```
+
+### Interprétation de la sortie
+
+- `explanation.text` — le texte d'entrée original.
+- `explanation.tokens` — la liste finale de tokens après toutes les étapes de l'analyseur.
+- `explanation.explanations` — une liste chronologique d'objets
+  `TokenExplanation` montrant chaque transformation.
+
+Utilisez ceci lorsque :
+- une chaîne d'analyseurs se comporte différemment de ce qui est attendu,
+- vous avez besoin de vérifier quels stopwords ou règles de stemming sont appliqués,
+- vous voulez comparer le comportement entre langues avec `MultiLanguageAnalyzer`.
+
 ## Override de stem par dictionnaire
 
 Remplace le stemming Snowball par des dictionnaires métier :
@@ -39273,6 +39454,310 @@ Le provider ne **n'intercepte pas** les lectures internes de segments de Whoosh.
 
 - [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
+
+
+## DOCUMENT (FR): Synonyms
+
+# Synonymes
+
+Module: `whoosh_modern.linguistics.synonyms`
+Version: 3.0.0
+
+Le moteur de synonymes fournit une expansion de synonymes au moment de la requête et de l'indexation via un système de providers pluggables. Il supporte les mappings statiques en mémoire, les fichiers YAML/JSON, la persistance SQLite, et les dictionnaires Wiktionary à grande échelle.
+
+## Architecture des providers
+
+Tous les providers de synonymes implémentent le protocole `SynonymProvider` :
+
+```python
+from whoosh_modern.linguistics.synonyms import SynonymProvider
+
+class MyProvider(SynonymProvider):
+    def get_synonyms(self, word: str) -> list[str]: ...
+    def add_synonym(self, word: str, synonyms: list[str]) -> None: ...
+    def remove_synonym(self, word: str, synonym: str) -> None: ...
+```
+
+## Providers intégrés
+
+### StaticSynonymProvider
+
+Provider en mémoire sauvegardé par un dictionnaire :
+
+```python
+from whoosh_modern.linguistics.synonyms import StaticSynonymProvider
+
+provider = StaticSynonymProvider({
+    "voiture": ["automobile", "véhicule"],
+    "maison": ["domicile", "résidence"],
+})
+print(provider.get_synonyms("voiture"))  # ['automobile', 'véhicule']
+```
+
+### YAMLSynonymProvider
+
+Charge les synonymes depuis un fichier YAML :
+
+```yaml
+# synonyms.yaml
+voiture:
+  - automobile
+  - véhicule
+maison:
+  - domicile
+  - résidence
+```
+
+```python
+from whoosh_modern.linguistics.synonyms import YAMLSynonymProvider
+
+provider = YAMLSynonymProvider("synonyms.yaml")
+print(provider.get_synonyms("voiture"))  # ['automobile', 'véhicule']
+```
+
+### JSONSynonymProvider
+
+Charge les synonymes depuis un fichier JSON :
+
+```json
+{
+    "voiture": ["automobile", "véhicule"],
+    "maison": ["domicile", "résidence"]
+}
+```
+
+```python
+from whoosh_modern.linguistics.synonyms import JSONSynonymProvider
+
+provider = JSONSynonymProvider("synonyms.json")
+print(provider.get_synonyms("voiture"))
+```
+
+### WiktionarySynonymProvider
+
+Charge les synonymes depuis un fichier JSON Lines kaikki.org :
+
+```python
+from whoosh_modern.linguistics.synonyms import WiktionarySynonymProvider
+
+provider = WiktionarySynonymProvider(
+    "src/whoosh_modern/linguistics/dictionaries/wiktionary/fr.json"
+)
+print(provider.get_synonyms("voiture"))  # ['automobile', 'véhicule']
+```
+
+Chaque ligne du fichier dictionnaire est un objet JSON :
+
+```json
+{"word": "voiture", "s": ["automobile", "véhicule"]}
+{"word": "ordinateur", "s": ["pc", "machine"]}
+```
+
+Le provider filtre :
+- Les mots contenant des espaces (expressions multi-mots)
+- Les entrées avec parties du discours non standard
+- Les listes de synonymes vides ou manquantes
+
+### SQLiteSynonymStore
+
+Store de synonymes persistant sauvegardé par SQLite :
+
+```python
+from whoosh_modern.linguistics.synonyms import SQLiteSynonymStore
+
+store = SQLiteSynonymStore("synonyms.db")
+store.add_synonym("voiture", ["automobile", "véhicule"])
+print(store.get_synonyms("voiture"))  # ['automobile', 'véhicule']
+store.close()
+```
+
+## SynonymManager
+
+`SynonymManager` est l'interface de haut niveau pour gérer les synonymes :
+
+```python
+from whoosh_modern.linguistics.synonyms import SynonymManager
+
+manager = SynonymManager({"voiture": ["automobile", "véhicule"]})
+
+# CRUD
+manager.add_synonyms("maison", ["domicile", "résidence"])
+print(manager.get_synonyms("maison"))  # ['domicile', 'résidence']
+manager.remove_synonym("maison", "domicile")
+
+# Import depuis des sources externes
+manager.import_yaml("synonyms.yaml")       # Requiert PyYAML
+manager.import_json("synonyms.json")
+manager.import_wiktionary("dictionaries/wiktionary/fr.json")
+
+# Export
+manager.export_json("output.json")
+```
+
+## Mise à jour des dictionnaires Wiktionary
+
+Les dictionnaires pré-générés se trouvent dans `src/whoosh_modern/linguistics/dictionaries/wiktionary/` :
+
+```
+wiktionary/
+├── fr.json
+├── en.json
+├── de.json
+├── es.json
+├── it.json
+├── manifest.json
+└── README.md
+```
+
+Pour les régénérer depuis le dernier dump kaikki.org :
+
+```bash
+python scripts/update_wiktionary_dictionaries.py --all
+```
+
+Ou pour une seule langue :
+
+```bash
+python scripts/update_wiktionary_dictionaries.py --lang fr
+```
+
+Le script télécharge `kaikki.org-dictionary-all.jsonl`, extrait les synonymes par langue, filtre par tags POS autorisés, et écrit des fichiers JSON Lines compacts par langue.
+
+## SynonymExpansionMiddleware
+
+Intègre l'expansion de synonymes dans le pipeline de middleware :
+
+```python
+from whoosh_modern.linguistics.synonyms import (
+    SynonymManager,
+    SynonymExpansionMiddleware,
+)
+
+manager = SynonymManager({
+    "voiture": ["automobile", "véhicule"],
+    "maison": ["domicile", "résidence"],
+})
+middleware = SynonymExpansionMiddleware(manager)
+```
+
+Le middleware étend à la fois les requêtes de recherche et les documents indexés :
+
+```python
+# Expansion de requête
+ctx = MiddlewareContext(operation="search")
+ctx.query = "voiture"
+ctx = middleware.before_search(ctx)
+# ctx.query == "voiture automobile véhicule"
+
+# Expansion de document
+ctx = MiddlewareContext(operation="index")
+ctx.document = {"title": "maison à vendre"}
+ctx = middleware.before_index(ctx)
+# ctx.document["title"] == "maison à vendre domicile résidence"
+```
+
+## Synonymes préconstruits par langue
+
+`LANG_SYNONYMS` fournit des dictionnaires de démarrage pour cinq langues :
+
+```python
+from whoosh_modern.linguistics.synonyms import LANG_SYNONYMS
+
+french_syns = LANG_SYNONYMS["fr"]
+print(french_syns["voiture"])  # ['automobile', 'véhicule']
+
+english_syns = LANG_SYNONYMS["en"]
+print(english_syns["car"])  # ['automobile', 'vehicle']
+```
+
+| Langue   | Code | Entrée exemple                          |
+|----------|------|----------------------------------------|
+| Français | `fr` | `"voiture": ["automobile", "véhicule"]` |
+| Anglais  | `en` | `"car": ["automobile", "vehicle"]`      |
+| Allemand | `de` | `"auto": ["wagen", "fahrzeug"]`         |
+| Espagnol | `es` | `"coche": ["automóvil", "vehículo"]`    |
+| Italien  | `it` | `"auto": ["automobile", "veicolo"]`     |
+
+## Exemple d'intégration
+
+```python
+from whoosh_modern.linguistics import (
+    LANG_SYNONYMS,
+    SynonymExpansionMiddleware,
+    SynonymManager,
+)
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareWriter, MiddlewareSearcher
+
+# 1. Construit le manager de synonymes
+syn_manager = SynonymManager(LANG_SYNONYMS["fr"])
+syn_manager.add_synonyms("recherche", ["query", "cherche"])
+
+# 2. Crée le middleware
+syn_middleware = SynonymExpansionMiddleware(syn_manager)
+
+# 3. Construit la chaîne de middleware
+chain = MiddlewareChain([syn_middleware])
+
+# 4. Utilise avec writer/searcher
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Comment faire une recherche dans Whoosh")
+
+with MiddlewareSearcher(ix.searcher(), chain) as searcher:
+    results = searcher.search("recherche")
+```
+
+## Intégration de l'indexation Wiktionary
+
+`WiktionaryIndexer` peut alimenter les synonymes directement dans `SynonymManager` et `SearchApplication`.
+
+### SynonymManager.import_wiktionary_index()
+
+Peuple un manager depuis un index Whoosh construit :
+
+```python
+from whoosh_modern.linguistics.synonyms import SynonymManager
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+indexer = WiktionaryIndexer("indexdir")
+# ... build_index() appelé précédemment ...
+
+manager = SynonymManager()
+manager.import_wiktionary_index("indexdir", language="fr")
+print(manager.get_synonyms("voiture"))
+# ['automobile', 'véhicule']
+```
+
+### Intégration SearchApplication
+
+Passe un `WiktionaryIndexer` à `SearchApplication` pour exposer un `synonym_manager` pré-peuplé :
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+indexer = WiktionaryIndexer("indexdir")
+app = SearchApplication(wiktionary_indexer=indexer)
+
+# synonym_manager est peuplé paresseusement depuis l'index
+manager = app.synonym_manager
+```
+
+### Câblage de SynonymExpansionMiddleware
+
+Combine avec le middleware pour étendre les requêtes au moment de la recherche :
+
+```python
+from whoosh_modern.linguistics.synonyms import SynonymExpansionMiddleware
+
+middleware = SynonymExpansionMiddleware(app.synonym_manager)
+```
+
+## Voir aussi
+
+- [Vue d'ensemble linguistique](linguistics.md) — Stemmers, analyseurs de langue, et intégration complète du pipeline
+- [Pipeline de middleware](middleware-pipeline.md) — Fonctionnement des chaînes de middleware
+- [Providers de stemming](stemming-providers.md) — Backends de stemming spécifiques aux langues
 
 
 ## DOCUMENT (FR): Vector
