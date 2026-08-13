@@ -80,4 +80,3 @@ that haven't changed.
 
 - [Indexing](/core/indexing) â€” Writers, `AsyncWriter`, `BufferedWriter`
 - [API: writing](../api/writing) â€” Writer concurrency helpers
-

@@ -196,4 +196,3 @@ return vector.id() == "wobble"
 - [Analysis](/core/analysis) â€” Analyzers, tokenizers, and filters
 - [N-grams](/core/ngrams) â€” Search-as-you-type with N-gram analyzers
 - [Searching](/core/searching) â€” The `search()` method and `Hit` objects
-

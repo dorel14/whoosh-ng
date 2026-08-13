@@ -38,6 +38,7 @@ class LangDetectProvider(LanguageDetector):
         """
         try:
             import langdetect  # pyright: ignore[reportMissingImports]
+
             _ = langdetect  # mark as used for type checkers
         except ImportError as exc:
             raise ImportError(
