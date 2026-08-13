@@ -31,6 +31,10 @@ with an "unbounded" cache.
 When you're indexing in large batches with a one-shot instance of the analyzer,
 consider using an unbounded cache:
 
+> **Note**: For new implementations or complex multilingual scenarios, consider
+> using the `CachedStemmingAnalyzer` (from `whoosh_modern.analysis.cached_stemming_analyzer`)
+> which offers integrated LRU caching and flexible configuration.
+
 ```python
 w = myindex.writer()
 # Get the analyzer object from a text field

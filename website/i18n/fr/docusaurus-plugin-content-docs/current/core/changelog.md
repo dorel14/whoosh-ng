@@ -11,9 +11,15 @@ Notes de version pour Whoosh-NG, generees automatiquement a partir des releases 
 ## v5.1.0 (2026-08-11)
 **Tag**: `v5.1.0`
 
-## v5.1.0 (2026-08-11)
-
 _This release is published under the BSD-2-Clause License._
+
+### Breaking Changes
+
+- **Changement de chemin d'import** : Le projet a été renommé de `whoosh-reloaded` en
+  `whoosh-ng`. Les modules d'extension modernes précédemment disponibles sous
+  `whoosh_reloaded` sont maintenant importables sous `whoosh_modern`. Le code
+  existant utilisant `whoosh_reloaded` doit être mis à jour vers `whoosh_modern`.
+  Les composants Whoosh core restent disponibles sous l'espace de noms `whoosh`.
 
 ### Bug Fixes
 

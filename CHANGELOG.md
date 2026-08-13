@@ -76,9 +76,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Indexing Integration section covering `import_wiktionary_index()`,
   `SearchApplication` integration, and middleware wiring.
 
+### Breaking Changes
+- **Import path change**: The project was renamed from `whoosh-reloaded` to
+  `whoosh-ng`. The modern extension modules previously available under
+  `whoosh_reloaded` are now importable under `whoosh_modern`. Existing code
+  using `whoosh_reloaded` must be updated to `whoosh_modern`. Core Whoosh
+  components remain available under the `whoosh` namespace.
+
 ### Changed
-- Renamed distribution from `whoosh-reloaded` to **`whoosh-ng`**. The import
-  namespace remains `whoosh` for backward compatibility.
+- Distribution renamed from `whoosh-reloaded` to **`whoosh-ng`**.
 - Documentation site moved to GitHub Pages: https://dorel14.github.io/Whoosh-NG/
 - Required Python version is now `>=3.11`.
 - Packaging cleaned: removed redundant `requirements*.txt`; consolidated extras

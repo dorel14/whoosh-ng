@@ -3,6 +3,11 @@ title: "Indexation"
 sidebar_position: 20
 ---
 
+:::info
+Suite au renommage de `whoosh-reloaded` en `whoosh-ng`, les nouveaux modules spécifiques à Whoosh-NG se trouvent généralement sous `whoosh_modern`.
+Les composants Whoosh core (comme `whoosh.analysis`, `whoosh.index`) restent accessibles directement sous l'espace de noms `whoosh` pour la rétrocompatibilité.
+:::
+
 # Indexation
 
 Guide pour ajouter, mettre à jour et supprimer des documents.

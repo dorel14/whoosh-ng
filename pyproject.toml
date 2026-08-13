@@ -418,8 +418,7 @@ module = [
   "tortoise",
   "Stemmer",
   "lmdb",
-  "httpx",
-  "psutil",
+  "sentence_transformers",
   "yaml",
 ]
 ignore_missing_imports = true

@@ -5,6 +5,11 @@ Module: whoosh.analysis
 Version: 2.7.4
 ---
 
+:::info
+Following the rename of `whoosh-reloaded` to `whoosh-ng`, new Whoosh-NG specific modules are typically found under `whoosh_modern`.
+Core Whoosh components (like `whoosh.analysis`, `whoosh.index`) remain accessible directly under the `whoosh` namespace for backward compatibility.
+:::
+
 # About analyzers
 
 ## Overview
@@ -57,8 +62,9 @@ def LowercaseFilter(tokens):
 You can wrap the filter around a tokenizer to see it in operation:
 
 ```python
-from whoosh.analysis import LowercaseFilter
+from whoosh.analysis import LowercaseFilter, RegexTokenizer
 
+tokenizer = RegexTokenizer()
 for token in LowercaseFilter(tokenizer("These ARE the things I want!")):
     print(repr(token.text))
 # u'these'

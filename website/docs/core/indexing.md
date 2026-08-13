@@ -3,6 +3,11 @@ title: "Indexing"
 sidebar_position: 20
 ---
 
+:::info
+Following the rename of `whoosh-reloaded` to `whoosh-ng`, new Whoosh-NG specific modules are typically found under `whoosh_modern`.
+Core Whoosh components (like `whoosh.analysis`, `whoosh.index`) remain accessible directly under the `whoosh` namespace for backward compatibility.
+:::
+
 # Indexing
 
 This guide covers adding, updating, and deleting documents in your Whoosh-NG index.
