@@ -158,7 +158,7 @@ def convert_links(content: str, locale: str, is_stub: bool = False) -> str:
     pmap = EN_PERMALINK_MAP if locale == "en" else FR_PERMALINK_MAP
 
     def _replace(match: re.Match) -> str:
-        path = match.group(1)
+        path: str = match.group(1)
         # Handle llms.txt / llms-full.txt — served from static/
         if path in ("/llms.txt", "/llms-full.txt"):
             return path

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from whoosh_modern.linguistics.explain import AnalysisExplanation, ExplainAnalyzer, TokenExplanation
 from whoosh_modern.analysis.cached_stemming_analyzer import CachedStemmingAnalyzer
+from whoosh_modern.linguistics.explain import AnalysisExplanation, ExplainAnalyzer, TokenExplanation
 
 
 class TestExplainAnalyzer:
