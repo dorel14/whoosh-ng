@@ -110,6 +110,19 @@ pip install "whoosh-ng[dev]"
 - **SearchView** (`whoosh_modern.views`): Unified interface integrating data sources, schema discovery, facets, validation, and middleware with `build()`, `refresh()`, `reindex()`, `validate()`, `evolve_schema()`, and strict mode
 - **Stemmer Provider System** (`whoosh_modern.analysis`): `get_stemmer()`, `register_stemmer()`, auto-detection between internal Porter stemmer and PyStemmer C backend
 - **Enhanced StemmingAnalyzer** (`whoosh_modern.analysis`): Accepts `stemmer="auto"|"internal"|"pystemmer"|provider` parameter
+- **Configuration Engine** (`whoosh_modern.config`): `ConfigEngine` with hierarchical YAML/JSON merging, Pydantic models (`WhooshNGConfig`, `FieldConfig`), and sub-engines (`SchemaEngine`, `AnalyzerEngine`, `DataSourceEngine`, `StorageEngine`, `SearchModelEngine`, `FacetEngine`, `PluginEngine`, `APIEngine`)
+- **Vector Search** (`whoosh_modern.vector`): `HnswlibProvider` for HNSW approximate nearest neighbor search alongside `NumpyProvider`
+- **Embedding Framework** (`whoosh_modern.embeddings`): `EmbeddingProvider` protocol and `SentenceTransformersProvider` for sentence-transformers embeddings
+- **Modern N-Gram Framework** (`whoosh_modern.analysis`): `AutoCompleteAnalyzer`, `EdgeNgramAnalyzer`, `SEARCH_AS_YOU_TYPE` field type, `NgramProfiler` for performance profiling, and `AnalyzerPresets` (autocomplete, partial_match, fuzzy, code_search, documentation, ecommerce, blog, multilingual)
+- **Language Auto-Detection** (`whoosh_modern.linguistics.detection`): `StopwordDetector` and `LangDetectProvider` for automatic language detection with configurable supported languages
+- **Language Registry** (`whoosh_modern.linguistics.registry`): `LanguageRegistry`, `StemmerRegistry`, and `LanguageProfile` for centralized language/analyzer/stemmer resolution with `get_default_registry()`
+- **Multi-Language Analyzer** (`whoosh_modern.linguistics.analyzers`): `MultiLanguageAnalyzer` applies multiple language analyzers simultaneously for multilingual indexing
+- **Analyzer Presets** (`whoosh_modern.analysis.stemmer_presets`): `AnalyzerPresets.documentation()`, `.ecommerce()`, `.blog()`, `.multilingual()` for common search scenarios
+- **Explain Analyzer** (`whoosh_modern.linguistics.explain`): `ExplainAnalyzer`, `AnalysisExplanation`, and `TokenExplanation` expose the tokenization/stemming pipeline for Search Studio
+- **Cached Stemming Analyzer** (`whoosh_modern.analysis.cached_stemming_analyzer`): `CachedStemmingAnalyzer` wraps language analyzers with LRU caching (default `cache_size=50000`) for repeated tokens
+- **Dictionary Stem Override** (`whoosh_modern.linguistics.dictionary_stem_override`): `DictionaryStemOverride` allows overriding Snowball stemming with business dictionaries (JSON/Wiktionary)
+- **Stemmer Profiler** (`whoosh_modern.profiling.stemmer_profiler`): `StemmerProfiler` and `StemmerProfilerReport` measure vocabulary reduction, estimated index size reduction, and average stemming time
+- **Multilingual SearchApplication** (`whoosh_modern.application`): `SearchApplication` now accepts `language_detector` and `dictionary_stem_overrides` parameters; `FieldConfig` supports `language="auto"` with detector resolution
 
 ### Breaking Changes
 
@@ -118,10 +131,14 @@ pip install "whoosh-ng[dev]"
 - `Token` now uses `__slots__`: code that iterates `token.__dict__` should use `token.copy()` or slot introspection instead
 - `finish_postings()` signature changed: `allow_compact=True` keyword added
 - **`whoosh_modern` package structure changed**: Import paths for data sources have been updated. For example, `from whoosh_modern.data_sources import SQLSource` should now be `from whoosh_modern.data_sources.sql import SQLSource`. Please update your import statements accordingly.
+- **Import path change**: The project was renamed from `whoosh-reloaded` to `whoosh-ng`.
+  The modern extension modules previously available under `whoosh_reloaded` are now importable under `whoosh_modern`.
+  Existing code using `whoosh_reloaded` must be updated to `whoosh_modern`. Core Whoosh
+  components remain available under the `whoosh` namespace.
 
 ### Changed
 
-- Distribution renamed from `whoosh-reloaded` to **`whoosh-ng`** (import namespace remains `whoosh`)
+- Distribution is now **`whoosh-ng`** (import namespace remains `whoosh` for core components, `whoosh_modern` for extensions)
 - Documentation links now absolute (GitHub Pages): `https://dorel14.github.io/whoosh-ng/en/...`
 - **Python 3.11+ required** (dropped Python 3.9/3.10 support)
 - Packaging cleaned: consolidated extras in `pyproject.toml`

@@ -327,8 +327,236 @@ with MiddlewareSearcher(ix.searcher(), chain) as searcher:
     results = searcher.search("search")
 ```
 
+## Language Registry
+
+The `LanguageRegistry` maps language codes to `LanguageProfile` instances, centralizing analyzer, stemmer, synonym provider, and language detector resolution.
+
+```python
+from whoosh_modern.linguistics.registry import (
+    LanguageRegistry,
+    LanguageProfile,
+    StemmerRegistry,
+    get_default_registry,
+)
+
+# Use the pre-populated default registry (FR/EN/DE/ES/IT)
+registry = get_default_registry()
+
+# Resolve a language profile
+profile = registry.resolve("fr")
+print(profile.language)   # "fr"
+print(profile.analyzer)   # FrenchAnalyzer instance
+
+# Register a custom language profile
+custom = LanguageProfile(
+    language="pt",
+    analyzer=...,  # your analyzer
+    stemmer=...,   # your stemmer
+)
+registry.register(custom)
+
+# StemmerRegistry adds stemmer-specific helpers
+stem_registry = StemmerRegistry(registry._profiles.values())
+stemmer = stem_registry.get_stemmer("fr")
+```
+
+## Multi-Language Analyzer
+
+`MultiLanguageAnalyzer` applies multiple language analyzers simultaneously for multilingual indexing.
+
+```python
+from whoosh_modern.linguistics.analyzers import MultiLanguageAnalyzer
+
+# Default: FR/EN/DE/ES/IT
+analyzer = MultiLanguageAnalyzer()
+
+# Custom language set
+analyzer = MultiLanguageAnalyzer(languages=["fr", "en"])
+
+tokens = analyzer("hello bonjour")
+# Returns combined tokens from all configured analyzers
+```
+
+## Language Auto-Detection
+
+`StopwordDetector` and `LangDetectProvider` enable automatic language detection:
+
+```python
+from whoosh_modern.linguistics.detection import StopwordDetector
+
+detector = StopwordDetector(supported_languages=["fr", "en", "de"])
+lang = detector.detect("Ceci est un texte en français")
+print(lang)  # "fr"
+```
+
+Use with `SearchApplication` for automatic language resolution:
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.linguistics.detection import StopwordDetector
+
+app = SearchApplication(
+    source=my_source,
+    language_detector=StopwordDetector(),
+)
+
+# FieldConfig supports language="auto"
+# The detector resolves the language per document
+```
+
+## Explain Analyzer
+
+`ExplainAnalyzer` exposes the tokenization/stemming pipeline for Search Studio:
+
+```python
+from whoosh_modern.linguistics.explain import ExplainAnalyzer
+
+explainer = ExplainAnalyzer(EnglishAnalyzer)
+result = explainer.explain("The running cats")
+
+print(result.text)       # "The running cats"
+print(result.tokens)     # ["run", "cat"]
+```
+
+## Debugging Analysis with ExplainAnalyzer
+
+`ExplainAnalyzer` wraps any existing analyzer and returns an
+`AnalysisExplanation` describing how a text is transformed. It is useful
+for debugging complex analyzer chains, especially when mixing multilingual
+analyzers, stopword filters, or dictionary stem overrides.
+
+```python
+from whoosh_modern.linguistics.explain import ExplainAnalyzer
+from whoosh.analysis import StandardAnalyzer
+
+explainer = ExplainAnalyzer(StandardAnalyzer())
+explanation = explainer.explain("A quick brown fox jumps over the lazy dog")
+
+print(f"Original text: {explanation.text}")
+print(f"Final tokens : {explanation.tokens}")
+
+print("\nStep-by-step explanations:")
+for step in explanation.explanations:
+    print(
+        f"  - {step.step}: '{step.original}' -> '{step.result}'"
+    )
+```
+
+Example output:
+
+```text
+Original text: A quick brown fox jumps over the lazy dog
+Final tokens : ['quick', 'brown', 'fox', 'jumps', 'lazy', 'dog']
+
+Step-by-step explanations:
+  - tokenize: 'A' -> 'A'
+  - lowercase: 'A' -> 'a'
+  - stop: 'a' -> ''
+  - tokenize: 'quick' -> 'quick'
+  - lowercase: 'quick' -> 'quick'
+  ...
+```
+
+### Interpreting the output
+
+- `explanation.text` — the original input text.
+- `explanation.tokens` — the final token list after all analyzer steps.
+- `explanation.explanations` — a chronological list of
+  `TokenExplanation` objects showing each transformation step.
+
+Use this when:
+- an analyzer pipeline behaves differently than expected,
+- you need to verify which stopwords or stemming rules are applied,
+- you want to compare behavior across languages with `MultiLanguageAnalyzer`.
+
+## Dictionary Stem Override
+
+Override Snowball stemming with business dictionaries:
+
+```python
+from whoosh_modern.linguistics.dictionary_stem_override import DictionaryStemOverride
+
+override = DictionaryStemOverride({
+    "voiture": "voitur",
+    "maison": "maison",
+})
+
+print(override.stem("voiture"))  # "voitur"
+print(override.stem("maison"))   # "maison"
+
+# Add rules dynamically
+override.add_rule("chien", "chien")
+```
+
+Use with `SearchApplication`:
+
+```python
+from whoosh_modern import SearchApplication
+
+app = SearchApplication(
+    source=my_source,
+    dictionary_stem_overrides={"voiture": "voitur"},
+)
+```
+
+## Cached Stemming Analyzer
+
+`CachedStemmingAnalyzer` wraps language analyzers with LRU caching:
+
+```python
+from whoosh_modern.analysis.cached_stemming_analyzer import CachedStemmingAnalyzer
+from whoosh_modern.linguistics.stemmers import FrenchAnalyzer
+
+cached = CachedStemmingAnalyzer(FrenchAnalyzer, cache_size=50000)
+tokens = cached("les maisons")
+```
+
+## Stemmer Profiler
+
+Measure stemming impact on vocabulary and performance:
+
+```python
+from whoosh_modern.profiling.stemmer_profiler import StemmerProfiler
+
+profiler = StemmerProfiler(stemmer=my_stemmer)
+report = profiler.profile(["document 1", "document 2", ...])
+
+print(report.original_tokens)        # Total tokens before stemming
+print(report.stemmed_tokens)         # Unique tokens after stemming
+print(report.reduction_ratio)        # Vocabulary reduction ratio
+print(report.estimated_size_reduction)  # Estimated index size reduction %
+print(report.avg_stem_time_ms)       # Average stemming time per token
+```
+
+## Analyzer Presets
+
+Preconfigured analyzers for common search scenarios:
+
+```python
+from whoosh_modern.analysis.stemmer_presets import AnalyzerPresets
+
+# Autocomplete
+autocomplete_analyzer = AnalyzerPresets.autocomplete()
+
+# Partial match
+partial_analyzer = AnalyzerPresets.partial_match()
+
+# Ecommerce
+ecommerce_analyzer = AnalyzerPresets.ecommerce()
+
+# Blog
+blog_analyzer = AnalyzerPresets.blog()
+
+# Multilingual
+multilingual_analyzer = AnalyzerPresets.multilingual()
+
+# Get by name
+analyzer = AnalyzerPresets.get("autocomplete")
+```
+
 ## See Also
 
+- [Synonyms](synonyms.md) — Synonym providers, manager, and Wiktionary dictionaries
 - [Stemming Guide](stemming-providers.md) — Stemmer providers and language analyzers
 - [Middleware Guide](middleware-pipeline.md) — Middleware pipeline integration
 - [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers

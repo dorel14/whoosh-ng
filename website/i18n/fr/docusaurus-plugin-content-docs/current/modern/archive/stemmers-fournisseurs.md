@@ -500,7 +500,7 @@ analyzer = StemmingAnalyzer(stemmer=stemmer)
 
 ## Voir Aussi
 
-- [Guide Stemming et Mots Vides](stemming.md) — Guide classique de stemming de Whoosh
+- [Guide Stemming et Mots Vides](../core/stemming.md) — Guide classique de stemming de Whoosh
 - [Guide Synonymes & Linguistique](linguistique.md) — Moteur d'expansion de synonymes
 - [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [API: Moderne](../api/modern.md) — Référence complète de l'API pour les extensions d'analyse

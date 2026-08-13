@@ -9,7 +9,7 @@ import sys
 def _get_process_memory_mb() -> float:
     """Return current process RSS memory in MB."""
     try:
-        import psutil
+        import psutil  # pyright: ignore[reportMissingImports]
 
         return float(psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024))
     except ImportError:

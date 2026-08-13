@@ -91,7 +91,8 @@ def _api_request(url: str, token: str | None = None) -> dict | list | None:
     req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read().decode("utf-8"))
+            result: dict | list | None = json.loads(resp.read().decode("utf-8"))
+            return result
     except Exception as e:
         print(f"API request error for {url}: {e}", file=sys.stderr)
         return None
@@ -126,7 +127,8 @@ def fetch_commits_between(prev_tag: str, curr_tag: str, token: str | None = None
     url = f"https://api.github.com/repos/{GITHUB_REPO}/compare/{prev_tag}...{curr_tag}"
     data = _api_request(url, token)
     if data and isinstance(data, dict) and "commits" in data:
-        return data["commits"]
+        commits: list[dict] = data["commits"]
+        return commits
     return []
 
 

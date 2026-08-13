@@ -81,6 +81,50 @@ class SynonymManager:
         provider = JSONSynonymProvider(path)
         self._merge(provider)
 
+    def import_wiktionary(self, path: str) -> None:
+        """Import synonyms from a Wiktionary JSON Lines dictionary.
+
+        Args:
+            path: Filesystem path to the kaikki.org JSON Lines dictionary
+                file for a given language (e.g.
+                ``dictionaries/wiktionary/fr.json``).
+        """
+        from whoosh_modern.linguistics.synonyms.wiktionary_provider import (
+            WiktionarySynonymProvider,
+        )
+
+        provider = WiktionarySynonymProvider(path)
+        self._merge(provider)
+
+    def import_wiktionary_index(
+        self,
+        index_path: str,
+        language: str | None = None,
+    ) -> None:
+        """Import synonyms from a built Wiktionary index.
+
+        Opens the Whoosh index at ``index_path`` and merges the stored
+        ``synonyms`` field into this manager, optionally filtered by
+        ``language``.
+
+        Args:
+            index_path: Filesystem path to the Whoosh index directory
+                built by ``WiktionaryIndexer.build_index()``.
+            language: Optional two-letter language code filter
+                (e.g. ``"fr"``). If ``None``, all languages are imported.
+        """
+        from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+        indexer = WiktionaryIndexer(index_path)
+        for doc in indexer.iter_documents(language=language):
+            word = doc.get("word")
+            synonyms = doc.get("synonyms") or []
+            if not word:
+                continue
+            clean_synonyms = [str(s) for s in synonyms if str(s)]
+            if clean_synonyms:
+                self._provider.add_synonym(word, clean_synonyms)
+
     def export_json(self, path: str) -> None:
         """Export synonyms to a JSON file.
 

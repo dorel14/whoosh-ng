@@ -13,6 +13,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from whoosh_modern.linguistics.detection.protocol import LanguageDetector
+
 
 class FieldConfig(BaseModel):
     """Configuration for a single Whoosh field.
@@ -28,6 +30,8 @@ class FieldConfig(BaseModel):
         stored: Whether the field value should be stored in the index.
         sortable: Whether the field should be sortable in search results.
         faceted: Whether the field should be usable for faceted search.
+        dictionary_stem_overrides: Optional mapping of word -> stemmed form
+            to override the default Snowball stemmer.
     """
 
     type: str = "text"
@@ -38,6 +42,34 @@ class FieldConfig(BaseModel):
     stored: bool = True
     sortable: bool = False
     faceted: bool = False
+    dictionary_stem_overrides: dict[str, str] = Field(default_factory=dict)
+
+    def effective_language(
+        self,
+        detector: LanguageDetector | None = None,
+        sample_text: str | None = None,
+    ) -> str | None:
+        """Return the effective language for this field.
+
+        If ``language`` is ``"auto"`` and a ``detector`` is provided with
+        ``sample_text``, the detector is used to guess the language from the
+        provided text. Without sample text, ``None`` is returned and the
+        caller should fall back to runtime detection on document content.
+
+        Args:
+            detector: Optional ``LanguageDetector`` instance used when
+                ``language == "auto"``.
+            sample_text: Optional text sample used for language detection when
+                ``language == "auto"``.
+
+        Returns:
+            The resolved language code, or ``None``.
+        """
+        if self.language == "auto":
+            if detector is None or not sample_text:
+                return None
+            return detector.detect(sample_text)
+        return self.language
 
 
 class FuzzyConfig(BaseModel):
@@ -150,6 +182,9 @@ class WhooshNGConfig(BaseModel):
         search: Search behaviour configuration.
         data_source: Data source configuration.
         storage: Storage backend configuration.
+        vector: Optional vector search configuration.
+        embedding: Optional embedding provider configuration.
+        language_detection: Optional language detection configuration.
     """
 
     index: str = "default"
@@ -158,6 +193,9 @@ class WhooshNGConfig(BaseModel):
     search: SearchConfig = Field(default_factory=SearchConfig)
     data_source: DataSourceConfigModel | None = None
     storage: StorageConfigModel = Field(default_factory=StorageConfigModel)
+    vector: dict[str, Any] = Field(default_factory=dict)
+    embedding: dict[str, Any] = Field(default_factory=dict)
+    language_detection: dict[str, Any] = Field(default_factory=dict)
 
 
 __all__ = [

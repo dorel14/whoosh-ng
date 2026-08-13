@@ -5,6 +5,9 @@ sidebar_position: 215
 
 # Configuration Engine
 
+Module: `whoosh_modern.config`
+Version: 3.1.0
+
 Whoosh-NG includes a **Configuration Engine** (`ConfigEngine`) that loads,
 validates, and merges application configuration from YAML or JSON files. It is
 built on Pydantic models and supports hierarchical layering so that environment-
@@ -270,17 +273,18 @@ engine.load("whoosh-ng.yml")
 app = engine.build()
 app.build()
 
-# Index documents through the underlying writer/view API
-app._view.index([
-    {"title": "Premier cours de Python", "body": "..."},
-    {"title": "Whoosh-NG avancé", "body": "..."},
-])
+# Add documents through the index writer
+writer = app.index.writer()
+writer.add_document(title="Premier cours de Python", body="...")
+writer.add_document(title="Whoosh-NG avancé", body="...")
+writer.commit()
 
 # Or use the source directly for streaming/batch indexing
 for doc in app._source.iter_documents():
-    app._view.index(doc)
+    with app.index.writer() as writer:
+        writer.add_document(**doc)
 
-results = app._searcher.search("python")
+results = app.search("python")
 ```
 
 ## Module reference

@@ -71,7 +71,7 @@ class TortoiseSource:
             otherwise.
         """
         try:
-            from tortoise import Tortoise
+            from tortoise import Tortoise  # pyright: ignore[reportMissingImports]
 
             return bool(Tortoise.is_inited())
         except Exception:

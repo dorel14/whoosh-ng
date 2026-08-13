@@ -3,7 +3,7 @@
 Orchestrates DataSource -> SchemaDiscovery -> Index -> search/autocomplete/synonyms/plugins.
 
 Author: dorel14
-Version: 3.0.0
+Version: 3.2.0
 """
 
 from __future__ import annotations
@@ -13,6 +13,10 @@ from typing import Any
 from whoosh.index import Index
 from whoosh.plugins.storage_base import SyncStorageProvider
 from whoosh_modern.data_sources import DataSource
+from whoosh_modern.linguistics.detection.protocol import LanguageDetector
+from whoosh_modern.linguistics.dictionary_stem_override import DictionaryStemOverride
+from whoosh_modern.linguistics.synonyms.manager import SynonymManager
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
 from whoosh_modern.middleware.storage import FileStorageProvider
 from whoosh_modern.views import SearchView
 
@@ -37,23 +41,42 @@ class SearchApplication:
         _storage: Optional storage provider for index files.
         _index: The built Whoosh Index (None until ``build`` is called).
         _schema: The Whoosh Schema discovered from the data source.
+        _wiktionary_indexer: Optional WiktionaryIndexer for synonym enrichment.
+        _synonym_manager: Optional SynonymManager populated from the Wiktionary index.
+        _language_detector: Optional language detector for multilingual indexing.
+        _dictionary_stem_overrides: Optional dictionary stem overrides.
     """
 
     def __init__(
         self,
         source: DataSource | None = None,
         storage: SyncStorageProvider | None = None,
+        wiktionary_indexer: WiktionaryIndexer | None = None,
+        language_detector: LanguageDetector | None = None,
+        dictionary_stem_overrides: dict[str, str] | None = None,
     ) -> None:
         """Initialize the SearchApplication.
 
         Args:
             source: Optional DataSource providing documents for indexing.
             storage: Optional storage provider for index files.
+            wiktionary_indexer: Optional WiktionaryIndexer whose synonyms
+                will be loaded into the synonym expansion middleware.
+            language_detector: Optional language detector used when
+                ``language="auto"`` is set on fields. When provided, the
+                detector is called on each document to resolve the language
+                and inject a ``_language`` stored field.
+            dictionary_stem_overrides: Optional mapping of word -> stemmed form
+                to override the default Snowball stemmer.
         """
         self._source = source
         self._storage = storage
         self._index: Index | None = None
         self._schema: Any = None
+        self._wiktionary_indexer = wiktionary_indexer
+        self._synonym_manager: SynonymManager | None = None
+        self._language_detector = language_detector
+        self._dictionary_stem_overrides = DictionaryStemOverride(dictionary_stem_overrides)
 
     @property
     def index(self) -> Index:
@@ -68,6 +91,57 @@ class SearchApplication:
         if self._index is None:
             raise RuntimeError("Call build() before accessing the index")
         return self._index
+
+    @property
+    def language_detector(self) -> LanguageDetector | None:
+        """Return the optional language detector.
+
+        Returns:
+            The ``LanguageDetector`` instance, or ``None`` if not provided.
+        """
+        return self._language_detector
+
+    @property
+    def synonym_manager(self) -> SynonymManager:
+        """Return the synonym manager populated from the Wiktionary index.
+
+        If a ``wiktionary_indexer`` was provided at construction time, the
+        manager is populated lazily on first access, even if ``build()``
+        has not been called yet.
+
+        Returns:
+            The SynonymManager instance. If no Wiktionary indexer was
+            provided, an empty manager is returned.
+        """
+        if self._synonym_manager is None:
+            self._synonym_manager = SynonymManager()
+            if self._wiktionary_indexer is not None:
+                self._synonym_manager.import_wiktionary_index(
+                    self._wiktionary_indexer._index_dir
+                )
+        return self._synonym_manager
+
+    def _detect_language(self, document: dict[str, Any]) -> str | None:
+        """Detect the language of a document using the configured detector.
+
+        Args:
+            document: The document dict from the data source.
+
+        Returns:
+            An ISO 639-1 language code, or ``None`` if detection fails.
+        """
+        if self._language_detector is None:
+            return None
+        texts: list[str] = []
+        for value in document.values():
+            if isinstance(value, str):
+                texts.append(value)
+            elif isinstance(value, list):
+                texts.extend(str(v) for v in value if isinstance(v, str))
+        joined = " ".join(texts).strip()
+        if not joined:
+            return None
+        return self._language_detector.detect(joined)
 
     def build(self) -> SearchApplication:
         """Build the index from the data source.
@@ -137,3 +211,4 @@ class SearchApplication:
 
 
 __all__ = ["SearchApplication"]
+

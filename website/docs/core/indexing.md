@@ -3,6 +3,11 @@ title: "Indexing"
 sidebar_position: 20
 ---
 
+:::info
+Following the rename of `whoosh-reloaded` to `whoosh-ng`, new Whoosh-NG specific modules are typically found under `whoosh_modern`.
+Core Whoosh components (like `whoosh.analysis`, `whoosh.index`) remain accessible directly under the `whoosh` namespace for backward compatibility.
+:::
+
 # Indexing
 
 This guide covers adding, updating, and deleting documents in your Whoosh-NG index.
@@ -67,6 +72,12 @@ writer.add_document(
     _stored_title="Display title to show in results"
 )
 ```
+
+> **Note**: The underscore prefix (`_stored_<field>`, `_<field>_boost`) is a
+> Whoosh convention for per-document overrides. It lets you store a different
+> value for display (`_stored_title`) without changing what is indexed, or
+> boost a specific field for a single document (`_title_boost`) without
+> affecting the schema-level boost.
 
 ### Field Boosts
 

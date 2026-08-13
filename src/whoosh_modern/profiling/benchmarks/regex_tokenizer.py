@@ -104,7 +104,7 @@ def run_p5_1(datasets: dict[str, list[str]]) -> dict[str, Any]:
 
         # Try C extension
         try:
-            import re2
+            import re2  # pyright: ignore[reportMissingImports]
 
             class Re2Tokenizer:
                 def __call__(self, text: str, **kwargs: Any) -> list[Any]:

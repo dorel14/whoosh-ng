@@ -50,6 +50,8 @@ with ix.searcher() as s:
 - **[Conception de schéma](/core/schema)** — Types de champs et stockage
 - **[Langage de requête](/core/query)** — Syntaxe de requête style Lucene
 - **[Backends](/core/backends)** — Stockage fichier, SQLite, mémoire
+- **[Stemming & Mots Vides](/core/stemming)** — Racines de mots et mots vides
+- **[N-grammes](/core/ngrams)** — Sous-chaînes, préfixes et autocomplétion
 - **[Migration](/core/migration)** — Migration depuis Whoosh classique
 - **[Nettoyage legacy](/core/legacy-cleanup)** — Suppression du code legacy
 

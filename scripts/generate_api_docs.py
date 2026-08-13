@@ -50,6 +50,7 @@ def install_pydoctor() -> bool:
     result = subprocess.run(
         [sys.executable, "-m", "pydoctor", "--help"],
         capture_output=True,
+        text=True,
         check=False,
     )
     if result.returncode == 0:

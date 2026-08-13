@@ -299,7 +299,7 @@ def _auto_detect(language: str = "english") -> StemmerProvider:
         InternalStemmerProvider).
     """
     try:
-        import Stemmer
+        import Stemmer  # pyright: ignore[reportMissingImports]
 
         _ = Stemmer  # mark as used for type checkers
         logger.info(f"Auto-detected PyStemmer for {language}")
@@ -331,7 +331,7 @@ def _is_pystemmer_available() -> bool:
         True if PyStemmer can be imported, False otherwise.
     """
     try:
-        import Stemmer
+        import Stemmer  # pyright: ignore[reportMissingImports]
 
         _ = Stemmer  # mark as used for type checkers
         return True

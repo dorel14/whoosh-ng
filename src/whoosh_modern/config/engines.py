@@ -397,13 +397,159 @@ class APIEngine:
         return create_app(index, prefix="/api/v1")
 
 
+class VectorEngine:
+    """Build a ``VectorProvider`` from ``WhooshNGConfig.vector``.
+
+    Attributes:
+        _config: The merged application configuration.
+    """
+
+    def __init__(self, config: WhooshNGConfig) -> None:
+        """Initialize the engine with a merged configuration.
+
+        Args:
+            config: Merged Whoosh-NG configuration.
+        """
+        self._config = config
+
+    def build(self) -> Any:
+        """Build a VectorProvider from the configured vector settings.
+
+        Returns:
+            A VectorProvider instance, or ``None`` if no vector configuration
+            is provided.
+        """
+        vector_config = self._config.vector
+        if not vector_config:
+            return None
+        provider_type = vector_config.get("provider", "numpy").lower()
+        if provider_type == "numpy":
+            try:
+                from whoosh_modern.vector.numpy_provider import NumpyProvider
+
+                return NumpyProvider()
+            except ImportError as exc:
+                raise ImportError(
+                    "NumpyProvider requires numpy. Install with: pip install numpy"
+                ) from exc
+        if provider_type == "hnswlib":
+            try:
+                from whoosh_modern.vector.hnswlib_provider import HnswlibProvider
+
+                return HnswlibProvider(
+                    dimension=int(vector_config.get("dimension", 384)),
+                    space=vector_config.get("space", "l2"),
+                    max_elements=int(vector_config.get("max_elements", 10000)),
+                    ef_construction=int(vector_config.get("ef_construction", 200)),
+                    m=int(vector_config.get("m", 16)),
+                )
+            except ImportError as exc:
+                raise ImportError(
+                    "HnswlibProvider requires hnswlib. "
+                    "Install with: pip install whoosh-ng[hnsw]"
+                ) from exc
+        raise ValueError(f"Unsupported vector provider: {provider_type}")
+
+
+class EmbeddingEngine:
+    """Build an ``EmbeddingProvider`` from ``WhooshNGConfig.embedding``.
+
+    Attributes:
+        _config: The merged application configuration.
+    """
+
+    def __init__(self, config: WhooshNGConfig) -> None:
+        """Initialize the engine with a merged configuration.
+
+        Args:
+            config: Merged Whoosh-NG configuration.
+        """
+        self._config = config
+
+    def build(self) -> Any:
+        """Build an EmbeddingProvider from the configured embedding settings.
+
+        Returns:
+            An EmbeddingProvider instance, or ``None`` if no embedding
+            configuration is provided.
+        """
+        embedding_config = self._config.embedding
+        if not embedding_config:
+            return None
+        provider_type = embedding_config.get("provider", "sentence-transformers").lower()
+        if provider_type == "sentence-transformers":
+            try:
+                from whoosh_modern.embeddings.sentence_transformers_provider import (
+                    SentenceTransformersProvider,
+                )
+
+                return SentenceTransformersProvider(
+                    model_name=embedding_config.get("model_name", "all-MiniLM-L6-v2")
+                )
+            except ImportError as exc:
+                raise ImportError(
+                    "SentenceTransformersProvider requires sentence-transformers. "
+                    "Install with: pip install whoosh-ng[embeddings]"
+                ) from exc
+        raise ValueError(f"Unsupported embedding provider: {provider_type}")
+
+
+class LanguageEngine:
+    """Build a ``LanguageDetector`` from ``WhooshNGConfig.language_detection``.
+
+    Attributes:
+        _config: The merged application configuration.
+    """
+
+    def __init__(self, config: WhooshNGConfig) -> None:
+        """Initialize the engine with a merged configuration.
+
+        Args:
+            config: Merged Whoosh-NG configuration.
+        """
+        self._config = config
+
+    def build(self) -> Any:
+        """Build a LanguageDetector from the configured language detection settings.
+
+        Returns:
+            A LanguageDetector instance, or ``None`` if no language detection
+            configuration is provided.
+        """
+        detection_config = self._config.language_detection
+        if not detection_config:
+            return None
+        detector_type = detection_config.get("provider", "stopword").lower()
+        if detector_type == "stopword":
+            supported = detection_config.get("supported_languages", ["fr", "en", "de", "es", "it"])
+            from whoosh_modern.linguistics.detection.stopword_detector import StopwordDetector
+
+            return StopwordDetector(supported_languages=list(supported))
+        if detector_type == "langdetect":
+            try:
+                from whoosh_modern.linguistics.detection.langdetect_provider import (
+                    LangDetectProvider,
+                )
+
+                return LangDetectProvider()
+            except ImportError as exc:
+                raise ImportError(
+                    "LangDetectProvider requires langdetect. "
+                    "Install with: pip install whoosh-ng[language-detection]"
+                ) from exc
+        raise ValueError(f"Unsupported language detector: {detector_type}")
+
+
 __all__ = [
     "AnalyzerEngine",
     "APIEngine",
     "DataSourceEngine",
+    "EmbeddingEngine",
     "FacetEngine",
+    "LanguageEngine",
     "PluginEngine",
     "SchemaEngine",
     "SearchModelEngine",
     "StorageEngine",
+    "VectorEngine",
 ]

@@ -1,4 +1,10 @@
-"""Index profiling utilities for Whoosh-NG."""
+"""Index profiling utilities for Whoosh-NG.
+
+Author: dorel14
+Version: 3.2.0
+"""
+
+from __future__ import annotations
 
 from whoosh_modern.profiling.analyzer_cache import AnalyzerCache, FieldAnalyzerCache
 from whoosh_modern.profiling.analyzer_comparator import AnalyzerComparator
@@ -15,11 +21,13 @@ from whoosh_modern.profiling.index_quality_analyzer import IndexQualityAnalyzer
 from whoosh_modern.profiling.indexing_pipeline_profiler import IndexingPipelineProfiler
 from whoosh_modern.profiling.memory import MemoryProfiler
 from whoosh_modern.profiling.metrics import MetricsCollector
+from whoosh_modern.profiling.ngram_profiler import NgramProfiler, NgramProfilerReport
 from whoosh_modern.profiling.perdocwriter_profiler import PerDocWriterProfiler
 from whoosh_modern.profiling.pipeline_reconciler_v2 import PipelineReconcilerV2
 from whoosh_modern.profiling.posting_pool_profiler import PostingPoolProfiler
 from whoosh_modern.profiling.segment_profiler import SegmentProfiler
 from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
+from whoosh_modern.profiling.stemmer_profiler import StemmerProfiler, StemmerProfilerReport
 from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
 from whoosh_modern.profiling.unified_pipeline_profiler import UnifiedPipelineProfiler
 
@@ -41,11 +49,15 @@ __all__ = [
     "IndexingPipelineProfiler",
     "MemoryProfiler",
     "MetricsCollector",
+    "NgramProfiler",
+    "NgramProfilerReport",
     "PerDocWriterProfiler",
     "PipelineReconcilerV2",
     "PostingPoolProfiler",
     "SegmentProfiler",
     "StemmerBenchmark",
+    "StemmerProfiler",
+    "StemmerProfilerReport",
     "SyntheticDatasetGenerator",
     "UnifiedPipelineProfiler",
     "AnalyzerCache",

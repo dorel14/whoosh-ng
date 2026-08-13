@@ -29,7 +29,7 @@ print(f"Total EN files: {en_count}")
 print()
 
 untranslated = []
-stubs = []
+stubs: list[str] = []
 for fr_file in fr_files:
     content = fr_file.read_text(encoding="utf-8")
     rel = fr_file.relative_to(fr_dir)
