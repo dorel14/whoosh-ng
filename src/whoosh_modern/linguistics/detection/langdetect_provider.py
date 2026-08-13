@@ -37,7 +37,7 @@ class LangDetectProvider(LanguageDetector):
             ImportError: If ``langdetect`` is not installed.
         """
         try:
-            import langdetect  # type: ignore[import-not-found]
+            import langdetect  # pyright: ignore[import-not-found]
         except ImportError as exc:
             raise ImportError(
                 "langdetect is required for LangDetectProvider. "
