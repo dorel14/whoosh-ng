@@ -15,15 +15,15 @@ from whoosh_modern.profiling.index_quality_analyzer import IndexQualityAnalyzer
 from whoosh_modern.profiling.indexing_pipeline_profiler import IndexingPipelineProfiler
 from whoosh_modern.profiling.memory import MemoryProfiler
 from whoosh_modern.profiling.metrics import MetricsCollector
+from whoosh_modern.profiling.ngram_profiler import NgramProfiler, NgramProfilerReport
 from whoosh_modern.profiling.perdocwriter_profiler import PerDocWriterProfiler
 from whoosh_modern.profiling.pipeline_reconciler_v2 import PipelineReconcilerV2
 from whoosh_modern.profiling.posting_pool_profiler import PostingPoolProfiler
 from whoosh_modern.profiling.segment_profiler import SegmentProfiler
 from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
+from whoosh_modern.profiling.stemmer_profiler import StemmerProfiler, StemmerProfilerReport
 from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
 from whoosh_modern.profiling.unified_pipeline_profiler import UnifiedPipelineProfiler
-
-from whoosh_modern.profiling.ngram_profiler import NgramProfiler, NgramProfilerReport
 
 __all__ = [
     "AnalyzerCache",
@@ -50,6 +50,8 @@ __all__ = [
     "PostingPoolProfiler",
     "SegmentProfiler",
     "StemmerBenchmark",
+    "StemmerProfiler",
+    "StemmerProfilerReport",
     "SyntheticDatasetGenerator",
     "UnifiedPipelineProfiler",
     "AnalyzerCache",

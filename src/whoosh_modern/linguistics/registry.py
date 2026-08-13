@@ -1,10 +1,11 @@
 """Language registry for multilingual indexing.
 
-Provides ``LanguageRegistry`` and ``LanguageProfile`` to centralize
-analyzer, stemmer, synonym provider, and language detection resolution.
+Provides ``LanguageRegistry``, ``StemmerRegistry``, and ``LanguageProfile``
+to centralize analyzer, stemmer, synonym provider, and language detection
+resolution.
 
 Author: dorel14
-Version: 1.0.0
+Version: 3.1.0
 """
 
 from __future__ import annotations
@@ -103,6 +104,38 @@ class LanguageRegistry:
         self._default_language = language
 
 
+class StemmerRegistry(LanguageRegistry):
+    """Registry of stemmers indexed by language code.
+
+    Extends :class:`LanguageRegistry` with stemmer-specific helpers.
+    """
+
+    def list_stemmers(self) -> list[str]:
+        """Return the list of registered stemmer codes.
+
+        Returns:
+            A list of language codes that have a registered stemmer.
+        """
+        return list(self._profiles.keys())
+
+    def get_stemmer(self, language: str) -> Any:
+        """Return the stemmer function for a language.
+
+        Args:
+            language: ISO 639-1 language code.
+
+        Returns:
+            The stemmer function/analyzer for the language.
+
+        Raises:
+            KeyError: If the language is not registered.
+        """
+        profile = self._profiles.get(language)
+        if profile is None:
+            raise KeyError(f"No stemmer registered for {language!r}")
+        return profile.stemmer
+
+
 def get_default_registry() -> LanguageRegistry:
     """Return a pre-populated registry for FR/EN/DE/ES/IT.
 
@@ -110,38 +143,48 @@ def get_default_registry() -> LanguageRegistry:
         A ``LanguageRegistry`` instance with profiles for French, English,
         German, Spanish, and Italian.
     """
+
+    def _make_stemmer(analyzer: Any) -> Any:
+        def _stem(text: str) -> list[str]:
+            return [t.text for t in analyzer(text)]
+
+        return _stem
+
     profiles = [
         LanguageProfile(
             language="fr",
             analyzer=FrenchAnalyzer,
-            stemmer=lambda text: [t.text for t in FrenchAnalyzer(text)],
-            synonym_provider=None,
+            stemmer=_make_stemmer(FrenchAnalyzer),
         ),
         LanguageProfile(
             language="en",
             analyzer=EnglishAnalyzer,
-            stemmer=lambda text: [t.text for t in EnglishAnalyzer(text)],
-            synonym_provider=None,
+            stemmer=_make_stemmer(EnglishAnalyzer),
         ),
         LanguageProfile(
             language="de",
             analyzer=GermanAnalyzer,
-            stemmer=lambda text: [t.text for t in GermanAnalyzer(text)],
-            synonym_provider=None,
+            stemmer=_make_stemmer(GermanAnalyzer),
         ),
         LanguageProfile(
             language="es",
             analyzer=SpanishAnalyzer,
-            stemmer=lambda text: [t.text for t in SpanishAnalyzer(text)],
-            synonym_provider=None,
+            stemmer=_make_stemmer(SpanishAnalyzer),
         ),
         LanguageProfile(
             language="it",
             analyzer=ItalianAnalyzer,
-            stemmer=lambda text: [t.text for t in ItalianAnalyzer(text)],
-            synonym_provider=None,
+            stemmer=_make_stemmer(ItalianAnalyzer),
         ),
     ]
     registry = LanguageRegistry(profiles)
     registry.set_default("en")
     return registry
+
+
+__all__ = [
+    "LanguageProfile",
+    "LanguageRegistry",
+    "StemmerRegistry",
+    "get_default_registry",
+]

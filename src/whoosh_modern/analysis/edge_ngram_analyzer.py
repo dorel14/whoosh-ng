@@ -11,7 +11,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from whoosh.analysis.filters import LowercaseFilter, NgramFilter
+from whoosh.analysis.filters import LowercaseFilter
+from whoosh.analysis.ngrams import NgramFilter
 from whoosh.analysis.tokenizers import RegexTokenizer, default_pattern
 
 

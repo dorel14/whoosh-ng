@@ -1,17 +1,25 @@
 """Whoosh-NG linguistic engine: synonyms, stemmers, language detection, and dictionary indexing.
 
 Author: dorel14
-Version: 3.0.0
+Version: 3.2.0
 """
 
 from __future__ import annotations
 
+from whoosh_modern.linguistics.analyzers import MultiLanguageAnalyzer
 from whoosh_modern.linguistics.detection import (
     LangDetectProvider,
     LanguageDetector,
     StopwordDetector,
 )
-from whoosh_modern.linguistics.registry import LanguageProfile, LanguageRegistry, get_default_registry
+from whoosh_modern.linguistics.dictionary_stem_override import DictionaryStemOverride
+from whoosh_modern.linguistics.explain import AnalysisExplanation, ExplainAnalyzer, TokenExplanation
+from whoosh_modern.linguistics.registry import (
+    LanguageProfile,
+    LanguageRegistry,
+    StemmerRegistry,
+    get_default_registry,
+)
 from whoosh_modern.linguistics.stemmers import (
     EnglishAnalyzer,
     FrenchAnalyzer,
@@ -47,6 +55,7 @@ __all__ = [
     "StopwordDetector",
     "LangDetectProvider",
     "LanguageRegistry",
+    "StemmerRegistry",
     "LanguageProfile",
     "get_default_registry",
     "FrenchAnalyzer",
@@ -54,4 +63,10 @@ __all__ = [
     "GermanAnalyzer",
     "SpanishAnalyzer",
     "ItalianAnalyzer",
+    "LanguageAnalyzer",
+    "MultiLanguageAnalyzer",
+    "AnalysisExplanation",
+    "ExplainAnalyzer",
+    "TokenExplanation",
+    "DictionaryStemOverride",
 ]

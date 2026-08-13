@@ -30,6 +30,8 @@ class FieldConfig(BaseModel):
         stored: Whether the field value should be stored in the index.
         sortable: Whether the field should be sortable in search results.
         faceted: Whether the field should be usable for faceted search.
+        dictionary_stem_overrides: Optional mapping of word -> stemmed form
+            to override the default Snowball stemmer.
     """
 
     type: str = "text"
@@ -40,6 +42,7 @@ class FieldConfig(BaseModel):
     stored: bool = True
     sortable: bool = False
     faceted: bool = False
+    dictionary_stem_overrides: dict[str, str] = Field(default_factory=dict)
 
     def effective_language(self, detector: LanguageDetector | None = None) -> str | None:
         """Return the effective language for this field.

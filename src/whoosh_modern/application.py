@@ -3,7 +3,7 @@
 Orchestrates DataSource -> SchemaDiscovery -> Index -> search/autocomplete/synonyms/plugins.
 
 Author: dorel14
-Version: 3.1.0
+Version: 3.2.0
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ from whoosh.index import Index
 from whoosh.plugins.storage_base import SyncStorageProvider
 from whoosh_modern.data_sources import DataSource
 from whoosh_modern.linguistics.detection.protocol import LanguageDetector
+from whoosh_modern.linguistics.dictionary_stem_override import DictionaryStemOverride
 from whoosh_modern.linguistics.synonyms.manager import SynonymManager
 from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
 from whoosh_modern.middleware.storage import FileStorageProvider
@@ -43,6 +44,7 @@ class SearchApplication:
         _wiktionary_indexer: Optional WiktionaryIndexer for synonym enrichment.
         _synonym_manager: Optional SynonymManager populated from the Wiktionary index.
         _language_detector: Optional language detector for multilingual indexing.
+        _dictionary_stem_overrides: Optional dictionary stem overrides.
     """
 
     def __init__(
@@ -51,6 +53,7 @@ class SearchApplication:
         storage: SyncStorageProvider | None = None,
         wiktionary_indexer: WiktionaryIndexer | None = None,
         language_detector: LanguageDetector | None = None,
+        dictionary_stem_overrides: dict[str, str] | None = None,
     ) -> None:
         """Initialize the SearchApplication.
 
@@ -63,6 +66,8 @@ class SearchApplication:
                 ``language="auto"`` is set on fields. When provided, the
                 detector is called on each document to resolve the language
                 and inject a ``_language`` stored field.
+            dictionary_stem_overrides: Optional mapping of word -> stemmed form
+                to override the default Snowball stemmer.
         """
         self._source = source
         self._storage = storage
@@ -71,6 +76,7 @@ class SearchApplication:
         self._wiktionary_indexer = wiktionary_indexer
         self._synonym_manager: SynonymManager | None = None
         self._language_detector = language_detector
+        self._dictionary_stem_overrides = DictionaryStemOverride(dictionary_stem_overrides)
 
     @property
     def index(self) -> Index:
@@ -205,3 +211,4 @@ class SearchApplication:
 
 
 __all__ = ["SearchApplication"]
+
