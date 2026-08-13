@@ -10,7 +10,7 @@ them according to a precedence hierarchy:
 5. Built-in defaults (lowest priority)
 
 Author: dorel14
-Version: 3.0.0
+Version: 3.1.0
 """
 
 from __future__ import annotations
@@ -20,7 +20,10 @@ from typing import Any
 
 from whoosh_modern.config.engines import (
     DataSourceEngine,
+    EmbeddingEngine,
+    LanguageEngine,
     StorageEngine,
+    VectorEngine,
 )
 from whoosh_modern.config.loader import load_json, load_yaml
 from whoosh_modern.config.models import WhooshNGConfig
@@ -121,9 +124,17 @@ class ConfigEngine:
             return self._app_cache
         source = DataSourceEngine(self._config).build()
         storage = StorageEngine(self._config).build()
+        vector_provider = VectorEngine(self._config).build()
+        embedding_provider = EmbeddingEngine(self._config).build()
+        language_detector = LanguageEngine(self._config).build()
         from whoosh_modern.application import SearchApplication
 
-        self._app_cache = SearchApplication(source=source, storage=storage)
+        self._app_cache = SearchApplication(
+            source=source,
+            storage=storage,
+            wiktionary_indexer=None,
+            language_detector=language_detector,
+        )
         return self._app_cache
 
     def reset(self) -> None:

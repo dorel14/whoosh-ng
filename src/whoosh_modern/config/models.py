@@ -173,6 +173,9 @@ class WhooshNGConfig(BaseModel):
         search: Search behaviour configuration.
         data_source: Data source configuration.
         storage: Storage backend configuration.
+        vector: Optional vector search configuration.
+        embedding: Optional embedding provider configuration.
+        language_detection: Optional language detection configuration.
     """
 
     index: str = "default"
@@ -181,6 +184,9 @@ class WhooshNGConfig(BaseModel):
     search: SearchConfig = Field(default_factory=SearchConfig)
     data_source: DataSourceConfigModel | None = None
     storage: StorageConfigModel = Field(default_factory=StorageConfigModel)
+    vector: dict[str, Any] = Field(default_factory=dict)
+    embedding: dict[str, Any] = Field(default_factory=dict)
+    language_detection: dict[str, Any] = Field(default_factory=dict)
 
 
 __all__ = [
