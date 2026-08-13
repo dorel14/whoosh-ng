@@ -9026,7 +9026,7 @@ consider using an unbounded cache:
 ```python
 w = myindex.writer()
 # Get the analyzer object from a text field
-stem_ana = w.schema["content"].format.analyzer
+stem_ana = w.schema["content"].analyzer
 # Set the cachesize to -1 to indicate unbounded caching
 stem_ana.cachesize = -1
 # Reset the analyzer to pick up the changed attribute
@@ -28090,7 +28090,7 @@ consider using an unbounded cache:
 ```python
 w = myindex.writer()
 # Get the analyzer object from a text field
-stem_ana = w.schema["content"].format.analyzer
+stem_ana = w.schema["content"].analyzer
 # Set the cachesize to -1 to indicate unbounded caching
 stem_ana.cachesize = -1
 # Reset the analyzer to pick up the changed attribute
