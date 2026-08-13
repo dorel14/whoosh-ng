@@ -13,6 +13,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from whoosh_modern.linguistics.detection.protocol import LanguageDetector
+
 
 class FieldConfig(BaseModel):
     """Configuration for a single Whoosh field.
@@ -38,6 +40,27 @@ class FieldConfig(BaseModel):
     stored: bool = True
     sortable: bool = False
     faceted: bool = False
+
+    def effective_language(self, detector: LanguageDetector | None = None) -> str | None:
+        """Return the effective language for this field.
+
+        If ``language`` is ``"auto"`` and a ``detector`` is provided, the
+        detector is used to guess the language from the field name. If the
+        language cannot be determined, ``None`` is returned and the caller
+        should fall back to a default.
+
+        Args:
+            detector: Optional ``LanguageDetector`` instance used when
+                ``language == "auto"``.
+
+        Returns:
+            The resolved language code, or ``None``.
+        """
+        if self.language == "auto":
+            if detector is None:
+                return None
+            return detector.detect(self.type)
+        return self.language
 
 
 class FuzzyConfig(BaseModel):

@@ -3,7 +3,7 @@
 Orchestrates DataSource -> SchemaDiscovery -> Index -> search/autocomplete/synonyms/plugins.
 
 Author: dorel14
-Version: 3.0.0
+Version: 3.1.0
 """
 
 from __future__ import annotations
@@ -13,8 +13,8 @@ from typing import Any
 from whoosh.index import Index
 from whoosh.plugins.storage_base import SyncStorageProvider
 from whoosh_modern.data_sources import DataSource
+from whoosh_modern.linguistics.detection.protocol import LanguageDetector
 from whoosh_modern.linguistics.synonyms.manager import SynonymManager
-from whoosh_modern.linguistics.synonyms.middleware import SynonymExpansionMiddleware
 from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
 from whoosh_modern.middleware.storage import FileStorageProvider
 from whoosh_modern.views import SearchView
@@ -42,6 +42,7 @@ class SearchApplication:
         _schema: The Whoosh Schema discovered from the data source.
         _wiktionary_indexer: Optional WiktionaryIndexer for synonym enrichment.
         _synonym_manager: Optional SynonymManager populated from the Wiktionary index.
+        _language_detector: Optional language detector for multilingual indexing.
     """
 
     def __init__(
@@ -49,6 +50,7 @@ class SearchApplication:
         source: DataSource | None = None,
         storage: SyncStorageProvider | None = None,
         wiktionary_indexer: WiktionaryIndexer | None = None,
+        language_detector: LanguageDetector | None = None,
     ) -> None:
         """Initialize the SearchApplication.
 
@@ -57,6 +59,10 @@ class SearchApplication:
             storage: Optional storage provider for index files.
             wiktionary_indexer: Optional WiktionaryIndexer whose synonyms
                 will be loaded into the synonym expansion middleware.
+            language_detector: Optional language detector used when
+                ``language="auto"`` is set on fields. When provided, the
+                detector is called on each document to resolve the language
+                and inject a ``_language`` stored field.
         """
         self._source = source
         self._storage = storage
@@ -64,6 +70,7 @@ class SearchApplication:
         self._schema: Any = None
         self._wiktionary_indexer = wiktionary_indexer
         self._synonym_manager: SynonymManager | None = None
+        self._language_detector = language_detector
 
     @property
     def index(self) -> Index:
@@ -78,6 +85,15 @@ class SearchApplication:
         if self._index is None:
             raise RuntimeError("Call build() before accessing the index")
         return self._index
+
+    @property
+    def language_detector(self) -> LanguageDetector | None:
+        """Return the optional language detector.
+
+        Returns:
+            The ``LanguageDetector`` instance, or ``None`` if not provided.
+        """
+        return self._language_detector
 
     @property
     def synonym_manager(self) -> SynonymManager:
@@ -98,6 +114,28 @@ class SearchApplication:
                     self._wiktionary_indexer._index_dir
                 )
         return self._synonym_manager
+
+    def _detect_language(self, document: dict[str, Any]) -> str | None:
+        """Detect the language of a document using the configured detector.
+
+        Args:
+            document: The document dict from the data source.
+
+        Returns:
+            An ISO 639-1 language code, or ``None`` if detection fails.
+        """
+        if self._language_detector is None:
+            return None
+        texts: list[str] = []
+        for value in document.values():
+            if isinstance(value, str):
+                texts.append(value)
+            elif isinstance(value, list):
+                texts.extend(str(v) for v in value if isinstance(v, str))
+        joined = " ".join(texts).strip()
+        if not joined:
+            return None
+        return self._language_detector.detect(joined)
 
     def build(self) -> SearchApplication:
         """Build the index from the data source.
