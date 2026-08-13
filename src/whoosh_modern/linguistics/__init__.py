@@ -6,6 +6,12 @@ Version: 3.0.0
 
 from __future__ import annotations
 
+from whoosh_modern.linguistics.detection import (
+    LangDetectProvider,
+    LanguageDetector,
+    StopwordDetector,
+)
+from whoosh_modern.linguistics.registry import LanguageProfile, LanguageRegistry, get_default_registry
 from whoosh_modern.linguistics.stemmers import (
     EnglishAnalyzer,
     FrenchAnalyzer,
@@ -37,6 +43,12 @@ __all__ = [
     "SynonymExpansionMiddleware",
     "LANG_SYNONYMS",
     "WiktionaryIndexer",
+    "LanguageDetector",
+    "StopwordDetector",
+    "LangDetectProvider",
+    "LanguageRegistry",
+    "LanguageProfile",
+    "get_default_registry",
     "FrenchAnalyzer",
     "EnglishAnalyzer",
     "GermanAnalyzer",
