@@ -6,7 +6,7 @@ sidebar_position: 53
 # Stemmer Providers
 
 Module: `whoosh_modern.analysis.stemmer_providers`, `whoosh_modern.analysis.stemming_analyzer`, `whoosh_modern.linguistics.stemmers`
-Version: 2.0.0
+Version: 3.0.0
 
 The stemmer provider system gives you flexible control over which stemming backend is used for text analysis. It supports auto-detection, explicit backend selection, and custom stemmer registration—all with a clean plugin-style API.
 

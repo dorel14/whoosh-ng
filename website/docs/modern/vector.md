@@ -5,6 +5,9 @@ sidebar_position: 60
 
 # Vector Search
 
+Module: `whoosh_modern.vector`
+Version: 2.1.0
+
 Whoosh-NG supports semantic search through vector embeddings. This guide covers setting up and using vector fields.
 
 ## Concept

@@ -432,6 +432,60 @@ print(result.text)       # "The running cats"
 print(result.tokens)     # ["run", "cat"]
 ```
 
+## Débogage d'analyse avec ExplainAnalyzer
+
+`ExplainAnalyzer` encapsule n'importe quel analyseur existant et retourne une
+`AnalysisExplanation` décrivant comment un texte est transformé. C'est un outil
+utile pour déboguer des chaînes d'analyseurs complexes, surtout lors de l'utilisation
+d'analyseurs multilingues, de filtres stopwords ou de remplacements de stemming
+par dictionnaire.
+
+```python
+from whoosh_modern.linguistics.explain import ExplainAnalyzer
+from whoosh.analysis import StandardAnalyzer
+
+explainer = ExplainAnalyzer(StandardAnalyzer())
+explanation = explainer.explain(
+    "A quick brown fox jumps over the lazy dog"
+)
+
+print(f"Texte original : {explanation.text}")
+print(f"Tokens finaux : {explanation.tokens}")
+
+print("\nExplications étape par étape :")
+for step in explanation.explanations:
+    print(
+        f"  - {step.step} : '{step.original}' -> '{step.result}'"
+    )
+```
+
+Exemple de sortie :
+
+```text
+Texte original : A quick brown fox jumps over the lazy dog
+Tokens finaux : ['quick', 'brown', 'fox', 'jumps', 'lazy', 'dog']
+
+Explications étape par étape :
+  - tokenize : 'A' -> 'A'
+  - lowercase : 'A' -> 'a'
+  - stop : 'a' -> ''
+  - tokenize : 'quick' -> 'quick'
+  - lowercase : 'quick' -> 'quick'
+  ...
+```
+
+### Interprétation de la sortie
+
+- `explanation.text` — le texte d'entrée original.
+- `explanation.tokens` — la liste finale de tokens après toutes les étapes de l'analyseur.
+- `explanation.explanations` — une liste chronologique d'objets
+  `TokenExplanation` montrant chaque transformation.
+
+Utilisez ceci lorsque :
+- une chaîne d'analyseurs se comporte différemment de ce qui est attendu,
+- vous avez besoin de vérifier quels stopwords ou règles de stemming sont appliqués,
+- vous voulez comparer le comportement entre langues avec `MultiLanguageAnalyzer`.
+
 ## Override de stem par dictionnaire
 
 Remplace le stemming Snowball par des dictionnaires métier :

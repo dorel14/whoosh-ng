@@ -72,3 +72,67 @@ writer.commit()
 - Commutez par lots pour de meilleures performances
 - Utilisez `BufferedWriter` en environnement multi-processus
 - Libérez toujours le verrou avec `commit()` ou `cancel()`
+
+## Valeurs stockées vs indexées
+
+Pour les champs qui sont à la fois indexés et stockés, vous pouvez stocker une valeur différente :
+
+```python
+writer.add_document(
+    title="Title to be indexed",
+    _stored_title="Display title to show in results"
+)
+```
+
+> **Note** : Le préfixe underscore (`_stored_<field>`, `_<field>_boost`) est une
+> convention Whoosh pour les overrides par document. Il vous permet de stocker
+> une valeur différente pour l'affichage (`_stored_title`) sans modifier ce qui
+> est indexé, ou de booster un champ spécifique pour un seul document
+> (`_title_boost`) sans affecter le boost au niveau du schéma.
+
+## Boosts de champs
+
+Booster des champs individuels au niveau du document :
+
+```python
+writer.add_document(
+    title="Important title",
+    _title_boost=2.0,   # Double weight for title terms
+    content="Body content"
+)
+```
+
+## Mettre à jour les documents
+
+Utilisez `update_document` pour remplacer les documents correspondant à des champs uniques :
+
+```python
+schema = Schema(path=ID(unique=True, stored=True), content=TEXT)
+ix = index.create_in("indexdir", schema)
+
+with ix.writer() as writer:
+    writer.add_document(path="/doc1", content="Original content")
+    writer.commit()
+
+with ix.writer() as writer:
+    # Remplace tout document avec path="/doc1"
+    writer.update_document(path="/doc1", content="Updated content")
+    writer.commit()
+```
+
+## Supprimer des documents
+
+```python
+# Par numéro de document
+writer.delete_document(docnum=42)
+
+# Par terme
+writer.delete_by_term("path", "/doc1")
+
+# Par requête
+from whoosh.query import Term
+q = Term("tags", "deprecated")
+writer.delete_by_query(q)
+
+writer.commit()
+```

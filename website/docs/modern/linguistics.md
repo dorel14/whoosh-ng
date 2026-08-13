@@ -418,6 +418,57 @@ print(result.text)       # "The running cats"
 print(result.tokens)     # ["run", "cat"]
 ```
 
+## Debugging Analysis with ExplainAnalyzer
+
+`ExplainAnalyzer` wraps any existing analyzer and returns an
+`AnalysisExplanation` describing how a text is transformed. It is useful
+for debugging complex analyzer chains, especially when mixing multilingual
+analyzers, stopword filters, or dictionary stem overrides.
+
+```python
+from whoosh_modern.linguistics.explain import ExplainAnalyzer
+from whoosh.analysis import StandardAnalyzer
+
+explainer = ExplainAnalyzer(StandardAnalyzer())
+explanation = explainer.explain("A quick brown fox jumps over the lazy dog")
+
+print(f"Original text: {explanation.text}")
+print(f"Final tokens : {explanation.tokens}")
+
+print("\nStep-by-step explanations:")
+for step in explanation.explanations:
+    print(
+        f"  - {step.step}: '{step.original}' -> '{step.result}'"
+    )
+```
+
+Example output:
+
+```text
+Original text: A quick brown fox jumps over the lazy dog
+Final tokens : ['quick', 'brown', 'fox', 'jumps', 'lazy', 'dog']
+
+Step-by-step explanations:
+  - tokenize: 'A' -> 'A'
+  - lowercase: 'A' -> 'a'
+  - stop: 'a' -> ''
+  - tokenize: 'quick' -> 'quick'
+  - lowercase: 'quick' -> 'quick'
+  ...
+```
+
+### Interpreting the output
+
+- `explanation.text` — the original input text.
+- `explanation.tokens` — the final token list after all analyzer steps.
+- `explanation.explanations` — a chronological list of
+  `TokenExplanation` objects showing each transformation step.
+
+Use this when:
+- an analyzer pipeline behaves differently than expected,
+- you need to verify which stopwords or stemming rules are applied,
+- you want to compare behavior across languages with `MultiLanguageAnalyzer`.
+
 ## Dictionary Stem Override
 
 Override Snowball stemming with business dictionaries:

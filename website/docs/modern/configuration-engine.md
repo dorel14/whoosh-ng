@@ -5,6 +5,9 @@ sidebar_position: 215
 
 # Configuration Engine
 
+Module: `whoosh_modern.config`
+Version: 3.1.0
+
 Whoosh-NG includes a **Configuration Engine** (`ConfigEngine`) that loads,
 validates, and merges application configuration from YAML or JSON files. It is
 built on Pydantic models and supports hierarchical layering so that environment-

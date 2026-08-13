@@ -1,4 +1,10 @@
-"""Index profiling utilities for Whoosh-NG."""
+"""Index profiling utilities for Whoosh-NG.
+
+Author: dorel14
+Version: 3.2.0
+"""
+
+from __future__ import annotations
 
 from whoosh_modern.profiling.analyzer_cache import AnalyzerCache, FieldAnalyzerCache
 from whoosh_modern.profiling.analyzer_comparator import AnalyzerComparator

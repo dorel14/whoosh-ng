@@ -53,6 +53,12 @@ class ExplainAnalyzer:
     """
 
     def __init__(self, analyzer: Any = None) -> None:
+        """Initialize the explain analyzer.
+
+        Args:
+            analyzer: The underlying analyzer to wrap. If ``None``, text is
+                split on whitespace without tokenization or stemming.
+        """
         self._analyzer = analyzer
 
     def explain(self, text: str) -> AnalysisExplanation:

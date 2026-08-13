@@ -68,6 +68,12 @@ writer.add_document(
 )
 ```
 
+> **Note**: The underscore prefix (`_stored_<field>`, `_<field>_boost`) is a
+> Whoosh convention for per-document overrides. It lets you store a different
+> value for display (`_stored_title`) without changing what is indexed, or
+> boost a specific field for a single document (`_title_boost`) without
+> affecting the schema-level boost.
+
 ### Field Boosts
 
 Boost individual fields at document level:

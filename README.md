@@ -110,6 +110,10 @@ pip install "whoosh-ng[dev]"
 - **SearchView** (`whoosh_modern.views`): Unified interface integrating data sources, schema discovery, facets, validation, and middleware with `build()`, `refresh()`, `reindex()`, `validate()`, `evolve_schema()`, and strict mode
 - **Stemmer Provider System** (`whoosh_modern.analysis`): `get_stemmer()`, `register_stemmer()`, auto-detection between internal Porter stemmer and PyStemmer C backend
 - **Enhanced StemmingAnalyzer** (`whoosh_modern.analysis`): Accepts `stemmer="auto"|"internal"|"pystemmer"|provider` parameter
+- **Configuration Engine** (`whoosh_modern.config`): `ConfigEngine` with hierarchical YAML/JSON merging, Pydantic models (`WhooshNGConfig`, `FieldConfig`), and sub-engines (`SchemaEngine`, `AnalyzerEngine`, `DataSourceEngine`, `StorageEngine`, `SearchModelEngine`, `FacetEngine`, `PluginEngine`, `APIEngine`)
+- **Vector Search** (`whoosh_modern.vector`): `HnswlibProvider` for HNSW approximate nearest neighbor search alongside `NumpyProvider`
+- **Embedding Framework** (`whoosh_modern.embeddings`): `EmbeddingProvider` protocol and `SentenceTransformersProvider` for sentence-transformers embeddings
+- **Modern N-Gram Framework** (`whoosh_modern.analysis`): `AutoCompleteAnalyzer`, `EdgeNgramAnalyzer`, `SEARCH_AS_YOU_TYPE` field type, `NgramProfiler` for performance profiling, and `AnalyzerPresets` (autocomplete, partial_match, fuzzy, code_search, documentation, ecommerce, blog, multilingual)
 - **Language Auto-Detection** (`whoosh_modern.linguistics.detection`): `StopwordDetector` and `LangDetectProvider` for automatic language detection with configurable supported languages
 - **Language Registry** (`whoosh_modern.linguistics.registry`): `LanguageRegistry`, `StemmerRegistry`, and `LanguageProfile` for centralized language/analyzer/stemmer resolution with `get_default_registry()`
 - **Multi-Language Analyzer** (`whoosh_modern.linguistics.analyzers`): `MultiLanguageAnalyzer` applies multiple language analyzers simultaneously for multilingual indexing

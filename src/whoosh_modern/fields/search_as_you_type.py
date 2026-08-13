@@ -26,6 +26,13 @@ class SEARCH_AS_YOU_TYPE(TEXT):  # noqa: N801
     """
 
     def __init__(self, stored: bool = True, **kwargs: Any) -> None:
+        """Initialize the search-as-you-type field.
+
+        Args:
+            stored: Whether the field value is stored in the index.
+            **kwargs: Additional keyword arguments forwarded to
+                :class:`whoosh.fields.TEXT`.
+        """
         kwargs.setdefault("field_boost", 1.0)
         super().__init__(stored=stored, **kwargs)
 

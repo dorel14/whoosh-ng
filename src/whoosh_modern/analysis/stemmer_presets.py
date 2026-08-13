@@ -16,7 +16,21 @@ from whoosh_modern.analysis.edge_ngram_analyzer import EdgeNgramAnalyzer
 
 
 class AnalyzerPresets:
-    """Preconfigured analyzers for common search scenarios."""
+    """Preconfigured analyzers for common search scenarios.
+
+    Each factory method returns a ready-to-use analyzer instance for a
+    specific use case. Use :meth:`get` to retrieve a preset by name.
+
+    Args:
+        name: Preset name for :meth:`get` (``autocomplete``,
+            ``partial_match``, ``fuzzy``, ``code_search``,
+            ``documentation``, ``ecommerce``, ``blog``, ``multilingual``).
+
+    Example:
+        >>> from whoosh_modern.analysis.stemmer_presets import AnalyzerPresets
+        >>> analyzer = AnalyzerPresets.get("autocomplete")
+        >>> tokens = analyzer("hello world")
+    """
 
     @staticmethod
     def autocomplete() -> AutoCompleteAnalyzer:

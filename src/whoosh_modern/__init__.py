@@ -2,16 +2,25 @@
 
 This package provides a unified search application entry point with
 support for multiple data sources, storage backends, analyzers,
-middleware, facets, validation, and profiling.
+middleware, facets, validation, profiling, vector search, embeddings,
+and linguistics.
 
 Author: dorel14
-Version: 3.0.0
+Version: 3.2.0
 """
 
 from __future__ import annotations
 
+from whoosh_modern.analysis import (
+    AutoCompleteAnalyzer,
+    CachedStemmingAnalyzer,
+    EdgeNgramAnalyzer,
+)
+from whoosh_modern.analysis.presets import AnalyzerPresets
 from whoosh_modern.application import SearchApplication
 from whoosh_modern.autocomplete import FuzzySuggestProvider, NGramProvider, create_autocomplete
+from whoosh_modern.config.engine import ConfigEngine
+from whoosh_modern.config.models import FieldConfig, WhooshNGConfig
 from whoosh_modern.data_sources import DataSource, ObservableDataSource
 from whoosh_modern.data_sources.config import DataSourceConfig
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
@@ -26,6 +35,10 @@ from whoosh_modern.data_sources.rest import RESTSource
 from whoosh_modern.data_sources.sql import SQLSource
 from whoosh_modern.data_sources.sqlalchemy_ds import SQLAlchemySource
 from whoosh_modern.data_sources.tortoise_ds import TortoiseSource
+from whoosh_modern.embeddings.protocol import EmbeddingProvider
+from whoosh_modern.embeddings.sentence_transformers_provider import (
+    SentenceTransformersProvider,
+)
 from whoosh_modern.exceptions import (
     DataSourceError,
     DocumentIterationError,
@@ -33,6 +46,7 @@ from whoosh_modern.exceptions import (
     ValidationError,
 )
 from whoosh_modern.facets import FacetManager
+from whoosh_modern.fields.search_as_you_type import SEARCH_AS_YOU_TYPE
 from whoosh_modern.indexing import (
     BatchAnalyzer,
     BatchIndexWriter,
@@ -56,6 +70,21 @@ from whoosh_modern.linguistics import (
     SynonymProvider,
     YAMLSynonymProvider,
 )
+from whoosh_modern.linguistics.analyzers import MultiLanguageAnalyzer
+from whoosh_modern.linguistics.detection import (
+    LangDetectProvider,
+    LanguageDetector,
+    StopwordDetector,
+)
+from whoosh_modern.linguistics.dictionary_stem_override import DictionaryStemOverride
+from whoosh_modern.linguistics.explain import AnalysisExplanation, ExplainAnalyzer, TokenExplanation
+from whoosh_modern.linguistics.registry import (
+    LanguageProfile,
+    LanguageRegistry,
+    StemmerRegistry,
+    get_default_registry,
+)
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
 from whoosh_modern.middleware import (
     AnalyzerMiddleware,
     CacheMiddleware,
@@ -84,6 +113,10 @@ from whoosh_modern.profiling import (
     IndexProfiler,
     MemoryProfiler,
     MetricsCollector,
+    NgramProfiler,
+    NgramProfilerReport,
+    StemmerProfiler,
+    StemmerProfilerReport,
     profile_commit,
 )
 from whoosh_modern.schema_discovery import SchemaDiscovery
@@ -98,11 +131,15 @@ from whoosh_modern.storage import (
     SnapshotStorage,
 )
 from whoosh_modern.validation import ValidationFramework
+from whoosh_modern.vector.hnswlib_provider import HnswlibProvider
 from whoosh_modern.views import SearchView
 from whoosh_modern.writer import ModernIndex
 
 __all__ = [
     "SearchApplication",
+    "ConfigEngine",
+    "FieldConfig",
+    "WhooshNGConfig",
     "FileStorage",
     "S3Storage",
     "SnapshotStorage",
@@ -152,6 +189,7 @@ __all__ = [
     "SynonymManager",
     "SynonymExpansionMiddleware",
     "LANG_SYNONYMS",
+    "WiktionaryIndexer",
     "FrenchAnalyzer",
     "EnglishAnalyzer",
     "GermanAnalyzer",
@@ -180,6 +218,34 @@ __all__ = [
     "FieldProfiler",
     "AnalyzerCache",
     "FieldAnalyzerCache",
+    "NgramProfiler",
+    "NgramProfilerReport",
+    "StemmerProfiler",
+    "StemmerProfilerReport",
     "profile_commit",
     "ParallelIndexBuilder",
+    # Linguistics
+    "LanguageDetector",
+    "StopwordDetector",
+    "LangDetectProvider",
+    "LanguageRegistry",
+    "StemmerRegistry",
+    "LanguageProfile",
+    "get_default_registry",
+    "MultiLanguageAnalyzer",
+    "ExplainAnalyzer",
+    "AnalysisExplanation",
+    "TokenExplanation",
+    "DictionaryStemOverride",
+    # Config
+    "SEARCH_AS_YOU_TYPE",
+    # Vector / Embeddings
+    "HnswlibProvider",
+    "EmbeddingProvider",
+    "SentenceTransformersProvider",
+    # Analysis presets
+    "AutoCompleteAnalyzer",
+    "EdgeNgramAnalyzer",
+    "AnalyzerPresets",
+    "CachedStemmingAnalyzer",
 ]

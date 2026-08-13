@@ -6,7 +6,7 @@ sidebar_position: 85
 # Provider Integration: Complete Pipeline Guide
 
 Module: `whoosh_modern.storage`, `whoosh_modern.analysis.stemmer_providers`, `whoosh_modern.linguistics.synonyms`, `whoosh_modern.vector`, `whoosh_modern.autocomplete`
-Version: 2.0.0
+Version: 3.0.0
 
 This guide explains how all Whoosh-NG providers integrate into the indexing and
 search pipeline. It is the definitive reference for understanding the data flow

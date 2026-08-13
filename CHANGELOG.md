@@ -5,7 +5,7 @@ All notable changes to Whoosh-NG are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.0.0.dev0] - Unreleased
+## [5.1.0] - Unreleased
 
 ### Added
 - **Configuration Engine sub-engines** (`src/whoosh_modern/config/engines.py`):
@@ -106,6 +106,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   hierarchical merging (language → application → instance → runtime), Pydantic
   models (`WhooshNGConfig`, `FieldConfig`, `SearchConfig`, `DataSourceConfigModel`,
   `StorageConfigModel`), and YAML/JSON loaders with validation.
+  Sub-engines: `SchemaEngine`, `AnalyzerEngine`, `DataSourceEngine`,
+  `StorageEngine`, `SearchModelEngine`, `FacetEngine`, `PluginEngine`, `APIEngine`.
+- **Vector Search** (`src/whoosh_modern/vector/`): `HnswlibProvider` for HNSW
+  approximate nearest neighbor search, complementing the existing `NumpyProvider`.
+- **Embedding Framework** (`src/whoosh_modern/embeddings/`): `EmbeddingProvider`
+  protocol and `SentenceTransformersProvider` for sentence-transformers embeddings.
+- **Modern N-Gram Framework** (`src/whoosh_modern/analysis/`):
+  `AutoCompleteAnalyzer`, `EdgeNgramAnalyzer`, `AnalyzerPresets` (autocomplete,
+  partial_match, fuzzy, code_search, documentation, ecommerce, blog, multilingual),
+  `CachedStemmingAnalyzer`, and `SEARCH_AS_YOU_TYPE` field type.
+- **N-Gram Profiler** (`src/whoosh_modern/profiling/ngram_profiler.py`):
+  `NgramProfiler` and `NgramProfilerReport` for measuring n-gram generation
+  performance.
 - **FastAPI WebSocket autocomplete**: persistent `WS /api/v1/autocomplete/ws`
   endpoint accepting `{"q":"..."}` messages and returning `{"suggestions":[...]}`.
 - **CoreStorageAdapter** (`src/whoosh_modern/storage/core_adapter.py`): bridges
@@ -138,4 +151,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `StorageEngine`, `SearchModelEngine`, `FacetEngine`, `PluginEngine`, `APIEngine`.
 - Sprint F: Admin Studio (NiceGUI) + Synonym Manager remain.
 
-[4.0.0.dev0]: https://github.com/dorel14/whoosh-NG/releases/tag/v4.0.0.dev0
+[5.1.0]: https://github.com/dorel14/whoosh-NG/releases/tag/v5.1.0

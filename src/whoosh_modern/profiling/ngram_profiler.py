@@ -44,6 +44,12 @@ class NgramProfiler:
     """
 
     def __init__(self, analyzer: Any = None) -> None:
+        """Initialize the profiler.
+
+        Args:
+            analyzer: Optional analyzer to use for profiling. Defaults to
+                ``NgramWordAnalyzer(3, at="start")``.
+        """
         self._analyzer = analyzer or NgramWordAnalyzer(3, at="start")
 
     def profile(self, documents: list[str]) -> NgramProfilerReport:

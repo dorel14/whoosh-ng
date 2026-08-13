@@ -37,6 +37,18 @@ class HnswlibProvider(VectorProvider):
         ef_construction: int = 200,
         m: int = 16,
     ) -> None:
+        """Initialize the HNSW provider.
+
+        Args:
+            dimension: Vector dimensionality.
+            space: Distance space (``"l2"`` or ``"cosine"``).
+            max_elements: Maximum number of elements in the index.
+            ef_construction: HNSW construction time ef parameter.
+            m: HNSW m parameter (number of connections per node).
+
+        Raises:
+            ImportError: If ``hnswlib`` is not installed.
+        """
         try:
             import hnswlib  # noqa: F401
         except ImportError as exc:
@@ -54,6 +66,11 @@ class HnswlibProvider(VectorProvider):
         self._next_id = 0
 
     def _ensure_index(self) -> Any:
+        """Lazily create the underlying ``hnswlib`` index.
+
+        Returns:
+            The initialized ``hnswlib.Index`` instance.
+        """
         if self._index is None:
             import hnswlib
 

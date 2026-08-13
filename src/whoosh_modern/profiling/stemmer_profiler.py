@@ -38,6 +38,12 @@ class StemmerProfiler:
     """
 
     def __init__(self, stemmer: Any = None) -> None:
+        """Initialize the stemmer profiler.
+
+        Args:
+            stemmer: Optional stemmer function to profile. If ``None``,
+                :meth:`profile` returns an empty report.
+        """
         self._stemmer = stemmer
 
     def profile(self, documents: list[str]) -> StemmerProfilerReport:
