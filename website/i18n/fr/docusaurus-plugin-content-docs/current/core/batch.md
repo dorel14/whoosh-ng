@@ -120,4 +120,3 @@ otherwise the number of segments will tend to increase forever!
 
 - [Indexing](/core/indexing) â€” Writer options and merge policies
 - [API: writing](../api/writing) â€” `Index.writer()` parameters
-

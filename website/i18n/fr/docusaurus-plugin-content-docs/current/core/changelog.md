@@ -8,6 +8,119 @@ sidebars: changelogSidebar
 
 Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
 
+## v5.3.0 (2026-08-13)
+**Tag**: `v5.3.0`
+
+## v5.3.0 (2026-08-13)
+
+_This release is published under the MIT License._
+
+### Bug Fixes
+
+- **linguistics**: Corriger les défauts signalés par revue et docs ([`ba05a8d`](https://github.com/dorel14/whoosh-ng/commit/ba05a8d5cbdba8d71f39d8e24920d55f77a8eb32))
+
+### Documentation
+
+- Auto-update llms context files [skip ci] ([`4585b5e`](https://github.com/dorel14/whoosh-ng/commit/4585b5eb665c0329c70da0efe5225b859fc14573))
+
+- Auto-update llms context files [skip ci] ([`c897f1f`](https://github.com/dorel14/whoosh-ng/commit/c897f1f0e6c6bbebee46a7672f5ca6d3d6abebf4))
+
+- Auto-update llms context files [skip ci] ([`a65b926`](https://github.com/dorel14/whoosh-ng/commit/a65b926027472d65244c76f250833af27c4bb8e5))
+
+- Auto-update llms context files [skip ci] ([`4911cf5`](https://github.com/dorel14/whoosh-ng/commit/4911cf57abc555eadfa47cf962943b321fb2457a))
+
+- Auto-update llms context files [skip ci] ([`8605b34`](https://github.com/dorel14/whoosh-ng/commit/8605b344f85f3e40dec93c9f9c7d04e7c10fd9f6))
+
+- Auto-update llms context files [skip ci] ([`8c88da5`](https://github.com/dorel14/whoosh-ng/commit/8c88da5d29097f8a4ee6a9c47ffcc5afdcf2ff55))
+
+- Update changelog and API docs [skip ci] ([`ae57714`](https://github.com/dorel14/whoosh-ng/commit/ae57714558186480f0f15e4aa21e093c61c166bd))
+
+- **config**: Corriger l'exemple ConfigEngine.build() ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`f09d6da`](https://github.com/dorel14/whoosh-ng/commit/f09d6dac72482868275ad581046909a5b4169885))
+
+- **documentation**: Mettre à jour la documentation pour le renommage en whoosh-ng ([`ec35fbd`](https://github.com/dorel14/whoosh-ng/commit/ec35fbd5182dc0c01e5888d7285f62be8c21a262))
+
+- **linguistics**: Documenter la détection automatique de langue et l'indexation multilingue ([`f86a17b`](https://github.com/dorel14/whoosh-ng/commit/f86a17bd7820a2e5a3f99fc8a8516c4b9b460a18))
+
+- **website**: Restructurer la documentation et déplacer les fonctionnalités classiques vers Core ([`54fb1f6`](https://github.com/dorel14/whoosh-ng/commit/54fb1f61f81b441febda3a0ecfce3fef8edb400f))
+
+### Features
+
+- **analysis**: Add EPIC 5.6 Modern N-Gram Framework Sprint NGRAM-1 ([#440](https://github.com/dorel14/whoosh-ng/pull/440), [`c634718`](https://github.com/dorel14/whoosh-ng/commit/c6347184bb2b6d307da5008c1edf4850eab88d0b))
+
+- **api**: Exposer les nouvelles fonctionnalités pour la version 5.1.0 ([`e306236`](https://github.com/dorel14/whoosh-ng/commit/e306236a71fdcd5f018d9af10cf923398ed852c1))
+
+- **linguistics**: Add language auto-detection for multilingual indexing ([#434](https://github.com/dorel14/whoosh-ng/pull/434), [`a91d6bf`](https://github.com/dorel14/whoosh-ng/commit/a91d6bf59b8faae98fe80aa4d6c5ac4e0813ec0e))
+
+- **linguistics**: Add language auto-detection in SearchApplication ([#435](https://github.com/dorel14/whoosh-ng/pull/435), [`99f4290`](https://github.com/dorel14/whoosh-ng/commit/99f42904e302191de630cfdefe8eec6f5a8b50ca))
+
+- **linguistics**: Add Wiktionary dictionary indexer (#429 #432) ([`726542d`](https://github.com/dorel14/whoosh-ng/commit/726542dd4bf8e79d35dadb36e126f1973207a8b4))
+
+- **linguistics**: Add Wiktionary synonym provider (#425 #426 #427) ([`2961b93`](https://github.com/dorel14/whoosh-ng/commit/2961b93726cf1792faf89b293f2439c5c92e7ee6))
+
+- **linguistics**: Integrate Wiktionary indexer with SearchApplication ([#433](https://github.com/dorel14/whoosh-ng/pull/433), [`f201f5c`](https://github.com/dorel14/whoosh-ng/commit/f201f5c37608df75dc79be5b2526fb71fa45ed36))
+
+- **vector**: Add HnswlibProvider for EPIC 9 Sprint VEC-1 ([#406](https://github.com/dorel14/whoosh-ng/pull/406), [`cd590d4`](https://github.com/dorel14/whoosh-ng/commit/cd590d4601e5c238385be6fe693ee22ebe4a0912))
+
+- **vector,embeddings,config**: Add HnswlibProvider, EmbeddingProvider, ConfigEngine extensions (#406 #407) ([`03a15aa`](https://github.com/dorel14/whoosh-ng/commit/03a15aabcb32822a71635a17b99e9c9545e07962))
+
+---
+
+**Detailed Changes**: [v5.2.0...v5.3.0](https://github.com/dorel14/whoosh-ng/compare/v5.2.0...v5.3.0)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- améliorer la qualité du code et nettoyer la configuration
+- v5.3.0 [skip ci]
+
+### Documentation
+
+- update changelog and API docs [skip ci]
+- corriger l'exemple ConfigEngine.build() (#422)
+- auto-update llms context files [skip ci]
+- restructurer la documentation et déplacer les fonctionnalités classiques vers Core
+- auto-update llms context files [skip ci]
+- documenter la détection automatique de langue et l'indexation multilingue
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+- mettre à jour la documentation pour le renommage en whoosh-ng
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+
+### Features
+
+- add Wiktionary synonym provider (#425 #426 #427)
+- add Wiktionary dictionary indexer (#429 #432)
+- integrate Wiktionary indexer with SearchApplication (#433)
+- add language auto-detection for multilingual indexing (#434)
+- add language auto-detection in SearchApplication (#435)
+- add HnswlibProvider for EPIC 9 Sprint VEC-1 (#406)
+- add HnswlibProvider, EmbeddingProvider, ConfigEngine extensions (#406 #407)
+- add EPIC 5.6 Modern N-Gram Framework Sprint NGRAM-1 (#440)
+- exposer les nouvelles fonctionnalités pour la version 5.1.0
+
+### Other
+
+- eat(linguistics): complete EPIC 6.7 Language Auto-Detection & Multilingual Indexing (#430)
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #454 from dorel14/dev
+
+### Code Refactoring
+
+- améliorer le typage et nettoyer les imports
+
+### Bug Fixes
+
+- corriger les défauts signalés par revue et docs
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.3.0)
+
 ## v5.2.0 (2026-08-12)
 **Tag**: `v5.2.0`
 
@@ -115,15 +228,9 @@ _This release is published under the BSD-2-Clause License._
 ## v5.1.0 (2026-08-11)
 **Tag**: `v5.1.0`
 
+## v5.1.0 (2026-08-11)
+
 _This release is published under the BSD-2-Clause License._
-
-### Breaking Changes
-
-- **Changement de chemin d'import** : Le projet a été renommé de `whoosh-reloaded` en
-  `whoosh-ng`. Les modules d'extension modernes précédemment disponibles sous
-  `whoosh_reloaded` sont maintenant importables sous `whoosh_modern`. Le code
-  existant utilisant `whoosh_reloaded` doit être mis à jour vers `whoosh_modern`.
-  Les composants Whoosh core restent disponibles sous l'espace de noms `whoosh`.
 
 ### Bug Fixes
 

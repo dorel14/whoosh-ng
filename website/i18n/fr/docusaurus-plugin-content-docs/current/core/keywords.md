@@ -96,4 +96,3 @@ Available models include `Bo1Model`, `Bo2Model`, and `KLModel`.
 
 - [Searching](/core/searching) â€” `Results`, `Hit`, and the `search()` method
 - [API: searching](../api/searching) â€” `key_terms`, `more_like_this` reference
-

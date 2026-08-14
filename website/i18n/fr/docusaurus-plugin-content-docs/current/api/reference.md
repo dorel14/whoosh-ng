@@ -11,51 +11,50 @@ The Whoosh-NG API reference is générée automatiquement à partir du code sour
 et génère une documentation HTML à partir des docstrings.
 
 :::note
-Si la documentation intégrée ne s'affiche pas, il se peut que les docs API
-n'aient pas encore été générées dans ce déploiement. Consultez
-[la page GitHub](https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs)
-pour la documentation API complète, ou reportez-vous à la
-[liste des modules API](#api-modules) ci-dessous.
+If the embedded documentation does not display, the API docs may not have
+been generated yet in this deployment. [View on GitHub](https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs)
+for the full API documentation, or check the
+[API modules list](#api-modules) below.
 :::
 
-## Modules API
+## API Modules
 
-### API Core
-
-| Module | Description |
-|--------|-------------|
-| `whoosh.index` | Création, ouverture et gestion d'index de haut niveau |
-| `whoosh.fields` | Schéma et définitions de types de champs |
-| `whoosh.writing` | Classes d'écriture et politiques de fusion |
-| `whoosh.searching` | Searcher, Results et collectors |
-| `whoosh.query` | Classes de requêtes et parseurs |
-| `whoosh.qparser` | Implémentation du parseur de requêtes |
-| `whoosh.analysis` | Tokenizers, filtres et analyseurs |
-| `whoosh.highlight` | Surlignage des résultats de recherche |
-| `whoosh.spelling` | Correction orthographique |
-| `whoosh.sorting` | Facettes et tri |
-| `whoosh.event_bus` | Système d'événements |
-| `whoosh.hooks` | Système de hooks |
-| `whoosh.middleware` | Pipeline de middleware |
-| `whoosh.plugins` | Système de plugins et registre |
-| `whoosh.backends` | Backends de stockage |
-
-### API Modern
+### Core API
 
 | Module | Description |
 |--------|-------------|
-| `whoosh_modern.data_sources` | Protocole et implémentations de sources de données |
-| `whoosh_modern.views` | Interface unifiée SearchView |
-| `whoosh_modern.middleware` | Middleware de retry, cache, logging |
-| `whoosh_modern.facets` | FacetManager pour l'auto-découverte |
-| `whoosh_modern.validation` | Framework de validation à 4 niveaux |
+| `whoosh.index` | High-level index creation, opening, and management |
+| `whoosh.fields` | Schema and field type definitions |
+| `whoosh.writing` | Writer classes and merge policies |
+| `whoosh.searching` | Searcher, Results, and collectors |
+| `whoosh.query` | Query classes and parsers |
+| `whoosh.qparser` | Query parser implementation |
+| `whoosh.analysis` | Tokenizers, filters, and analyzers |
+| `whoosh.highlight` | Search result highlighting |
+| `whoosh.spelling` | Spelling correction |
+| `whoosh.sorting` | Facets and sorting |
+| `whoosh.event_bus` | Event system |
+| `whoosh.hooks` | Hook system |
+| `whoosh.middleware` | Middleware pipeline |
+| `whoosh.plugins` | Plugin system and registry |
+| `whoosh.backends` | Storage backends |
+
+### Modern API
+
+| Module | Description |
+|--------|-------------|
+| `whoosh_modern.data_sources` | Data source protocol and implementations |
+| `whoosh_modern.views` | SearchView unified interface |
+| `whoosh_modern.middleware` | Retry, cache, logging middleware |
+| `whoosh_modern.facets` | FacetManager for auto-discovery |
+| `whoosh_modern.validation` | 4-level validation framework |
 | `whoosh_modern.indexing` | BatchIndexWriter, AnalyzerCache |
-| `whoosh_modern.linguistics` | Moteur linguistique (stemmers, synonymes) |
-| `whoosh_modern.storage` | Providers de stockage (HybridStorage, etc.) |
-| `whoosh_modern.vector` | NumpyProvider pour la similarité vectorielle |
-| `whoosh_modern.autocomplete` | Plugins de providers d'autocomplétion |
-| `whoosh_fastapi` | Endpoints API REST FastAPI |
-| `whoosh_admin` | Tableau de bord d'administration |
+| `whoosh_modern.linguistics` | Linguistic engine (stemmers, synonyms) |
+| `whoosh_modern.storage` | Storage providers (HybridStorage, etc.) |
+| `whoosh_modern.vector` | NumpyProvider for vector similarity |
+| `whoosh_modern.autocomplete` | Autocomplete provider plugins |
+| `whoosh_fastapi` | FastAPI REST API endpoints |
+| `whoosh_admin` | Admin UI dashboard |
 
 :::info
 For the full interactive API documentation, run:
