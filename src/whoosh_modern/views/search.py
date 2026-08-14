@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 from typing import Any
 
-from whoosh.fields import Schema
+from whoosh.fields import Schema, STORED
 from whoosh.index import create_in, exists_in, open_dir
 from whoosh.middleware.context import MiddlewareContext
 from whoosh_modern.exceptions import ValidationError
@@ -21,8 +21,8 @@ from whoosh_modern.validation import ValidationFramework, ValidationResult
 
 logger = logging.getLogger(__name__)
 
-_SCHEMA_VERSION_FIELD = "_schema_version"
-_SCHEMA_UPDATED_AT_FIELD = "_schema_updated_at"
+_SCHEMA_VERSION_FIELD = "schema_version"
+_SCHEMA_UPDATED_AT_FIELD = "schema_updated_at"
 
 
 class SearchView:
@@ -130,6 +130,8 @@ class SearchView:
             writer.add_document(**self._prepare_doc(doc, schema))
         writer.commit()
 
+        self._store_schema_metadata(schema)
+
         return self._index
 
     def refresh(self) -> int:
@@ -233,6 +235,11 @@ class SearchView:
 
                     fields[target_field] = VECTOR()
 
+        if _SCHEMA_VERSION_FIELD not in fields:
+            fields[_SCHEMA_VERSION_FIELD] = STORED
+        if _SCHEMA_UPDATED_AT_FIELD not in fields:
+            fields[_SCHEMA_UPDATED_AT_FIELD] = STORED
+
         return Schema(**fields)
 
     def _prepare_doc(self, doc: dict[str, Any], schema: Schema) -> dict[str, Any]:
@@ -302,7 +309,14 @@ class SearchView:
             return True
 
         try:
-            return _SCHEMA_VERSION_FIELD in self._index.schema
+            ix = open_dir(self._index_path)
+            with ix.searcher() as searcher:
+                for stored in searcher.all_stored_fields():
+                    if _SCHEMA_VERSION_FIELD in stored:
+                        return stored[_SCHEMA_VERSION_FIELD] == self.schema_version
+                return False
+        except Exception:
+            return False
         except Exception:
             return False
 
