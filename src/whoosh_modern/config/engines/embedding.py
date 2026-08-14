@@ -54,19 +54,11 @@ class EmbeddingEngine:
                 from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider
 
                 return ONNXEmbeddingProvider(
-                return ONNXEmbeddingProvider(
                     model_path=str(embedding_config.model_path or ""),
-                    tokenizer_dir=str(embedding_config.tokenizer_dir or ""),
+                    tokenizer_dir=embedding_config.tokenizer_dir,
                     pooling=embedding_config.pooling,
                     normalize=embedding_config.normalize,
-                    dimension=embedding_config.dimension,
-                    enable_prefix=embedding_config.enable_prefix,
-                )
-                    tokenizer_dir=None,
-                    pooling="mean",
-                    normalize=True,
-                    dimension=None,
-                    enable_prefix=True,
+                    quantization=embedding_config.quantization or "fp32",
                 )
             except ImportError as exc:
                 raise ImportError(

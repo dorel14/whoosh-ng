@@ -146,6 +146,7 @@ class ONNXEmbeddingProvider:
         self._dimension = dimension
         self._enable_prefix = enable_prefix
         self._model_path = str(model_file)
+        self._quantization = quantization
         self._dimension_inferred = False
 
         logger.debug(
@@ -302,14 +303,6 @@ class ONNXEmbeddingProvider:
             f"model_path={self._model_path!r}, "
             f"pooling={self._pooling!r}, "
             f"normalize={self._normalize}, "
-    def __repr__(self) -> str:
-        return (
-            f"ONNXEmbeddingProvider("
-            f"model_path={self._model_path!r}, "
-            f"pooling={self._pooling!r}, "
-            f"normalize={self._normalize}, "
             f"quantization={self._quantization!r}"
-            f")"
-        )
             f")"
         )

@@ -35,6 +35,8 @@ def test_embedding_engine_onnx() -> None:
             model="multilingual-e5-small",
             model_path="models/multilingual-e5-small/model.onnx",
             tokenizer_dir="models/multilingual-e5-small",
+            pooling="mean",
+            normalize=True,
             quantization="fp32",
             batch_size=32,
         )
@@ -43,7 +45,13 @@ def test_embedding_engine_onnx() -> None:
         mock.return_value = MagicMock()
         result = EmbeddingEngine(config).build()
         assert result is not None
-        mock.assert_called_once()
+        mock.assert_called_once_with(
+            model_path="models/multilingual-e5-small/model.onnx",
+            tokenizer_dir="models/multilingual-e5-small",
+            pooling="mean",
+            normalize=True,
+            quantization="fp32",
+        )
 
 
 def test_embedding_engine_sentence_transformers() -> None:
@@ -68,7 +76,9 @@ def test_embedding_engine_unsupported() -> None:
 
 
 def test_config_engine_build_uses_embedding_engine() -> None:
-    """Test ConfigEngine.build() invokes EmbeddingEngine."""
+    """Test ConfigEngine.build() invokes EmbeddingEngine and forwards its
+    built provider to SearchApplication.
+    """
     engine = ConfigEngine()
     with (
         patch("whoosh_modern.config.engine.EmbeddingEngine") as mock_embedding,
@@ -78,11 +88,16 @@ def test_config_engine_build_uses_embedding_engine() -> None:
         patch("whoosh_modern.config.engine.LanguageEngine") as mock_lang,
         patch("whoosh_modern.application.SearchApplication") as mock_app,
     ):
+        built_embedding_provider = MagicMock(name="built_embedding_provider")
         mock_source.return_value.build.return_value = MagicMock()
         mock_storage.return_value.build.return_value = MagicMock()
         mock_vector.return_value.build.return_value = None
-        mock_embedding.return_value.build.return_value = None
+        mock_embedding.return_value.build.return_value = built_embedding_provider
         mock_lang.return_value.build.return_value = None
         engine._config = WhooshNGConfig()
         engine.build()
         mock_embedding.assert_called_once()
+        mock_app.assert_called_once()
+        _, call_kwargs = mock_app.call_args
+        assert call_kwargs["embedding_provider"] is built_embedding_provider
+        assert call_kwargs["config"] is engine._config
