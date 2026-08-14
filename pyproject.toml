@@ -76,6 +76,9 @@ fuzzy = [
 phonetic = [
   "metaphone",
 ]
+linguistic = [
+  "langdetect",
+]
 lmdb = [
   "lmdb",
 ]
