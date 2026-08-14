@@ -54,7 +54,14 @@ class EmbeddingEngine:
                 from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider
 
                 return ONNXEmbeddingProvider(
-                    model_path=str(embedding_config.model or ""),
+                return ONNXEmbeddingProvider(
+                    model_path=str(embedding_config.model_path or ""),
+                    tokenizer_dir=str(embedding_config.tokenizer_dir or ""),
+                    pooling=embedding_config.pooling,
+                    normalize=embedding_config.normalize,
+                    dimension=embedding_config.dimension,
+                    enable_prefix=embedding_config.enable_prefix,
+                )
                     tokenizer_dir=None,
                     pooling="mean",
                     normalize=True,
