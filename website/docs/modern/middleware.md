@@ -110,6 +110,11 @@ embedding = EmbeddingMiddleware(
 )
 ```
 
+> **Precedence:** When `embedding_fields` is provided, the root-level
+> `source_field` / `target_field` defaults are **ignored** — each entry is
+> processed independently. To avoid confusion, do not specify `source_field`
+> / `target_field` at the root level when using `embedding_fields`.
+
 ### EncryptionMiddleware
 
 Marks documents for encryption at the backend level:

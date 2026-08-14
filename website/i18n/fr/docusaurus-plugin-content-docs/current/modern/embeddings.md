@@ -13,7 +13,7 @@ le CLI `whoosh-ng-models` et `EmbeddingEngine` pour l'intégration
 `ConfigEngine`.
 
 > **Module :** `whoosh_modern.embeddings`
-> **Version :** 3.0.0
+> **Version :** 3.1.0
 
 ## Installation
 
@@ -37,10 +37,10 @@ pip install whoosh-ng[embeddings,vector]
 from whoosh_modern.embeddings import FastEmbedProvider
 
 provider = FastEmbedProvider()
-vector = provider.embed("bonjour le monde")
+vector = provider.embed("hello world")
 print(len(vector))  # 384
 
-batch = provider.embed_batch(["bonjour", "le monde"])
+batch = provider.embed_batch(["hello", "world"])
 print(len(batch))   # 2
 ```
 
@@ -71,12 +71,42 @@ provider = FastEmbedProvider(model_name="BAAI/bge-base-en-v1.5")
 `tokenizers`. Il gère la tokenization, l'inférence, le pooling et la
 normalisation L2 optionnelle.
 
+Les modèles ONNX peuvent être obtenus de deux manières :
+
+**Option A — via EmbeddingModelManager (recommandé pour les modèles enregistrés) :**
+
+L'`EmbeddingModelManager` télécharge et met en cache les modèles ONNX depuis
+le Hub HuggingFace dans `~/.whoosh-ng/models/`. Une fois le modèle installé,
+vous passez le chemin du répertoire local au provider :
+
+```python
+from whoosh_modern.embeddings import EmbeddingModelManager, ONNXEmbeddingProvider
+
+# Télécharger le modèle (une fois ; mis en cache ensuite)
+manager = EmbeddingModelManager()
+model_dir = manager.download("multilingual-e5-small")
+
+# Résoudre le chemin du fichier .onnx
+onnx_path = str(next(model_dir.glob("*.onnx")))
+
+provider = ONNXEmbeddingProvider(
+    model_path=onnx_path,
+    tokenizer_dir=str(model_dir),
+    pooling="mean",
+    normalize=True,
+)
+```
+
+**Option B — via des chemins locaux explicites (modèles personnalisés ou pré-téléchargés) :**
+
 ```python
 from whoosh_modern.embeddings import ONNXEmbeddingProvider
 
 provider = ONNXEmbeddingProvider(
     model_path="models/multilingual-e5-small/model.onnx",
     tokenizer_dir="models/multilingual-e5-small",
+    pooling="mean",
+    normalize=True,
 )
 ```
 
@@ -105,6 +135,27 @@ Quand `enable_prefix=True`, `embed()` préfixe par `"passage: "` et
 `embed_batch(..., is_query=True)` préfixe par `"query: "`. Mettez
 `enable_prefix=False` quand le modèle n'attend pas de préfixe.
 
+## Identifiants de modèles : FastEmbed vs ONNX
+
+Les deux providers interprètent les identifiants de modèles différemment.
+Comprendre cette distinction évite la confusion avec des noms existant dans
+les deux registres :
+
+| Aspect | FastEmbedProvider | ONNXEmbeddingProvider |
+|--------|-------------------|-----------------------|
+| Type d'identifiant | Nom de modèle HuggingFace (ex. `BAAI/bge-small-en-v1.5`) | Nom de modèle enregistré (ex. `bge-small-en-v1.5`) **ou** chemin de fichier local |
+| Mécanisme de téléchargement | `fastembed` télécharge automatiquement à la première utilisation | `EmbeddingModelManager.download()` télécharge depuis le Hub |
+| Emplacement du cache | Cache propre de FastEmbed (`~/.cache/fastembed`) | `~/.whoosh-ng/models/` |
+| Registre | Aucun (FastEmbed gère sa propre liste de modèles) | `EmbeddingModelRegistry` (`get_default_registry()`) |
+| Exemple | `FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")` | `ONNXEmbeddingProvider(model_path=str(model_dir / "model.onnx"))` |
+
+> **Note d'ambiguïté :** Le nom `bge-small-en-v1.5` existe à la fois comme
+> modèle FastEmbed (identifiant de repo HuggingFace sans espace de noms) et
+> comme entrée de registre ONNX. Ils produisent des embeddings similaires mais
+> **ne sont pas interchangeables** — FastEmbed gère son propre téléchargement,
+> tandis que le registre ONNX mappe vers `onnx-community/bge-small-en-v1.5-ONNX`
+> via `EmbeddingModelManager`.
+
 ## Model manager et registry
 
 ### EmbeddingModelRegistry
@@ -126,7 +177,7 @@ Modèles pré-enregistrés :
 
 | Nom | Dimension | Pooling | Description |
 |-----|-----------|---------|-------------|
-| `bge-small-en-v1.5` | 384 | mean | BGE-small anglais |
+| `bge-small-en-v1.5` | 384 | mean | BGE-small anglais (ONNX) |
 | `multilingual-e5-small` | 384 | mean | E5-small multilingue |
 | `mini-lm-en-ONNX` | 384 | cls | MiniLM anglais |
 | `bge-small-en-v1.5-int8` | 384 | mean | BGE-small quantifié INT8 |
@@ -193,10 +244,20 @@ embedding:
 ```
 
 ```yaml
-# Ou avec ONNX
+# ONNX avec un nom de modèle enregistré
+# EmbeddingModelManager télécharge et met en cache le modèle automatiquement,
+# dérivant model_path et tokenizer_dir depuis le cache local.
 embedding:
   provider: onnx
   model: multilingual-e5-small
+  pooling: mean
+  normalize: true
+```
+
+```yaml
+# ONNX avec des chemins locaux explicites (modèles personnalisés ou pré-téléchargés)
+embedding:
+  provider: onnx
   model_path: models/multilingual-e5-small/model.onnx
   tokenizer_dir: models/multilingual-e5-small
   pooling: mean
@@ -204,7 +265,7 @@ embedding:
 ```
 
 ```yaml
-# Ou avec sentence-transformers
+# sentence-transformers
 embedding:
   provider: sentence-transformers
   model: all-MiniLM-L6-v2
@@ -212,11 +273,11 @@ embedding:
 
 ```yaml
 # Vectorisation multi-champs
+# Quand embedding_fields est utilisé, omettez source_field/target_field au
+# niveau racine — ils sont ignorés quand embedding_fields est présent.
 embedding:
   provider: fastembed
   model: BAAI/bge-small-en-v1.5
-  source_field: body
-  target_field: body_vector
   embedding_fields:
     - source_field: title
       target_field: title_vector
@@ -226,13 +287,73 @@ embedding:
 
 Providers supportés : `fastembed`, `onnx`, `sentence-transformers`.
 
-Lorsque `embedding_fields` est fourni, les valeurs par défaut `source_field` / `target_field` sont ignorées et chaque mapping est traité indépendamment. `SearchView` injecte automatiquement les champs cibles en tant que champs `VECTOR` dans le schéma Whoosh généré s'ils ne sont pas déjà déclarés.
+> **Précédence des champs multi-champs :** Quand `embedding_fields` est fourni,
+> les valeurs par défaut racine `source_field` / `target_field` sont **ignorées**
+> — chaque entrée dans `embedding_fields` est traitée indépendamment.
+> `SearchView` injecte automatiquement les champs cibles en tant que champs
+> `VECTOR` dans le schéma Whoosh généré s'ils ne sont pas déjà déclarés.
+> Pour éviter la confusion, omettez `source_field` et `target_field` du niveau
+> racine lorsque vous utilisez `embedding_fields`.
 
-**Note sur la configuration ONNX :**
-Lorsque vous utilisez `provider: onnx`, vous pouvez spécifier un modèle enregistré via `model` ou fournir des chemins de fichiers explicites via `model_path` et `tokenizer_dir`.
-Si `model` est spécifié, l'`EmbeddingModelManager` tentera de télécharger et gérer le modèle, dérivant automatiquement `model_path` et `tokenizer_dir` depuis le cache local.
-Si `model_path` et/ou `tokenizer_dir` sont fournis explicitement, ils prendront le pas sur les chemins dérivés du nom du `model`.
-Il est recommandé d'utiliser soit `model` pour les modèles gérés par le manager, soit `model_path` / `tokenizer_dir` pour des chemins locaux personnalisés, afin d'éviter toute ambiguïté.
+### Configuration ONNX
+
+Lorsque vous utilisez `provider: onnx`, vous pouvez spécifier un modèle enregistré
+via `model` ou fournir des chemins de fichiers explicites via `model_path` et
+`tokenizer_dir`.
+
+- Si `model` est spécifié, `EmbeddingModelManager` téléchargera et gérera le
+  modèle, dérivant automatiquement `model_path` et `tokenizer_dir` depuis le
+  cache local.
+- Si `model_path` et/ou `tokenizer_dir` sont fournis explicitement, ils prennent
+  le pas sur les chemins dérivés du nom du `model`.
+
+Il est recommandé d'utiliser soit `model` pour les modèles gérés par le manager,
+soit `model_path` / `tokenizer_dir` pour des chemins locaux personnalisés, afin
+d'éviter toute ambiguïité.
+
+## Gestion des erreurs d'embedding
+
+> **Décision de conception :** Les erreurs du fournisseur sont **ignorées**
+> (journalisées en tant qu'avertissements) pour éviter d'interrompre le pipeline
+> d'indexation. Cela s'applique à tous les providers d'embeddings (FastEmbed,
+> ONNX, Sentence Transformers).
+
+Lorsqu'un provider d'embedding lève une exception pendant `embed()` ou
+`embed_batch()`, le `EmbeddingMiddleware` attrape l'exception, journalise un
+avertissement, et continue l'indexation. Le document concerné sera indexé
+**sans** son champ vectoriel, ce qui signifie qu'il ne sera pas recherchable
+via la recherche sémantique (similarité) mais restera recherchable via la
+recherche par mot-clé (BM25).
+
+Les noms de loggers Python pertinents sont :
+
+| Logger | Module source |
+|--------|---------------|
+| `whoosh_modern.middleware.embedding` | `EmbeddingMiddleware.before_index()` |
+| `whoosh_modern.config.engines.embedding` | `EmbeddingEngine.build()` |
+
+Configurez la journalisation pour contrôler la verbosité et la destination :
+
+```python
+import logging
+
+# Journaliser les avertissements d'embedding vers un fichier dédié
+logging.basicConfig(
+    level=logging.WARNING,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    filename="embedding_warnings.log",
+)
+
+# Ou élever les avertissements au niveau ERROR pour les faire remonter en développement
+logging.getLogger("whoosh_modern.middleware.embedding").setLevel(logging.ERROR)
+```
+
+### Gestion des erreurs dans le benchmark
+
+Le script de benchmark `benchmark/stock_parquet_embedding.py` suit le même
+modèle : les exceptions du provider sont attrapées, un avertissement est
+imprimé sur `stderr`, et le document est ignoré. Les échecs sont suivis dans
+la sortie du benchmark sous la clé `failures`.
 
 ## Protocole
 

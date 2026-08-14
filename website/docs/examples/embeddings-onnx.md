@@ -10,22 +10,52 @@ This example shows how to use **ONNX** for dense vector embeddings in Whoosh‑N
 ## 1. Install Dependencies
 
 ```bash
-pip install "whoosh-ng[embeddings]" onnx onnxruntime
+pip install "whoosh-ng[embeddings-onnx]" onnx
 ```
 
-## 2. Single-Field Vectorization
+## 2. Install a Model (via EmbeddingModelManager)
+
+Before using an ONNX provider, download and cache the model files using the
+`EmbeddingModelManager`. This handles downloads from the HuggingFace Hub
+and cache management for you:
 
 ```python
+from whoosh_modern.embeddings import EmbeddingModelManager
+
+manager = EmbeddingModelManager()
+model_dir = manager.download("multilingual-e5-small")
+print(manager.is_installed("multilingual-e5-small"))  # True
+print(sorted(model_dir.glob("*.onnx")))               # [model.onnx]
+```
+
+You can also manage models via the CLI:
+
+```bash
+whoosh-ng-models install multilingual-e5-small
+whoosh-ng-models list
+```
+
+## 3. Single-Field Vectorization
+
+```python
+from pathlib import Path
+
 from whoosh.fields import Schema, TEXT
 from whoosh.index import create_in
 from whoosh_modern import SearchApplication
 from whoosh_modern.data_sources.in_memory import InMemorySource
-from whoosh_modern.embeddings import ONNXEmbeddingProvider
-from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+from whoosh_modern.embeddings import EmbeddingModelManager, ONNXEmbeddingProvider
+
+# Download the model (skipped if already cached)
+manager = EmbeddingModelManager()
+model_dir = manager.download("multilingual-e5-small")
+
+# Resolve the .onnx file path
+onnx_path = str(next(model_dir.glob("*.onnx")))
 
 provider = ONNXEmbeddingProvider(
-    model_path="models/multilingual-e5-small/model.onnx",
-    tokenizer_dir="models/multilingual-e5-small",
+    model_path=onnx_path,
+    tokenizer_dir=str(model_dir),
     pooling="mean",
     normalize=True,
 )
@@ -46,7 +76,11 @@ app = SearchApplication(
 app.build("indexdir")
 ```
 
-## 3. Multi-Field Vectorization
+## 4. Multi-Field Vectorization
+
+When `embedding_fields` is provided, the root-level `source_field` /
+`target_field` defaults are ignored — each mapping is processed
+independently. Omit the root-level fields to avoid confusion:
 
 ```python
 app = SearchApplication(
@@ -60,7 +94,7 @@ app = SearchApplication(
 app.build("indexdir")
 ```
 
-## 4. Inspect Stored Vectors
+## 5. Inspect Stored Vectors
 
 ```python
 with app.index.searcher() as searcher:
@@ -74,3 +108,5 @@ with app.index.searcher() as searcher:
 - The target vector fields are added to the schema automatically as `VECTOR` fields.
 - If a source field is missing or not a string, it is skipped silently.
 - Provider errors are swallowed to avoid breaking the indexing pipeline.
+  See the [_embeddings guide](/modern/embeddings#error-handling) for logging
+  configuration.

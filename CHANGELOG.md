@@ -139,6 +139,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`src/whoosh/__init__.py`), providing a common root for core and modern errors.
 - **ModernIndexBuilder**: unused `merge_policy` parameter is now wired to
   `writer.commit(mergetype=...)` in `_build_parallel()`.
+- **EmbeddingEngine ONNX model resolution** (`src/whoosh_modern/config/engines/embedding.py`):
+  When `provider: onnx` is configured with `model` (a registered model name) but
+  no `model_path`, the engine now uses `EmbeddingModelManager` to download and
+  cache the model, then derives `model_path` and `tokenizer_dir` from the local
+  cache. Previously the model name was incorrectly passed as `model_path`, which
+  would fail because `ONNXEmbeddingProvider` expects an actual file path.
+  Explicit `model_path` / `tokenizer_dir` still take precedence when provided.
+  Added `expected_sha256` field to `EmbeddingConfig` for checksum verification
+  during model download.
+
+### Changed
+
+- **Embeddings documentation** (`website/docs/modern/embeddings.md`,
+  `website/i18n/fr/docusaurus-plugin-content-docs/current/modern/embeddings.md`):
+  - Added `Provider Model Naming` section clarifying that `FastEmbedProvider`
+    uses HuggingFace model names auto-downloaded by `fastembed`, while
+    `ONNXEmbeddingProvider` uses registered model names downloaded via
+    `EmbeddingModelManager` or explicit local file paths.
+  - Updated ONNX example to use `EmbeddingModelManager.download()` instead of
+    raw file paths.
+  - Updated Multi-field vectorization YAML example to omit root-level
+    `source_field` / `target_field` when `embedding_fields` is present, with a
+    clear precedence note.
+  - Moved provider error handling documentation from "Notes" to a dedicated
+    `Error Handling` section covering logging configuration and the design
+    rationale.
+- **Embedding examples** (`website/docs/examples/embeddings-fastembed.md`,
+  `website/docs/examples/embeddings-onnx.md`): Updated to reflect the
+  `EmbeddingModelManager` workflow for ONNX models and the multi-field
+  vectorization precedence rules.
+- **EmbeddingMiddleware** (`src/whoosh_modern/middleware/embedding.py`): Improved
+  warning log messages to include the source field name and a truncated preview
+  of the input text for easier diagnostic. Updated module version to 3.1.0.
 
 ### In Progress (tracked in `.kilo/plans/1786003980063-whoosh-ng-roadmap.md`)
 - Sprint F: Admin Studio (NiceGUI) + Synonym Manager remain.

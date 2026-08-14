@@ -43,6 +43,10 @@ app.build("indexdir")
 
 ## 3. Multi-Field Vectorization
 
+When `embedding_fields` is provided, the root-level `source_field` /
+`target_field` defaults are ignored — each mapping is processed
+independently. Omit the root-level fields to avoid confusion:
+
 ```python
 app = SearchApplication(
     source=source,
@@ -69,3 +73,5 @@ with app.index.searcher() as searcher:
 - The target vector fields are added to the schema automatically as `VECTOR` fields.
 - If a source field is missing or not a string, it is skipped silently.
 - Provider errors are swallowed to avoid breaking the indexing pipeline.
+  See the [_embeddings guide](/modern/embeddings#error-handling) for logging
+  configuration.

@@ -187,13 +187,15 @@ class EmbeddingConfig(BaseModel):
             ``"fp32"``).
         batch_size: Number of texts to embed per batch.
         cache: Whether to cache embeddings locally.
-        source_field: Default source field to embed when
+         source_field: Default source field to embed when
             ``embedding_fields`` is not provided.
         target_field: Default target field when ``embedding_fields`` is not
             provided.
         embedding_fields: Sequence of ``{"source_field": ..., "target_field": ...}``
             mappings for multi-field embedding. When provided, the
             ``source_field`` and ``target_field`` defaults are ignored.
+        expected_sha256: Optional SHA256 checksum for model integrity
+            verification when downloading via ``EmbeddingModelManager``.
     """
 
     provider: str | None = None
@@ -208,6 +210,7 @@ class EmbeddingConfig(BaseModel):
     source_field: str = "content"
     target_field: str = "embedding"
     embedding_fields: list[dict[str, str]] | None = None
+    expected_sha256: str | None = None
 
 
 class WhooshNGConfig(BaseModel):

@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, cast
 
-from whoosh.fields import STORED, Schema
+from whoosh.fields import Schema
 from whoosh.index import create_in, exists_in, open_dir
 from whoosh.middleware.context import MiddlewareContext
 from whoosh_modern.exceptions import ValidationError

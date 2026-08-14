@@ -1,11 +1,12 @@
 """Config integration tests for the embedding subsystem.
 
 Author: dorel14
-Version: 3.0.0
+Version: 3.1.0
 """
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -28,7 +29,9 @@ def test_embedding_engine_fastembed() -> None:
 
 
 def test_embedding_engine_onnx() -> None:
-    """Test EmbeddingEngine builds an ONNXEmbeddingProvider from config."""
+    """Test EmbeddingEngine builds an ONNXEmbeddingProvider from explicit
+    local paths.
+    """
     config = WhooshNGConfig(
         embedding=EmbeddingConfig(
             provider="onnx",
@@ -54,6 +57,87 @@ def test_embedding_engine_onnx() -> None:
             enable_prefix=True,
             quantization="fp32",
         )
+
+
+def test_embedding_engine_onnx_with_model_name(tmp_path: Path) -> None:
+    """Test EmbeddingEngine uses EmbeddingModelManager to download a
+    registered ONNX model when ``model`` is set but ``model_path`` is not.
+    """
+    # Create a fake model directory with a dummy .onnx file
+    model_dir = tmp_path / "multilingual-e5-small"
+    model_dir.mkdir()
+    fake_onnx = model_dir / "model.onnx"
+    fake_onnx.write_bytes(b"fake")
+
+    config = WhooshNGConfig(
+        embedding=EmbeddingConfig(
+            provider="onnx",
+            model="multilingual-e5-small",
+            pooling="mean",
+            normalize=True,
+        )
+    )
+
+    with (
+        patch("whoosh_modern.embeddings.model_manager.EmbeddingModelManager") as mock_mgr_cls,
+        patch("whoosh_modern.embeddings.onnx_provider.ONNXEmbeddingProvider") as mock_onnx,
+    ):
+        mock_mgr = mock_mgr_cls.return_value
+        mock_mgr.download.return_value = model_dir
+        result = EmbeddingEngine(config).build()
+        assert result is not None
+        mock_mgr.download.assert_called_once_with("multilingual-e5-small", expected_sha256=None)
+        mock_onnx.assert_called_once_with(
+            model_path=str(fake_onnx),
+            tokenizer_dir=str(model_dir),
+            pooling="mean",
+            normalize=True,
+            dimension=None,
+            enable_prefix=True,
+            quantization="fp32",
+        )
+
+
+def test_embedding_engine_onnx_with_model_and_sha256(tmp_path: Path) -> None:
+    """Test EmbeddingEngine passes expected_sha256 to EmbeddingModelManager
+    when configured.
+    """
+    model_dir = tmp_path / "multilingual-e5-small"
+    model_dir.mkdir()
+    fake_onnx = model_dir / "model.onnx"
+    fake_onnx.write_bytes(b"fake")
+
+    config = WhooshNGConfig(
+        embedding=EmbeddingConfig(
+            provider="onnx",
+            model="multilingual-e5-small",
+            expected_sha256="abc123",
+        )
+    )
+
+    with (
+        patch("whoosh_modern.embeddings.model_manager.EmbeddingModelManager") as mock_mgr_cls,
+        patch("whoosh_modern.embeddings.onnx_provider.ONNXEmbeddingProvider") as mock_onnx,
+    ):
+        mock_mgr = mock_mgr_cls.return_value
+        mock_mgr.download.return_value = model_dir
+        result = EmbeddingEngine(config).build()
+        assert result is not None
+        mock_mgr.download.assert_called_once_with("multilingual-e5-small", expected_sha256="abc123")
+
+
+def test_embedding_engine_onnx_missing_model_and_path() -> None:
+    """Test EmbeddingEngine raises ValueError when neither model nor
+    model_path is provided for the ONNX provider.
+    """
+    config = WhooshNGConfig(
+        embedding=EmbeddingConfig(
+            provider="onnx",
+            pooling="mean",
+        )
+    )
+    with pytest.raises(ValueError, match="requires either 'model_path'"):
+        EmbeddingEngine(config).build()
 
 
 def test_embedding_engine_sentence_transformers() -> None:

@@ -1,7 +1,7 @@
 """Embedding middleware for Whoosh-NG.
 
 Author: dorel14
-Version: 3.0.0
+Version: 3.1.0
 """
 
 from __future__ import annotations
@@ -87,12 +87,27 @@ class EmbeddingMiddleware(Middleware):
             target = field_config["target_field"]
             text = doc.get(source)
             if not text or not isinstance(text, str):
+                # Skip silently: missing or non-string source fields are
+                # expected when documents are heterogeneous.
                 continue
             try:
                 vector = self._embedding_provider.embed(text)
                 doc[target] = vector
             except Exception as exc:
-                logger.warning("Embedding failed for field %r: %s", target, exc)
+                # Provider errors are swallowed (logged as warnings) to
+                # avoid breaking the indexing pipeline. Documents indexed
+                # without their embedding vector will not be searchable
+                # via vector similarity, but they remain searchable via
+                # keyword/BM25 matching. Configure Python logging on the
+                # 'whoosh_modern.middleware.embedding' logger to capture
+                # or escalate these warnings.
+                logger.warning(
+                    "Embedding failed for field %r (source=%r, target=%r): %s",
+                    source,
+                    text[:200],
+                    target,
+                    exc,
+                )
 
         context.document = doc
         return context

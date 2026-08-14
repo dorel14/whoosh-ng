@@ -91,6 +91,11 @@ embedding = EmbeddingMiddleware(
 )
 ```
 
+> **Précédence :** Quand `embedding_fields` est fourni, les valeurs par défaut
+> `source_field` / `target_field` sont **ignorées** — chaque entrée est traitée
+> indépendamment. Pour éviter la confusion, n'indiquez pas `source_field` /
+> `target_field` au niveau racine lorsque vous utilisez `embedding_fields`.
+
 ### CompressionMiddleware
 
 Marque les documents pour la compression au niveau du backend :

@@ -25,14 +25,24 @@ from whoosh_modern.embeddings.registry import (
 )
 
 try:
-    from huggingface_hub import hf_hub_download as _hf_hub_download
+    import huggingface_hub  # pyright: ignore[reportMissingImports,reportUnusedImport]
 
     _HAS_HUGGINGFACE_HUB = True
 except ImportError:
     _HAS_HUGGINGFACE_HUB = False
 
-    def _hf_hub_download(*args: Any, **kwargs: Any) -> Any:  # type: ignore[no-redef]
+
+def _hf_hub_download(*args: Any, **kwargs: Any) -> Any:
+    """Download a file from the HuggingFace Hub.
+
+    Raises ``ImportError`` if ``huggingface_hub`` is not installed.
+    """
+    if not _HAS_HUGGINGFACE_HUB:
         raise ImportError("huggingface_hub is required for this operation")
+    from huggingface_hub import hf_hub_download
+
+    return hf_hub_download(*args, **kwargs)
+
 
 logger = logging.getLogger(__name__)
 
@@ -313,9 +323,7 @@ class EmbeddingModelManager:
                 "config.json",
             ]
             onnx_dest = model_dir / "model.onnx"
-            if not self._download_onnx_with_hf(
-                model_info, onnx_candidates, onnx_dest
-            ):
+            if not self._download_onnx_with_hf(model_info, onnx_candidates, onnx_dest):
                 raise FileNotFoundError(
                     f"Failed to download any ONNX file for '{model_name}' "
                     f"from candidates {onnx_candidates}"

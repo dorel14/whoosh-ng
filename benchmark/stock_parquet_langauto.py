@@ -191,9 +191,7 @@ def run_language_detection_benchmark(max_docs: int | None = None) -> dict[str, A
 
     accuracy = (detected.get("fr", 0) / docs * 100.0) if docs else 0.0
     fr_accuracy_pct = (
-        (detected.get("fr", 0) / processed_texts_count * 100.0)
-        if processed_texts_count
-        else 0.0
+        (detected.get("fr", 0) / processed_texts_count * 100.0) if processed_texts_count else 0.0
     )
     avg_ms = total_ms / processed_texts_count if processed_texts_count else 0.0
     min_ms_report = min_ms if min_ms != float("inf") else 0.0
