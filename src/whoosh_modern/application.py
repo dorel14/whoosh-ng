@@ -56,6 +56,7 @@ class SearchApplication:
         dictionary_stem_overrides: dict[str, str] | None = None,
         embedding_provider: Any | None = None,
         embedding_fields: list[dict[str, str]] | None = None,
+        config: Any | None = None,
     ) -> None:
         """Initialize the SearchApplication.
 
@@ -76,6 +77,10 @@ class SearchApplication:
                 mappings for multi-field embedding. When provided, the
                 ``source_field`` / ``target_field`` defaults from the
                 embedding configuration are ignored.
+            config: Optional :class:`whoosh_modern.config.models.WhooshNGConfig`
+                instance used to resolve embedding defaults (``source_field``,
+                ``target_field``, ``embedding_fields``) when they are not
+                explicitly provided as constructor arguments.
         """
         self._source = source
         self._storage = storage
@@ -87,7 +92,7 @@ class SearchApplication:
         self._dictionary_stem_overrides = DictionaryStemOverride(dictionary_stem_overrides)
         self._embedding_provider = embedding_provider
         self._embedding_fields = embedding_fields
-        self._config = None
+        self._config = config
 
     @property
     def index(self) -> Index:
