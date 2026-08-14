@@ -13,12 +13,13 @@ from __future__ import annotations
 from typing import Any
 
 from .auto import AutoIndexer
-from .base import ModelIndex, TypeMapper
 from .dataclass_integration import register_model as register_dataclass_model
+from .model_index import ModelIndex
 from .msgspec_integration import register_model as register_msgspec_model
 from .pydantic_integration import register_model as register_pydantic_model
 from .sqlalchemy_integration import register_model as register_sqlalchemy_model
 from .sqlmodel_integration import register_model as register_sqlmodel_model
+from .type_mapper import TypeMapper
 from .types import SearchField, SearchOptions
 
 __all__ = [

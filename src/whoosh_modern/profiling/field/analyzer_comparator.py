@@ -19,7 +19,7 @@ from collections import defaultdict
 from typing import Any
 
 from whoosh.analysis import LanguageAnalyzer, StandardAnalyzer, StemmingAnalyzer
-from whoosh_modern.profiling.analyzer_profiler import AnalyzerStepProfiler
+from whoosh_modern.profiling.field.analyzer import AnalyzerStepProfiler
 
 
 class AnalyzerResult:

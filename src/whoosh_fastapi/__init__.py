@@ -21,7 +21,7 @@ from contextlib import suppress
 from typing import Any
 
 from whoosh.index import Index
-from whoosh.utils.async_utils import run_sync
+from whoosh.util.async_utils import run_sync
 
 logger = logging.getLogger(__name__)
 

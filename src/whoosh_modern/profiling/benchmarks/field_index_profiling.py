@@ -20,8 +20,8 @@ sys.path.insert(0, "src")
 
 from whoosh.analysis import LanguageAnalyzer, StandardAnalyzer, StemmingAnalyzer
 from whoosh.fields import TEXT, Schema
-from whoosh_modern.profiling.analyzer_profiler import AnalyzerStepProfiler
-from whoosh_modern.profiling.field_index_profiler import FieldIndexProfiler
+from whoosh_modern.profiling.field.analyzer import AnalyzerStepProfiler
+from whoosh_modern.profiling.field.index import FieldIndexProfiler
 from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
 from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
 

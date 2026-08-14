@@ -172,6 +172,26 @@ class StorageConfigModel(BaseModel):
     prefix: str = ""
 
 
+class EmbeddingConfig(BaseModel):
+    """Embedding provider configuration.
+
+    Attributes:
+        provider: Embedding provider type (``"onnx"``, ``"sentence-transformers"``,
+            ``"fastembed"``).
+        model: Model identifier or name (e.g. ``"bge-small"``, ``"e5-small"``).
+        quantization: Optional quantization variant (``"int8"``, ``"fp16"``,
+            ``"fp32"``).
+        batch_size: Number of texts to embed per batch.
+        cache: Whether to cache embeddings locally.
+    """
+
+    provider: str = "sentence-transformers"
+    model: str | None = None
+    quantization: str | None = None
+    batch_size: int = 32
+    cache: bool = True
+
+
 class WhooshNGConfig(BaseModel):
     """Top-level Whoosh-NG application configuration.
 
@@ -194,13 +214,14 @@ class WhooshNGConfig(BaseModel):
     data_source: DataSourceConfigModel | None = None
     storage: StorageConfigModel = Field(default_factory=StorageConfigModel)
     vector: dict[str, Any] = Field(default_factory=dict)
-    embedding: dict[str, Any] = Field(default_factory=dict)
+    embedding: EmbeddingConfig = Field(default_factory=EmbeddingConfig)
     language_detection: dict[str, Any] = Field(default_factory=dict)
 
 
 __all__ = [
     "AIConfig",
     "DataSourceConfigModel",
+    "EmbeddingConfig",
     "FieldConfig",
     "FuzzyConfig",
     "RankingConfig",

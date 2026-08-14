@@ -1,3 +1,13 @@
+"""Legacy compatibility utilities for Whoosh-NG.
+
+This package contains the original utility helpers from the Whoosh library,
+including random name generation, binary tree construction, decorators, and
+the new async bridge utilities for sync/async interoperability.
+
+Auteur: SoniqueBay Team
+Version: 1.0.0
+"""
+
 # type: ignore
 # mypy: ignore-errors
 # pyright: ignore
@@ -17,17 +27,16 @@
 # IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
 # EVENT SHALL MATT CHAPUT OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-# OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # The views and conclusions contained in the software and documentation are
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Matt Chaput.
-
 
 import random
 import sys
@@ -35,6 +44,14 @@ import threading
 import time
 from bisect import insort
 from functools import wraps
+
+from whoosh.util.async_utils import (
+    call_maybe_async,
+    is_async_callable,
+    maybe_await,
+    run_async_from_sync,
+    run_sync,
+)
 
 # These must be valid separate characters in CASE-INSENSTIVE filenames
 IDCHARS = "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -160,3 +177,24 @@ def protected(method):
         return method(self, *args, **kwargs)
 
     return protected_wrapper
+
+
+__all__ = [
+    # Async utilities
+    "run_sync",
+    "maybe_await",
+    "call_maybe_async",
+    "is_async_callable",
+    "run_async_from_sync",
+    # Legacy utilities
+    "IDCHARS",
+    "now",
+    "random_name",
+    "random_bytes",
+    "make_binary_tree",
+    "make_weighted_tree",
+    "fib",
+    "synchronized",
+    "unclosed",
+    "protected",
+]

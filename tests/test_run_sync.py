@@ -5,7 +5,7 @@ import threading
 
 import pytest
 
-from whoosh.utils.async_utils import (
+from whoosh.util.async_utils import (
     call_maybe_async,
     is_async_callable,
     maybe_await,
