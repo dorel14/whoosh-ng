@@ -6,13 +6,15 @@ Version: 3.0.0
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import time
 from datetime import datetime
-from typing import Any
+from pathlib import Path
+from typing import Any, cast
 
-from whoosh.fields import Schema, STORED
+from whoosh.fields import STORED, Schema
 from whoosh.index import create_in, exists_in, open_dir
 from whoosh.middleware.context import MiddlewareContext
 from whoosh_modern.exceptions import ValidationError
@@ -20,9 +22,6 @@ from whoosh_modern.middleware import Middleware
 from whoosh_modern.validation import ValidationFramework, ValidationResult
 
 logger = logging.getLogger(__name__)
-
-_SCHEMA_VERSION_FIELD = "schema_version"
-_SCHEMA_UPDATED_AT_FIELD = "schema_updated_at"
 
 
 class SearchView:
@@ -130,7 +129,7 @@ class SearchView:
             writer.add_document(**self._prepare_doc(doc, schema))
         writer.commit()
 
-        self._store_schema_metadata(schema)
+        self._store_schema_metadata()
 
         return self._index
 
@@ -235,11 +234,6 @@ class SearchView:
 
                     fields[target_field] = VECTOR()
 
-        if _SCHEMA_VERSION_FIELD not in fields:
-            fields[_SCHEMA_VERSION_FIELD] = STORED
-        if _SCHEMA_UPDATED_AT_FIELD not in fields:
-            fields[_SCHEMA_UPDATED_AT_FIELD] = STORED
-
         return Schema(**fields)
 
     def _prepare_doc(self, doc: dict[str, Any], schema: Schema) -> dict[str, Any]:
@@ -275,27 +269,25 @@ class SearchView:
 
         return prepared
 
-    def _store_schema_metadata(self, schema: Schema) -> None:
-        """Store schema version and update timestamp in index metadata.
+    def _store_schema_metadata(self) -> None:
+        """Store schema version and update timestamp in a sidecar JSON file.
 
-        Args:
-            schema: The Whoosh Schema to version.
+        Writes ``schema_metadata.json`` inside the index directory so the
+        metadata does not become an extra searchable document.
         """
         if self._index is None or self._index_path is None:
             return
 
+        metadata_path = Path(self._index_path) / "schema_metadata.json"
         try:
-            if not exists_in(self._index_path):
-                return
-
-            ix = open_dir(self._index_path)
-            with ix.writer() as writer:
-                writer.add_document(
-                    **{
-                        _SCHEMA_VERSION_FIELD: self.schema_version,
-                        _SCHEMA_UPDATED_AT_FIELD: str(time.time()),
+            metadata_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": self.schema_version,
+                        "updated_at": time.time(),
                     }
                 )
+            )
         except Exception:
             logger.debug("Could not store schema metadata", exc_info=True)
 
@@ -308,15 +300,13 @@ class SearchView:
         if self._index is None or self._index_path is None:
             return True
 
-        try:
-            ix = open_dir(self._index_path)
-            with ix.searcher() as searcher:
-                for stored in searcher.all_stored_fields():
-                    if _SCHEMA_VERSION_FIELD in stored:
-                        return stored[_SCHEMA_VERSION_FIELD] == self.schema_version
-                return False
-        except Exception:
+        metadata_path = Path(self._index_path) / "schema_metadata.json"
+        if not metadata_path.exists():
             return False
+
+        try:
+            data = json.loads(metadata_path.read_text())
+            return cast(bool, data.get("schema_version") == self.schema_version)
         except Exception:
             return False
 
