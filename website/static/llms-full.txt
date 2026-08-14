@@ -16963,10 +16963,22 @@ embedding:
 ```
 
 ```yaml
-# Or with ONNX
+# Or with ONNX using EmbeddingModelManager
 embedding:
   provider: onnx
   model: multilingual-e5-small
+  pooling: mean
+  normalize: true
+```
+
+When using `provider: onnx`, the `EmbeddingModelManager` downloads and caches the model files automatically. The manager derives `model_path` and `tokenizer_dir` from the local cache, so you typically only need to specify the `model` name.
+
+If you need to use a custom local model, you can provide explicit paths:
+
+```yaml
+# Or with explicit local paths
+embedding:
+  provider: onnx
   model_path: models/multilingual-e5-small/model.onnx
   tokenizer_dir: models/multilingual-e5-small
   pooling: mean
@@ -16997,6 +17009,12 @@ embedding:
 Supported providers: `fastembed`, `onnx`, `sentence-transformers`.
 
 When `embedding_fields` is provided, the `source_field` / `target_field` defaults are ignored and each mapping is processed independently. The `SearchView` automatically injects the target fields as `VECTOR` fields into the generated Whoosh schema if they are not already declared.
+
+**Note on ONNX configuration:**
+When using `provider: onnx`, you can specify a registered model via `model` or provide explicit file paths via `model_path` and `tokenizer_dir`.
+If `model` is specified, `EmbeddingModelManager` will attempt to download and manage the model, automatically deriving `model_path` and `tokenizer_dir` from the local cache.
+If `model_path` and/or `tokenizer_dir` are explicitly provided, they will take precedence over paths derived from the `model` name.
+It is recommended to use either `model` for manager-managed models, or `model_path` / `tokenizer_dir` for custom local paths, to avoid ambiguity.
 
 ## Protocol
 
@@ -37591,6 +37609,12 @@ embedding:
 Providers supportés : `fastembed`, `onnx`, `sentence-transformers`.
 
 Lorsque `embedding_fields` est fourni, les valeurs par défaut `source_field` / `target_field` sont ignorées et chaque mapping est traité indépendamment. `SearchView` injecte automatiquement les champs cibles en tant que champs `VECTOR` dans le schéma Whoosh généré s'ils ne sont pas déjà déclarés.
+
+**Note sur la configuration ONNX :**
+Lorsque vous utilisez `provider: onnx`, vous pouvez spécifier un modèle enregistré via `model` ou fournir des chemins de fichiers explicites via `model_path` et `tokenizer_dir`.
+Si `model` est spécifié, l'`EmbeddingModelManager` tentera de télécharger et gérer le modèle, dérivant automatiquement `model_path` et `tokenizer_dir` depuis le cache local.
+Si `model_path` et/ou `tokenizer_dir` sont fournis explicitement, ils prendront le pas sur les chemins dérivés du nom du `model`.
+Il est recommandé d'utiliser soit `model` pour les modèles gérés par le manager, soit `model_path` / `tokenizer_dir` pour des chemins locaux personnalisés, afin d'éviter toute ambiguïté.
 
 ## Protocole
 
