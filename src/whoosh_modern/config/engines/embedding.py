@@ -34,7 +34,7 @@ class EmbeddingEngine:
             configuration is provided.
         """
         embedding_config = self._config.embedding
-        if not embedding_config:
+        if not embedding_config or not embedding_config.provider:
             return None
         provider_type = embedding_config.provider.lower()
         if provider_type == "fastembed":

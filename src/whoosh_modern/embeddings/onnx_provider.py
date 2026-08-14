@@ -101,7 +101,7 @@ class ONNXEmbeddingProvider:
         )
 
         try:
-            from tokenizers import Tokenizer  # type: ignore[import-untyped]
+            from tokenizers import Tokenizer
         except ImportError as exc:
             raise ImportError(
                 "ONNXEmbeddingProvider requires the 'tokenizers' package. "
@@ -109,7 +109,7 @@ class ONNXEmbeddingProvider:
             ) from exc
 
         try:
-            import onnxruntime as ort  # type: ignore[import-untyped]
+            import onnxruntime as ort
 
             sess_options = ort.SessionOptions()
             sess_options.intra_op_num_threads = 1

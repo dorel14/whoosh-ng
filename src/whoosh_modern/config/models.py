@@ -196,7 +196,7 @@ class EmbeddingConfig(BaseModel):
             ``source_field`` and ``target_field`` defaults are ignored.
     """
 
-    provider: str = "sentence-transformers"
+    provider: str = ""
     model: str | None = None
     model_path: str | None = None
     tokenizer_dir: str | None = None

@@ -39,7 +39,10 @@ def dummy_tokenizer(tmp_path: Path) -> str:
     """Create a minimal valid tokenizer JSON for testing."""
     tok_dir = tmp_path / "tok"
     tok_dir.mkdir()
-    tokenizer_json = '{"version":"1.0","added_tokens":[],"normalizer":null,"pre_tokenizer":null,"post_processor":null,"decoder":null,"model":{"type":"BPE","dropout":0.0,"unk_token":null,"continuing_subword_prefix":null,"end_of_word_suffix":null,"fuse_unk":false,"vocab":{"<unk>":0},"merges":[]}}'
+    tokenizer_json = '{"version":"1.0","added_tokens":[],\
+        "normalizer":null,"pre_tokenizer":null,"post_processor":null,"decoder":null,\
+        "model":{"type":"BPE","dropout":0.0,"unk_token":null,"continuing_subword_prefix":null,\
+        "end_of_word_suffix":null,"fuse_unk":false,"vocab":{"<unk>":0},"merges":[]}}'
     (tok_dir / "tokenizer.json").write_text(tokenizer_json, encoding="utf-8")
     (tok_dir / "tokenizer_config.json").write_text("{}", encoding="utf-8")
     (tok_dir / "config.json").write_text("{}", encoding="utf-8")

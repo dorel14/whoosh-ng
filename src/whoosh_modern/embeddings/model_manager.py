@@ -16,6 +16,7 @@ import logging
 import os
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 from whoosh_modern.embeddings.registry import (
     EmbeddingModelRegistry,
@@ -23,8 +24,9 @@ from whoosh_modern.embeddings.registry import (
     get_default_registry,
 )
 
+_hf_hub_download: Any = None
 try:
-    from huggingface_hub import hf_hub_download
+    from huggingface_hub import hf_hub_download as _hf_hub_download
 
     _HAS_HUGGINGFACE_HUB = True
 except ImportError:
@@ -318,7 +320,7 @@ class EmbeddingModelManager:
                 )
             for filename in other_files:
                 try:
-                    hf_hub_download(
+                    _hf_hub_download(
                         repo_id=model_info.model_id,
                         filename=filename,
                         repo_type="model",
@@ -419,7 +421,7 @@ class EmbeddingModelManager:
             if "/" in candidate:
                 subfolder, filename = candidate.split("/", 1)
             try:
-                local_path = hf_hub_download(
+                local_path = _hf_hub_download(
                     repo_id=model_info.model_id,
                     filename=filename,
                     repo_type="model",

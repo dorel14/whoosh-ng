@@ -42,7 +42,6 @@ from whoosh_modern.profiling.pipeline import (
 )
 from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
 from whoosh_modern.profiling.stemmer_profiler import StemmerProfiler, StemmerProfilerReport
-from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
 
 __all__ = [
     "AnalyzerCache",

@@ -15,6 +15,8 @@ import pytest
 
 from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
 
+pytest.importorskip("fastembed")
+
 
 @pytest.fixture
 def mock_fastembed() -> Generator[MagicMock, None, None]:

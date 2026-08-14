@@ -437,6 +437,10 @@ module = [
   "Stemmer",
   "lmdb",
   "sentence_transformers",
+  "tokenizers",
+  "onnxruntime",
+  "huggingface_hub",
+  "fastembed",
   "yaml",
 ]
 ignore_missing_imports = true
