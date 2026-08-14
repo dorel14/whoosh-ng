@@ -9116,6 +9116,223 @@ otherwise the number of segments will tend to increase forever!
 
 Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
 
+## v5.3.0 (2026-08-13)
+**Tag**: `v5.3.0`
+
+## v5.3.0 (2026-08-13)
+
+_This release is published under the MIT License._
+
+### Bug Fixes
+
+- **linguistics**: Corriger les défauts signalés par revue et docs ([`ba05a8d`](https://github.com/dorel14/whoosh-ng/commit/ba05a8d5cbdba8d71f39d8e24920d55f77a8eb32))
+
+### Documentation
+
+- Auto-update llms context files [skip ci] ([`4585b5e`](https://github.com/dorel14/whoosh-ng/commit/4585b5eb665c0329c70da0efe5225b859fc14573))
+
+- Auto-update llms context files [skip ci] ([`c897f1f`](https://github.com/dorel14/whoosh-ng/commit/c897f1f0e6c6bbebee46a7672f5ca6d3d6abebf4))
+
+- Auto-update llms context files [skip ci] ([`a65b926`](https://github.com/dorel14/whoosh-ng/commit/a65b926027472d65244c76f250833af27c4bb8e5))
+
+- Auto-update llms context files [skip ci] ([`4911cf5`](https://github.com/dorel14/whoosh-ng/commit/4911cf57abc555eadfa47cf962943b321fb2457a))
+
+- Auto-update llms context files [skip ci] ([`8605b34`](https://github.com/dorel14/whoosh-ng/commit/8605b344f85f3e40dec93c9f9c7d04e7c10fd9f6))
+
+- Auto-update llms context files [skip ci] ([`8c88da5`](https://github.com/dorel14/whoosh-ng/commit/8c88da5d29097f8a4ee6a9c47ffcc5afdcf2ff55))
+
+- Update changelog and API docs [skip ci] ([`ae57714`](https://github.com/dorel14/whoosh-ng/commit/ae57714558186480f0f15e4aa21e093c61c166bd))
+
+- **config**: Corriger l'exemple ConfigEngine.build() ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`f09d6da`](https://github.com/dorel14/whoosh-ng/commit/f09d6dac72482868275ad581046909a5b4169885))
+
+- **documentation**: Mettre à jour la documentation pour le renommage en whoosh-ng ([`ec35fbd`](https://github.com/dorel14/whoosh-ng/commit/ec35fbd5182dc0c01e5888d7285f62be8c21a262))
+
+- **linguistics**: Documenter la détection automatique de langue et l'indexation multilingue ([`f86a17b`](https://github.com/dorel14/whoosh-ng/commit/f86a17bd7820a2e5a3f99fc8a8516c4b9b460a18))
+
+- **website**: Restructurer la documentation et déplacer les fonctionnalités classiques vers Core ([`54fb1f6`](https://github.com/dorel14/whoosh-ng/commit/54fb1f61f81b441febda3a0ecfce3fef8edb400f))
+
+### Features
+
+- **analysis**: Add EPIC 5.6 Modern N-Gram Framework Sprint NGRAM-1 ([#440](https://github.com/dorel14/whoosh-ng/pull/440), [`c634718`](https://github.com/dorel14/whoosh-ng/commit/c6347184bb2b6d307da5008c1edf4850eab88d0b))
+
+- **api**: Exposer les nouvelles fonctionnalités pour la version 5.1.0 ([`e306236`](https://github.com/dorel14/whoosh-ng/commit/e306236a71fdcd5f018d9af10cf923398ed852c1))
+
+- **linguistics**: Add language auto-detection for multilingual indexing ([#434](https://github.com/dorel14/whoosh-ng/pull/434), [`a91d6bf`](https://github.com/dorel14/whoosh-ng/commit/a91d6bf59b8faae98fe80aa4d6c5ac4e0813ec0e))
+
+- **linguistics**: Add language auto-detection in SearchApplication ([#435](https://github.com/dorel14/whoosh-ng/pull/435), [`99f4290`](https://github.com/dorel14/whoosh-ng/commit/99f42904e302191de630cfdefe8eec6f5a8b50ca))
+
+- **linguistics**: Add Wiktionary dictionary indexer (#429 #432) ([`726542d`](https://github.com/dorel14/whoosh-ng/commit/726542dd4bf8e79d35dadb36e126f1973207a8b4))
+
+- **linguistics**: Add Wiktionary synonym provider (#425 #426 #427) ([`2961b93`](https://github.com/dorel14/whoosh-ng/commit/2961b93726cf1792faf89b293f2439c5c92e7ee6))
+
+- **linguistics**: Integrate Wiktionary indexer with SearchApplication ([#433](https://github.com/dorel14/whoosh-ng/pull/433), [`f201f5c`](https://github.com/dorel14/whoosh-ng/commit/f201f5c37608df75dc79be5b2526fb71fa45ed36))
+
+- **vector**: Add HnswlibProvider for EPIC 9 Sprint VEC-1 ([#406](https://github.com/dorel14/whoosh-ng/pull/406), [`cd590d4`](https://github.com/dorel14/whoosh-ng/commit/cd590d4601e5c238385be6fe693ee22ebe4a0912))
+
+- **vector,embeddings,config**: Add HnswlibProvider, EmbeddingProvider, ConfigEngine extensions (#406 #407) ([`03a15aa`](https://github.com/dorel14/whoosh-ng/commit/03a15aabcb32822a71635a17b99e9c9545e07962))
+
+---
+
+**Detailed Changes**: [v5.2.0...v5.3.0](https://github.com/dorel14/whoosh-ng/compare/v5.2.0...v5.3.0)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- améliorer la qualité du code et nettoyer la configuration
+- v5.3.0 [skip ci]
+
+### Documentation
+
+- update changelog and API docs [skip ci]
+- corriger l'exemple ConfigEngine.build() (#422)
+- auto-update llms context files [skip ci]
+- restructurer la documentation et déplacer les fonctionnalités classiques vers Core
+- auto-update llms context files [skip ci]
+- documenter la détection automatique de langue et l'indexation multilingue
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+- mettre à jour la documentation pour le renommage en whoosh-ng
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+
+### Features
+
+- add Wiktionary synonym provider (#425 #426 #427)
+- add Wiktionary dictionary indexer (#429 #432)
+- integrate Wiktionary indexer with SearchApplication (#433)
+- add language auto-detection for multilingual indexing (#434)
+- add language auto-detection in SearchApplication (#435)
+- add HnswlibProvider for EPIC 9 Sprint VEC-1 (#406)
+- add HnswlibProvider, EmbeddingProvider, ConfigEngine extensions (#406 #407)
+- add EPIC 5.6 Modern N-Gram Framework Sprint NGRAM-1 (#440)
+- exposer les nouvelles fonctionnalités pour la version 5.1.0
+
+### Other
+
+- eat(linguistics): complete EPIC 6.7 Language Auto-Detection & Multilingual Indexing (#430)
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #454 from dorel14/dev
+
+### Code Refactoring
+
+- améliorer le typage et nettoyer les imports
+
+### Bug Fixes
+
+- corriger les défauts signalés par revue et docs
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.3.0)
+
+## v5.2.0 (2026-08-12)
+**Tag**: `v5.2.0`
+
+## v5.2.0 (2026-08-12)
+
+_This release is published under the BSD-2-Clause License._
+
+### Bug Fixes
+
+- **config**: Corriger le passage de booléen à StandardAnalyzer.stoplist ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`7c3649c`](https://github.com/dorel14/whoosh-ng/commit/7c3649c268d0551793c52f5855b6f1b7cab06a01))
+
+- **config**: Corriger les bugs et améliorer les tests et la documentation ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`377a531`](https://github.com/dorel14/whoosh-ng/commit/377a531a9e20c7534bb8c54803fd91910b8e2323))
+
+- **config**: Corriger pyright, unused imports et StandardAnalyzer.stoplist ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`10192bb`](https://github.com/dorel14/whoosh-ng/commit/10192bbd8c7824c3ccd89807c5bc6699c52a29b7))
+
+### Documentation
+
+- Auto-update llms context files [skip ci] ([`d188581`](https://github.com/dorel14/whoosh-ng/commit/d188581f5ca7fd71182ac26f71d06e0d045c2f0f))
+
+- Auto-update llms context files [skip ci] ([`599c979`](https://github.com/dorel14/whoosh-ng/commit/599c979675149203172e73efa587578ffa4dab4f))
+
+- Auto-update llms context files [skip ci] ([`7405bd0`](https://github.com/dorel14/whoosh-ng/commit/7405bd03e8445f547830b461de274d1f73a84cb9))
+
+- Update changelog and API docs [skip ci] ([`9bc3cfd`](https://github.com/dorel14/whoosh-ng/commit/9bc3cfd033c2999aa6dd73ff15bc992c9883dccf))
+
+- Update changelog and API docs [skip ci] ([`2920f65`](https://github.com/dorel14/whoosh-ng/commit/2920f653921efae2075911bd0f9c9a3de43c6808))
+
+- Update changelog and API docs [skip ci] ([`dc32e6f`](https://github.com/dorel14/whoosh-ng/commit/dc32e6fb7b16659c2757ce86ed38c6ee43b8b9df))
+
+### Features
+
+- **config**: Add ConfigEngine sub-engines for Sprint CFG-1 ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`47c59b4`](https://github.com/dorel14/whoosh-ng/commit/47c59b4d0d66f2105de4de3e0dee5501133ff96e))
+
+- **config**: Add ConfigEngine.build() orchestration for Sprint CFG-1 ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`1329b42`](https://github.com/dorel14/whoosh-ng/commit/1329b4296a35e2b115580bcad95ac83a394e8911))
+
+- **config**: Ajouter la mise en cache et valider les sources de données ([`add4bb8`](https://github.com/dorel14/whoosh-ng/commit/add4bb8cc4b8d7fcaf4ed06b5c20b93bd3fa312c))
+
+---
+
+**Detailed Changes**: [v5.1.0...v5.2.0](https://github.com/dorel14/whoosh-ng/compare/v5.1.0...v5.2.0)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- merge master into dev [skip ci]
+- merge master into dev [skip ci]
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- apply pre-commit fixes
+- v5.2.0 [skip ci]
+
+### Other
+
+- Delete LICENSE_OLD.txt
+- Add MIT License to the project
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #424 from dorel14/dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- style(codebase): uniformiser le formatage du code et améliorer la lisibilité
+- .
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- .
+- Merge pull request #428 from dorel14/dev
+
+### CI/CD
+
+- restructurer la génération du changelog et simplifier Pages
+- documenter le jeton GH_TOKEN et ajouter pydoctor
+- documenter le jeton GH_TOKEN et ajouter pydoctor (#422)
+- ajouter pydoctor, documenter GH_TOKEN et ignorer les benchmarks JSON (#422)
+- factoriser should_release et rendre l'i18n dynamique (#422)
+
+### Documentation
+
+- auto-update llms context files [skip ci]
+- update changelog and API docs [skip ci]
+- update changelog and API docs [skip ci]
+- update changelog and API docs [skip ci]
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+
+### Code Refactoring
+
+- restructurer la chaîne de déploiement et supprimer les workflows obsolètes
+- supprimer le benchmark stemmer français et moderniser les chemins
+
+### Features
+
+- add ConfigEngine sub-engines for Sprint CFG-1 (#422)
+- add ConfigEngine.build() orchestration for Sprint CFG-1 (#422)
+- ajouter la mise en cache et valider les sources de données
+
+### Bug Fixes
+
+- corriger le passage de booléen à StandardAnalyzer.stoplist (#422)
+- corriger les bugs et améliorer les tests et la documentation (#422)
+- corriger pyright, unused imports et StandardAnalyzer.stoplist (#422)
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.2.0)
+
 ## v5.1.0 (2026-08-11)
 **Tag**: `v5.1.0`
 
@@ -14058,6 +14275,151 @@ Supported `type` values: `sql`, `sqlalchemy`, `rest`, `csv`, `json`, `graphql`,
 | `PydanticSource` | Pydantic models | `pydantic` |
 
 
+## DOCUMENT: Embeddings Fastembed
+
+# Embeddings with FastEmbed
+
+This example shows how to use **FastEmbed** for dense vector embeddings in Whoosh‑NG.
+
+## 1. Install Dependencies
+
+```bash
+pip install "whoosh-ng[embeddings]"
+```
+
+## 2. Single-Field Vectorization
+
+```python
+from whoosh.fields import Schema, TEXT
+from whoosh.index import create_in
+from whoosh_modern import SearchApplication
+from whoosh_modern.data_sources.in_memory import InMemorySource
+from whoosh_modern.embeddings import FastEmbedProvider
+from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+source = InMemorySource(
+    documents=[
+        {"title": "Whoosh-NG", "body": "Modern Python full-text search."},
+        {"title": "FastEmbed", "body": "Lightweight embedding models."},
+    ],
+    schema=Schema(title=TEXT(stored=True), body=TEXT),
+)
+
+app = SearchApplication(
+    source=source,
+    embedding_provider=provider,
+    source_field="body",
+    target_field="body_vector",
+)
+app.build("indexdir")
+```
+
+## 3. Multi-Field Vectorization
+
+```python
+app = SearchApplication(
+    source=source,
+    embedding_provider=provider,
+    embedding_fields=[
+        {"source_field": "title", "target_field": "title_vector"},
+        {"source_field": "body", "target_field": "body_vector"},
+    ],
+)
+app.build("indexdir")
+```
+
+## 4. Inspect Stored Vectors
+
+```python
+with app.index.searcher() as searcher:
+    for stored in searcher.all_stored_fields():
+        print(stored.get("title_vector"))
+        print(stored.get("body_vector"))
+```
+
+## Notes
+
+- The target vector fields are added to the schema automatically as `VECTOR` fields.
+- If a source field is missing or not a string, it is skipped silently.
+- Provider errors are swallowed to avoid breaking the indexing pipeline.
+
+
+## DOCUMENT: Embeddings Onnx
+
+# Embeddings with ONNX
+
+This example shows how to use **ONNX** for dense vector embeddings in Whoosh‑NG.
+
+## 1. Install Dependencies
+
+```bash
+pip install "whoosh-ng[embeddings]" onnx onnxruntime
+```
+
+## 2. Single-Field Vectorization
+
+```python
+from whoosh.fields import Schema, TEXT
+from whoosh.index import create_in
+from whoosh_modern import SearchApplication
+from whoosh_modern.data_sources.in_memory import InMemorySource
+from whoosh_modern.embeddings import ONNXEmbeddingProvider
+from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+
+provider = ONNXEmbeddingProvider(
+    model_path="models/multilingual-e5-small/model.onnx",
+    tokenizer_dir="models/multilingual-e5-small",
+    pooling="mean",
+    normalize=True,
+)
+source = InMemorySource(
+    documents=[
+        {"title": "Whoosh-NG", "body": "Modern Python full-text search."},
+        {"title": "ONNX", "body": "Lightweight model runtime."},
+    ],
+    schema=Schema(title=TEXT(stored=True), body=TEXT),
+)
+
+app = SearchApplication(
+    source=source,
+    embedding_provider=provider,
+    source_field="body",
+    target_field="body_vector",
+)
+app.build("indexdir")
+```
+
+## 3. Multi-Field Vectorization
+
+```python
+app = SearchApplication(
+    source=source,
+    embedding_provider=provider,
+    embedding_fields=[
+        {"source_field": "title", "target_field": "title_vector"},
+        {"source_field": "body", "target_field": "body_vector"},
+    ],
+)
+app.build("indexdir")
+```
+
+## 4. Inspect Stored Vectors
+
+```python
+with app.index.searcher() as searcher:
+    for stored in searcher.all_stored_fields():
+        print(stored.get("title_vector"))
+        print(stored.get("body_vector"))
+```
+
+## Notes
+
+- The target vector fields are added to the schema automatically as `VECTOR` fields.
+- If a source field is missing or not a string, it is skipped silently.
+- Provider errors are swallowed to avoid breaking the indexing pipeline.
+
+
 ## DOCUMENT: Facets
 
 # Facet Manager
@@ -16129,6 +16491,7 @@ All configuration is expressed through typed Pydantic models:
 - `SearchConfig` / `FuzzyConfig` / `RankingConfig` / `AIConfig`
 - `DataSourceConfigModel` — data source connection and sync settings
 - `StorageConfigModel` — storage backend selection
+- `EmbeddingConfig` — embedding provider, model, and multi-field vectorization
 
 ### Loaders
 
@@ -16282,6 +16645,11 @@ data_source:
 storage:
   type: file
   path: ./index
+embedding:
+  provider: fastembed
+  model: BAAI/bge-small-en-v1.5
+  source_field: description
+  target_field: description_vector
 ```
 
 ### Layered configuration (base + instance + runtime)
@@ -16399,11 +16767,359 @@ results = app.search("python")
 | `whoosh_modern.config.models` | Pydantic models for validation |
 | `whoosh_modern.config.loader` | YAML / JSON file loaders |
 | `whoosh_modern.config.engine` | `ConfigEngine` with hierarchical merging |
+| `whoosh_modern.config.engines.embedding` | `EmbeddingEngine` — builds an `EmbeddingProvider` from the `embedding` config block |
 
 ## See Also
 
 - [Storage Providers](storage-providers.md) — Storage backends configurable via `StorageConfigModel`
 - [Data Sources](data-sources.md) — `DataSourceConfigModel` and provider configuration
+
+
+## DOCUMENT: Embeddings
+
+# Embeddings
+
+Whoosh-NG can embed documents into dense vectors and use them for semantic
+search. This page covers the full embeddings stack: **FastEmbedProvider**
+(default CPU backend), **ONNXEmbeddingProvider** (advanced CPU backend),
+**EmbeddingModelRegistry**, **EmbeddingModelManager**, the
+`whoosh-ng-models` CLI, and `EmbeddingEngine` for `ConfigEngine` integration.
+
+> **Module:** `whoosh_modern.embeddings`
+> **Version:** 3.0.0
+
+## Install
+
+```bash
+# Default CPU backend (FastEmbed)
+pip install whoosh-ng[embeddings]
+
+# Advanced CPU backend (ONNX Runtime)
+pip install whoosh-ng[embeddings-onnx]
+
+# Sentence-transformers backend
+pip install whoosh-ng[embeddings-sentence-transformers]
+
+# Full stack with vector search
+pip install whoosh-ng[embeddings,vector]
+```
+
+## Quickstart
+
+```python
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider()
+vector = provider.embed("hello world")
+print(len(vector))  # 384
+
+batch = provider.embed_batch(["hello", "world"])
+print(len(batch))   # 2
+```
+
+## Providers
+
+### FastEmbedProvider (default)
+
+`FastEmbedProvider` is the default CPU-friendly backend. It wraps
+`fastembed.TextEmbedding`, which downloads and caches models automatically.
+
+```python
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider()
+# Or with a custom model:
+provider = FastEmbedProvider(model_name="BAAI/bge-base-en-v1.5")
+```
+
+- Zero PyTorch dependency.
+- CPU-only.
+- Automatic model download and caching.
+- Conforms to `EmbeddingProvider`.
+
+### ONNXEmbeddingProvider (advanced)
+
+`ONNXEmbeddingProvider` wraps an ONNX model and a HuggingFace `tokenizers`
+tokenizer. It handles tokenization, inference, pooling, and optional L2
+normalization.
+
+```python
+from whoosh_modern.embeddings import ONNXEmbeddingProvider
+
+provider = ONNXEmbeddingProvider(
+    model_path="models/multilingual-e5-small/model.onnx",
+    tokenizer_dir="models/multilingual-e5-small",
+)
+```
+
+#### Constructor arguments
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `model_path` | `str` | required | Path to the `.onnx` model file |
+| `tokenizer_dir` | `str \| None` | parent of `model_path` | Directory containing `tokenizer.json` |
+| `pooling` | `str` | `"mean"` | One of `"mean"`, `"cls"`, `"max"` |
+| `normalize` | `bool` | `True` | L2-normalize output vectors |
+| `dimension` | `int \| None` | `None` | Expected embedding dimension (inferred from model if omitted) |
+| `enable_prefix` | `bool` | `True` | Prepend E5-style `"passage: "` / `"query: "` prefix |
+
+#### Pooling strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `mean` | Average of all real-token embeddings (mask-aware) |
+| `cls` | First token embedding |
+| `max` | Element-wise maximum over real tokens |
+
+#### E5-style task prefixes
+
+When `enable_prefix=True`, `embed()` prepends `"passage: "` and
+`embed_batch(..., is_query=True)` prepends `"query: "`. Set
+`enable_prefix=False` when the model does not expect a prefix.
+
+## Model manager and registry
+
+### EmbeddingModelRegistry
+
+`EmbeddingModelRegistry` stores `ModelInfo` metadata for known ONNX models.
+
+```python
+from whoosh_modern.embeddings import get_default_registry
+
+registry = get_default_registry()
+info = registry.resolve("multilingual-e5-small")
+print(info.dimension)   # 384
+print(info.pooling)     # mean
+print(info.normalize)   # True
+```
+
+Pre-registered models:
+
+| Name | Dimension | Pooling | Description |
+|------|-----------|---------|-------------|
+| `bge-small-en-v1.5` | 384 | mean | English BGE-small |
+| `multilingual-e5-small` | 384 | mean | Multilingual E5-small |
+| `mini-lm-en-ONNX` | 384 | cls | MiniLM English |
+| `bge-small-en-v1.5-int8` | 384 | mean | BGE-small INT8 quantized |
+
+### EmbeddingModelManager
+
+`EmbeddingModelManager` downloads and caches ONNX models locally under
+`~/.whoosh-ng/models/` (override with `WHOOSH_NG_MODELS_DIR`).
+
+```python
+from whoosh_modern.embeddings import EmbeddingModelManager
+
+manager = EmbeddingModelManager()
+
+# Download a model from HuggingFace
+model_dir = manager.download("multilingual-e5-small")
+
+# Check if installed
+print(manager.is_installed("multilingual-e5-small"))  # True
+
+# List installed models
+print(manager.list_installed())
+
+# Verify checksum
+print(manager.verify_checksum("multilingual-e5-small", "sha256hex..."))
+
+# Remove
+manager.remove("multilingual-e5-small")
+```
+
+## CLI
+
+A console script `whoosh-ng-models` is installed with the `embeddings-onnx`
+extra:
+
+```bash
+whoosh-ng-models list
+whoosh-ng-models list --all
+whoosh-ng-models info multilingual-e5-small
+whoosh-ng-models install multilingual-e5-small
+whoosh-ng-models verify multilingual-e5-small --expected-sha256 <hex>
+whoosh-ng-models remove multilingual-e5-small
+whoosh-ng-models update multilingual-e5-small
+```
+
+Use `--models-dir` to override the default models directory.
+
+Use `--hf-token` to authenticate with the HuggingFace Hub. It falls back to
+`HF_TOKEN` / `HUGGING_FACE_HUB_TOKEN` environment variables. Public models
+work without a token, but authenticated requests get higher rate limits and
+faster downloads.
+
+## ConfigEngine integration
+
+`EmbeddingEngine` (`whoosh_modern.config.engines.embedding.EmbeddingEngine`) reads the
+`embedding` block from `WhooshNGConfig` and instantiates the matching provider.
+
+```yaml
+# whoosh-ng.yml
+embedding:
+  provider: fastembed
+  model: BAAI/bge-small-en-v1.5
+```
+
+```yaml
+# Or with ONNX
+embedding:
+  provider: onnx
+  model: multilingual-e5-small
+  model_path: models/multilingual-e5-small/model.onnx
+  tokenizer_dir: models/multilingual-e5-small
+  pooling: mean
+  normalize: true
+```
+
+```yaml
+# Or with sentence-transformers
+embedding:
+  provider: sentence-transformers
+  model: all-MiniLM-L6-v2
+```
+
+```yaml
+# Multi-field vectorization
+embedding:
+  provider: fastembed
+  model: BAAI/bge-small-en-v1.5
+  source_field: body
+  target_field: body_vector
+  embedding_fields:
+    - source_field: title
+      target_field: title_vector
+    - source_field: body
+      target_field: body_vector
+```
+
+Supported providers: `fastembed`, `onnx`, `sentence-transformers`.
+
+When `embedding_fields` is provided, the `source_field` / `target_field` defaults are ignored and each mapping is processed independently. The `SearchView` automatically injects the target fields as `VECTOR` fields into the generated Whoosh schema if they are not already declared.
+
+## Protocol
+
+Any object that implements `embed(text: str) -> Sequence[float]` satisfies
+the `EmbeddingProvider` protocol (`whoosh_modern.embeddings.protocol`).
+
+```python
+from whoosh_modern.embeddings.protocol import EmbeddingProvider
+
+class MyProvider:
+    def embed(self, text: str) -> list[float]: ...
+```
+
+## Examples
+
+- [Embeddings with FastEmbed](/examples/embeddings-fastembed) — Runnable FastEmbed example
+- [Embeddings with ONNX](/examples/embeddings-onnx) — Runnable ONNX example
+
+## See Also
+
+- [Vector Search](/modern/vector) — Using embeddings for semantic search
+- [Storage Providers](/modern/storage-providers) — Persisting vector indexes
+- [Configuration Engine](/modern/configuration-engine) — Typed configuration surface
+
+
+## DOCUMENT: Facets
+
+# Facets
+
+Whoosh-NG provides a modern `FacetManager` that auto-discovers facetable
+fields from a Whoosh `Schema` and supports manual overrides. All facets
+produced are genuine core `FacetType` instances usable directly as
+`groupedby=` arguments in `searcher.search()`.
+
+> **Module:** `whoosh_modern.facets`
+> **Version:** 3.0.0
+
+## Quickstart
+
+```python
+from whoosh.fields import Schema, TEXT, NUMERIC, DATETIME
+from whoosh_modern.facets import FacetManager
+
+schema = Schema(
+    title=TEXT(stored=True),
+    category=TEXT(sortable=True),
+    price=NUMERIC(),
+    published=DATETIME(),
+)
+
+manager = FacetManager(schema)
+facets = manager.get_facets()
+
+# Use directly in search
+with ix.searcher() as searcher:
+    results = searcher.search("query", groupedby=facets)
+```
+
+## Auto-discovery rules
+
+`FacetManager` inspects each field type and proposes a default facet:
+
+| Whoosh field type | Facet produced |
+|-------------------|----------------|
+| `TEXT`, `KEYWORD`, `BOOLEAN`, `ID` | `TermsFacet` |
+| `NUMERIC` | `RangeFacet` |
+| `DATETIME` | `DateRangeFacet` |
+
+Defaults:
+- `TermsFacet` uses `limit=100`
+- `RangeFacet` spans `0` to `1000` with `gap=100`
+- `DateRangeFacet` spans `1970-01-01` to `2100-01-01` with `gap=365 days`
+
+## TermsFacet
+
+`TermsFacet` is a thin subclass of core `whoosh.sorting.FieldFacet` that
+accepts the legacy `limit` and `name` keyword arguments for backward
+compatibility.
+
+```python
+from whoosh_modern.facets import TermsFacet
+
+facet = TermsFacet("category", limit=50, name="Category")
+```
+
+## Manual overrides
+
+```python
+manager.set_manual_override("price", {
+    "type": "range",
+    "start": 0,
+    "end": 1000,
+    "gap": 100,
+})
+
+manager.set_manual_override("category", {
+    "type": "terms",
+    "limit": 50,
+})
+```
+
+Manual overrides take precedence over auto-discovered facets.
+
+## Inspection
+
+```python
+manager.is_facetable("category")          # True
+config = manager.get_facet_config("category")  # {"type": "terms", "limit": 50}
+all_configs = manager.get_all_facet_configs()
+stats = manager.get_facet_stats()
+# {
+#   "total_fields": 4,
+#   "auto_discovered_facets": 2,
+#   "manual_overrides": 1,
+#   "total_facets_configured": 3,
+#   "facet_fields": ["category", "price", ...]
+# }
+```
+
+## See Also
+
+- [Storage Providers](/modern/storage-providers) — Persisting faceted indexes
+- [Provider Integration](/modern/provider-integration) — Full pipeline guide
 
 
 ## DOCUMENT: Linguistics
@@ -16961,6 +17677,7 @@ analyzer = AnalyzerPresets.get("autocomplete")
 
 ## See Also
 
+- [SearchApplication](search-application.md) — Unified entry point for indexing and search
 - [Synonyms](synonyms.md) — Synonym providers, manager, and Wiktionary dictionaries
 - [Stemming Guide](stemming-providers.md) — Stemmer providers and language analyzers
 - [Middleware Guide](middleware-pipeline.md) — Middleware pipeline integration
@@ -17448,6 +18165,34 @@ compression = CompressionMiddleware()
 # Sets document["_compressed"] = True
 ```
 
+### EmbeddingMiddleware
+
+Enriches documents with dense vector embeddings before indexing:
+
+```python
+from whoosh_modern.middleware import EmbeddingMiddleware
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+embedding = EmbeddingMiddleware(
+    embedding_provider=provider,
+    source_field="body",
+    target_field="body_vector",
+)
+```
+
+Use `embedding_fields` for multi-field vectorization:
+
+```python
+embedding = EmbeddingMiddleware(
+    embedding_provider=provider,
+    embedding_fields=[
+        {"source_field": "title", "target_field": "title_vector"},
+        {"source_field": "body", "target_field": "body_vector"},
+    ],
+)
+```
+
 ### EncryptionMiddleware
 
 Marks documents for encryption at the backend level:
@@ -17589,6 +18334,7 @@ need to transform documents, queries, or results.
 | `StorageProvider` | `StorageMiddleware` | `before_index`, `on_commit` | Tags context with storage backend; writes commit checkpoints |
 | `StemmerProvider` | `StemmingMiddleware` | `before_index`, `before_search` | Stems document fields and query text |
 | `SynonymProvider` | `SynonymExpansionMiddleware` | `before_index`, `before_search` | Expands documents and queries with synonyms |
+| `EmbeddingProvider` | `EmbeddingMiddleware` | `before_index` | Computes dense vectors for configured fields and stores them as `VECTOR` fields |
 | `VectorProvider` | (built into Whoosh core) | N/A (segment format) | Registered in `VectorRegistry`; resolved at search time from segment metadata |
 | `AutocompleteProvider` | (standalone or registry) | N/A | Used directly via `.search()` or via `AutocompleteRegistry` |
 
@@ -17717,6 +18463,146 @@ handles the lifecycle integration (when and how to apply the provider).
 ## Modern Middleware (Whoosh-NG 2.0)
 
 Whoosh-NG 2.0 adds a modern middleware package (`whoosh_modern.middleware`) with wrap-style resilience middleware (retry, caching, logging) and hook-based middleware for storage, search, and analysis. For full details on the modern middleware architecture, plugin integration, and deployment, see the [Middleware & Plugin Pipeline Guide](middleware-pipeline.md).
+
+
+## DOCUMENT: Models
+
+# Models
+
+Whoosh-NG can automatically map Python models to Whoosh `Schema` fields using
+`ModelIndex` and `TypeMapper`. This covers dataclasses, Pydantic models,
+SQLAlchemy models, SQLModel, msgspec, and plain annotated classes.
+
+> **Module:** `whoosh_modern.models`
+> **Version:** 3.0.0
+
+## ModelIndex
+
+`ModelIndex` inspects a Python model's type annotations and builds a Whoosh
+`Schema` automatically.
+
+```python
+from dataclasses import dataclass
+from whoosh_modern.models import ModelIndex
+
+@dataclass
+class Book:
+    title: str
+    count: int
+    tag: str | None = None
+
+idx = ModelIndex(Book)
+schema = idx.schema
+```
+
+### Supported model types
+
+| Model type | Detection |
+|------------|-----------|
+| Dataclass | `dataclasses.is_dataclass()` |
+| Pydantic / HasFields | `isinstance(model, HasFields)` |
+| SQLAlchemy | `hasattr(model, "__mapper__")` |
+| Plain class | `inspect.get_annotations()` |
+
+### Auto type mapping
+
+| Python type | Whoosh field |
+|-------------|--------------|
+| `str` | `TEXT` |
+| `int` / `float` | `NUMERIC` |
+| `bool` | `BOOLEAN` |
+| `datetime` / `date` | `DATETIME` |
+| `Decimal` | `NUMERIC(int, decimal_places=2)` |
+| `Enum` | `KEYWORD` |
+| `bytes` | `KEYWORD` (hex-encoded) |
+| `list[str]` | `KEYWORD` |
+| `Optional[T]` | mapped type or `STORED` |
+
+### ID field detection
+
+`ModelIndex` auto-detects the ID field in this order:
+1. Explicit `SearchOptions(id=True)`
+2. Field named `id`, `ID`, or `_id`
+3. First `str` field
+
+### Converting instances to documents
+
+```python
+doc = idx.to_whoosh_document(book_instance)
+# {"title": "Whoosh-NG", "count": 42, "tag": "search"}
+```
+
+## SearchOptions and SearchField
+
+Use `SearchField` and `SearchOptions` to override auto-mapped defaults:
+
+```python
+from whoosh_modern.models import SearchField, SearchOptions
+
+class Book:
+    title: str = SearchField(fulltext=True, stored=True, analyzer="Simple")
+    count: int = SearchField(sortable=True)
+    tags: list[str] = SearchField(multi=True)
+```
+
+Or with `Annotated`:
+
+```python
+from typing import Annotated
+from whoosh_modern.models import SearchField
+
+class Book:
+    title: Annotated[str, SearchField(fulltext=True, stored=True)]
+```
+
+## TypeMapper
+
+`TypeMapper` is the central registry mapping Python types, runtime values,
+and dtype names to Whoosh field types.
+
+```python
+from whoosh_modern.models import TypeMapper, SearchOptions
+
+# Map a Python type
+field = TypeMapper.map(str, SearchOptions(stored=True))
+
+# Map an annotation (unwraps Optional and Annotated)
+field = TypeMapper.map_annotation(int | None)
+
+# Map a runtime value
+field = TypeMapper.map_value(42)
+
+# Map a dtype name (pandas, polars, SQL, etc.)
+field = TypeMapper.map_dtype("int64")
+```
+
+### Registering custom mappings
+
+```python
+TypeMapper.register(MyType, lambda opt: TEXT(stored=opt.stored))
+```
+
+### Type suggestion
+
+`TypeMapper.suggest_type(current, usage)` recommends a more specific Whoosh
+field type for a `TEXT` field based on usage statistics:
+
+```python
+suggestion = TypeMapper.suggest_type("TEXT", {
+    "doc_count": 1000,
+    "unique_values": 950,
+    "is_id": True,
+    "is_bool": False,
+    "is_datetime": False,
+})
+# "ID" or "KEYWORD" or None
+```
+
+## See Also
+
+- [Schema](/core/schema) — Core Whoosh schema concepts
+- [Auto-indexing](/modern/auto-indexing) — Schema discovery from data sources
+- [Configuration Engine](/modern/configuration-engine) — Typed configuration surface
 
 
 ## DOCUMENT: Modern Indexing
@@ -19018,7 +19904,7 @@ The provider operates independently of Whoosh's index/searcher.
 1. **Choose the right integration pattern**: Field analyzers for static schemas, middleware for dynamic behavior, registry for pluggable backends.
 2. **Avoid double-application**: Don't use both field-level analyzers and middleware for the same transformation (e.g., stemming).
 3. **Register providers at startup**: Call `VectorPlugin().register(manager)` and `AutocompletePlugin().register(manager)` before creating indexes.
-4. **Use the highest-level API when possible**: `SearchApplication` for end-to-end, `create_autocomplete()` for suggestions, `get_stemmer()` for stemming.
+4. **Use the highest-level API when possible**: [`SearchApplication`](/modern/search-application) for end-to-end, `create_autocomplete()` for suggestions, `get_stemmer()` for stemming.
 5. **Keep providers stateless**: Providers should not hold index-specific state; use middleware context for per-request data.
 6. **Test providers in isolation**: Each provider should be testable without Whoosh core (unit tests for `provider.search()`, `provider.add()`).
 7. **Document provider dependencies**: Note optional dependencies (boto3, PyStemmer, PyYAML) in your project's requirements.
@@ -19032,6 +19918,278 @@ The provider operates independently of Whoosh's index/searcher.
 - [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters
 - [Plugins Guide](plugins-advanced.md) — Plugin registration and entry points
 - [API: Modern](../api/modern.md) — Full API reference for all providers
+
+
+## DOCUMENT: Search Application
+
+# SearchApplication
+
+Module: `whoosh_modern.application`
+Version: 3.2.0
+
+`SearchApplication` is the **unified entry point** for Whoosh-NG. It orchestrates the full indexing and search pipeline from a `DataSource` to a searchable Whoosh index: schema discovery, validation, storage resolution, middleware composition, index creation, and query execution.
+
+## Architecture
+
+```text
+DataSource (SQL, JSON, REST, CSV, …)
+    │
+    ▼
+SearchApplication
+    │
+    ├── source.discover_schema() ──► Whoosh Schema
+    │
+    ├── storage._resolve_index_path() ──► filesystem path
+    │       │
+    │       ├── FileStorageProvider ──► provider.root
+    │       └── Other providers ──► tempfile.mkdtemp()
+    │
+    ├── SearchView.build(path)
+    │       │
+    │       ├── MiddlewareChain.before_index()
+    │       │   ├── StorageMiddleware
+    │       │   ├── EmbeddingMiddleware (optional)
+    │       │   ├── StemmingMiddleware
+    │       │   └── SynonymExpansionMiddleware
+    │       │
+    │       ├── for doc in source.iter_documents():
+    │       │       writer.add_document(**prepared_doc)
+    │       │
+    │       └── writer.commit()
+    │
+    ▼
+Whoosh Index (segments on disk / S3 / hybrid cache)
+```
+
+## Quick Start
+
+```python
+from whoosh_modern import SearchApplication, SQLSource
+from whoosh_modern.storage import FileStorage
+import sqlite3
+
+engine = sqlite3.connect("products.db")
+app = SearchApplication(
+    source=SQLSource(query="SELECT * FROM products", connection=engine),
+    storage=FileStorage("indexdir"),
+)
+app.build()
+results = app.search("laptop")
+for hit in results:
+    print(hit["title"])
+```
+
+## Constructor
+
+```python
+SearchApplication(
+    source: DataSource | None = None,
+    storage: SyncStorageProvider | None = None,
+    wiktionary_indexer: WiktionaryIndexer | None = None,
+    language_detector: LanguageDetector | None = None,
+    dictionary_stem_overrides: dict[str, str] | None = None,
+    embedding_provider: Any | None = None,
+    embedding_fields: list[dict[str, str]] | None = None,
+)
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `source` | `DataSource \| None` | Data source providing documents for indexing. Required for `build()`. |
+| `storage` | `SyncStorageProvider \| None` | Storage backend for index files. When it is a `FileStorageProvider`, its public `root` is used as the index directory. Otherwise a temporary directory is created. |
+| `wiktionary_indexer` | `WiktionaryIndexer \| None` | Wiktionary indexer whose synonyms will be loaded into the synonym expansion middleware on first access. |
+| `language_detector` | `LanguageDetector \| None` | Language detector used when `language="auto"` is set on fields. When provided, the detector is called on each document to resolve the language and inject a `_language` stored field. |
+| `dictionary_stem_overrides` | `dict[str, str] \| None` | Mapping of word → stemmed form to override the default Snowball stemmer. |
+| `embedding_provider` | `Any \| None` | Embedding provider used to enrich documents with dense vectors before indexing. |
+| `embedding_fields` | `list[dict[str, str]] \| None` | Sequence of `{"source_field": "...", "target_field": "..."}` mappings for multi-field embedding. When provided, the `source_field` / `target_field` defaults from the embedding configuration are ignored. |
+
+## Properties
+
+### `index`
+
+```python
+@property
+def index(self) -> Index
+```
+
+Returns the built Whoosh `Index`.
+
+Raises `RuntimeError` if `build()` has not been called yet.
+
+### `language_detector`
+
+```python
+@property
+def language_detector(self) -> LanguageDetector | None
+```
+
+Returns the configured language detector, or `None` if not provided.
+
+### `synonym_manager`
+
+```python
+@property
+def synonym_manager(self) -> SynonymManager
+```
+
+Returns the `SynonymManager` populated from the Wiktionary index. If a `wiktionary_indexer` was provided at construction time, the manager is populated lazily on first access, even if `build()` has not been called yet. If no indexer was provided, an empty manager is returned.
+
+## Methods
+
+### `build()`
+
+```python
+def build(self) -> SearchApplication
+```
+
+Build the index from the data source.
+
+1. Resolves the index path from the storage provider.
+2. Discovers the schema from the data source.
+3. Creates a `SearchView` and optionally attaches `EmbeddingMiddleware`.
+4. Runs validation.
+5. Creates or opens the Whoosh index.
+6. Populates the index by iterating all documents.
+
+Returns `self` for chaining.
+
+Raises `ValueError` if no data source was provided.
+
+### `search()`
+
+```python
+def search(self, query: Any, **kwargs: Any) -> Any
+```
+
+Search the index.
+
+- If `query` is a string, it is parsed using `QueryParser` with the first schema field as the default field.
+- Opens a searcher and delegates to `searcher.search()`.
+
+Returns search results from the Whoosh searcher.
+
+Raises `RuntimeError` if `build()` has not been called yet.
+
+## Usage Examples
+
+### With Local Storage
+
+```python
+from whoosh_modern import SearchApplication, SQLSource
+from whoosh_modern.storage import FileStorage
+import sqlite3
+
+engine = sqlite3.connect("products.db")
+app = SearchApplication(
+    source=SQLSource(query="SELECT * FROM products", connection=engine),
+    storage=FileStorage("indexdir"),
+)
+app.build()
+results = app.search("laptop")
+```
+
+### With Hybrid S3 Storage
+
+```python
+from whoosh_modern import SearchApplication, SQLSource
+from whoosh_modern.storage import HybridStorage, S3Storage
+
+remote = S3Storage(bucket="my-index-bucket", prefix="segments")
+storage = HybridStorage(local_cache="./cache", remote=remote)
+
+app = SearchApplication(
+    source=SQLSource(query="SELECT * FROM products", connection=engine),
+    storage=storage,
+)
+app.build()
+results = app.search("laptop")
+```
+
+### With Language Detection
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.linguistics.detection import StopwordDetector
+from whoosh_modern.data_sources.json import JSONSource
+
+detector = StopwordDetector(["fr", "en", "de"])
+source = JSONSource("data/products.json")
+
+app = SearchApplication(
+    source=source,
+    language_detector=detector,
+)
+app.build()
+```
+
+When fields are configured with `language="auto"`, the detector resolves the language from the document content and injects a `_language` stored field.
+
+### With Wiktionary Synonyms
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+indexer = WiktionaryIndexer(language="en")
+indexer.build()
+
+app = SearchApplication(
+    source=source,
+    wiktionary_indexer=indexer,
+)
+app.build()
+
+# Access the populated synonym manager
+synonym_manager = app.synonym_manager
+```
+
+### With Dictionary Stem Overrides
+
+```python
+from whoosh_modern import SearchApplication
+
+app = SearchApplication(
+    source=source,
+    dictionary_stem_overrides={
+        "mice": "mouse",
+        "geese": "goose",
+    },
+)
+app.build()
+```
+
+## SearchApplication vs SearchView
+
+`SearchApplication` is a simplified wrapper around `SearchView`. Use `SearchApplication` for most production use cases. Use `SearchView` directly when you need fine-grained control over the indexing lifecycle.
+
+| Feature | SearchApplication | SearchView |
+|---------|-------------------|------------|
+| Schema discovery | ✅ automatic | ✅ automatic |
+| Validation | ✅ automatic | ✅ automatic |
+| Incremental refresh | ❌ | ✅ `refresh()` |
+| Full reindex | ❌ | ✅ `reindex()` |
+| Schema evolution | ❌ | ✅ `evolve_schema()` |
+| Custom middleware | ❌ | ✅ `middleware=` |
+| Facets | ❌ | ✅ `facets=` |
+| Field overrides | ❌ | ✅ `fields=` |
+| Storage integration | ✅ automatic | ✅ via `StorageMiddleware` |
+
+## How Storage Integration Works
+
+When `storage` is a `FileStorageProvider` (exposed as `FileStorage`), `SearchApplication` uses its public `root` as the index directory. For all other providers (S3, Hybrid, Snapshot), it falls back to a temporary directory because Whoosh core requires a filesystem path for `create_in()`.
+
+The actual segment routing, commit checkpointing, and cache synchronization are handled by `StorageMiddleware` at the middleware layer, not by the storage provider itself.
+
+## See Also
+
+- [SearchView](/examples/search-view) — Lower-level view with refresh, reindex, and validation
+- [Storage Providers](/modern/storage-providers) — Pluggable storage backends
+- [Middleware Pipeline](/modern/middleware-pipeline) — Cross-cutting indexing and search hooks
+- [Linguistics](/modern/linguistics) — Language detection and synonym expansion
+- [Provider Integration](/modern/provider-integration) — End-to-end pipeline guide
+- [Auto-Indexing](/modern/auto-indexing) — Schema discovery and data-source driven indexing
 
 
 ## DOCUMENT: Stemming Providers
@@ -19784,23 +20942,6 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## Using storage with SearchApplication
-
-```python
-from whoosh_modern import SearchApplication, SQLSource
-from whoosh_modern.storage import HybridStorage, S3Storage
-
-remote = S3Storage(bucket="my-index-bucket", prefix="segments")
-storage = HybridStorage(local_cache="./cache", remote=remote)
-
-app = SearchApplication(
-    source=SQLSource(query="SELECT * FROM products", connection=engine),
-    storage=storage,
-)
-app.build()
-results = app.index.search("laptop")
-```
-
 ## Performance Benchmarks
 
 Benchmarks were run against a local MinIO instance using a 28.89 MB Whoosh
@@ -19952,7 +21093,7 @@ with MiddlewareWriter(ix.writer(), chain) as writer:
 | `SyncStorageProvider` / `AsyncStorageProvider` | **Contract** defining `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
 | `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implementations** of the contract |
 | `StorageMiddleware` | **Integration layer** that calls the provider at specific lifecycle hooks (`before_index`, `on_commit`) |
-| `SearchApplication` | **Entry point** that delegates to `SearchView.build()`; when the storage is a `FileStorageProvider` (exposed as `FileStorage`) it uses its public `root` to create the Whoosh index directory, otherwise it falls back to a temporary directory |
+| `SearchApplication` | **Entry point** that delegates to `SearchView.build()`; resolves the index path from `FileStorageProvider.root` or a temporary directory. See [SearchApplication](/modern/search-application). |
 
 The provider itself does **not** intercept Whoosh's internal segment reads. Those reads go through Whoosh's built-in `FileStorage` (`whoosh.filedb.filestore`) which reads from the filesystem path given to `create_in()`. The Whoosh-NG storage provider abstraction is designed for:
 - Custom segment routing (S3, SQLite, hybrid cache)
@@ -20264,6 +21405,7 @@ middleware = SynonymExpansionMiddleware(app.synonym_manager)
 
 ## See Also
 
+- [SearchApplication](search-application.md) — Unified entry point for indexing and search
 - [Linguistics Overview](linguistics.md) — Stemmers, language analyzers, and full pipeline integration
 - [Middleware Pipeline](middleware-pipeline.md) — How middleware chains work
 - [Stemming Providers](stemming-providers.md) — Language-specific stemmer backends
@@ -20593,6 +21735,7 @@ at startup.
 
 ## See Also
 
+- [Embeddings](/modern/embeddings) — ONNX Runtime CPU-friendly embedding provider
 - [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters
 
@@ -26996,51 +28139,50 @@ The Whoosh-NG API reference is générée automatiquement à partir du code sour
 et génère une documentation HTML à partir des docstrings.
 
 :::note
-Si la documentation intégrée ne s'affiche pas, il se peut que les docs API
-n'aient pas encore été générées dans ce déploiement. Consultez
-[la page GitHub](https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs)
-pour la documentation API complète, ou reportez-vous à la
-[liste des modules API](#api-modules) ci-dessous.
+If the embedded documentation does not display, the API docs may not have
+been generated yet in this deployment. [View on GitHub](https://github.com/dorel14/whoosh-ng/tree/master/website/static/api_docs)
+for the full API documentation, or check the
+[API modules list](#api-modules) below.
 :::
 
-## Modules API
+## API Modules
 
-### API Core
-
-| Module | Description |
-|--------|-------------|
-| `whoosh.index` | Création, ouverture et gestion d'index de haut niveau |
-| `whoosh.fields` | Schéma et définitions de types de champs |
-| `whoosh.writing` | Classes d'écriture et politiques de fusion |
-| `whoosh.searching` | Searcher, Results et collectors |
-| `whoosh.query` | Classes de requêtes et parseurs |
-| `whoosh.qparser` | Implémentation du parseur de requêtes |
-| `whoosh.analysis` | Tokenizers, filtres et analyseurs |
-| `whoosh.highlight` | Surlignage des résultats de recherche |
-| `whoosh.spelling` | Correction orthographique |
-| `whoosh.sorting` | Facettes et tri |
-| `whoosh.event_bus` | Système d'événements |
-| `whoosh.hooks` | Système de hooks |
-| `whoosh.middleware` | Pipeline de middleware |
-| `whoosh.plugins` | Système de plugins et registre |
-| `whoosh.backends` | Backends de stockage |
-
-### API Modern
+### Core API
 
 | Module | Description |
 |--------|-------------|
-| `whoosh_modern.data_sources` | Protocole et implémentations de sources de données |
-| `whoosh_modern.views` | Interface unifiée SearchView |
-| `whoosh_modern.middleware` | Middleware de retry, cache, logging |
-| `whoosh_modern.facets` | FacetManager pour l'auto-découverte |
-| `whoosh_modern.validation` | Framework de validation à 4 niveaux |
+| `whoosh.index` | High-level index creation, opening, and management |
+| `whoosh.fields` | Schema and field type definitions |
+| `whoosh.writing` | Writer classes and merge policies |
+| `whoosh.searching` | Searcher, Results, and collectors |
+| `whoosh.query` | Query classes and parsers |
+| `whoosh.qparser` | Query parser implementation |
+| `whoosh.analysis` | Tokenizers, filters, and analyzers |
+| `whoosh.highlight` | Search result highlighting |
+| `whoosh.spelling` | Spelling correction |
+| `whoosh.sorting` | Facets and sorting |
+| `whoosh.event_bus` | Event system |
+| `whoosh.hooks` | Hook system |
+| `whoosh.middleware` | Middleware pipeline |
+| `whoosh.plugins` | Plugin system and registry |
+| `whoosh.backends` | Storage backends |
+
+### Modern API
+
+| Module | Description |
+|--------|-------------|
+| `whoosh_modern.data_sources` | Data source protocol and implementations |
+| `whoosh_modern.views` | SearchView unified interface |
+| `whoosh_modern.middleware` | Retry, cache, logging middleware |
+| `whoosh_modern.facets` | FacetManager for auto-discovery |
+| `whoosh_modern.validation` | 4-level validation framework |
 | `whoosh_modern.indexing` | BatchIndexWriter, AnalyzerCache |
-| `whoosh_modern.linguistics` | Moteur linguistique (stemmers, synonymes) |
-| `whoosh_modern.storage` | Providers de stockage (HybridStorage, etc.) |
-| `whoosh_modern.vector` | NumpyProvider pour la similarité vectorielle |
-| `whoosh_modern.autocomplete` | Plugins de providers d'autocomplétion |
-| `whoosh_fastapi` | Endpoints API REST FastAPI |
-| `whoosh_admin` | Tableau de bord d'administration |
+| `whoosh_modern.linguistics` | Linguistic engine (stemmers, synonyms) |
+| `whoosh_modern.storage` | Storage providers (HybridStorage, etc.) |
+| `whoosh_modern.vector` | NumpyProvider for vector similarity |
+| `whoosh_modern.autocomplete` | Autocomplete provider plugins |
+| `whoosh_fastapi` | FastAPI REST API endpoints |
+| `whoosh_admin` | Admin UI dashboard |
 
 :::info
 For the full interactive API documentation, run:
@@ -28180,18 +29322,229 @@ otherwise the number of segments will tend to increase forever!
 
 Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
 
-## v5.1.0 (2026-08-11)
-**Tag**: `v5.1.0`
+## v5.3.0 (2026-08-13)
+**Tag**: `v5.3.0`
+
+## v5.3.0 (2026-08-13)
+
+_This release is published under the MIT License._
+
+### Bug Fixes
+
+- **linguistics**: Corriger les défauts signalés par revue et docs ([`ba05a8d`](https://github.com/dorel14/whoosh-ng/commit/ba05a8d5cbdba8d71f39d8e24920d55f77a8eb32))
+
+### Documentation
+
+- Auto-update llms context files [skip ci] ([`4585b5e`](https://github.com/dorel14/whoosh-ng/commit/4585b5eb665c0329c70da0efe5225b859fc14573))
+
+- Auto-update llms context files [skip ci] ([`c897f1f`](https://github.com/dorel14/whoosh-ng/commit/c897f1f0e6c6bbebee46a7672f5ca6d3d6abebf4))
+
+- Auto-update llms context files [skip ci] ([`a65b926`](https://github.com/dorel14/whoosh-ng/commit/a65b926027472d65244c76f250833af27c4bb8e5))
+
+- Auto-update llms context files [skip ci] ([`4911cf5`](https://github.com/dorel14/whoosh-ng/commit/4911cf57abc555eadfa47cf962943b321fb2457a))
+
+- Auto-update llms context files [skip ci] ([`8605b34`](https://github.com/dorel14/whoosh-ng/commit/8605b344f85f3e40dec93c9f9c7d04e7c10fd9f6))
+
+- Auto-update llms context files [skip ci] ([`8c88da5`](https://github.com/dorel14/whoosh-ng/commit/8c88da5d29097f8a4ee6a9c47ffcc5afdcf2ff55))
+
+- Update changelog and API docs [skip ci] ([`ae57714`](https://github.com/dorel14/whoosh-ng/commit/ae57714558186480f0f15e4aa21e093c61c166bd))
+
+- **config**: Corriger l'exemple ConfigEngine.build() ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`f09d6da`](https://github.com/dorel14/whoosh-ng/commit/f09d6dac72482868275ad581046909a5b4169885))
+
+- **documentation**: Mettre à jour la documentation pour le renommage en whoosh-ng ([`ec35fbd`](https://github.com/dorel14/whoosh-ng/commit/ec35fbd5182dc0c01e5888d7285f62be8c21a262))
+
+- **linguistics**: Documenter la détection automatique de langue et l'indexation multilingue ([`f86a17b`](https://github.com/dorel14/whoosh-ng/commit/f86a17bd7820a2e5a3f99fc8a8516c4b9b460a18))
+
+- **website**: Restructurer la documentation et déplacer les fonctionnalités classiques vers Core ([`54fb1f6`](https://github.com/dorel14/whoosh-ng/commit/54fb1f61f81b441febda3a0ecfce3fef8edb400f))
+
+### Features
+
+- **analysis**: Add EPIC 5.6 Modern N-Gram Framework Sprint NGRAM-1 ([#440](https://github.com/dorel14/whoosh-ng/pull/440), [`c634718`](https://github.com/dorel14/whoosh-ng/commit/c6347184bb2b6d307da5008c1edf4850eab88d0b))
+
+- **api**: Exposer les nouvelles fonctionnalités pour la version 5.1.0 ([`e306236`](https://github.com/dorel14/whoosh-ng/commit/e306236a71fdcd5f018d9af10cf923398ed852c1))
+
+- **linguistics**: Add language auto-detection for multilingual indexing ([#434](https://github.com/dorel14/whoosh-ng/pull/434), [`a91d6bf`](https://github.com/dorel14/whoosh-ng/commit/a91d6bf59b8faae98fe80aa4d6c5ac4e0813ec0e))
+
+- **linguistics**: Add language auto-detection in SearchApplication ([#435](https://github.com/dorel14/whoosh-ng/pull/435), [`99f4290`](https://github.com/dorel14/whoosh-ng/commit/99f42904e302191de630cfdefe8eec6f5a8b50ca))
+
+- **linguistics**: Add Wiktionary dictionary indexer (#429 #432) ([`726542d`](https://github.com/dorel14/whoosh-ng/commit/726542dd4bf8e79d35dadb36e126f1973207a8b4))
+
+- **linguistics**: Add Wiktionary synonym provider (#425 #426 #427) ([`2961b93`](https://github.com/dorel14/whoosh-ng/commit/2961b93726cf1792faf89b293f2439c5c92e7ee6))
+
+- **linguistics**: Integrate Wiktionary indexer with SearchApplication ([#433](https://github.com/dorel14/whoosh-ng/pull/433), [`f201f5c`](https://github.com/dorel14/whoosh-ng/commit/f201f5c37608df75dc79be5b2526fb71fa45ed36))
+
+- **vector**: Add HnswlibProvider for EPIC 9 Sprint VEC-1 ([#406](https://github.com/dorel14/whoosh-ng/pull/406), [`cd590d4`](https://github.com/dorel14/whoosh-ng/commit/cd590d4601e5c238385be6fe693ee22ebe4a0912))
+
+- **vector,embeddings,config**: Add HnswlibProvider, EmbeddingProvider, ConfigEngine extensions (#406 #407) ([`03a15aa`](https://github.com/dorel14/whoosh-ng/commit/03a15aabcb32822a71635a17b99e9c9545e07962))
+
+---
+
+**Detailed Changes**: [v5.2.0...v5.3.0](https://github.com/dorel14/whoosh-ng/compare/v5.2.0...v5.3.0)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- améliorer la qualité du code et nettoyer la configuration
+- v5.3.0 [skip ci]
+
+### Documentation
+
+- update changelog and API docs [skip ci]
+- corriger l'exemple ConfigEngine.build() (#422)
+- auto-update llms context files [skip ci]
+- restructurer la documentation et déplacer les fonctionnalités classiques vers Core
+- auto-update llms context files [skip ci]
+- documenter la détection automatique de langue et l'indexation multilingue
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+- mettre à jour la documentation pour le renommage en whoosh-ng
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+
+### Features
+
+- add Wiktionary synonym provider (#425 #426 #427)
+- add Wiktionary dictionary indexer (#429 #432)
+- integrate Wiktionary indexer with SearchApplication (#433)
+- add language auto-detection for multilingual indexing (#434)
+- add language auto-detection in SearchApplication (#435)
+- add HnswlibProvider for EPIC 9 Sprint VEC-1 (#406)
+- add HnswlibProvider, EmbeddingProvider, ConfigEngine extensions (#406 #407)
+- add EPIC 5.6 Modern N-Gram Framework Sprint NGRAM-1 (#440)
+- exposer les nouvelles fonctionnalités pour la version 5.1.0
+
+### Other
+
+- eat(linguistics): complete EPIC 6.7 Language Auto-Detection & Multilingual Indexing (#430)
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #454 from dorel14/dev
+
+### Code Refactoring
+
+- améliorer le typage et nettoyer les imports
+
+### Bug Fixes
+
+- corriger les défauts signalés par revue et docs
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.3.0)
+
+## v5.2.0 (2026-08-12)
+**Tag**: `v5.2.0`
+
+## v5.2.0 (2026-08-12)
 
 _This release is published under the BSD-2-Clause License._
 
-### Breaking Changes
+### Bug Fixes
 
-- **Changement de chemin d'import** : Le projet a été renommé de `whoosh-reloaded` en
-  `whoosh-ng`. Les modules d'extension modernes précédemment disponibles sous
-  `whoosh_reloaded` sont maintenant importables sous `whoosh_modern`. Le code
-  existant utilisant `whoosh_reloaded` doit être mis à jour vers `whoosh_modern`.
-  Les composants Whoosh core restent disponibles sous l'espace de noms `whoosh`.
+- **config**: Corriger le passage de booléen à StandardAnalyzer.stoplist ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`7c3649c`](https://github.com/dorel14/whoosh-ng/commit/7c3649c268d0551793c52f5855b6f1b7cab06a01))
+
+- **config**: Corriger les bugs et améliorer les tests et la documentation ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`377a531`](https://github.com/dorel14/whoosh-ng/commit/377a531a9e20c7534bb8c54803fd91910b8e2323))
+
+- **config**: Corriger pyright, unused imports et StandardAnalyzer.stoplist ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`10192bb`](https://github.com/dorel14/whoosh-ng/commit/10192bbd8c7824c3ccd89807c5bc6699c52a29b7))
+
+### Documentation
+
+- Auto-update llms context files [skip ci] ([`d188581`](https://github.com/dorel14/whoosh-ng/commit/d188581f5ca7fd71182ac26f71d06e0d045c2f0f))
+
+- Auto-update llms context files [skip ci] ([`599c979`](https://github.com/dorel14/whoosh-ng/commit/599c979675149203172e73efa587578ffa4dab4f))
+
+- Auto-update llms context files [skip ci] ([`7405bd0`](https://github.com/dorel14/whoosh-ng/commit/7405bd03e8445f547830b461de274d1f73a84cb9))
+
+- Update changelog and API docs [skip ci] ([`9bc3cfd`](https://github.com/dorel14/whoosh-ng/commit/9bc3cfd033c2999aa6dd73ff15bc992c9883dccf))
+
+- Update changelog and API docs [skip ci] ([`2920f65`](https://github.com/dorel14/whoosh-ng/commit/2920f653921efae2075911bd0f9c9a3de43c6808))
+
+- Update changelog and API docs [skip ci] ([`dc32e6f`](https://github.com/dorel14/whoosh-ng/commit/dc32e6fb7b16659c2757ce86ed38c6ee43b8b9df))
+
+### Features
+
+- **config**: Add ConfigEngine sub-engines for Sprint CFG-1 ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`47c59b4`](https://github.com/dorel14/whoosh-ng/commit/47c59b4d0d66f2105de4de3e0dee5501133ff96e))
+
+- **config**: Add ConfigEngine.build() orchestration for Sprint CFG-1 ([#422](https://github.com/dorel14/whoosh-ng/pull/422), [`1329b42`](https://github.com/dorel14/whoosh-ng/commit/1329b4296a35e2b115580bcad95ac83a394e8911))
+
+- **config**: Ajouter la mise en cache et valider les sources de données ([`add4bb8`](https://github.com/dorel14/whoosh-ng/commit/add4bb8cc4b8d7fcaf4ed06b5c20b93bd3fa312c))
+
+---
+
+**Detailed Changes**: [v5.1.0...v5.2.0](https://github.com/dorel14/whoosh-ng/compare/v5.1.0...v5.2.0)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- merge master into dev [skip ci]
+- merge master into dev [skip ci]
+- merge master into dev [skip ci]
+- synchronize version from pyproject.toml [skip ci]
+- apply pre-commit fixes
+- v5.2.0 [skip ci]
+
+### Other
+
+- Delete LICENSE_OLD.txt
+- Add MIT License to the project
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #424 from dorel14/dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- style(codebase): uniformiser le formatage du code et améliorer la lisibilité
+- .
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- .
+- Merge pull request #428 from dorel14/dev
+
+### CI/CD
+
+- restructurer la génération du changelog et simplifier Pages
+- documenter le jeton GH_TOKEN et ajouter pydoctor
+- documenter le jeton GH_TOKEN et ajouter pydoctor (#422)
+- ajouter pydoctor, documenter GH_TOKEN et ignorer les benchmarks JSON (#422)
+- factoriser should_release et rendre l'i18n dynamique (#422)
+
+### Documentation
+
+- auto-update llms context files [skip ci]
+- update changelog and API docs [skip ci]
+- update changelog and API docs [skip ci]
+- update changelog and API docs [skip ci]
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+
+### Code Refactoring
+
+- restructurer la chaîne de déploiement et supprimer les workflows obsolètes
+- supprimer le benchmark stemmer français et moderniser les chemins
+
+### Features
+
+- add ConfigEngine sub-engines for Sprint CFG-1 (#422)
+- add ConfigEngine.build() orchestration for Sprint CFG-1 (#422)
+- ajouter la mise en cache et valider les sources de données
+
+### Bug Fixes
+
+- corriger le passage de booléen à StandardAnalyzer.stoplist (#422)
+- corriger les bugs et améliorer les tests et la documentation (#422)
+- corriger pyright, unused imports et StandardAnalyzer.stoplist (#422)
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.2.0)
+
+## v5.1.0 (2026-08-11)
+**Tag**: `v5.1.0`
+
+## v5.1.0 (2026-08-11)
+
+_This release is published under the BSD-2-Clause License._
 
 ### Bug Fixes
 
@@ -35723,6 +37076,7 @@ Toute la configuration est exprimée via des modèles Pydantic typés :
 - `SearchConfig` / `FuzzyConfig` / `RankingConfig` / `AIConfig`
 - `DataSourceConfigModel` — connexion et synchronisation de la source de données
 - `StorageConfigModel` — sélection du backend de stockage
+- `EmbeddingConfig` — configuration du fournisseur d'embeddings, du modèle et de la vectorisation multi-champs
 
 ### Chargeurs (loaders)
 
@@ -35881,6 +37235,11 @@ data_source:
 storage:
   type: file
   path: ./index
+embedding:
+  provider: fastembed
+  model: BAAI/bge-small-en-v1.5
+  source_field: description
+  target_field: description_vector
 ```
 
 ### Configuration par couches (base + instance + runtime)
@@ -35998,11 +37357,263 @@ results = app.search("python")
 | `whoosh_modern.config.models` | Modèles Pydantic de validation |
 | `whoosh_modern.config.loader` | Chargeurs de fichiers YAML / JSON |
 | `whoosh_modern.config.engine` | `ConfigEngine` avec fusion hiérarchique |
+| `whoosh_modern.config.engines.embedding` | `EmbeddingEngine` — construit un `EmbeddingProvider` à partir du bloc de config `embedding` |
 
 ## Voir aussi
 
 - [Providers de Stockage](storage-providers.md) — Backends configurables via `StorageConfigModel`
 - [Sources de Données](data-sources.md) — `DataSourceConfigModel` et configuration des providers
+
+
+## DOCUMENT (FR): Embeddings
+
+# Embeddings
+
+Whoosh-NG peut embarquer des documents dans des vecteurs denses et les utiliser
+pour la recherche sémantique. Cette page couvre la stack embeddings complète :
+**FastEmbedProvider** (backend CPU par défaut), **ONNXEmbeddingProvider**
+(backend CPU avancé), **EmbeddingModelRegistry**, **EmbeddingModelManager**,
+le CLI `whoosh-ng-models` et `EmbeddingEngine` pour l'intégration
+`ConfigEngine`.
+
+> **Module :** `whoosh_modern.embeddings`
+> **Version :** 3.0.0
+
+## Installation
+
+```bash
+# Backend CPU par défaut (FastEmbed)
+pip install whoosh-ng[embeddings]
+
+# Backend CPU avancé (ONNX Runtime)
+pip install whoosh-ng[embeddings-onnx]
+
+# Backend sentence-transformers
+pip install whoosh-ng[embeddings-sentence-transformers]
+
+# Stack complète avec recherche vectorielle
+pip install whoosh-ng[embeddings,vector]
+```
+
+## Démarrage rapide
+
+```python
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider()
+vector = provider.embed("bonjour le monde")
+print(len(vector))  # 384
+
+batch = provider.embed_batch(["bonjour", "le monde"])
+print(len(batch))   # 2
+```
+
+## Providers
+
+### FastEmbedProvider (défaut)
+
+`FastEmbedProvider` est le backend CPU par défaut. Il encapsule
+`fastembed.TextEmbedding`, qui télécharge et cache les modèles
+automatiquement.
+
+```python
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider()
+# Ou avec un modèle personnalisé :
+provider = FastEmbedProvider(model_name="BAAI/bge-base-en-v1.5")
+```
+
+- Zéro dépendance PyTorch.
+- CPU-only.
+- Téléchargement automatique et cache des modèles.
+- Conforme au protocole `EmbeddingProvider`.
+
+### ONNXEmbeddingProvider (avancé)
+
+`ONNXEmbeddingProvider` encapsule un modèle ONNX et un tokenizer HuggingFace
+`tokenizers`. Il gère la tokenization, l'inférence, le pooling et la
+normalisation L2 optionnelle.
+
+```python
+from whoosh_modern.embeddings import ONNXEmbeddingProvider
+
+provider = ONNXEmbeddingProvider(
+    model_path="models/multilingual-e5-small/model.onnx",
+    tokenizer_dir="models/multilingual-e5-small",
+)
+```
+
+#### Arguments du constructeur
+
+| Argument | Type | Défaut | Description |
+|----------|------|---------|-------------|
+| `model_path` | `str` | requis | Chemin vers le fichier `.onnx` |
+| `tokenizer_dir` | `str \| None` | parent de `model_path` | Répertoire contenant `tokenizer.json` |
+| `pooling` | `str` | `"mean"` | Au choix `"mean"`, `"cls"`, `"max"` |
+| `normalize` | `bool` | `True` | Normalisation L2 des vecteurs de sortie |
+| `dimension` | `int \| None` | `None` | Dimension attendue des embeddings (inférée depuis le modèle si omise) |
+| `enable_prefix` | `bool` | `True` | Ajoute le préfixe de tâche E5 `"passage: "` / `"query: "` |
+
+#### Stratégies de pooling
+
+| Stratégie | Description |
+|-----------|-------------|
+| `mean` | Moyenne des embeddings de tous les tokens réels (aware masque) |
+| `cls` | Embedding du premier token |
+| `max` | Maximum élément par élément sur les tokens réels |
+
+#### Préfixes de tâche E5
+
+Quand `enable_prefix=True`, `embed()` préfixe par `"passage: "` et
+`embed_batch(..., is_query=True)` préfixe par `"query: "`. Mettez
+`enable_prefix=False` quand le modèle n'attend pas de préfixe.
+
+## Model manager et registry
+
+### EmbeddingModelRegistry
+
+`EmbeddingModelRegistry` stocke les métadonnées `ModelInfo` des modèles ONNX
+connus.
+
+```python
+from whoosh_modern.embeddings import get_default_registry
+
+registry = get_default_registry()
+info = registry.resolve("multilingual-e5-small")
+print(info.dimension)   # 384
+print(info.pooling)     # mean
+print(info.normalize)   # True
+```
+
+Modèles pré-enregistrés :
+
+| Nom | Dimension | Pooling | Description |
+|-----|-----------|---------|-------------|
+| `bge-small-en-v1.5` | 384 | mean | BGE-small anglais |
+| `multilingual-e5-small` | 384 | mean | E5-small multilingue |
+| `mini-lm-en-ONNX` | 384 | cls | MiniLM anglais |
+| `bge-small-en-v1.5-int8` | 384 | mean | BGE-small quantifié INT8 |
+
+### EmbeddingModelManager
+
+`EmbeddingModelManager` télécharge et met en cache les modèles ONNX localement
+sous `~/.whoosh-ng/models/` (remplacer par `WHOOSH_NG_MODELS_DIR`).
+
+```python
+from whoosh_modern.embeddings import EmbeddingModelManager
+
+manager = EmbeddingModelManager()
+
+# Télécharger un modèle depuis HuggingFace
+model_dir = manager.download("multilingual-e5-small")
+
+# Vérifier la présence
+print(manager.is_installed("multilingual-e5-small"))  # True
+
+# Lister les modèles installés
+print(manager.list_installed())
+
+# Vérifier le checksum
+print(manager.verify_checksum("multilingual-e5-small", "hexsha256..."))
+
+# Supprimer
+manager.remove("multilingual-e5-small")
+```
+
+## CLI
+
+Un script console `whoosh-ng-models` est installé avec l'extra
+`embeddings-onnx` :
+
+```bash
+whoosh-ng-models list
+whoosh-ng-models list --all
+whoosh-ng-models info multilingual-e5-small
+whoosh-ng-models install multilingual-e5-small
+whoosh-ng-models verify multilingual-e5-small --expected-sha256 <hex>
+whoosh-ng-models remove multilingual-e5-small
+whoosh-ng-models update multilingual-e5-small
+```
+
+Utilisez `--models-dir` pour remplacer le répertoire de modèles par défaut.
+
+Utilisez `--hf-token` pour vous authentifier auprès du Hub HuggingFace. Il se
+rabat sur les variables d'environnement `HF_TOKEN` /
+`HUGGING_FACE_HUB_TOKEN`. Les modèles publics fonctionnent sans token, mais
+les requêtes authentifiées bénéficient de limites de débit plus élevées et de
+téléchargements plus rapides.
+
+## Intégration ConfigEngine
+
+`EmbeddingEngine` (`whoosh_modern.config.engines.embedding.EmbeddingEngine`) lit le bloc
+`embedding` depuis `WhooshNGConfig` et instancie le provider correspondant.
+
+```yaml
+# whoosh-ng.yml
+embedding:
+  provider: fastembed
+  model: BAAI/bge-small-en-v1.5
+```
+
+```yaml
+# Ou avec ONNX
+embedding:
+  provider: onnx
+  model: multilingual-e5-small
+  model_path: models/multilingual-e5-small/model.onnx
+  tokenizer_dir: models/multilingual-e5-small
+  pooling: mean
+  normalize: true
+```
+
+```yaml
+# Ou avec sentence-transformers
+embedding:
+  provider: sentence-transformers
+  model: all-MiniLM-L6-v2
+```
+
+```yaml
+# Vectorisation multi-champs
+embedding:
+  provider: fastembed
+  model: BAAI/bge-small-en-v1.5
+  source_field: body
+  target_field: body_vector
+  embedding_fields:
+    - source_field: title
+      target_field: title_vector
+    - source_field: body
+      target_field: body_vector
+```
+
+Providers supportés : `fastembed`, `onnx`, `sentence-transformers`.
+
+Lorsque `embedding_fields` est fourni, les valeurs par défaut `source_field` / `target_field` sont ignorées et chaque mapping est traité indépendamment. `SearchView` injecte automatiquement les champs cibles en tant que champs `VECTOR` dans le schéma Whoosh généré s'ils ne sont pas déjà déclarés.
+
+## Protocole
+
+Tout objet implémentant `embed(text: str) -> Sequence[float]` satisfait le
+protocole `EmbeddingProvider` (`whoosh_modern.embeddings.protocol`).
+
+```python
+from whoosh_modern.embeddings.protocol import EmbeddingProvider
+
+class MonProvider:
+    def embed(self, text: str) -> list[float]: ...
+```
+
+## Exemples
+
+- [Embeddings avec FastEmbed](/examples/embeddings-fastembed) — Exemple FastEmbed exécutable
+- [Embeddings avec ONNX](/examples/embeddings-onnx) — Exemple ONNX exécutable
+
+## Voir aussi
+
+- [Recherche vectorielle](/modern/vector) — Utiliser les embeddings pour la recherche sémantique
+- [Fournisseurs de stockage](/modern/storage-providers) — Persister les index vectoriels
+- [Moteur de configuration](/modern/configuration-engine) — Surface de configuration typée
 
 
 ## DOCUMENT (FR): Linguistics
@@ -36577,6 +38188,7 @@ analyzer = AnalyzerPresets.get("autocomplete")
 
 ## Voir aussi
 
+- [SearchApplication](search-application.md) — Point d'entrée unifié pour l'indexation et la recherche
 - [Synonymes](synonyms.md) — Providers de synonymes, manager et dictionnaires Wiktionary
 - [Guide des Stemmers](stemming-providers.md) — Providers de stemming et analyseurs de langue
 - [Guide du Middleware](middleware-pipeline.md) — Intégration du pipeline de middleware
@@ -37045,6 +38657,56 @@ cached = cache.get_cached("requête utilisateur")
 cache.set_cached("requête utilisateur", results)
 ```
 
+### EmbeddingMiddleware
+
+Enrichit les documents avec des embeddings vectoriels denses avant l'indexation :
+
+```python
+from whoosh_modern.middleware import EmbeddingMiddleware
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+embedding = EmbeddingMiddleware(
+    embedding_provider=provider,
+    source_field="body",
+    target_field="body_vector",
+)
+```
+
+Utilisez `embedding_fields` pour la vectorisation multi-champs :
+
+```python
+embedding = EmbeddingMiddleware(
+    embedding_provider=provider,
+    embedding_fields=[
+        {"source_field": "title", "target_field": "title_vector"},
+        {"source_field": "body", "target_field": "body_vector"},
+    ],
+)
+```
+
+### CompressionMiddleware
+
+Marque les documents pour la compression au niveau du backend :
+
+```python
+from whoosh.middleware import CompressionMiddleware
+
+compression = CompressionMiddleware()
+# Définit document["_compressed"] = True
+```
+
+### EncryptionMiddleware
+
+Marque les documents pour le chiffrement au niveau du backend :
+
+```python
+from whoosh.middleware import EncryptionMiddleware
+
+encryption = EncryptionMiddleware()
+# Définit document["_encrypted"] = True
+```
+
 ## MiddlewareChain
 
 ```python
@@ -37066,6 +38728,13 @@ context = chain.run_before("before_search", context)
 context = chain.run_after("after_search", context)
 ```
 
+### Ordre d'exécution
+
+- Les hooks `before_*` s'exécutent dans l'ordre d'enregistrement
+- Les hooks `after_*` s'exécutent dans l'ordre inverse
+- Si un hook lève `StopOperation`, le pipeline s'arrête
+- Si `fail_open=False`, les exceptions se propagent immédiatement
+
 ## Intégration
 
 ### Avec Writer
@@ -37086,6 +38755,16 @@ from whoosh.middleware.integration import apply_middleware_to_searcher
 
 searcher = apply_middleware_to_searcher(ix.searcher(), chain.middlewares)
 results = searcher.search("query")
+```
+
+### Avec PluginManager
+
+```python
+from whoosh.plugins.manager import PluginManager
+
+# Les plugins peuvent fournir du middleware
+PluginManager.load_plugins()
+chain = PluginManager.get_middleware_chain()
 ```
 
 ## Exemple: middleware personnalisé
@@ -37110,6 +38789,14 @@ class RateLimitMiddleware(Middleware):
         if not rate_limiter.allow(context):
             raise StopOperation("Limite de taux dépassée")
         return context
+
+class QueryEnrichmentMiddleware(Middleware):
+    """Ajouter des synonymes à la requête."""
+
+    def before_search(self, context: MiddlewareContext):
+        if context.query:
+            context.query += " " + get_synonyms(context.query)
+        return context
 ```
 
 ## Gestion des erreurs
@@ -37133,6 +38820,142 @@ class ResilientMiddleware(Middleware):
 3. **L'ordre compte**: Placez le cache avant les métriques, l'auth avant le routage
 4. **Performance**: Gardez les hooks légers; utilisez async pour les I/O
 5. **Testabilité**: Mockez le contexte pour tester le middleware isolément
+
+## Intégration des providers via middleware
+
+De nombreux providers Whoosh-NG s'intègrent dans le pipeline d'indexation et de recherche grâce aux hooks de middleware. C'est le pattern standard pour les préoccupations transverses qui doivent transformer des documents, des requêtes ou des résultats.
+
+### Mapping provider → middleware
+
+| Provider | Middleware | Hooks utilisés | Usage |
+|----------|-----------|----------------|-------|
+| `StorageProvider` | `StorageMiddleware` | `before_index`, `on_commit` | Marque le contexte avec le backend de stockage ; écrit des points de commit |
+| `StemmerProvider` | `StemmingMiddleware` | `before_index`, `before_search` | Stemme les champs de document et le texte de requête |
+| `SynonymProvider` | `SynonymExpansionMiddleware` | `before_index`, `before_search` | Étend les documents et les requêtes avec des synonymes |
+| `EmbeddingProvider` | `EmbeddingMiddleware` | `before_index` | Calcule des vecteurs denses pour les champs configurés et les stocke comme champs `VECTOR` |
+| `VectorProvider` | (intégré au core Whoosh) | N/A (format de segment) | Enregistré dans `VectorRegistry` ; résolu au moment de la recherche à partir des métadonnées de segment |
+| `AutocompleteProvider` | ( autonome ou registre) | N/A | Utilisé directement via `.search()` ou via `AutocompleteRegistry` |
+
+### Flux des providers dans le pipeline
+
+```text
+                     ┌──────────────────┐
+                     │  PluginManager   │
+                     │  .load_plugins() │
+                     └────────┬─────────┘
+                              │
+               ┌──────────────┼──────────────┐
+               │              │              │
+      ┌────────▼──────┐ ┌────▼─────┐ ┌──────▼────────┐
+      │ VectorPlugin  │ │AutoPlugin│ │ Other Plugins │
+      │               │ │         │ │               │
+      │ VectorRegistry│ │AutoReg. │ │ ProviderReg.  │
+      │ .register()   │ │.register│ │ .register()   │
+      └───────────────┘ └─────────┘ └───────────────┘
+
+                     ┌──────────────────┐
+                     │ MiddlewareChain  │
+                     │                  │
+                     │ ┌──────────────┐ │
+                     │ │ before_index │ │
+                     │ │  hooks       │ │
+                     │ │  (ordered)   │ │
+                     │ └──────┬───────┘ │
+                     │        │         │
+                     │ ┌──────▼───────┐ │
+                     │ │   Writer     │ │
+                     │ │  .add_doc()  │ │
+                     │ └──────┬───────┘ │
+                     │        │         │
+                     │ ┌──────▼───────┐ │
+                     │ │  on_commit   │ │
+                     │ │  hooks       │ │
+                     │ └──────────────┘ │
+                     └──────────────────┘
+
+                     ┌──────────────────┐
+                     │  Searcher         │
+                     │                  │
+                     │ ┌──────────────┐ │
+                     │ │before_search │ │
+                     │ │  hooks       │ │
+                     │ └──────┬───────┘ │
+                     │        │         │
+                     │ ┌──────▼───────┐ │
+                     │ │   Query      │ │
+                     │ │  execution   │ │
+                     │ └──────┬───────┘ │
+                     │        │         │
+                     │ ┌──────▼───────┐ │
+                     │ │ after_search │ │
+                     │ │  hooks       │ │
+                     │ └──────────────┘ │
+                     └──────────────────┘
+```
+
+### Exemple: pipeline complet de providers
+
+```python
+from whoosh.middleware.chain import MiddlewareChain
+from whoosh.middleware.wrappers import MiddlewareWriter, MiddlewareSearcher
+from whoosh_modern.middleware import (
+    StorageMiddleware,
+    StemmingMiddleware,
+    FileStorageProvider,
+)
+from whoosh_modern.linguistics.synonyms import (
+    SynonymExpansionMiddleware,
+    SynonymManager,
+)
+from whoosh_modern.analysis import get_stemmer
+
+# 1. Construire les providers
+storage = FileStorageProvider("/data/index")
+stemmer = get_stemmer("auto", "english")
+syn_manager = SynonymManager({"car": ["automobile", "vehicle"]})
+
+# 2. Construire la chaîne de middleware
+chain = MiddlewareChain([
+    StorageMiddleware(storage, name="primary"),
+    StemmingMiddleware(stemmer=stemmer.stem, fields=["title", "content"]),
+    SynonymExpansionMiddleware(syn_manager),
+])
+
+# 3. Indexer avec middleware
+with MiddlewareWriter(ix.writer(), chain) as writer:
+    writer.add_document(title="Car for sale", content="House near beach")
+    # StorageMiddleware.before_index() marque le contexte
+    # StemmingMiddleware stemme "Car" → "car"
+    # SynonymExpansionMiddleware étend "Car" → "Car automobile vehicle"
+    writer.commit()
+    # StorageMiddleware.on_commit() écrit le checkpoint
+
+# 4. Rechercher avec middleware
+with MiddlewareSearcher(ix.searcher(), chain) as searcher:
+    # StemmingMiddleware stemme la requête "cars" → "car"
+    # SynonymExpansionMiddleware étend "car" → "car automobile vehicle"
+    results = searcher.search("cars")
+```
+
+### Insight clé : le middleware comme adaptateur de provider
+
+Le middleware agit comme l'**adaptateur** entre les providers et le pipeline core de Whoosh :
+
+```text
+Provider (logique métier)
+    │
+    ▼
+Middleware (intégration pipeline)
+    │
+    ▼
+Whoosh core (moteur générique)
+```
+
+- **StorageProvider** → **StorageMiddleware** → writer/searcher Whoosh
+- **StemmerProvider** → **StemmingMiddleware** → document/requête Whoosh
+- **SynonymProvider** → **SynonymExpansionMiddleware** → champs texte Whoosh
+
+Cette séparation garde les providers simples (responsabilité unique) tandis que le middleware gère l'intégration du cycle de vie (quand et comment appliquer le provider).
 
 ## Middleware Moderne (Whoosh-NG 2.0)
 
@@ -38383,7 +40206,7 @@ Le provider fonctionne indépendamment de l'index/searcher Whoosh.
 1. **Choisir le bon pattern d'intégration** : Les analyseurs de champs pour les schémas statiques, le middleware pour le comportement dynamique, le registre pour les backends interchangeables.
 2. **Éviter les double-applications** : Ne pas utiliser à la fois les analyseurs de niveau champ et le middleware pour la même transformation (ex: stemming).
 3. **Enregistrer les providers au démarrage** : Appeler `VectorPlugin().register(manager)` et `AutocompletePlugin().register(manager)` avant de créer les index.
-4. **Utiliser l'API de plus haut niveau quand c'est possible** : `SearchApplication` pour le bout en bout, `create_autocomplete()` pour les suggestions, `get_stemmer()` pour le stemming.
+4. **Utiliser l'API de plus haut niveau quand c'est possible** : [`SearchApplication`](/modern/search-application) pour le bout en bout, `create_autocomplete()` pour les suggestions, `get_stemmer()` pour le stemming.
 5. **Garder les providers sans état** : Les providers ne devraient pas contenir d'état spécifique à l'index; utilisez le contexte de middleware pour les données par requête.
 6. **Tester les providers en isolation** : Chaque provider devrait être testable sans Whoosh core (tests unitaires pour `provider.search()`, `provider.add()`).
 7. **Documenter les dépendances des providers** : Noter les dépendances optionnelles (boto3, PyStemmer, PyYAML) dans les exigences de votre projet.
@@ -38397,6 +40220,278 @@ Le provider fonctionne indépendamment de l'index/searcher Whoosh.
 - [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
 - [Guide Plugins](plugins-advanced.md) — Enregistrement et entry points des plugins
 - [API: Moderne](../api/modern.md) — Référence complète de l'API pour tous les providers
+
+
+## DOCUMENT (FR): Search Application
+
+# SearchApplication
+
+Module : `whoosh_modern.application`
+Version : 3.2.0
+
+`SearchApplication` est le **point d'entrée unifié** de Whoosh-NG. Il orchestre l'ensemble du pipeline d'indexation et de recherche, depuis une `DataSource` jusqu'à un index Whoosh interrogeable : découverte de schéma, validation, résolution du stockage, composition des middleware, création de l'index et exécution des requêtes.
+
+## Architecture
+
+```text
+DataSource (SQL, JSON, REST, CSV, …)
+    │
+    ▼
+SearchApplication
+    │
+    ├── source.discover_schema() ──► Schéma Whoosh
+    │
+    ├── storage._resolve_index_path() ──► chemin fichiersystem
+    │       │
+    │       ├── FileStorageProvider ──► provider.root
+    │       └── Autres providers ──► tempfile.mkdtemp()
+    │
+    ├── SearchView.build(path)
+    │       │
+    │       ├── MiddlewareChain.before_index()
+    │       │   ├── StorageMiddleware
+    │       │   ├── EmbeddingMiddleware (optionnel)
+    │       │   ├── StemmingMiddleware
+    │       │   └── SynonymExpansionMiddleware
+    │       │
+    │       ├── for doc in source.iter_documents():
+    │       │       writer.add_document(**prepared_doc)
+    │       │
+    │       └── writer.commit()
+    │
+    ▼
+Index Whoosh (segments sur disque / S3 / cache hybride)
+```
+
+## Démarrage rapide
+
+```python
+from whoosh_modern import SearchApplication, SQLSource
+from whoosh_modern.storage import FileStorage
+import sqlite3
+
+engine = sqlite3.connect("products.db")
+app = SearchApplication(
+    source=SQLSource(query="SELECT * FROM products", connection=engine),
+    storage=FileStorage("indexdir"),
+)
+app.build()
+results = app.search("laptop")
+for hit in results:
+    print(hit["title"])
+```
+
+## Constructeur
+
+```python
+SearchApplication(
+    source: DataSource | None = None,
+    storage: SyncStorageProvider | None = None,
+    wiktionary_indexer: WiktionaryIndexer | None = None,
+    language_detector: LanguageDetector | None = None,
+    dictionary_stem_overrides: dict[str, str] | None = None,
+    embedding_provider: Any | None = None,
+    embedding_fields: list[dict[str, str]] | None = None,
+)
+```
+
+### Paramètres
+
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| `source` | `DataSource \| None` | Source de données fournissant les documents à indexer. Requis pour `build()`. |
+| `storage` | `SyncStorageProvider \| None` | Backend de stockage pour les fichiers d'index. Si c'est un `FileStorageProvider`, son attribut public `root` est utilisé comme répertoire d'index. Sinon, un répertoire temporaire est créé. |
+| `wiktionary_indexer` | `WiktionaryIndexer \| None` | Indexeur Wiktionary dont les synonymes seront chargés dans le middleware d'expansion de synonymes lors du premier accès. |
+| `language_detector` | `LanguageDetector \| None` | Détecteur de langue utilisé lorsque `language="auto"` est défini sur les champs. Lorsqu'il est fourni, le détecteur est appelé sur chaque document pour résoudre la langue et injecter un champ stocké `_language`. |
+| `dictionary_stem_overrides` | `dict[str, str] \| None` | Mapping mot → forme stemmée pour remplacer le stemmer Snowball par défaut. |
+| `embedding_provider` | `Any \| None` | Fournisseur d'embeddings utilisé pour enrichir les documents avec des vecteurs denses avant l'indexation. |
+| `embedding_fields` | `list[dict[str, str]] \| None` | Séquence de mappings `{"source_field": "...", "target_field": "..."}` pour l'embedding multi-champs. Lorsque fourni, les valeurs par défaut `source_field` / `target_field` de la configuration d'embedding sont ignorées. |
+
+## Propriétés
+
+### `index`
+
+```python
+@property
+def index(self) -> Index
+```
+
+Retourne l'`Index` Whoosh construit.
+
+Lève `RuntimeError` si `build()` n'a pas été appelé.
+
+### `language_detector`
+
+```python
+@property
+def language_detector(self) -> LanguageDetector | None
+```
+
+Retourne le détecteur de langue configuré, ou `None` si aucun n'a été fourni.
+
+### `synonym_manager`
+
+```python
+@property
+def synonym_manager(self) -> SynonymManager
+```
+
+Retourne le `SynonymManager` peuplé à partir de l'index Wiktionary. Si un `wiktionary_indexer` a été fourni lors de la construction, le manager est peuplé paresseusement lors du premier accès, même si `build()` n'a pas été appelé. Si aucun indexer n'a été fourni, un manager vide est retourné.
+
+## Méthodes
+
+### `build()`
+
+```python
+def build(self) -> SearchApplication
+```
+
+Construit l'index à partir de la source de données.
+
+1. Résout le chemin d'index à partir du provider de stockage.
+2. Découvre le schéma depuis la source de données.
+3. Crée un `SearchView` et attache optionnellement `EmbeddingMiddleware`.
+4. Exécute la validation.
+5. Crée ou ouvre l'index Whoosh.
+6. Peuple l'index en itérant tous les documents.
+
+Retourne `self` pour permettre le chaînage.
+
+Lève `ValueError` si aucune source de données n'a été fournie.
+
+### `search()`
+
+```python
+def search(self, query: Any, **kwargs: Any) -> Any
+```
+
+Recherche dans l'index.
+
+- Si `query` est une chaîne, elle est analysée en utilisant `QueryParser` avec le premier champ du schéma comme champ par défaut.
+- Ouvre un searcher et délègue à `searcher.search()`.
+
+Retourne les résultats de recherche du searcher Whoosh.
+
+Lève `RuntimeError` si `build()` n'a pas été appelé.
+
+## Exemples d'utilisation
+
+### Avec stockage local
+
+```python
+from whoosh_modern import SearchApplication, SQLSource
+from whoosh_modern.storage import FileStorage
+import sqlite3
+
+engine = sqlite3.connect("products.db")
+app = SearchApplication(
+    source=SQLSource(query="SELECT * FROM products", connection=engine),
+    storage=FileStorage("indexdir"),
+)
+app.build()
+results = app.search("laptop")
+```
+
+### Avec stockage hybride S3
+
+```python
+from whoosh_modern import SearchApplication, SQLSource
+from whoosh_modern.storage import HybridStorage, S3Storage
+
+remote = S3Storage(bucket="my-index-bucket", prefix="segments")
+storage = HybridStorage(local_cache="./cache", remote=remote)
+
+app = SearchApplication(
+    source=SQLSource(query="SELECT * FROM products", connection=engine),
+    storage=storage,
+)
+app.build()
+results = app.search("laptop")
+```
+
+### Avec détection de langue
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.linguistics.detection import StopwordDetector
+from whoosh_modern.data_sources.json import JSONSource
+
+detector = StopwordDetector(["fr", "en", "de"])
+source = JSONSource("data/products.json")
+
+app = SearchApplication(
+    source=source,
+    language_detector=detector,
+)
+app.build()
+```
+
+Lorsque les champs sont configurés avec `language="auto"`, le détecteur résout la langue à partir du contenu du document et injecte un champ stocké `_language`.
+
+### Avec synonymes Wiktionary
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.linguistics.wiktionary_indexer import WiktionaryIndexer
+
+indexer = WiktionaryIndexer(language="en")
+indexer.build()
+
+app = SearchApplication(
+    source=source,
+    wiktionary_indexer=indexer,
+)
+app.build()
+
+# Accéder au synonym_manager peuplé
+synonym_manager = app.synonym_manager
+```
+
+### Avec remplacements de stemming personnalisés
+
+```python
+from whoosh_modern import SearchApplication
+
+app = SearchApplication(
+    source=source,
+    dictionary_stem_overrides={
+        "mice": "mouse",
+        "geese": "goose",
+    },
+)
+app.build()
+```
+
+## SearchApplication vs SearchView
+
+`SearchApplication` est un wrapper simplifié autour de `SearchView`. Utilisez `SearchApplication` pour la plupart des cas de production. Utilisez `SearchView` directement lorsque vous avez besoin d'un contrôle plus fin du cycle de vie d'indexation.
+
+| Fonctionnalité | SearchApplication | SearchView |
+|----------------|-------------------|------------|
+| Découverte de schéma | ✅ automatique | ✅ automatique |
+| Validation | ✅ automatique | ✅ automatique |
+| Rafraîchissement incrémental | ❌ | ✅ `refresh()` |
+| Réindexation complète | ❌ | ✅ `reindex()` |
+| Évolution de schéma | ❌ | ✅ `evolve_schema()` |
+| Middleware personnalisé | ❌ | ✅ `middleware=` |
+| Facettes | ❌ | ✅ `facets=` |
+| Remplacements de champs | ❌ | ✅ `fields=` |
+| Intégration du stockage | ✅ automatique | ✅ via `StorageMiddleware` |
+
+## Fonctionnement de l'intégration du stockage
+
+Lorsque `storage` est un `FileStorageProvider` (exposé sous le nom `FileStorage`), `SearchApplication` utilise son attribut public `root` comme répertoire d'index. Pour tous les autres providers (S3, Hybride, Snapshot), il se rabat sur un répertoire temporaire car Whoosh core nécessite un chemin filesystem pour `create_in()`.
+
+Le routage réel des segments, le pointage de commit et la synchronisation du cache sont gérés par `StorageMiddleware` au niveau middleware, et non par le provider de stockage lui-même.
+
+## Voir aussi
+
+- [SearchView](/examples/search-view) — Vue de bas niveau avec rafraîchissement, réindexation et validation
+- [Fournisseurs de stockage](/modern/storage-providers) — Backends de stockage enfichables
+- [Pipeline de middleware](/modern/middleware-pipeline) — Hooks d'indexation et de recherche transverses
+- [Linguistique](/modern/linguistics) — Détection de langue et expansion de synonymes
+- [Intégration des providers](/modern/provider-integration) — Guide de pipeline de bout en bout
+- [Auto-indexation](/modern/auto-indexing) — Découverte de schéma et indexation pilotée par source de données
 
 
 ## DOCUMENT (FR): Stemming Providers
@@ -39154,23 +41249,6 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## Utilisation du stockage avec SearchApplication
-
-```python
-from whoosh_modern import SearchApplication, SQLSource
-from whoosh_modern.storage import HybridStorage, S3Storage
-
-remote = S3Storage(bucket="my-index-bucket", prefix="segments")
-storage = HybridStorage(local_cache="./cache", remote=remote)
-
-app = SearchApplication(
-    source=SQLSource(query="SELECT * FROM products", connection=engine),
-    storage=storage,
-)
-app.build()
-results = app.index.search("laptop")
-```
-
 ## Benchmarks de performance
 
 Les benchmarks ont été exécutés contre une instance MinIO locale en
@@ -39293,7 +41371,7 @@ modifier le writer.
 | `SyncStorageProvider` / `AsyncStorageProvider` | **Contrat** définissant `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
 | `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implémentations** du contrat |
 | `StorageMiddleware` | **Couche d'intégration** qui appelle le provider aux hooks de cycle de vie (`before_index`, `on_commit`) |
-| `SearchApplication` | **Point d'entrée** qui extrait `_root` du provider pour créer le répertoire d'index Whoosh |
+| `SearchApplication` | **Point d'entrée** qui extrait `_root` du provider pour créer le répertoire d'index Whoosh. Voir [SearchApplication](/modern/search-application). |
 
 Le provider ne **n'intercepte pas** les lectures internes de segments de Whoosh. Ces lectures passent par le `FileStorage` intégré de Whoosh (`whoosh.filedb.filestore`) qui lit depuis le chemin du système de fichiers donné à `create_in()`. L'abstraction provider de Whoosh-NG est conçue pour :
 - Le routage personnalisé de segments (S3, SQLite, cache hybride)
@@ -39605,6 +41683,7 @@ middleware = SynonymExpansionMiddleware(app.synonym_manager)
 
 ## Voir aussi
 
+- [SearchApplication](search-application.md) — Point d'entrée unifié pour l'indexation et la recherche
 - [Vue d'ensemble linguistique](linguistics.md) — Stemmers, analyseurs de langue, et intégration complète du pipeline
 - [Pipeline de middleware](middleware-pipeline.md) — Fonctionnement des chaînes de middleware
 - [Providers de stemming](stemming-providers.md) — Backends de stemming spécifiques aux langues
@@ -39767,6 +41846,7 @@ requise au démarrage.
 
 ## Voir Aussi
 
+- [Embeddings](/modern/embeddings) — Provider d'embeddings ONNX Runtime compatible CPU
 - [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
 
