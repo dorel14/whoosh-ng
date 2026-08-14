@@ -302,6 +302,14 @@ class ONNXEmbeddingProvider:
             f"model_path={self._model_path!r}, "
             f"pooling={self._pooling!r}, "
             f"normalize={self._normalize}, "
-            f"quantization={self._pooling!r}"
+    def __repr__(self) -> str:
+        return (
+            f"ONNXEmbeddingProvider("
+            f"model_path={self._model_path!r}, "
+            f"pooling={self._pooling!r}, "
+            f"normalize={self._normalize}, "
+            f"quantization={self._quantization!r}"
+            f")"
+        )
             f")"
         )
