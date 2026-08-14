@@ -6,11 +6,14 @@ Version: 3.0.0
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Sequence
 from typing import Any
 
 from whoosh.middleware.base import Middleware
 from whoosh.middleware.context import MiddlewareContext
+
+logger = logging.getLogger(__name__)
 
 
 class EmbeddingMiddleware(Middleware):
@@ -88,8 +91,8 @@ class EmbeddingMiddleware(Middleware):
             try:
                 vector = self._embedding_provider.embed(text)
                 doc[target] = vector
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("Embedding failed for field %r: %s", target, exc)
 
         context.document = doc
         return context

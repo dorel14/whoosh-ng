@@ -43,7 +43,15 @@ def test_embedding_engine_onnx() -> None:
         mock.return_value = MagicMock()
         result = EmbeddingEngine(config).build()
         assert result is not None
-        mock.assert_called_once()
+        mock.assert_called_once_with(
+            model_path="models/multilingual-e5-small/model.onnx",
+            tokenizer_dir="models/multilingual-e5-small",
+            pooling="mean",
+            normalize=True,
+            dimension=None,
+            enable_prefix=True,
+            quantization="fp32",
+        )
 
 
 def test_embedding_engine_sentence_transformers() -> None:

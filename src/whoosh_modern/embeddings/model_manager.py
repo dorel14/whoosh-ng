@@ -24,13 +24,15 @@ from whoosh_modern.embeddings.registry import (
     get_default_registry,
 )
 
-_hf_hub_download: Any = None
 try:
     from huggingface_hub import hf_hub_download as _hf_hub_download
 
     _HAS_HUGGINGFACE_HUB = True
 except ImportError:
     _HAS_HUGGINGFACE_HUB = False
+
+    def _hf_hub_download(*args: Any, **kwargs: Any) -> Any:  # type: ignore[no-redef]
+        raise ImportError("huggingface_hub is required for this operation")
 
 logger = logging.getLogger(__name__)
 

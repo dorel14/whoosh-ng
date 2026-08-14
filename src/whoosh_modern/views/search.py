@@ -302,12 +302,9 @@ class SearchView:
             return True
 
         try:
-            ix = open_dir(self._index_path)
-            with ix.searcher() as searcher:
-                _ = searcher.search(self._index.schema[_SCHEMA_VERSION_FIELD].exists())
-                return True
+            return _SCHEMA_VERSION_FIELD in self._index.schema
         except Exception:
-            return True
+            return False
 
     def evolve_schema(self, new_fields: dict[str, Any]) -> None:
         """Evolve the schema by adding new fields without a full reindex.

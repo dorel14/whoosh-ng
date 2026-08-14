@@ -189,10 +189,22 @@ embedding:
 ```
 
 ```yaml
-# Or with ONNX
+# Or with ONNX using EmbeddingModelManager
 embedding:
   provider: onnx
   model: multilingual-e5-small
+  pooling: mean
+  normalize: true
+```
+
+When using `provider: onnx`, the `EmbeddingModelManager` downloads and caches the model files automatically. The manager derives `model_path` and `tokenizer_dir` from the local cache, so you typically only need to specify the `model` name.
+
+If you need to use a custom local model, you can provide explicit paths:
+
+```yaml
+# Or with explicit local paths
+embedding:
+  provider: onnx
   model_path: models/multilingual-e5-small/model.onnx
   tokenizer_dir: models/multilingual-e5-small
   pooling: mean
@@ -223,6 +235,12 @@ embedding:
 Supported providers: `fastembed`, `onnx`, `sentence-transformers`.
 
 When `embedding_fields` is provided, the `source_field` / `target_field` defaults are ignored and each mapping is processed independently. The `SearchView` automatically injects the target fields as `VECTOR` fields into the generated Whoosh schema if they are not already declared.
+
+**Note on ONNX configuration:**
+When using `provider: onnx`, you can specify a registered model via `model` or provide explicit file paths via `model_path` and `tokenizer_dir`.
+If `model` is specified, `EmbeddingModelManager` will attempt to download and manage the model, automatically deriving `model_path` and `tokenizer_dir` from the local cache.
+If `model_path` and/or `tokenizer_dir` are explicitly provided, they will take precedence over paths derived from the `model` name.
+It is recommended to use either `model` for manager-managed models, or `model_path` / `tokenizer_dir` for custom local paths, to avoid ambiguity.
 
 ## Protocol
 

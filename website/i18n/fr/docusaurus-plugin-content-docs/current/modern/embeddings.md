@@ -228,6 +228,12 @@ Providers supportés : `fastembed`, `onnx`, `sentence-transformers`.
 
 Lorsque `embedding_fields` est fourni, les valeurs par défaut `source_field` / `target_field` sont ignorées et chaque mapping est traité indépendamment. `SearchView` injecte automatiquement les champs cibles en tant que champs `VECTOR` dans le schéma Whoosh généré s'ils ne sont pas déjà déclarés.
 
+**Note sur la configuration ONNX :**
+Lorsque vous utilisez `provider: onnx`, vous pouvez spécifier un modèle enregistré via `model` ou fournir des chemins de fichiers explicites via `model_path` et `tokenizer_dir`.
+Si `model` est spécifié, l'`EmbeddingModelManager` tentera de télécharger et gérer le modèle, dérivant automatiquement `model_path` et `tokenizer_dir` depuis le cache local.
+Si `model_path` et/ou `tokenizer_dir` sont fournis explicitement, ils prendront le pas sur les chemins dérivés du nom du `model`.
+Il est recommandé d'utiliser soit `model` pour les modèles gérés par le manager, soit `model_path` / `tokenizer_dir` pour des chemins locaux personnalisés, afin d'éviter toute ambiguïté.
+
 ## Protocole
 
 Tout objet implémentant `embed(text: str) -> Sequence[float]` satisfait le

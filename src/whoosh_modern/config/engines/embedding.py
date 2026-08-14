@@ -6,9 +6,12 @@ Version: 3.0.0
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from whoosh_modern.config.models import WhooshNGConfig
+
+logger = logging.getLogger(__name__)
 
 
 class EmbeddingEngine:
@@ -35,6 +38,10 @@ class EmbeddingEngine:
         """
         embedding_config = self._config.embedding
         if not embedding_config or not embedding_config.provider:
+            logger.warning(
+                "No embedding provider configured. Embeddings will not be generated. "
+                "Set embedding.provider in your config to enable embeddings."
+            )
             return None
         provider_type = embedding_config.provider.lower()
         if provider_type == "fastembed":
@@ -54,12 +61,13 @@ class EmbeddingEngine:
                 from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider
 
                 return ONNXEmbeddingProvider(
-                    model_path=str(embedding_config.model or ""),
-                    tokenizer_dir=None,
-                    pooling="mean",
-                    normalize=True,
+                    model_path=embedding_config.model_path or str(embedding_config.model or ""),
+                    tokenizer_dir=embedding_config.tokenizer_dir,
+                    pooling=embedding_config.pooling,
+                    normalize=embedding_config.normalize,
                     dimension=None,
                     enable_prefix=True,
+                    quantization=embedding_config.quantization or "fp32",
                 )
             except ImportError as exc:
                 raise ImportError(
