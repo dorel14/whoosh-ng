@@ -334,7 +334,7 @@ The provider operates independently of Whoosh's index/searcher.
 1. **Choose the right integration pattern**: Field analyzers for static schemas, middleware for dynamic behavior, registry for pluggable backends.
 2. **Avoid double-application**: Don't use both field-level analyzers and middleware for the same transformation (e.g., stemming).
 3. **Register providers at startup**: Call `VectorPlugin().register(manager)` and `AutocompletePlugin().register(manager)` before creating indexes.
-4. **Use the highest-level API when possible**: `SearchApplication` for end-to-end, `create_autocomplete()` for suggestions, `get_stemmer()` for stemming.
+4. **Use the highest-level API when possible**: [`SearchApplication`](/modern/search-application) for end-to-end, `create_autocomplete()` for suggestions, `get_stemmer()` for stemming.
 5. **Keep providers stateless**: Providers should not hold index-specific state; use middleware context for per-request data.
 6. **Test providers in isolation**: Each provider should be testable without Whoosh core (unit tests for `provider.search()`, `provider.add()`).
 7. **Document provider dependencies**: Note optional dependencies (boto3, PyStemmer, PyYAML) in your project's requirements.

@@ -98,8 +98,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   HNSW approximate nearest neighbor search, complementing the existing
   `NumpyProvider`.
 - **Embedding Framework** (`src/whoosh_modern/embeddings/`): added
-  `EmbeddingProvider` protocol and `SentenceTransformersProvider` for
-  sentence-transformers embeddings.
+  `EmbeddingProvider` protocol, `SentenceTransformersProvider`,
+  `FastEmbedProvider` (default CPU backend via `fastembed`),
+  `ONNXEmbeddingProvider` (CPU-friendly, zero PyTorch dependency),
+  `EmbeddingModelRegistry` with pre-registered ONNX models,
+  `EmbeddingModelManager` for download/cache/checksum verification in
+  `~/.whoosh-ng/models/`, the `whoosh-ng-models` CLI
+  (`list|install|info|verify|remove|update`), and `EmbeddingEngine`
+  (`src/whoosh_modern/config/engines/embedding.py`) for `ConfigEngine`
+  integration (`embedding:` YAML/JSON block).
+- **Embeddings documentation** (`website/docs/modern/embeddings.md`):
+  dedicated guide covering FastEmbed, ONNX, model manager/registry, CLI,
+  ConfigEngine integration, protocol, and runnable example.
 - **Modern N-Gram Framework** (`src/whoosh_modern/analysis/`): added
   `AutoCompleteAnalyzer`, `EdgeNgramAnalyzer`, `SEARCH_AS_YOU_TYPE` field
   type, and new `AnalyzerPresets` (autocomplete, partial_match, fuzzy,

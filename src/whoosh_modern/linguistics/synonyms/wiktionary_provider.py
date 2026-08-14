@@ -107,9 +107,7 @@ class WiktionarySynonymProvider(StaticSynonymProvider):
                     continue
 
                 clean_synonyms = [
-                    str(s)
-                    for s in synonyms
-                    if isinstance(s, str) and s and " " not in s
+                    str(s) for s in synonyms if isinstance(s, str) and s and " " not in s
                 ]
                 if not clean_synonyms:
                     skipped_entries += 1

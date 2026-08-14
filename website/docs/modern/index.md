@@ -48,7 +48,9 @@ storage.
 | [Linguistics & Synonyms](/modern/linguistics) | `SynonymManager` and linguistic engine |
 | [Stemmer Providers](/modern/stemming-providers) | PyStemmer backends and auto-detection |
 | [Storage Providers](/modern/storage-providers) | Hybrid, S3, and async storage backends |
+| [Embeddings](/modern/embeddings) | ONNX Runtime CPU-friendly embedding provider |
 | [Auto-indexing](/modern/auto-indexing) | Schema discovery and data-source driven indexing |
+| [SearchApplication](/modern/search-application) | Unified entry point for indexing and search |
 | [Provider Integration](/modern/provider-integration) | End-to-end pipeline integration |
 | [Configuration Engine](/modern/configuration-engine) | Typed configuration surface |
 

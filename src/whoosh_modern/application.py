@@ -54,6 +54,8 @@ class SearchApplication:
         wiktionary_indexer: WiktionaryIndexer | None = None,
         language_detector: LanguageDetector | None = None,
         dictionary_stem_overrides: dict[str, str] | None = None,
+        embedding_provider: Any | None = None,
+        embedding_fields: list[dict[str, str]] | None = None,
     ) -> None:
         """Initialize the SearchApplication.
 
@@ -68,6 +70,12 @@ class SearchApplication:
                 and inject a ``_language`` stored field.
             dictionary_stem_overrides: Optional mapping of word -> stemmed form
                 to override the default Snowball stemmer.
+            embedding_provider: Optional embedding provider used to enrich
+                documents with dense vectors before indexing.
+            embedding_fields: Optional sequence of ``{"source_field": ..., "target_field": ...}``
+                mappings for multi-field embedding. When provided, the
+                ``source_field`` / ``target_field`` defaults from the
+                embedding configuration are ignored.
         """
         self._source = source
         self._storage = storage
@@ -77,6 +85,9 @@ class SearchApplication:
         self._synonym_manager: SynonymManager | None = None
         self._language_detector = language_detector
         self._dictionary_stem_overrides = DictionaryStemOverride(dictionary_stem_overrides)
+        self._embedding_provider = embedding_provider
+        self._embedding_fields = embedding_fields
+        self._config = None
 
     @property
     def index(self) -> Index:
@@ -116,9 +127,7 @@ class SearchApplication:
         if self._synonym_manager is None:
             self._synonym_manager = SynonymManager()
             if self._wiktionary_indexer is not None:
-                self._synonym_manager.import_wiktionary_index(
-                    self._wiktionary_indexer._index_dir
-                )
+                self._synonym_manager.import_wiktionary_index(self._wiktionary_indexer._index_dir)
         return self._synonym_manager
 
     def _detect_language(self, document: dict[str, Any]) -> str | None:
@@ -158,6 +167,24 @@ class SearchApplication:
         index_path = self._resolve_index_path()
 
         view = SearchView(name="search_application", source=self._source)
+        if self._embedding_provider is not None:
+            from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+
+            embedding_config = getattr(self._config, "embedding", None)
+            source_field = getattr(embedding_config, "source_field", "content")
+            target_field = getattr(embedding_config, "target_field", "embedding")
+            embedding_fields = self._embedding_fields or getattr(
+                embedding_config, "embedding_fields", None
+            )
+            view.middleware = [
+                *getattr(view, "middleware", []),
+                EmbeddingMiddleware(
+                    embedding_provider=self._embedding_provider,
+                    source_field=source_field,
+                    target_field=target_field,
+                    embedding_fields=embedding_fields,
+                ),
+            ]
         self._index = view.build(index_path)
         self._schema = view._schema
         self._view = view
@@ -211,4 +238,3 @@ class SearchApplication:
 
 
 __all__ = ["SearchApplication"]
-

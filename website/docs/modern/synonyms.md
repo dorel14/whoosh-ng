@@ -300,6 +300,7 @@ middleware = SynonymExpansionMiddleware(app.synonym_manager)
 
 ## See Also
 
+- [SearchApplication](search-application.md) — Unified entry point for indexing and search
 - [Linguistics Overview](linguistics.md) — Stemmers, language analyzers, and full pipeline integration
 - [Middleware Pipeline](middleware-pipeline.md) — How middleware chains work
 - [Stemming Providers](stemming-providers.md) — Language-specific stemmer backends

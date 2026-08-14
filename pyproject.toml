@@ -53,7 +53,15 @@ faiss = [
   "faiss-cpu",
 ]
 embeddings = [
+  "fastembed",
+]
+embeddings-sentence-transformers = [
   "sentence-transformers",
+]
+embeddings-onnx = [
+  "onnxruntime",
+  "tokenizers",
+  "huggingface_hub",
 ]
 fastembed = [
   "fastembed",
@@ -126,6 +134,9 @@ whoosh_vector = "whoosh_modern.vector.plugin:VectorPlugin"
 whoosh_fastapi = "whoosh_fastapi:create_app"
 whoosh_observability = "whoosh.middleware.metrics:PrometheusMiddleware"
 whoosh_admin = "whoosh_admin:create_admin_app"
+
+[project.scripts]
+whoosh-ng-models = "whoosh_modern.embeddings.cli:main"
 
 [project.urls]
 Documentation = "https://dorel14.github.io/whoosh-ng/"

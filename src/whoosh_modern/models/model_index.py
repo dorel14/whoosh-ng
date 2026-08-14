@@ -113,7 +113,7 @@ class ModelIndex:
         else:
             annotations = _get_annotations(model)
             for name, annotation in annotations.items():
-                options = TypeMapper._extract_search_options(annotation, SearchOptions())
+                options = _extract_search_options(annotation, SearchOptions())
                 attr = getattr(model, name, None)
                 if isinstance(attr, SearchField):
                     options = attr.options

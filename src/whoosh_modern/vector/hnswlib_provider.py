@@ -53,8 +53,7 @@ class HnswlibProvider(VectorProvider):
             import hnswlib  # pyright: ignore[reportMissingImports,reportUnusedImport,reportMissingModuleSource]
         except ImportError as exc:
             raise ImportError(
-                "HnswlibProvider requires hnswlib. "
-                "Install it with: pip install whoosh-ng[hnsw]"
+                "HnswlibProvider requires hnswlib. Install it with: pip install whoosh-ng[hnsw]"
             ) from exc
         self._dimension = dimension
         self._space: Literal["l2", "ip", "cosine"] = space

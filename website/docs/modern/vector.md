@@ -325,5 +325,6 @@ at startup.
 
 ## See Also
 
+- [Embeddings](/modern/embeddings) — ONNX Runtime CPU-friendly embedding provider
 - [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
 - [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters

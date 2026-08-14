@@ -49,7 +49,9 @@ pipeline de middleware, linguistique et stockage cloud enfichable.
 | [Synonymes & Linguistique](/modern/linguistique) | `SynonymManager` et moteur linguistique |
 | [Fournisseurs de Stemmers](/modern/stemmers-fournisseurs) | Backends PyStemmer et auto-détection |
 | [Providers de Stockage](/modern/storage-providers) | Backends hybrides, S3 et asynchrones |
+| [Embeddings](/modern/embeddings) | Provider d'embeddings ONNX Runtime compatible CPU |
 | [Auto-indexation](/modern/auto-indexing) | Découverte de schéma et indexation pilotée par une source de données |
+| [SearchApplication](/modern/search-application) | Point d'entrée unifié pour l'indexation et la recherche |
 | [Intégration des Providers](/modern/provider-integration) | Intégration de bout en bout du pipeline |
 | [Moteur de Configuration](/modern/configuration-engine) | Surface de configuration typée |
 

@@ -103,6 +103,8 @@ Both versions are kept synchronized, with code examples remaining in English for
 - **[SearchView](/examples/search-view)** — Full pipeline integration
 - **[Autocomplete](/examples/autocomplete)** — Autocomplete provider examples
 - **[Vector Search](/examples/vector-search)** — NumPy, HNSW, and Faiss integrations
+- **[Embeddings with FastEmbed](/examples/embeddings-fastembed)** — Dense embeddings via FastEmbed
+- **[Embeddings with ONNX](/examples/embeddings-onnx)** — Dense embeddings via ONNX runtime
 
 ## Quick Overview
 

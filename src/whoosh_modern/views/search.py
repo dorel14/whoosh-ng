@@ -14,6 +14,7 @@ from typing import Any
 
 from whoosh.fields import Schema
 from whoosh.index import create_in, exists_in, open_dir
+from whoosh.middleware.context import MiddlewareContext
 from whoosh_modern.exceptions import ValidationError
 from whoosh_modern.middleware import Middleware
 from whoosh_modern.validation import ValidationFramework, ValidationResult
@@ -199,22 +200,38 @@ class SearchView:
     def _apply_field_overrides(self, schema: Schema) -> Schema:
         """Apply field type overrides from the fields parameter.
 
+        Also injects embedding target fields declared by any
+        :class:`EmbeddingMiddleware` so that the generated schema always
+        contains the fields required to store computed vectors.
+
         Args:
             schema: The original discovered Whoosh Schema.
 
         Returns:
             A new Schema with overridden field types where specified.
         """
-        if not self.fields:
-            return schema
-
-        # Rebuild schema with overrides
         fields: dict[str, Any] = {}
         for field_name, field_type in schema.items():
-            if field_name in self.fields:
-                fields[field_name] = self.fields[field_name]
+            fields[field_name] = field_type
+
+        for field_name, field_type in self.fields.items():
+            fields[field_name] = field_type
+
+        for middleware in self.middleware:
+            embedding_fields = getattr(middleware, "_embedding_fields", None)
+            if embedding_fields:
+                for field_config in embedding_fields:
+                    target_field = field_config.get("target_field")
+                    if target_field and target_field not in fields:
+                        from whoosh_modern.fields import VECTOR
+
+                        fields[target_field] = VECTOR()
             else:
-                fields[field_name] = field_type
+                target_field = getattr(middleware, "_target_field", None)
+                if target_field and target_field not in fields:
+                    from whoosh_modern.fields import VECTOR
+
+                    fields[target_field] = VECTOR()
 
         return Schema(**fields)
 
@@ -224,6 +241,7 @@ class SearchView:
         Preserves list/tuple values as multi-valued fields instead of
         joining them into a single string. Converts non-string scalar values
         (e.g. integers from SQL) to strings for Whoosh compatibility.
+        Runs middleware ``before_index`` hooks when configured.
 
         Args:
             doc: Source document as a dict.
@@ -239,6 +257,15 @@ class SearchView:
                 if value is not None and not isinstance(value, str | bytes | list | tuple):
                     value = str(value)
                 prepared[field_name] = value
+
+        if self.middleware:
+            context = MiddlewareContext("index")
+            context.document = prepared
+            for middleware in self.middleware:
+                context = middleware.before_index(context)
+            if context.document is not None:
+                prepared = context.document
+
         return prepared
 
     def _store_schema_metadata(self, schema: Schema) -> None:

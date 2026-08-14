@@ -66,3 +66,100 @@ class TestSearchApplication:
         app = SearchApplication()
         with pytest.raises(RuntimeError, match="Call build"):
             _ = app.index
+
+
+class TestSearchApplicationEmbedding:
+    def test_build_adds_vector_field_from_middleware(self, tmp_path: Any) -> None:
+        documents = [{"title": "hello", "content": "world"}]
+        source = _FakeDataSource(documents)
+
+        from unittest.mock import MagicMock
+
+        from whoosh_modern.fields import VECTOR
+        from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+        from whoosh_modern.views.search import SearchView
+
+        provider = MagicMock()
+        provider.embed.return_value = [0.1, 0.2, 0.3]
+
+        view = SearchView(
+            name="test",
+            source=source,
+            middleware=[
+                EmbeddingMiddleware(
+                    embedding_provider=provider,
+                    source_field="content",
+                    target_field="embedding",
+                ),
+            ],
+        )
+        index = view.build(str(tmp_path / "index"))
+        assert "embedding" in index.schema
+        assert isinstance(index.schema["embedding"], VECTOR)
+        assert index.schema["embedding"].stored is True
+
+    def test_build_indexes_embedding_vector(self, tmp_path: Any) -> None:
+        documents = [{"title": "hello", "content": "world"}]
+        source = _FakeDataSource(documents)
+
+        from unittest.mock import MagicMock
+
+        from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+        from whoosh_modern.views.search import SearchView
+
+        provider = MagicMock()
+        provider.embed.return_value = [0.1, 0.2, 0.3]
+
+        view = SearchView(
+            name="test",
+            source=source,
+            middleware=[
+                EmbeddingMiddleware(
+                    embedding_provider=provider,
+                    source_field="content",
+                    target_field="embedding",
+                ),
+            ],
+        )
+        index = view.build(str(tmp_path / "index"))
+        with index.searcher() as searcher:
+            results = list(searcher.all_stored_fields())
+            assert len(results) == 1
+            assert results[0]["embedding"] == [0.1, 0.2, 0.3]
+
+    def test_build_supports_multiple_vector_fields(self, tmp_path: Any) -> None:
+        documents = [{"title": "hello", "content": "world"}]
+        source = _FakeDataSource(documents)
+
+        from unittest.mock import MagicMock
+
+        from whoosh_modern.fields import VECTOR
+        from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+        from whoosh_modern.views.search import SearchView
+
+        provider = MagicMock()
+        provider.embed.side_effect = [[2.0], [5.0]]
+
+        view = SearchView(
+            name="test",
+            source=source,
+            middleware=[
+                EmbeddingMiddleware(
+                    embedding_provider=provider,
+                    embedding_fields=[
+                        {"source_field": "title", "target_field": "title_vector"},
+                        {"source_field": "content", "target_field": "body_vector"},
+                    ],
+                ),
+            ],
+        )
+        index = view.build(str(tmp_path / "index"))
+        assert "title_vector" in index.schema
+        assert "body_vector" in index.schema
+        assert isinstance(index.schema["title_vector"], VECTOR)
+        assert isinstance(index.schema["body_vector"], VECTOR)
+        with index.searcher() as searcher:
+            results = list(searcher.all_stored_fields())
+            assert len(results) == 1
+            assert results[0]["title_vector"] == [2.0]
+            assert results[0]["body_vector"] == [5.0]

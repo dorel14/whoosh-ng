@@ -82,6 +82,34 @@ compression = CompressionMiddleware()
 # Sets document["_compressed"] = True
 ```
 
+### EmbeddingMiddleware
+
+Enriches documents with dense vector embeddings before indexing:
+
+```python
+from whoosh_modern.middleware import EmbeddingMiddleware
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+embedding = EmbeddingMiddleware(
+    embedding_provider=provider,
+    source_field="body",
+    target_field="body_vector",
+)
+```
+
+Use `embedding_fields` for multi-field vectorization:
+
+```python
+embedding = EmbeddingMiddleware(
+    embedding_provider=provider,
+    embedding_fields=[
+        {"source_field": "title", "target_field": "title_vector"},
+        {"source_field": "body", "target_field": "body_vector"},
+    ],
+)
+```
+
 ### EncryptionMiddleware
 
 Marks documents for encryption at the backend level:
@@ -223,6 +251,7 @@ need to transform documents, queries, or results.
 | `StorageProvider` | `StorageMiddleware` | `before_index`, `on_commit` | Tags context with storage backend; writes commit checkpoints |
 | `StemmerProvider` | `StemmingMiddleware` | `before_index`, `before_search` | Stems document fields and query text |
 | `SynonymProvider` | `SynonymExpansionMiddleware` | `before_index`, `before_search` | Expands documents and queries with synonyms |
+| `EmbeddingProvider` | `EmbeddingMiddleware` | `before_index` | Computes dense vectors for configured fields and stores them as `VECTOR` fields |
 | `VectorProvider` | (built into Whoosh core) | N/A (segment format) | Registered in `VectorRegistry`; resolved at search time from segment metadata |
 | `AutocompleteProvider` | (standalone or registry) | N/A | Used directly via `.search()` or via `AutocompleteRegistry` |
 

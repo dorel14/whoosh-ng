@@ -300,6 +300,7 @@ middleware = SynonymExpansionMiddleware(app.synonym_manager)
 
 ## Voir aussi
 
+- [SearchApplication](search-application.md) — Point d'entrée unifié pour l'indexation et la recherche
 - [Vue d'ensemble linguistique](linguistics.md) — Stemmers, analyseurs de langue, et intégration complète du pipeline
 - [Pipeline de middleware](middleware-pipeline.md) — Fonctionnement des chaînes de middleware
 - [Providers de stemming](stemming-providers.md) — Backends de stemming spécifiques aux langues

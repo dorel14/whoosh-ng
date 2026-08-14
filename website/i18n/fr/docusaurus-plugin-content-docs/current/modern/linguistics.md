@@ -573,6 +573,7 @@ analyzer = AnalyzerPresets.get("autocomplete")
 
 ## Voir aussi
 
+- [SearchApplication](search-application.md) — Point d'entrée unifié pour l'indexation et la recherche
 - [Synonymes](synonyms.md) — Providers de synonymes, manager et dictionnaires Wiktionary
 - [Guide des Stemmers](stemming-providers.md) — Providers de stemming et analyseurs de langue
 - [Guide du Middleware](middleware-pipeline.md) — Intégration du pipeline de middleware
