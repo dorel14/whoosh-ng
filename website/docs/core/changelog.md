@@ -8,6 +8,92 @@ sidebars: changelogSidebar
 
 Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
 
+## v5.4.0 (2026-08-15)
+**Tag**: `v5.4.0`
+
+## v5.4.0 (2026-08-15)
+
+_This release is published under the MIT License._
+
+### Bug Fixes
+
+- Resolve CI failures and improve embeddings documentation ([`245424b`](https://github.com/dorel14/whoosh-ng/commit/245424ba09aa4dc7813bf0d4fbf4b598e5963c67))
+
+- Store schema metadata in sidecar file instead of index document ([`aa35288`](https://github.com/dorel14/whoosh-ng/commit/aa35288552003bf2ba39d64f2bccca0cb6090079))
+
+- **embeddings**: Corriger la gestion de la configuration fournisseur vide ([`6b61760`](https://github.com/dorel14/whoosh-ng/commit/6b617602d08c4db4bab306167f1c1dfaa3486ed8))
+
+- **embeddings**: Forward embedding provider to SearchApplication and fix ONNX config wiring ([`9c1f187`](https://github.com/dorel14/whoosh-ng/commit/9c1f187d9aa8538760f2aa1f7409ba68c28a4e84))
+
+### Documentation
+
+- Auto-update llms context files [skip ci] ([`ebaff76`](https://github.com/dorel14/whoosh-ng/commit/ebaff7671d5fc9ebe0c51d9aacf7e794172ccb66))
+
+- Auto-update llms context files [skip ci] ([`b9f88c4`](https://github.com/dorel14/whoosh-ng/commit/b9f88c4b8850b17e05f3bc8b889e57cfc26123dd))
+
+- Auto-update llms context files [skip ci] ([`5963c65`](https://github.com/dorel14/whoosh-ng/commit/5963c65b34daaa41a901d631a1301c932250d7da))
+
+- Update changelog and API docs [skip ci] ([`6050c5c`](https://github.com/dorel14/whoosh-ng/commit/6050c5c8691156821092cec1c62868625294c5d0))
+
+### Features
+
+- **benchmark**: Ajouter les benchmarks langage auto + embedding sur stock Parquet ([`ad68214`](https://github.com/dorel14/whoosh-ng/commit/ad68214ede533f286cac73d8add0ae58ed28f9f7))
+
+- **embeddings**: Ajouter le framework d'embeddings et providers ONNX/FastEmbed ([`b5d97db`](https://github.com/dorel14/whoosh-ng/commit/b5d97dbb13e25046237c42b821d752693ad128b4))
+
+- **embeddings**: Améliorer la configuration ONNX, les benchmarks et la gestion des erreurs ([`d079d08`](https://github.com/dorel14/whoosh-ng/commit/d079d082a93cf2f274230493737c7fb732e67d07))
+
+---
+
+**Detailed Changes**: [v5.3.1...v5.4.0](https://github.com/dorel14/whoosh-ng/compare/v5.3.1...v5.4.0)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- trigger CI re-validation
+- v5.4.0 [skip ci]
+
+### Documentation
+
+- update changelog and API docs [skip ci]
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+- auto-update llms context files [skip ci]
+
+### Features
+
+- ajouter les benchmarks langage auto + embedding sur stock Parquet
+- ajouter le framework d'embeddings et providers ONNX/FastEmbed
+- améliorer la configuration ONNX, les benchmarks et la gestion des erreurs
+
+### Code Refactoring
+
+- merge whoosh.utils into whoosh.util and clean up modern modules
+- remove dead whoosh_modern/fields.py shim and add VECTOR field type
+
+### Other
+
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Update src/whoosh_modern/embeddings/onnx_provider.py
+- Update src/whoosh_modern/config/engines/embedding.py
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- .
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #461 from dorel14/dev
+
+### Bug Fixes
+
+- corriger la gestion de la configuration fournisseur vide
+- forward embedding provider to SearchApplication and fix ONNX config wiring
+- store schema metadata in sidecar file instead of index document
+- resolve CI failures and improve embeddings documentation
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.4.0)
+
 ## v5.3.1 (2026-08-13)
 **Tag**: `v5.3.1`
 
