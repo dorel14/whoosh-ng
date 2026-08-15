@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from itertools import permutations
 
 import pytest
@@ -58,7 +58,7 @@ def test_empty_commit():
 
 
 def test_version_in():
-    with TempStorage("versionin") as st:
+    with TempStorage(debug=True) as st:
         assert not index.exists(st)
 
         schema = fields.Schema(text=fields.TEXT)
@@ -124,6 +124,7 @@ def test_integrity():
     w.commit()
 
     tr = ix.reader()
+    assert tr is not None
     assert ix.doc_count_all() == 3
     assert " ".join(tr.field_terms("name")) == "alpha beta brown one two yellow"
 
@@ -143,7 +144,9 @@ def test_lengths():
             w.add_document(f2=" ".join(islice(cycle(items), length)))
         w.commit()
 
-        with ix.reader() as dr:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as dr:
             ls1 = [dr.doc_field_length(i, "f1") for i in range(0, len(lengths))]
             assert ls1 == [0] * len(lengths)
             ls2 = [dr.doc_field_length(i, "f2") for i in range(0, len(lengths))]
@@ -182,6 +185,7 @@ def test_lengths_ram():
     w.commit()
 
     dr = ix.reader()
+    assert dr is not None
     assert dr.stored_fields(0)["f1"] == "A B C D E"
     assert dr.doc_field_length(0, "f1") == 5
     assert dr.doc_field_length(1, "f1") == 8
@@ -217,7 +221,9 @@ def test_merged_lengths():
         w.add_document(f1="Y X", f2="A B")
         w.commit(merge=False)
 
-        with ix.reader() as dr:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as dr:
             assert dr.stored_fields(0)["f1"] == "A B C"
             assert dr.doc_field_length(0, "f1") == 3
             assert dr.doc_field_length(2, "f2") == 6
@@ -235,7 +241,9 @@ def test_frequency_keyword():
     w.add_document(content="D E F")
     w.commit()
 
-    with ix.reader() as tr:
+    ctx = ix.reader()
+    assert ctx is not None
+    with ctx as tr:
         assert tr.doc_frequency("content", "B") == 2
         assert tr.frequency("content", "B") == 5
         assert tr.doc_frequency("content", "E") == 2
@@ -272,7 +280,9 @@ def test_frequency_text():
     w.add_document(content="delta echo foxtrot")
     w.commit()
 
-    with ix.reader() as tr:
+    ctx = ix.reader()
+    assert ctx is not None
+    with ctx as tr:
         assert tr.doc_frequency("content", "bravo") == 2
         assert tr.frequency("content", "bravo") == 5
         assert tr.doc_frequency("content", "echo") == 2
@@ -330,7 +340,9 @@ def test_deletion():
         assert ix.doc_count_all() == 4
         assert ix.doc_count() == 4
 
-        with ix.reader() as tr:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as tr:
             assert " ".join(tr.field_terms("name")) == "brown one two yellow"
 
 
@@ -543,7 +555,9 @@ def test_deleteall():
         ix.optimize()
         assert ix.doc_count_all() == 0
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert list(r) == []
 
 
@@ -608,7 +622,9 @@ def test_multivalue():
         )
         w.add_document(txt=["a", "b", "c"])
 
-    with ix.reader() as r:
+    ctx = ix.reader()
+    assert ctx is not None
+    with ctx as r:
         assert ("num", 3) in r
         assert ("date", datetime(2003, 3, 3, tzinfo=UTC)) in r
         assert " ".join(r.field_terms("txt")) == "a b c"
@@ -624,7 +640,7 @@ def test_multi_language():
             w = w[:-2]
         return w
 
-    ana_pig = analysis.StemmingAnalyzer(stoplist=["nday", "roay"], stemfn=stem_piglatin)
+    ana_pig = analysis.StemmingAnalyzer(stoplist=["nday", "roay"], stemfn=stem_piglatin)  # type: ignore[arg-type]
 
     # Dictionary mapping languages to analyzers
     analyzers = {"eng": ana_eng, "pig": ana_pig}
@@ -657,14 +673,14 @@ def test_multi_language():
         q = qp.parse("dreaming")
         r = s.search(q)
         assert len(r) == 1
-        assert r[0]["content"] == "Such stuff as dreams are made on"
+        assert r[0]["content"] == "Such stuff as dreams are made on"  # type: ignore[call-overload]
 
         schema["content"].analyzer = analyzers["pig"]
         qp = qparser.QueryParser("content", schema)
         q = qp.parse("otnay")
         r = s.search(q)
         assert len(r) == 1
-        assert r[0]["content"] == "Otay ebay, roay otnay otay ebay"
+        assert r[0]["content"] == "Otay ebay, roay otnay otay ebay"  # type: ignore[call-overload]
 
 
 def test_doc_boost():
@@ -736,14 +752,18 @@ def test_glob_optimize():
         writer.commit()
 
         # Read back fields
-        assert list(ix.reader().all_stored_fields()) == [{"f1": 1, "f2": 2}]
+        r = ix.reader()
+        assert r is not None
+        assert list(r.all_stored_fields()) == [{"f1": 1, "f2": 2}]
 
         # Optimize
         writer = ix.writer()
         writer.commit(optimize=True)
 
         # Read fields again
-        assert list(ix.reader().all_stored_fields()) == [{"f1": 1, "f2": 2}]
+        r = ix.reader()
+        assert r is not None
+        assert list(r.all_stored_fields()) == [{"f1": 1, "f2": 2}]
 
 
 def test_index_decimals():
@@ -756,7 +776,7 @@ def test_index_decimals():
         w.add_document(name="hello", num=Decimal("3.2"))
 
     schema = fields.Schema(
-        name=fields.KEYWORD(stored=True), num=fields.NUMERIC(Decimal, decimal_places=5)
+        name=fields.KEYWORD(stored=True), num=fields.NUMERIC(Decimal, decimal_places=5)  # type: ignore[arg-type]
     )
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:
@@ -789,6 +809,7 @@ def test_stored_tuple():
 
         with ix.searcher() as s:
             doc = s.document(b="f")
+            assert doc is not None
             assert doc["a"] == ("foxtrot", 6)
 
 

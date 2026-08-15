@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from whoosh_modern.linguistics.detection.stopword_detector import StopwordDetector
 
 

@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-import pytest
-
 from whoosh.middleware.context import MiddlewareContext
 from whoosh_modern.middleware.embedding import EmbeddingMiddleware
 

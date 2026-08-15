@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import gzip
 import os
 import sqlite3
-from datetime import datetime
 
 
 def build_reuters_table(conn: sqlite3.Connection, path: str) -> int:

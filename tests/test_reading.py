@@ -90,6 +90,7 @@ def test_readers():
 
     def t(ix):
         r = ix.reader()
+        assert r is not None
         assert list(r.all_stored_fields()) == stored
         assert sorted(_stats(r)) == target
 
@@ -112,7 +113,9 @@ def test_term_inspection():
             )
             w.add_document(title="My other document", content="AA AB BB CC EE EE AX AX DD")
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             cterms = " ".join(r.field_terms("content"))
             assert cterms == "aa ab ax bb cc dd ee"
 
@@ -178,6 +181,7 @@ def test_vector_postings():
     writer.add_document(id="1", content="the quick brown fox jumped over the lazy dogs")
     writer.commit()
     r = ix.reader()
+    assert r is not None
 
     terms = list(r.vector_as("weight", 0, "content"))
     assert terms == [
@@ -297,6 +301,7 @@ def test_first_id():
     w.commit()
 
     r = ix.reader()
+    assert r is not None
     docid = r.first_id("path", "/b")
     assert r.stored_fields(docid) == {"path": "/b"}
 
@@ -320,6 +325,7 @@ def test_first_id():
     w.commit(merge=False)
 
     r = ix.reader()
+    assert r is not None
     assert r.__class__ == reading.MultiReader
     docid = r.first_id("path", "/e")
     assert r.stored_fields(docid) == {"path": "/e"}
@@ -336,6 +342,7 @@ class RecoverReader(threading.Thread):
     def run(self):
         for _ in range(50):
             r = self.ix.reader()
+            assert r is not None
             r.close()
 
 
@@ -386,6 +393,7 @@ def test_nonexclusive_read():
         def fn():
             for _ in range(5):
                 r = ix.reader()
+                assert r is not None
                 assert list(r.field_terms("text")) == [
                     "document",
                     "five",
@@ -412,6 +420,7 @@ def test_doc_count():
             w.add_document(id=i)
 
     r = ix.reader()
+    assert r is not None
     assert r.doc_count() == 10
     assert r.doc_count_all() == 10
 
@@ -423,6 +432,7 @@ def test_doc_count():
     w.commit()
 
     r = ix.reader()
+    assert r is not None
     assert r.doc_count() == 6
     assert r.doc_count_all() == 10
 
@@ -432,6 +442,7 @@ def test_doc_count():
     w.commit(merge=False)
 
     r = ix.reader()
+    assert r is not None
     assert r.doc_count() == 11
     assert r.doc_count_all() == 15
 
@@ -442,11 +453,13 @@ def test_doc_count():
     w.commit(merge=False)
 
     r = ix.reader()
+    assert r is not None
     assert r.doc_count() == 8
     assert r.doc_count_all() == 15
 
     ix.optimize()
     r = ix.reader()
+    assert r is not None
     assert r.doc_count() == 8
     assert r.doc_count_all() == 8
 
@@ -470,35 +483,45 @@ def test_cursor():
             w.add_document(text="kilo lima mike november oskar")
             w.add_document(text="charlie alfa alfa bravo bravo bravo")
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             cur = r.cursor("text")
-            assert cur.text() == "alfa"
+            assert cur.text() == "alfa"  # type: ignore[attr-defined]
             assert cur.next() == "bravo"
-            assert cur.text() == "bravo"
+            assert cur.text() == "bravo"  # type: ignore[attr-defined]
 
             assert cur.find(b"inc") == "india"
-            assert cur.text() == "india"
+            assert cur.text() == "india"  # type: ignore[attr-defined]
 
-            cur.first() == "alfa"
-            assert cur.text() == "alfa"
+            _ = cur.first() == "alfa"
+            assert cur.text() == "alfa"  # type: ignore[attr-defined]
 
             assert cur.find(b"zulu") is None
-            assert cur.text() is None
+            assert cur.text() is None  # type: ignore[attr-defined]
             assert not cur.is_valid()
 
             assert cur.find(b"a") == "alfa"
-            assert cur.term_info().weight() == 3
+            ti = cur.term_info()
+            assert ti is not None
+            assert ti.weight() == 3
             assert cur.next() == "bravo"
-            assert cur.term_info().weight() == 4
+            ti = cur.term_info()
+            assert ti is not None
+            assert ti.weight() == 4
             assert cur.next() == "charlie"
-            assert cur.term_info().weight() == 2
+            ti = cur.term_info()
+            assert ti is not None
+            assert ti.weight() == 2
 
 
 def _check_inspection_results(ix):
     AE = "aé".encode()
     AU = "aú".encode()
 
-    with ix.reader() as r:
+    ctx = ix.reader()
+    assert ctx is not None
+    with ctx as r:
         cterms = " ".join(r.field_terms("content"))
         assert cterms == "aa aé aú bb cc dd ee"
 

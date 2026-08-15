@@ -5,7 +5,7 @@ import tempfile
 
 import pytest
 
-from whoosh.fields import ID, TEXT
+from whoosh.fields import TEXT
 from whoosh_modern.data_sources.sql import SQLSource
 from whoosh_modern.views import SearchView
 

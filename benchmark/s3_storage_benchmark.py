@@ -21,7 +21,6 @@ import asyncio
 import io
 import os
 import random
-import statistics
 import time
 from dataclasses import dataclass, field
 from typing import Any

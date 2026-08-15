@@ -2,7 +2,7 @@ import os.path
 import random
 import shutil
 import time
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 
 from whoosh import fields, index, query
 from whoosh.util import now
@@ -41,7 +41,7 @@ def test_bigsort():
 
         t = now()
         for y in x:
-            p = list(s.postings("date", y).all_ids())
+            _p = list(s.postings("date", y).all_ids())
         print(now() - t)
 
         t = now()

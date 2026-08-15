@@ -1,9 +1,6 @@
 """Tests for BatchIndexWriter."""
 
-import os
 import tempfile
-
-import pytest
 
 from whoosh import fields
 from whoosh.index import create_in

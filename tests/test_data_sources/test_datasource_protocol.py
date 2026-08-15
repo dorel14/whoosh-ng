@@ -1,12 +1,9 @@
 """Tests for DataSource protocol and capability protocols."""
 
-import pytest
-
 from whoosh.fields import Schema
 from whoosh_modern.data_sources import (
     AsyncDataSource,
     CountableDataSource,
-    DataSource,
     IncrementalDataSource,
     MetadataDataSource,
     RefreshableDataSource,

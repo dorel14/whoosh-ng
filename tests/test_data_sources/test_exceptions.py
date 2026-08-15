@@ -1,7 +1,5 @@
 """Tests for typed exceptions with source and field context."""
 
-import pytest
-
 from whoosh import WhooshError
 from whoosh_modern.exceptions import (
     DataSourceError,

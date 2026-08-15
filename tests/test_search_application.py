@@ -8,7 +8,6 @@ import pytest
 
 from whoosh.fields import TEXT, Schema
 from whoosh_modern import SearchApplication
-from whoosh_modern.data_sources.fast_csv import FastCSVSource
 from whoosh_modern.storage import FileStorage
 
 
@@ -199,3 +198,75 @@ class TestSearchApplicationEmbedding:
             results = list(searcher.all_stored_fields())
             assert len(results) == 1
             assert results[0]["content_vector"] == [0.1, 0.2, 0.3]
+
+
+class TestSearchApplicationSearcherConfig:
+    def test_search_with_searcher_dict(self, tmp_path: Any) -> None:
+        documents = [{"title": "hello", "content": "world"}]
+        source = _FakeDataSource(documents)
+        storage = FileStorage(str(tmp_path))
+
+        app = SearchApplication(
+            source=source,
+            storage=storage,
+            searcher={"weighting": "BM25F"},
+        )
+        app.build()
+
+        results = app.search("title:hello")
+        assert len(results) == 1
+
+    def test_search_with_searcher_config(self, tmp_path: Any) -> None:
+        documents = [{"title": "hello", "content": "world"}]
+        source = _FakeDataSource(documents)
+        storage = FileStorage(str(tmp_path))
+
+        from whoosh_modern.config.models import SearcherConfig
+
+        app = SearchApplication(
+            source=source,
+            storage=storage,
+            searcher=SearcherConfig(weighting="BM25F"),
+        )
+        app.build()
+
+        results = app.search("title:hello")
+        assert len(results) == 1
+
+    def test_search_without_searcher_config(self, tmp_path: Any) -> None:
+        documents = [{"title": "hello", "content": "world"}]
+        source = _FakeDataSource(documents)
+        storage = FileStorage(str(tmp_path))
+
+        app = SearchApplication(source=source, storage=storage)
+        app.build()
+
+        results = app.search("title:hello")
+        assert len(results) == 1
+
+    def test_search_with_config_object(self, tmp_path: Any) -> None:
+        documents = [{"title": "hello", "content": "world"}]
+        source = _FakeDataSource(documents)
+        storage = FileStorage(str(tmp_path))
+
+        from whoosh_modern.config.models import (
+            SearchConfig,
+            SearcherConfig,
+            WhooshNGConfig,
+        )
+
+        config = WhooshNGConfig(
+            search=SearchConfig(
+                searcher=SearcherConfig(weighting="BM25F"),
+            ),
+        )
+
+        app = SearchApplication(
+            source=source,
+            storage=storage,
+            config=config,
+        )
+        app.build()
+
+        results = app.search("title:hello")
+        assert len(results) == 1

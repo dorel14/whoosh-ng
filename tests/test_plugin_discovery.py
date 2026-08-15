@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
+
 import pytest
 
 from whoosh.plugins.manager import STANDARD_GROUPS, Plugin, PluginManager
@@ -57,7 +59,7 @@ class EmbeddingPlugin(Plugin):
 
 
 @pytest.fixture
-def discovered_manager(monkeypatch: pytest.MonkeyPatch) -> PluginManager:
+def discovered_manager(monkeypatch: pytest.MonkeyPatch) -> Generator[PluginManager, None, None]:
     plugins = {
         "whoosh.plugins": [],
         "whoosh.datasources": [DatasourcePlugin],

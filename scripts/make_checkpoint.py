@@ -20,7 +20,7 @@ print("Creating checkpoint index in", indexdir)
 schema = fields.Schema(
     path=fields.ID(stored=True, unique=True),
     num=fields.NUMERIC(int, stored=True),
-    frac=fields.NUMERIC(float, stored=True),
+    frac=fields.NUMERIC(float, stored=True),  # type: ignore[arg-type]
     dt=fields.DATETIME(stored=True),
     tag=fields.KEYWORD,
     title=fields.TEXT(stored=True),

@@ -14,10 +14,13 @@ Version: 3.0.0
 
 from __future__ import annotations
 
-from whoosh.sorting import DateRangeFacet, FieldFacet, RangeFacet
+from whoosh.sorting import DateRangeFacet, FacetType, FieldFacet, RangeFacet
 
 from .manager import FacetManager
 from .terms import TermsFacet
+
+#: Alias exposing the core facet base type under the public ``Facet`` name.
+Facet = FacetType
 
 __all__ = (
     "DateRangeFacet",

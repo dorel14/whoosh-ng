@@ -38,7 +38,9 @@ def create_index():
 
 def test_add_text(model=classify.Bo1Model):
     ix = create_index()
-    with ix.reader() as r:
+    r = ix.reader()
+    assert r is not None
+    with r as r:
         exp = classify.Expander(r, "content", model=model)
         exp.add_text(text)
         assert {t[0] for t in exp.expanded_terms(3)} == {
@@ -64,9 +66,9 @@ def test_keyterms(model=classify.Bo1Model):
 def test_keyterms_from_text(model=classify.Bo2Model):
     ix = create_index()
     with ix.searcher() as s:
-        keys = list(s.key_terms_from_text("content", text, model=model))
+        keys = list(s.key_terms_from_text("content", text, model=model))  # type: ignore[reportArgumentType]
         assert {t[0] for t in keys} == {"particles", "velocity", "field"}
-        keys = list(s.key_terms_from_text("extra", text, model=model))
+        keys = list(s.key_terms_from_text("extra", text, model=model))  # type: ignore[reportArgumentType]
         assert keys == []
 
 
@@ -88,7 +90,7 @@ def test_more_like_this(model=classify.Bo2Model):
 
         with ix.searcher() as s:
             docnum = s.document_number(id="1")
-            r = s.more_like(docnum, "text", model=model, **kwargs)
+            r = s.more_like(docnum, "text", model=model, **kwargs)  # type: ignore[reportArgumentType]
             assert [hit["id"] for hit in r] == ["6", "2", "3"]
 
     schema = fields.Schema(id=fields.ID(stored=True), text=fields.TEXT(stored=True))
@@ -119,7 +121,7 @@ def test_more_like(model=classify.Bo2Model):
 
         with ix.searcher() as s:
             docnum = s.document_number(id="3")
-            r = s.more_like(docnum, "text", model=model)
+            r = s.more_like(docnum, "text", model=model)  # type: ignore[reportArgumentType]
             assert [hit["id"] for hit in r] == ["5", "4"]
 
 
@@ -144,20 +146,20 @@ def test_fake_more_like(model=classify.Bo1Model):
 
 
 def test_bo2model():
-    test_empty_more_like(classify.Bo2Model)
-    test_add_text(classify.Bo2Model)
+    test_empty_more_like(classify.Bo2Model)  # type: ignore[reportArgumentType]
+    test_add_text(classify.Bo2Model)  # type: ignore[reportArgumentType]
     test_keyterms_from_text(classify.Bo2Model)
     test_more_like_this(classify.Bo2Model)
     test_more_like(classify.Bo2Model)
-    test_keyterms(classify.Bo2Model)
-    test_fake_more_like(classify.Bo2Model)
+    test_keyterms(classify.Bo2Model)  # type: ignore[reportArgumentType]
+    test_fake_more_like(classify.Bo2Model)  # type: ignore[reportArgumentType]
 
 
 def test_klmodel():
-    test_empty_more_like(classify.KLModel)
-    test_add_text(classify.KLModel)
-    test_keyterms_from_text(classify.KLModel)
-    test_more_like_this(classify.KLModel)
-    test_more_like(classify.KLModel)
-    test_keyterms(classify.KLModel)
-    test_fake_more_like(classify.KLModel)
+    test_empty_more_like(classify.KLModel)  # type: ignore[reportArgumentType]
+    test_add_text(classify.KLModel)  # type: ignore[reportArgumentType]
+    test_keyterms_from_text(classify.KLModel)  # type: ignore[reportArgumentType]
+    test_more_like_this(classify.KLModel)  # type: ignore[reportArgumentType]
+    test_more_like(classify.KLModel)  # type: ignore[reportArgumentType]
+    test_keyterms(classify.KLModel)  # type: ignore[reportArgumentType]
+    test_fake_more_like(classify.KLModel)  # type: ignore[reportArgumentType]

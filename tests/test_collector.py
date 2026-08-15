@@ -60,7 +60,7 @@ def test_timelimit():
         oq = query.Term("text", "alfa")
         sq = SlowQuery(oq)
 
-        col = collectors.TimeLimitCollector(s.collector(limit=None), timelimit=0.1)
+        col = collectors.TimeLimitCollector(s.collector(limit=None), timelimit=0.1)  # type: ignore[reportArgumentType]
         with pytest.raises(searching.TimeLimit):
             s.search_with_collector(sq, col)
 
@@ -68,7 +68,7 @@ def test_timelimit():
         with pytest.raises(collectors.TimeLimit):
             s.search_with_collector(sq, col)
 
-        col = collectors.TimeLimitCollector(s.collector(limit=None), timelimit=0.25)
+        col = collectors.TimeLimitCollector(s.collector(limit=None), timelimit=0.25)  # type: ignore[reportArgumentType]
         try:
             s.search_with_collector(sq, col)
             assert False  # Shouldn't get here
@@ -76,7 +76,7 @@ def test_timelimit():
             r = col.results()
             assert r.scored_length() > 0
 
-        col = collectors.TimeLimitCollector(s.collector(limit=None), timelimit=0.5)
+        col = collectors.TimeLimitCollector(s.collector(limit=None), timelimit=0.5)  # type: ignore[reportArgumentType]
         s.search_with_collector(oq, col)
         assert col.results().runtime < 0.5
 
@@ -204,7 +204,7 @@ def test_termdocs():
         r = s.search(q, scored=False, terms=True)
 
         field = s.schema["key"]
-        terms = [field.from_bytes(term) for fieldname, term in r.termdocs if fieldname == "key"]
+        terms = [field.from_bytes(term) for fieldname, term in r.termdocs if fieldname == "key"]  # type: ignore[reportAttributeAccessIssue]
         assert sorted(terms) == ["angora", "anorak", "ant"]
 
 
@@ -260,7 +260,7 @@ def test_filter_results_count():
             restrict_q = query.Term("django_ct", "app.model2")
             r2 = s.search(q, filter=restrict_q)
             assert len(r2) == 1
-            assert r2[0]["id"] == 3
+            assert r2[0]["id"] == 3  # type: ignore[reportCallIssue]
 
 
 def test_filter_with_reverse_sorting():
@@ -298,7 +298,7 @@ def test_timelimit_preserves_filter():
     with ix.searcher() as s:
         q = query.Term("text", "charlie")
         filter_q = query.Term("status", "public")
-        col = collectors.TimeLimitCollector(s.collector(filter=filter_q, limit=None), timelimit=5.0)
+        col = collectors.TimeLimitCollector(s.collector(filter=filter_q, limit=None), timelimit=5.0)  # type: ignore[reportArgumentType]
         s.search_with_collector(q, col)
         r = col.results()
         result_ids = {hit["id"] for hit in r}
@@ -366,5 +366,5 @@ def test_collapse_with_order_length():
         q = query.Every()
         r = s.search(q, collapse="category", collapse_order=sorting.FieldFacet("sort"), limit=10)
         assert len(r) == 2
-        assert r.collapsed_counts["A"] == 1
-        assert r.collapsed_counts["B"] == 1
+        assert r.collapsed_counts["A"] == 1  # type: ignore[reportAttributeAccessIssue]
+        assert r.collapsed_counts["B"] == 1  # type: ignore[reportAttributeAccessIssue]

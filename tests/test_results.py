@@ -27,8 +27,8 @@ def test_score_retrieval():
     with ix.searcher() as s:
         results = s.search(query.Term("content", "white"))
         assert len(results) == 2
-        assert results[0]["title"] == "Miss Mary"
-        assert results[1]["title"] == "Snow White"
+        assert results[0]["title"] == "Miss Mary"  # type: ignore[call-overload]
+        assert results[1]["title"] == "Snow White"  # type: ignore[call-overload]
         assert results.score(0) is not None
         assert results.score(0) != 0
         assert results.score(0) != 1
@@ -214,7 +214,7 @@ def test_extend_filtered():
 
     with ix.searcher() as s:
         r1 = s.search(query.Term("text", "alfa"), filter={1, 4})
-        assert r1.allowed == {1, 4}
+        assert r1.allowed == {1, 4}  # type: ignore[attr-defined]
         assert len(r1.top_n) == 0
 
         r2 = s.search(query.Term("text", "bravo"))
@@ -222,7 +222,7 @@ def test_extend_filtered():
         assert hits(r2) == [1, 2, 4]
 
         r3 = r1.copy()
-        assert r3.allowed == {1, 4}
+        assert r3.allowed == {1, 4}  # type: ignore[attr-defined]
         assert len(r3.top_n) == 0
         r3.extend(r2)
         assert len(r3.top_n) == 3
@@ -563,7 +563,7 @@ def test_hit_column():
         assert len(r) == 1
         hit = r[0]
         with pytest.raises(KeyError):
-            _ = hit["text"]
+            _ = hit["text"]  # type: ignore[call-overload]
 
     # With column
     schema = fields.Schema(text=fields.TEXT(sortable=True))
@@ -575,7 +575,7 @@ def test_hit_column():
         r = s.search(query.Term("text", "alfa"))
         assert len(r) == 1
         hit = r[0]
-        assert hit["text"] == "alfa bravo charlie"
+        assert hit["text"] == "alfa bravo charlie"  # type: ignore[call-overload]
 
 
 def test_closed_searcher():
@@ -597,7 +597,7 @@ def test_closed_searcher():
         s.close()
         assert s.is_closed
         with pytest.raises(ReaderClosed):
-            assert r[0]["key"] == "bravo"
+            assert r[0]["key"] == "bravo"  # type: ignore[call-overload]
         with pytest.raises(ReaderClosed):
             s.reader().column_reader("key")
         with pytest.raises(ReaderClosed):
@@ -606,7 +606,7 @@ def test_closed_searcher():
         s = ix.searcher()
         r = s.search(query.TermRange("key", "b", "d"))
         assert r[0]
-        assert r[0]["key"] == "bravo"
+        assert r[0]["key"] == "bravo"  # type: ignore[call-overload]
         c = s.reader().column_reader("key")
         assert c[1] == "bravo"
         assert s.suggest("key", "brovo") == ["bravo"]
@@ -647,7 +647,7 @@ def test_phrase_keywords():
         q = query.Phrase("text", ["alfa", "bravo"])
         r = s.search(q)
         assert len(r) == 2
-        kts = " ".join(t for t, score in r.key_terms("text"))
+        kts = " ".join(t for t, _score in r.key_terms("text"))
         assert kts == "alfa bravo charlie foxtrot delta"
 
 
@@ -665,8 +665,8 @@ def test_every_keywords():
         r = s.search(q, terms=True)
         assert len(r) == 2
         hit = r[0]
-        assert hit["content"] == "bravo"
-        assert hit.highlights("content") == ""
+        assert hit["content"] == "bravo"  # type: ignore[call-overload]
+        assert hit.highlights("content") == ""  # type: ignore[attr-defined]
 
 
 def test_filter_by_result():

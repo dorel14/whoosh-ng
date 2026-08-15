@@ -1,5 +1,5 @@
 import copy
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from itertools import permutations, zip_longest
 
 import pytest
@@ -102,7 +102,7 @@ def test_ors():
             q = query.Or(qs[:i])
             r1 = [(hit.docnum, hit.score) for hit in s.search(q, limit=None)]
 
-            q.binary_matcher = True
+            q.binary_matcher = True  # type: ignore[attr-defined]
             r2 = [(hit.docnum, hit.score) for hit in s.search(q, limit=None)]
 
             for item1, item2 in zip_longest(r1, r2):
@@ -165,7 +165,7 @@ def test_andnot2():
 
         anq = query.AndNot(q, oq)
 
-        m = anq.matcher(s)
+        _m = anq.matcher(s)
         r = s.search(anq)
         assert list(anq.docs(s)) == sorted(hit.docnum for hit in r)
         assert " ".join(sorted(hit["a"] for hit in r)) == "charlie foxtrot india juliet"
@@ -271,10 +271,10 @@ def test_range():
 
         q = qp.parse("{bravo TO delta}")
         assert q.__class__ == query.TermRange
-        assert q.start == "bravo"
-        assert q.end == "delta"
-        assert q.startexcl
-        assert q.endexcl
+        assert q.start == "bravo"  # type: ignore[attr-defined]
+        assert q.end == "delta"  # type: ignore[attr-defined]
+        assert q.startexcl  # type: ignore[attr-defined]
+        assert q.endexcl  # type: ignore[attr-defined]
         ids = sorted([d["id"] for d in s.search(q)])
         assert ids == ["A", "B", "C"]
 
@@ -415,14 +415,14 @@ def test_negated_unlimited_ranges():
 
         nq = qp.parse("NOT [to]")
         assert nq.__class__ == query.Not
-        q = nq.query
+        q = nq.query  # type: ignore[attr-defined]
         assert q.__class__ == query.Every
         assert "".join(h["id"] for h in s.search(q, limit=None)) == domain
         assert not list(nq.docs(s))
 
         nq = qp.parse("NOT num:[to]")
         assert nq.__class__ == query.Not
-        q = nq.query
+        q = nq.query  # type: ignore[attr-defined]
         assert q.__class__ == query.NumericRange
         assert q.start is None
         assert q.end is None
@@ -431,7 +431,7 @@ def test_negated_unlimited_ranges():
 
         nq = qp.parse("NOT date:[to]")
         assert nq.__class__ == query.Not
-        q = nq.query
+        q = nq.query  # type: ignore[attr-defined]
         assert q.__class__ == query.Every
         assert "".join(h["id"] for h in s.search(q, limit=None)) == domain
         assert not list(nq.docs(s))
@@ -454,8 +454,8 @@ def test_keyword_or():
         assert qr.__class__ == query.Or
         r = s.search(qr)
         assert len(r) == 2
-        assert r[0]["a"] == "Third"
-        assert r[1]["a"] == "First"
+        assert r[0]["a"] == "Third"  # type: ignore[call-overload]
+        assert r[1]["a"] == "First"  # type: ignore[call-overload]
 
 
 def test_merged():
@@ -468,7 +468,7 @@ def test_merged():
         with ix.searcher() as s:
             r = s.search(query.Term("content", "bravo"))
             assert len(r) == 1
-            assert r[0]["id"] == "bravo"
+            assert r[0]["id"] == "bravo"  # type: ignore[call-overload]
 
         with ix.writer() as w:
             w.add_document(id="charlie", content="charlie")
@@ -479,7 +479,7 @@ def test_merged():
         with ix.searcher() as s:
             r = s.search(query.Term("content", "bravo"))
             assert len(r) == 1
-            assert r[0]["id"] == "bravo"
+            assert r[0]["id"] == "bravo"  # type: ignore[call-overload]
 
 
 def test_multireader():
@@ -501,7 +501,7 @@ def test_multireader():
     with ix.searcher() as s:
         r = s.search(query.Term("content", "bravo"))
         assert len(r) == 1
-        assert r[0]["id"] == "bravo"
+        assert r[0]["id"] == "bravo"  # type: ignore[call-overload]
 
     w = ix.writer()
     w.add_document(id="juliet", content="juliet")
@@ -523,7 +523,7 @@ def test_multireader():
     with ix.searcher() as s:
         r = s.search(query.Term("content", "bravo"))
         assert len(r) == 1
-        assert r[0]["id"] == "bravo"
+        assert r[0]["id"] == "bravo"  # type: ignore[call-overload]
 
 
 def test_posting_phrase():
@@ -651,7 +651,7 @@ def test_phrase_sameword():
     with ix.searcher() as s:
         r = s.search(query.Phrase("text", ["linda", "linda", "linda"]), limit=None)
         assert len(r) == 1
-        assert r[0]["id"] == 1
+        assert r[0]["id"] == 1  # type: ignore[call-overload]
 
 
 def test_phrase_multi():
@@ -681,7 +681,9 @@ def test_missing_field_scoring():
         with ix.writer() as w:
             w.add_document(name="Frank", hobbies="baseball, basketball")
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert r.field_length("hobbies") == 2
             assert r.field_length("name") == 1
 
@@ -711,7 +713,7 @@ def test_search_fieldname_underscores():
     qp = qparser.QueryParser("my_value", schema=s)
     with ix.searcher() as s:
         r = s.search(qp.parse("my_name:Green"))
-        assert r[0]["my_name"] == "Green"
+        assert r[0]["my_name"] == "Green"  # type: ignore[call-overload]
 
 
 def test_short_prefix():
@@ -719,7 +721,7 @@ def test_short_prefix():
     qp = qparser.QueryParser("value", schema=s)
     q = qp.parse("s*")
     assert q.__class__.__name__ == "Prefix"
-    assert q.text == "s"
+    assert q.text == "s"  # type: ignore[attr-defined]
 
 
 def test_weighting():
@@ -738,7 +740,7 @@ def test_weighting():
 
     # Fake Weighting implementation
     class CommentWeighting(Weighting):
-        def scorer(self, searcher, fieldname, text, qf=1):
+        def scorer(self, searcher, fieldname, text, qf=1):  # type: ignore[override]
             return self.CommentScorer(searcher.stored_fields)
 
         class CommentScorer(BaseScorer):
@@ -1088,6 +1090,7 @@ def test_boost_phrase():
         r = s.search(q, limit=None)
         for hit in r:
             if "bravo charlie delta" in hit["title"]:
+                assert hit.score is not None
                 assert hit.score > 100.0
 
 
@@ -1330,7 +1333,7 @@ def test_collapse():
         r = col.results()
         assert " ".join(hit["id"] for hit in r) == "f c h"
 
-        col = s.collector(limit=None)
+        col = s.collector(limit=None)  # type: ignore[arg-type]
         col = collectors.CollapseCollector(col, "tag")
         s.search_with_collector(q, col)
         r = col.results()
@@ -1380,7 +1383,7 @@ def test_collapse_nocolumn():
         r = col.results()
         assert " ".join(hit["id"] for hit in r) == "f c h"
 
-        col = s.collector(limit=None)
+        col = s.collector(limit=None)  # type: ignore[arg-type]
         col = collectors.CollapseCollector(col, "tag")
         s.search_with_collector(q, col)
         r = col.results()
@@ -1598,10 +1601,10 @@ def test_coord():
         w.add_document(id=9, hits=0, tags="foo foo foo foo")
 
     og = qparser.OrGroup.factory(0.99)
-    qp = qparser.QueryParser("tags", schema, group=og)
+    qp = qparser.QueryParser("tags", schema, group=og)  # type: ignore[arg-type]
     q = qp.parse("golf foxtrot echo")
     assert q.__class__ == query.Or
-    assert q.scale == 0.99
+    assert q.scale == 0.99  # type: ignore[attr-defined]
 
     with ix.searcher() as s:
         m = q.matcher(s)
@@ -1682,8 +1685,8 @@ def test_score_length():
         assert not s.is_atomic()
         p = s.postings("a", "mike")
         while p.is_active():
-            docnum = p.id()
-            score = p.score()
+            _docnum = p.id()
+            _score = p.score()
             p.next()
 
 
@@ -1763,14 +1766,14 @@ def test_issue_334():
         q = query.NestedChildren(pq, cq) & query.Term("returns", "void")
         r = s.search(q)
         assert len(r) == 1
-        assert r[0]["name"] == "close"
+        assert r[0]["name"] == "close"  # type: ignore[call-overload]
 
 
 def test_find_decimals():
     from decimal import Decimal
 
     schema = fields.Schema(
-        name=fields.KEYWORD(stored=True), num=fields.NUMERIC(Decimal, decimal_places=5)
+        name=fields.KEYWORD(stored=True), num=fields.NUMERIC(Decimal, decimal_places=5)  # type: ignore[arg-type]
     )
     ix = RamStorage().create_index(schema)
 
@@ -1807,11 +1810,11 @@ def test_limit_scores():
             q = query.And([query.Term("desc", "delta", boost=30.0), query.Term("parent", "545")])
             r = s.search(q, limit=500)
             assert r.scored_length() == 1
-            limited_score = r[0].score
+            limited_score = r[0].score  # type: ignore[attr-defined]
 
             r = s.search(q, limit=None)
             assert r.scored_length() == 1
-            unlimited_score = r[0].score
+            unlimited_score = r[0].score  # type: ignore[attr-defined]
 
             assert limited_score == unlimited_score
 

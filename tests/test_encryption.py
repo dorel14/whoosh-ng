@@ -1,4 +1,3 @@
-import io
 import os
 import tempfile
 
@@ -64,7 +63,7 @@ def test_default_cipher_empty_key_is_noop() -> None:
 def test_encrypted_storage_file_backend() -> None:
     pytest.importorskip("lmdb")
     with tempfile.TemporaryDirectory() as tmpdir:
-        path = os.path.join(tmpdir, "encrypted_index")
+        _path = os.path.join(tmpdir, "encrypted_index")
         storage = EncryptedStorage(_MemoryStorage(), StaticKeyProvider(b"secret"))
         storage.write("test.txt", b"secret data")
         assert storage.read("test.txt") == b"secret data"

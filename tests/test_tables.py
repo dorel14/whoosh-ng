@@ -21,7 +21,7 @@ def test_hash_single():
 
 
 def test_hash():
-    with TempStorage("hash") as st:
+    with TempStorage("hash") as st:  # type: ignore[arg-type]
         hwf = st.create_file("test.hsh")
         hw = HashWriter(hwf)
         hw.add(b("foo"), b("bar"))
@@ -67,7 +67,7 @@ def test_hash_contents():
     # Convert to bytes
     samp_bytes: set[tuple[bytes, bytes]] = {(b(k), b(v)) for k, v in samp}
 
-    with TempStorage("hashcontents") as st:
+    with TempStorage("hashcontents") as st:  # type: ignore[arg-type]
         hw = HashWriter(st.create_file("test.hsh"))
         hw.add_all(samp_bytes)
         hw.close()
@@ -79,8 +79,8 @@ def test_hash_contents():
         for key, value in probes:
             assert hr[key] == value
 
-        assert set(hr.keys()) == {k for k, v in samp_bytes}
-        assert set(hr.values()) == {v for k, v in samp_bytes}
+        assert set(hr.keys()) == {k for k, _v in samp_bytes}
+        assert set(hr.values()) == {v for _k, v in samp_bytes}
         assert set(hr.items()) == samp_bytes
 
         hr.close()
@@ -97,7 +97,7 @@ def test_random_hash():
         s = "".join(random.sample(domain, random.randint(minlen, maxlen)))
         return b(s)
 
-    with TempStorage("randomhash") as st:
+    with TempStorage("randomhash") as st:  # type: ignore[arg-type]
         samp = {randstring(): randstring() for _ in range(times)}
 
         hw = HashWriter(st.create_file("test.hsh"))
@@ -115,7 +115,7 @@ def test_random_hash():
 
 def test_random_access():
     times = 1000
-    with TempStorage("orderedhash") as st:
+    with TempStorage("orderedhash") as st:  # type: ignore[arg-type]
         hw = HashWriter(st.create_file("test.hsh"))
         hw.add_all((b(f"{x:08x}"), b(str(x))) for x in range(times))
         hw.close()
@@ -149,7 +149,7 @@ def test_ordered_closest():
     keys = [b(k) for k in keys]
     values = [str(len(k)).encode("ascii") for k in keys]
 
-    with TempStorage("orderedclosest") as st:
+    with TempStorage("orderedclosest") as st:  # type: ignore[arg-type]
         hw = OrderedHashWriter(st.create_file("test.hsh"))
         hw.add_all(zip(keys, values))
         hw.close()

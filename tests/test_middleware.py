@@ -82,7 +82,7 @@ class TestMiddlewareSearcher:
         mock = MockSearcher()
         chain = MiddlewareChain([MetricsMiddleware()])
         wrapper = MiddlewareSearcher(mock, chain)
-        result = wrapper.search("test query")
+        _result = wrapper.search("test query")
         assert len(mock.queries) == 1
         assert mock.queries[0] == "test query"
 
@@ -129,7 +129,10 @@ class TestCompressionMiddleware:
         ctx = MiddlewareContext("index")
         ctx.document = {"title": "test"}
         result = middleware.before_index(ctx)
-        assert result.document.get("_compressed") is True
+        assert result is not None
+        doc = result.document
+        assert doc is not None
+        assert doc.get("_compressed") is True
 
 
 class TestEncryptionMiddleware:
@@ -138,7 +141,10 @@ class TestEncryptionMiddleware:
         ctx = MiddlewareContext("index")
         ctx.document = {"title": "secret"}
         result = middleware.before_index(ctx)
-        assert result.document.get("_encrypted") is True
+        assert result is not None
+        doc = result.document
+        assert doc is not None
+        assert doc.get("_encrypted") is True
 
 
 class TestMetricsMiddleware:
@@ -184,14 +190,14 @@ class TestMiddlewareChain:
 
     def test_chain_executes_middleware_in_order(self):
         class BeforeMiddleware(Middleware):
-            def before_index(self, ctx):
-                ctx.labels["order"] = ctx.labels.get("order", []) + ["before"]
-                return ctx
+            def before_index(self, context):
+                context.labels["order"] = context.labels.get("order", []) + ["before"]
+                return context
 
         class AfterMiddleware(Middleware):
-            def after_index(self, ctx):
-                ctx.labels["order"] = ctx.labels.get("order", []) + ["after"]
-                return ctx
+            def after_index(self, context):
+                context.labels["order"] = context.labels.get("order", []) + ["after"]
+                return context
 
         chain = MiddlewareChain([BeforeMiddleware(), AfterMiddleware()])
         ctx = MiddlewareContext("index")
@@ -201,7 +207,7 @@ class TestMiddlewareChain:
 
     def test_stop_operation_can_be_raised(self):
         class StoppingMiddleware(Middleware):
-            def before_index(self, ctx):
+            def before_index(self, context):
                 raise StopOperation("blocked")
 
         chain = MiddlewareChain([StoppingMiddleware()])

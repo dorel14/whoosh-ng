@@ -854,7 +854,7 @@ def migrate_fr() -> None:
                     en_permalink_m = re.search(r"^permalink:\s*(.*)$", en_fm, re.MULTILINE)
                     if en_permalink_m:
                         # Assign based on known ordering
-                        permalink = en_permalink_m.group(1).strip()
+                        _permalink = en_permalink_m.group(1).strip()
                         # We don't have nav_order, use a high number
                         en_nav = "100"
 

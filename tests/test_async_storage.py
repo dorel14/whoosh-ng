@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import os
-
 import pytest
 
 from whoosh_modern.storage.async_file import AsyncFileStorage

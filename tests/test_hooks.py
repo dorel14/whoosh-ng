@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from whoosh.hooks import HookImpl, call_hook, hookimpl, register_hook
+from whoosh.hooks import call_hook, hookimpl, register_hook
 
 
 @pytest.fixture(autouse=True)
@@ -24,8 +24,6 @@ def test_hookimpl_decorator_returns_hook_impl() -> None:
 
 @pytest.mark.asyncio
 async def test_register_and_call_hook() -> None:
-    from whoosh.hooks import _hooks
-
     async def transform(data: dict[str, Any]) -> dict[str, Any]:
         return {"transformed": True, **data}
 

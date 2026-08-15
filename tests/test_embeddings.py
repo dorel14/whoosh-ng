@@ -55,7 +55,7 @@ def _make_fake_onnx(tmp_path: Path, dimension: int = 4) -> Path:
         w_initializer = helper.make_tensor(
             "W",
             TensorProto.FLOAT,
-            [None, dimension],
+            [None, dimension],  # type: ignore[arg-type]
             [1.0] * (10 * dimension),
         )
         graph = helper.make_graph(

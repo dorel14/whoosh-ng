@@ -50,7 +50,7 @@ def test_ramstorage():
 
 
 def test_filelock_simple():
-    with TempStorage("simplefilelock") as st:
+    with TempStorage("simplefilelock") as st:  # type: ignore[arg-type]
         lock1 = st.lock("testlock")
         lock2 = st.lock("testlock")
         assert lock1 is not lock2
@@ -65,7 +65,7 @@ def test_filelock_simple():
 
 
 def test_threaded_filelock():
-    with TempStorage("threadedfilelock") as st:
+    with TempStorage("threadedfilelock") as st:  # type: ignore[arg-type]
         lock1 = st.lock("testlock")
         result = []
 
@@ -117,7 +117,7 @@ def test_version_object():
     assert sv.parse("999.999.999c999") == sv(999, 999, 999, "c", 999)
 
     assert sv.parse("1.2") == sv.parse("1.2")
-    assert sv("1.2") != sv("1.3")
+    assert sv("1.2") != sv("1.3")  # type: ignore[arg-type]
     assert sv.parse("1.0") < sv.parse("1.1")
     assert sv.parse("1.0") < sv.parse("2.0")
     assert sv.parse("1.2.3a4") < sv.parse("1.2.3a5")

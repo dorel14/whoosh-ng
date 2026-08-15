@@ -1,5 +1,6 @@
 import inspect
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
+from typing import Any
 
 from whoosh import analysis, fields, formats, qparser, query
 from whoosh.filedb.filestore import RamStorage
@@ -33,7 +34,7 @@ def test_combos():
         plugins.PseudoFieldPlugin: ({"name": lambda x: x}),
     }
 
-    pis = _plugin_classes(())
+    pis: list[Any] = _plugin_classes(())
     for i, plugin in enumerate(pis):
         try:
             pis[i] = plugin(*init_args.get(plugin, ()))
@@ -54,7 +55,7 @@ def test_combos():
 def test_field_alias():
     qp = qparser.QueryParser("content", None)
     qp.add_plugin(plugins.FieldAliasPlugin({"title": ("article", "caption")}))
-    q = qp.parse("alfa title:bravo article:charlie caption:delta")
+    q: Any = qp.parse("alfa title:bravo article:charlie caption:delta")
     assert str(q) == ("(content:alfa AND title:bravo AND title:charlie AND title:delta)")
 
 
@@ -70,42 +71,42 @@ def test_dateparser():
     basedate = datetime(2010, 9, 20, 15, 16, 6, 454000, tzinfo=UTC)
     qp.add_plugin(dateparse.DateParserPlugin(basedate, callback=cb))
 
-    q = qp.parse("hello date:'last tuesday'")
+    q: Any = qp.parse("hello date:'last tuesday'")
     assert q.__class__ == query.And
     assert q[1].__class__ == query.DateRange
     assert q[1].startdate == adatetime(2010, 9, 14).floor()
     assert q[1].enddate == adatetime(2010, 9, 14).ceil()
 
-    q = qp.parse("date:'3am to 5pm'")
+    q: Any = qp.parse("date:'3am to 5pm'")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2010, 9, 20, 3).floor()
     assert q.enddate == adatetime(2010, 9, 20, 17).ceil()
 
-    q = qp.parse("date:blah")
+    q: Any = qp.parse("date:blah")
     assert q == query.NullQuery
     assert errs[0] == "blah"
 
-    q = qp.parse("hello date:blarg")
+    q: Any = qp.parse("hello date:blarg")
     assert str(q) == "(text:hello AND <_NullQuery>)"
     assert q[1].error == "blarg"
     assert errs[1] == "blarg"
 
-    q = qp.parse("hello date:20055x10")
+    q: Any = qp.parse("hello date:20055x10")
     assert str(q) == "(text:hello AND <_NullQuery>)"
     assert q[1].error == "20055x10"
     assert errs[2] == "20055x10"
 
-    q = qp.parse("hello date:'2005 19 32'")
+    q: Any = qp.parse("hello date:'2005 19 32'")
     assert str(q) == "(text:hello AND <_NullQuery>)"
     assert q[1].error == "2005 19 32"
     assert errs[3] == "2005 19 32"
 
-    q = qp.parse("date:'march 24 to dec 12'")
+    q: Any = qp.parse("date:'march 24 to dec 12'")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2010, 3, 24).floor()
     assert q.enddate == adatetime(2010, 12, 12).ceil()
 
-    q = qp.parse("date:('30 june' OR '10 july') quick")
+    q: Any = qp.parse("date:('30 june' OR '10 july') quick")
     assert q.__class__ == query.And
     assert len(q) == 2
     assert q[0].__class__ == query.Or
@@ -119,32 +120,32 @@ def test_date_range():
     basedate = datetime(2010, 9, 20, 15, 16, 6, 454000, tzinfo=UTC)
     qp.add_plugin(dateparse.DateParserPlugin(basedate))
 
-    q = qp.parse("date:['30 march' to 'next wednesday']")
+    q: Any = qp.parse("date:['30 march' to 'next wednesday']")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2010, 3, 30).floor()
     assert q.enddate == adatetime(2010, 9, 22).ceil()
 
-    q = qp.parse("date:[to 'next wednesday']")
+    q: Any = qp.parse("date:[to 'next wednesday']")
     assert q.__class__ == query.DateRange
     assert q.startdate is None
     assert q.enddate == adatetime(2010, 9, 22).ceil()
 
-    q = qp.parse("date:['30 march' to]")
+    q: Any = qp.parse("date:['30 march' to]")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2010, 3, 30).floor()
     assert q.enddate is None
 
-    q = qp.parse("date:[30 march to next wednesday]")
+    q: Any = qp.parse("date:[30 march to next wednesday]")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2010, 3, 30).floor()
     assert q.enddate == adatetime(2010, 9, 22).ceil()
 
-    q = qp.parse("date:[to next wednesday]")
+    q: Any = qp.parse("date:[to next wednesday]")
     assert q.__class__ == query.DateRange
     assert q.startdate is None
     assert q.enddate == adatetime(2010, 9, 22).ceil()
 
-    q = qp.parse("date:[30 march to]")
+    q: Any = qp.parse("date:[30 march to]")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2010, 3, 30).floor()
     assert q.enddate is None
@@ -156,7 +157,7 @@ def test_daterange_multi():
     basedate = datetime(2010, 9, 20, 15, 16, 6, 454000, tzinfo=UTC)
     qp.add_plugin(dateparse.DateParserPlugin(basedate))
 
-    q = qp.parse("start:[2008 to] AND end:[2011 to 2011]")
+    q: Any = qp.parse("start:[2008 to] AND end:[2011 to 2011]")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.DateRange
     assert q[1].__class__ == query.DateRange
@@ -185,13 +186,13 @@ def test_daterange_empty_field():
 
 
 def test_free_dates():
-    a = analysis.StandardAnalyzer(stoplist=None)
+    a = analysis.StandardAnalyzer(stoplist=None)  # type: ignore[arg-type]
     schema = fields.Schema(text=fields.TEXT(analyzer=a), date=fields.DATETIME)
     qp = qparser.QueryParser("text", schema)
     basedate = datetime(2010, 9, 20, 15, 16, 6, 454000, tzinfo=UTC)
     qp.add_plugin(dateparse.DateParserPlugin(basedate, free=True))
 
-    q = qp.parse("hello date:last tuesday")
+    q: Any = qp.parse("hello date:last tuesday")
     assert q.__class__ == query.And
     assert len(q) == 2
     assert q[0].__class__ == query.Term
@@ -200,7 +201,7 @@ def test_free_dates():
     assert q[1].startdate == adatetime(2010, 9, 14).floor()
     assert q[1].enddate == adatetime(2010, 9, 14).ceil()
 
-    q = qp.parse("date:mar 29 1972 hello")
+    q: Any = qp.parse("date:mar 29 1972 hello")
     assert q.__class__ == query.And
     assert len(q) == 2
     assert q[0].__class__ == query.DateRange
@@ -209,12 +210,12 @@ def test_free_dates():
     assert q[1].__class__ == query.Term
     assert q[1].text == "hello"
 
-    q = qp.parse("date:2005 march 2")
+    q: Any = qp.parse("date:2005 march 2")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2005, 3, 2).floor()
     assert q.enddate == adatetime(2005, 3, 2).ceil()
 
-    q = qp.parse("date:'2005' march 2")
+    q: Any = qp.parse("date:'2005' march 2")
     assert q.__class__ == query.And
     assert len(q) == 3
     assert q[0].__class__ == query.DateRange
@@ -224,17 +225,17 @@ def test_free_dates():
     assert q[1].fieldname == "text"
     assert q[1].text == "march"
 
-    q = qp.parse("date:march 24 to dec 12")
+    q: Any = qp.parse("date:march 24 to dec 12")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2010, 3, 24).floor()
     assert q.enddate == adatetime(2010, 12, 12).ceil()
 
-    q = qp.parse("date:5:10pm")
+    q: Any = qp.parse("date:5:10pm")
     assert q.__class__ == query.DateRange
     assert q.startdate == adatetime(2010, 9, 20, 17, 10).floor()
     assert q.enddate == adatetime(2010, 9, 20, 17, 10).ceil()
 
-    q = qp.parse("(date:30 june OR date:10 july) quick")
+    q: Any = qp.parse("(date:30 june OR date:10 july) quick")
     assert q.__class__ == query.And
     assert len(q) == 2
     assert q[0].__class__ == query.Or
@@ -257,11 +258,11 @@ def test_prefix_plugin():
         qp.remove_plugin_class(plugins.WildcardPlugin)
         qp.add_plugin(plugins.PrefixPlugin)
 
-        q = qp.parse("b*")
+        q: Any = qp.parse("b*")
         r = s.search(q, limit=None)
         assert len(r) == 2
 
-        q = qp.parse("br*")
+        q: Any = qp.parse("br*")
         r = s.search(q, limit=None)
         assert len(r) == 1
 
@@ -273,21 +274,21 @@ def test_custom_tokens():
     cp = plugins.OperatorsPlugin(And="&", Or="\\|", AndNot="&!", AndMaybe="&~", Not="-")
     qp.add_plugin(cp)
 
-    q = qp.parse("this | that")
+    q: Any = qp.parse("this | that")
     assert q.__class__ == query.Or
     assert q[0].__class__ == query.Term
     assert q[0].text == "this"
     assert q[1].__class__ == query.Term
     assert q[1].text == "that"
 
-    q = qp.parse("this&!that")
+    q: Any = qp.parse("this&!that")
     assert q.__class__ == query.AndNot
     assert q.a.__class__ == query.Term
     assert q.a.text == "this"
     assert q.b.__class__ == query.Term
     assert q.b.text == "that"
 
-    q = qp.parse("alfa -bravo NOT charlie")
+    q: Any = qp.parse("alfa -bravo NOT charlie")
     assert len(q) == 4
     assert q[1].__class__ == query.Not
     assert q[1].query.text == "bravo"
@@ -296,15 +297,15 @@ def test_custom_tokens():
 
 def test_copyfield():
     qp = qparser.QueryParser("a", None)
-    qp.add_plugin(plugins.CopyFieldPlugin({"b": "c"}, None))
+    qp.add_plugin(plugins.CopyFieldPlugin({"b": "c"}, None))  # type: ignore[arg-type]
     assert str(qp.parse("hello b:matt")) == "(a:hello AND b:matt AND c:matt)"
 
     qp = qparser.QueryParser("a", None)
-    qp.add_plugin(plugins.CopyFieldPlugin({"b": "c"}, syntax.AndMaybeGroup))
+    qp.add_plugin(plugins.CopyFieldPlugin({"b": "c"}, syntax.AndMaybeGroup))  # type: ignore[arg-type]
     assert str(qp.parse("hello b:matt")) == "(a:hello AND (b:matt ANDMAYBE c:matt))"
 
     qp = qparser.QueryParser("a", None)
-    qp.add_plugin(plugins.CopyFieldPlugin({"b": "c"}, syntax.RequireGroup))
+    qp.add_plugin(plugins.CopyFieldPlugin({"b": "c"}, syntax.RequireGroup))  # type: ignore[arg-type]
     assert (
         str(qp.parse("hello (there OR b:matt)"))
         == "(a:hello AND (a:there OR (b:matt REQUIRE c:matt)))"
@@ -337,14 +338,14 @@ def test_gtlt():
         a=fields.KEYWORD,
         b=fields.NUMERIC,
         c=fields.KEYWORD,
-        d=fields.NUMERIC(float),
+        d=fields.NUMERIC(float),  # type: ignore[arg-type]
         e=fields.DATETIME,
     )
     qp = qparser.QueryParser("a", schema)
     qp.add_plugin(plugins.GtLtPlugin())
     qp.add_plugin(dateparse.DateParserPlugin())
 
-    q = qp.parse("a:hello b:>100 c:<=z there")
+    q: Any = qp.parse("a:hello b:>100 c:<=z there")
     assert q.__class__ == query.And
     assert len(q) == 4
     assert q[0] == query.Term("a", "hello")
@@ -352,7 +353,7 @@ def test_gtlt():
     assert q[2] == query.TermRange("c", None, "z")
     assert q[3] == query.Term("a", "there")
 
-    q = qp.parse("hello e:>'29 mar 2001' there")
+    q: Any = qp.parse("hello e:>'29 mar 2001' there")
     assert q.__class__ == query.And
     assert len(q) == 3
     assert q[0] == query.Term("a", "hello")
@@ -360,12 +361,12 @@ def test_gtlt():
     assert q[1] == query.DateRange("e", datetime(2001, 3, 29, 0, 0, tzinfo=UTC), None)
     assert q[2] == query.Term("a", "there")
 
-    q = qp.parse("a:> alfa c:<= bravo")
+    q: Any = qp.parse("a:> alfa c:<= bravo")
     assert str(q) == "(a:a: AND a:alfa AND a:c: AND a:bravo)"
 
     qp.remove_plugin_class(plugins.FieldsPlugin)
     qp.remove_plugin_class(plugins.RangePlugin)
-    q = qp.parse("hello a:>500 there")
+    q: Any = qp.parse("hello a:>500 there")
     assert str(q) == "(a:hello AND a:a: AND a:500 AND a:there)"
 
 
@@ -374,10 +375,10 @@ def test_regex():
     qp = qparser.QueryParser("a", schema)
     qp.add_plugin(plugins.RegexPlugin())
 
-    q = qp.parse("a:foo-bar b:foo-bar")
+    q: Any = qp.parse("a:foo-bar b:foo-bar")
     assert str(q) == "(a:foo-bar AND b:foo AND b:bar)"
 
-    q = qp.parse('a:r"foo-bar" b:r"foo-bar"')
+    q: Any = qp.parse('a:r"foo-bar" b:r"foo-bar"')
     assert str(q) == '(a:r"foo-bar" AND b:r"foo-bar")'
 
 
@@ -392,7 +393,7 @@ def test_pseudofield():
 
     qp = qparser.QueryParser("a", schema)
     qp.add_plugin(qparser.PseudoFieldPlugin({"regex": regex_maker}))
-    q = qp.parse("alfa regex:br.vo")
+    q: Any = qp.parse("alfa regex:br.vo")
     assert str(q) == '(a:alfa AND content:r"br.vo")'
 
     def rev_text(node):
@@ -414,23 +415,23 @@ def test_pseudofield():
 
     qp = qparser.QueryParser("content", schema)
     qp.add_plugin(qparser.PseudoFieldPlugin({"reverse": rev_text}))
-    q = qp.parse("alfa reverse:bravo")
+    q: Any = qp.parse("alfa reverse:bravo")
     assert str(q) == "(content:alfa AND (reverse:bravo OR reverse:ovarb))"
 
 
 def test_fuzzy_plugin():
-    ana = analysis.StandardAnalyzer("\\S+")
+    ana = analysis.StandardAnalyzer("\\S+")  # type: ignore[arg-type]
     schema = fields.Schema(f=fields.TEXT(analyzer=ana))
     qp = default.QueryParser("f", schema)
     qp.add_plugin(plugins.FuzzyTermPlugin())
 
-    q = qp.parse("bob~")
+    q: Any = qp.parse("bob~")
     assert q.__class__ == query.FuzzyTerm
     assert q.field() == "f"
     assert q.text == "bob"
     assert q.maxdist == 1
 
-    q = qp.parse("Alfa Bravo~ Charlie")
+    q: Any = qp.parse("Alfa Bravo~ Charlie")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Term
     assert q[0].text == "alfa"
@@ -441,7 +442,7 @@ def test_fuzzy_plugin():
     assert q[2].__class__ == query.Term
     assert q[2].text == "charlie"
 
-    q = qp.parse("Alfa Bravo~2 Charlie")
+    q: Any = qp.parse("Alfa Bravo~2 Charlie")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Term
     assert q[0].text == "alfa"
@@ -452,7 +453,7 @@ def test_fuzzy_plugin():
     assert q[2].__class__ == query.Term
     assert q[2].text == "charlie"
 
-    q = qp.parse("alfa ~2 bravo")
+    q: Any = qp.parse("alfa ~2 bravo")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Term
     assert q[0].text == "alfa"
@@ -462,7 +463,7 @@ def test_fuzzy_plugin():
     assert q[2].text == "bravo"
 
     qp = default.QueryParser("f", None)
-    q = qp.parse("'bob~'")
+    q: Any = qp.parse("'bob~'")
     assert q.__class__ == query.Term
     assert q.field() == "f"
     assert q.text == "bob~"
@@ -496,7 +497,7 @@ def test_fuzzy_prefix():
 
     parser = QueryParser("content", ix.schema)
     parser.add_plugin(FuzzyTermPlugin())
-    q = parser.parse("first~2/3 OR zeroth", debug=False)
+    q: Any = parser.parse("first~2/3 OR zeroth", debug=False)
 
     assert isinstance(q, query.Or)
     ft = q[0]
@@ -512,22 +513,22 @@ def test_fuzzy_prefix():
 
 def test_function_plugin():
     class FakeQuery(query.Query):
-        def __init__(self, children, *args, **kwargs):
-            self.children = children
+        def __init__(self, children: Any, *args: Any, **kwargs: Any) -> None:
+            self._children = children
             self.args = args
             self.kwargs = kwargs
             self.fieldname = None
 
         def __hash__(self):
-            return hash(tuple(self.children)) ^ hash(self.args)
+            return hash(tuple(self._children)) ^ hash(self.args)
 
         def __str__(self):
-            qs = "|".join(str(q) for q in self.children)
+            qs = "|".join(str(q) for q in self._children)
             args = ",".join(self.args)
             kwargs = ",".join(sorted("%s:%s" % item for item in self.kwargs.items()))
             return f"<{qs} {args} {kwargs}>"
 
-    def fuzzy(qs, prefix=0, maxdist=2):
+    def fuzzy(qs: Any, prefix: int = 0, maxdist: int = 2) -> Any:
         prefix = int(prefix)
         maxdist = int(maxdist)
         return query.FuzzyTerm(qs[0].fieldname, qs[0].text, prefixlength=prefix, maxdist=maxdist)
@@ -537,7 +538,7 @@ def test_function_plugin():
     qp.add_plugin(fp)
 
     def check(qstring, target):
-        q = qp.parse(u(qstring), normalize=False)
+        q: Any = qp.parse(u(qstring), normalize=False)
         assert str(q) == target
 
     check("alfa #foo charlie delta", "(f:alfa AND <  > AND f:charlie AND f:delta)")
@@ -584,7 +585,7 @@ def test_function_first():
     qp = default.QueryParser("f", None)
     qp.add_plugin(fp)
 
-    q = qp.parse("#first(apples)")
+    q: Any = qp.parse("#first(apples)")
     assert isinstance(q, SpanFirst)
 
 
@@ -594,19 +595,19 @@ def test_sequence_plugin():
     qp.add_plugin(plugins.FuzzyTermPlugin())
     qp.add_plugin(plugins.SequencePlugin())
 
-    q = qp.parse('alfa "bravo charlie~2 (delta OR echo)" foxtrot')
+    q: Any = qp.parse('alfa "bravo charlie~2 (delta OR echo)" foxtrot')
     assert (
         str(q) == "(f:alfa AND (f:bravo NEAR f:charlie~2 NEAR (f:delta OR f:echo)) AND f:foxtrot)"
     )
     assert q[1].__class__ == query.Sequence
 
-    q = qp.parse('alfa "bravo charlie~2 d?lt*')
+    q: Any = qp.parse('alfa "bravo charlie~2 d?lt*')
     assert q[0].text == "alfa"
     assert q[1].text == "bravo"
     assert q[2].__class__ == query.FuzzyTerm
     assert q[3].__class__ == query.Wildcard
 
-    q = qp.parse('alfa "bravo charlie~2" d?lt* "[a TO z] [0 TO 9]" echo')
+    q: Any = qp.parse('alfa "bravo charlie~2" d?lt* "[a TO z] [0 TO 9]" echo')
     assert (
         str(q)
         == "(f:alfa AND (f:bravo NEAR f:charlie~2) AND f:d?lt* AND (f:[a TO z] NEAR f:[0 TO 9]) AND f:echo)"
@@ -619,7 +620,7 @@ def test_sequence_plugin():
     assert q[3][1].__class__ == query.TermRange
     assert q[4].text == "echo"
 
-    q = qp.parse('alfa "bravo charlie~3"~2 delta')
+    q: Any = qp.parse('alfa "bravo charlie~3"~2 delta')
     assert q[1].__class__ == query.Sequence
     assert q[1].slop == 2
     assert q[1][1].__class__ == query.FuzzyTerm
@@ -631,14 +632,14 @@ def test_sequence_andmaybe():
     qp.remove_plugin_class(plugins.PhrasePlugin)
     qp.add_plugins([plugins.FuzzyTermPlugin(), plugins.SequencePlugin()])
 
-    q = qp.parse('Dahmen ANDMAYBE "Besov Spaces"')
+    q: Any = qp.parse('Dahmen ANDMAYBE "Besov Spaces"')
     assert isinstance(q, query.AndMaybe)
     assert q[0] == query.Term("f", "Dahmen")
     assert q[1] == query.Sequence([query.Term("f", "Besov"), query.Term("f", "Spaces")])
 
 
 def test_sequence_complex():
-    ana = analysis.StandardAnalyzer(stoplist=None)
+    ana = analysis.StandardAnalyzer(stoplist=None)  # type: ignore[arg-type]
     schema = fields.Schema(
         title=fields.TEXT(stored=True),
         path=fields.ID(stored=True),
@@ -668,7 +669,7 @@ def test_sequence_complex():
         qp.add_plugin(plugins.SequencePlugin())
         qp.add_plugin(plugins.FuzzyTermPlugin())
 
-        q = qp.parse('"(he OR she OR we~) would*"~3')
+        q: Any = qp.parse('"(he OR she OR we~) would*"~3')
         r = s.search(q)
         assert r.scored_length()
 

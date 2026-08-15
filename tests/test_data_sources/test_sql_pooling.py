@@ -2,8 +2,6 @@
 
 import sqlite3
 
-import pytest
-
 from whoosh_modern.data_sources.sql import SQLSource, _ConnectionPool
 
 

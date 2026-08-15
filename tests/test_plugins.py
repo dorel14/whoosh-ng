@@ -1,7 +1,6 @@
-import pytest
+from typing import Any
 
 from whoosh.plugins.manager import AnalyzerPlugin, PluginManager, QueryRewritePlugin
-from whoosh.query import Every
 
 
 class DummyAnalyzer:
@@ -24,7 +23,7 @@ class PrefixRewritePlugin(QueryRewritePlugin):
     def register(self, manager: PluginManager) -> None:
         manager.register_query_rewriter(self)
 
-    def rewrite(self, query, searcher):
+    def rewrite(self, query: Any, searcher: Any) -> Any:
         if (
             query.__class__.__name__ == "Term"
             and query.text
@@ -56,7 +55,7 @@ def test_query_rewrite_plugin_rewrites_query():
     from whoosh.query import Term
 
     query = Term("content", "hello")
-    rewritten = rewriter.rewrite(query, searcher=None)
+    rewritten: Any = rewriter.rewrite(query, searcher=None)
     assert rewritten.text == "prefix:hello"
 
 

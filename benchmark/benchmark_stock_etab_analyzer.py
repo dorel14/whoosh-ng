@@ -11,7 +11,6 @@ Run with::
 
 from __future__ import annotations
 
-import os
 import sqlite3
 import tempfile
 
@@ -19,7 +18,7 @@ import pytest
 
 pytest.importorskip("pytest_benchmark")
 
-from whoosh import analysis, fields, index, qparser
+from whoosh import fields, index, qparser
 from whoosh_modern.data_sources.sql import SQLSource
 from whoosh_modern.linguistics.stemmers import FrenchAnalyzer
 

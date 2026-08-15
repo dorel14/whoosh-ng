@@ -16,7 +16,11 @@ def _check_multi() -> None:
     """Skip the test if multiprocessing is not available/usable."""
     try:
         import multiprocessing
-        import multiprocessing.synchronize  # noqa: F401
+
+        _ = multiprocessing
+        import multiprocessing.synchronize
+
+        _ = multiprocessing.synchronize
     except ImportError:
         pytest.skip("multiprocessing not available")
 

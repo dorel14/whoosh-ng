@@ -7,15 +7,10 @@ from pathlib import Path
 import pytest
 
 from whoosh import fields
-from whoosh.index import create_in, open_dir
+from whoosh.index import create_in
 from whoosh.qparser import QueryParser
-from whoosh.searching import Searcher
-from whoosh_modern.data_sources import DataSource
 from whoosh_modern.data_sources.fast_csv import FastCSVSource
 from whoosh_modern.data_sources.json import JSONSource
-from whoosh_modern.data_sources.pandas_ds import PandasSource
-from whoosh_modern.data_sources.parquet_ds import ParquetSource
-from whoosh_modern.data_sources.polars_ds import PolarsSource
 
 
 @pytest.fixture
@@ -120,7 +115,7 @@ class TestDataSourceStreamBatches:
         if not csv_path.exists():
             pytest.skip("CSV benchmark file not available")
         source = FastCSVSource(path=str(csv_path))
-        schema = source.discover_schema()
+        _schema = source.discover_schema()
         batches = []
         count = 0
         for batch in source.stream_batches(batch_size=1000):

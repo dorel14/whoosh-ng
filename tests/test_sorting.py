@@ -1,5 +1,5 @@
 import random
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from itertools import permutations
 
 from whoosh import columns, fields, query, sorting
@@ -47,7 +47,7 @@ def get_schema():
     return fields.Schema(
         id=fields.ID(stored=True),
         num=fields.NUMERIC(stored=True),
-        frac=fields.NUMERIC(float, stored=True),
+        frac=fields.NUMERIC(float, stored=True),  # type: ignore[arg-type]
         tag=fields.ID(stored=True),
         ev=fields.ID,
     )
@@ -265,7 +265,7 @@ def test_query_facet_overlap():
         facets = sorting.Facets()
         facets.add_query("myfacet", {"a-c": q1, "d-f": q2, "g-i": q3}, allow_overlap=True)
         r = s.search(query.Every(), groupedby=facets)
-        gr = r.groups("myfacet")
+        _gr = r.groups("myfacet")
         assert r.groups("myfacet") == {
             "a-c": [0, 1, 2, 6, 7, 8],
             "d-f": [3, 4, 5],
@@ -511,7 +511,7 @@ def test_overlapping_vector():
     with ix.searcher() as s:
         of = sorting.FieldFacet("tags", allow_overlap=True)
         cat = of.categorizer(s)
-        assert cat._use_vectors
+        assert cat._use_vectors  # type: ignore[attr-defined]
 
         r = s.search(query.Every(), groupedby={"tags": of})
         assert r.groups("tags") == {
@@ -547,7 +547,7 @@ def test_overlapping_lists():
     with ix.searcher() as s:
         of = sorting.FieldFacet("tags", allow_overlap=True)
         cat = of.categorizer(s)
-        assert not cat._use_vectors
+        assert not cat._use_vectors  # type: ignore[attr-defined]
 
         r = s.search(query.Every(), groupedby={"tags": of})
         assert r.groups("tags") == {
@@ -991,7 +991,9 @@ def test_add_sortable():
         w.add_document(chapter="charlie", price=200)
         w.merge = False
 
-    with ix.reader() as r:
+    ctx = ix.reader()
+    assert ctx is not None
+    with ctx as r:
         assert not r.has_column("chapter")
         assert not r.has_column("price")
 
@@ -1000,7 +1002,9 @@ def test_add_sortable():
         sorting.add_sortable(w, "price", sorting.FieldFacet("price"))
         w.merge = False
 
-    with ix.reader() as r:
+    ctx = ix.reader()
+    assert ctx is not None
+    with ctx as r:
         assert r.has_column("chapter")
         assert r.has_column("price")
 
@@ -1012,7 +1016,9 @@ def test_add_sortable():
 
     ix.optimize()
 
-    with ix.reader() as r:
+    ctx = ix.reader()
+    assert ctx is not None
+    with ctx as r:
         assert r.has_column("chapter")
         assert r.has_column("price")
 

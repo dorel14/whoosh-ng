@@ -24,8 +24,6 @@ Usage:
 
 from __future__ import annotations
 
-import json
-import os
 import re
 import subprocess
 import sys
@@ -277,7 +275,7 @@ def get_existing_items(project_id: str) -> dict[str, str]:
         if not data:
             break
         for item in data:
-            item_id = str(item.get("id", ""))
+            _item_id = str(item.get("id", ""))
             node_id = str(item.get("node_id", ""))
             content = item.get("content")
             if content and content.get("title"):
@@ -472,7 +470,7 @@ def is_sub_issue(parent_issue_number: int, child_issue_number: int) -> bool:
     """Vérifie si une issue est déjà une sub-issue d'une autre via GraphQL."""
     repo_id = get_repo_node_id()
     parent_id = get_issue_node_id(repo_id, parent_issue_number)
-    child_id = get_issue_node_id(repo_id, child_issue_number)
+    _child_id = get_issue_node_id(repo_id, child_issue_number)
     query = """
     query($parentId: ID!) {
       node(id: $parentId) {
@@ -1000,5 +998,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     if sys.stdout.encoding != "utf-8" and hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     main()

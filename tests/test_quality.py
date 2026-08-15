@@ -1,4 +1,5 @@
 import random
+from typing import Any, cast
 
 from whoosh import fields, matching, scoring
 from whoosh.filedb.filestore import RamStorage
@@ -18,7 +19,7 @@ def test_max_field_length():
         w.add_document(t=" ".join(["word"] * i))
         w.commit()
 
-        with ix.reader() as r:
+        with cast(Any, ix.reader()) as r:
             assert r.max_field_length("t") == _discreet(i)
 
 
@@ -36,7 +37,7 @@ def test_minmax_field_length():
         w.add_document(t=" ".join(["word"] * count))
         w.commit()
 
-        with ix.reader() as r:
+        with cast(Any, ix.reader()) as r:
             assert r.min_field_length("t") == _discreet(least)
             assert r.max_field_length("t") == _discreet(most)
 
@@ -53,7 +54,7 @@ def test_term_stats():
     w.add_document(t="foxtrot alfa alfa alfa")
     w.commit()
 
-    with ix.reader() as r:
+    with cast(Any, ix.reader()) as r:
         ti = r.term_info("t", "alfa")
         assert ti.weight() == 4.0
         assert ti.doc_frequency() == 2
@@ -76,7 +77,7 @@ def test_term_stats():
     w.add_document(t="juliet alfa bravo charlie delta echo foxtrot")
     w.commit(merge=False)
 
-    with ix.reader() as r:
+    with cast(Any, ix.reader()) as r:
         ti = r.term_info("t", "alfa")
         assert ti.weight() == 6.0
         assert ti.doc_frequency() == 4
@@ -101,7 +102,7 @@ def test_min_max_id():
     w.add_document(id=4, t="echo foxtrot golf")
     w.commit()
 
-    with ix.reader() as r:
+    with cast(Any, ix.reader()) as r:
         ti = r.term_info("t", "delta")
         assert ti.min_id() == 1
         assert ti.max_id() == 3
@@ -121,7 +122,7 @@ def test_min_max_id():
     w.add_document(id=8, t="alfa bravo charlie")
     w.commit(merge=False)
 
-    with ix.reader() as r:
+    with cast(Any, ix.reader()) as r:
         ti = r.term_info("t", "delta")
         assert ti.min_id() == 1
         assert ti.max_id() == 3
@@ -141,16 +142,16 @@ def test_replacements():
     b = matching.ListMatcher([1, 2, 3], [0.25, 0.25, 0.25], scorer=sc)
     um = matching.UnionMatcher(a, b)  # type: ignore[abstract]
 
-    a2 = a.replace(0.5)
+    a2 = a.replace(0.5)  # type: ignore[arg-type]
     assert a2.__class__ == matching.NullMatcherClass
 
-    um2 = um.replace(0.5)
+    um2 = um.replace(0.5)  # type: ignore[arg-type]
     assert um2.__class__ == matching.IntersectionMatcher
-    um2 = um.replace(0.6)
+    um2 = um.replace(0.6)  # type: ignore[arg-type]
     assert um2.__class__ == matching.NullMatcherClass
 
     wm = matching.WrappingMatcher(um, boost=2.0)
-    wm = wm.replace(0.5)
+    wm = wm.replace(0.5)  # type: ignore[arg-type]
     assert wm.__class__ == matching.WrappingMatcher
     assert wm.boost == 2.0
     assert wm.child.__class__ == matching.IntersectionMatcher
@@ -159,9 +160,9 @@ def test_replacements():
     ls2 = matching.ListMatcher([1, 2, 3], [0.2, 0.2, 0.2], scorer=scoring.WeightScorer(0.2))
     ls3 = matching.ListMatcher([1, 2, 3], [0.3, 0.3, 0.3], scorer=scoring.WeightScorer(0.3))
     mm = matching.MultiMatcher([ls1, ls2, ls3], [0, 4, 8])
-    mm = mm.replace(0.25)
-    assert mm.current == 2
+    mm = mm.replace(0.25)  # type: ignore[arg-type]
+    assert mm.current == 2  # type: ignore[attr-defined]
 
     dm = matching.DisjunctionMaxMatcher(ls1, ls2)  # type: ignore[abstract]
-    dm = dm.replace(0.15)
+    dm = dm.replace(0.15)  # type: ignore[arg-type]
     assert dm is ls2

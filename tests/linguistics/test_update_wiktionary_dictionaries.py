@@ -8,8 +8,6 @@ import subprocess
 import sys
 import tempfile
 
-import pytest
-
 from whoosh_modern.linguistics.synonyms.wiktionary_provider import WiktionarySynonymProvider
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

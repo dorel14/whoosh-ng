@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
-from whoosh.hooks import HookImpl, call_hook, hookimpl, register_hook
+from whoosh.hooks import call_hook, hookimpl, register_hook
 
 
 @dataclass(frozen=True)
@@ -71,7 +71,8 @@ class HookedStorageProvider(StorageProvider):
 
     async def write(self, key: str, data: bytes) -> None:
         updated = await call_hook("before_write", key, data)
-        await self.provider.write(key, updated if isinstance(updated, bytes | bytearray) else data)
+        payload = cast(bytes, updated) if isinstance(updated, (bytes, bytearray)) else data
+        await self.provider.write(key, payload)
         await call_hook("after_write", key, data)
 
     async def delete(self, key: str) -> None:

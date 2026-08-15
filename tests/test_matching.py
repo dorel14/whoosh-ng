@@ -1,11 +1,13 @@
 from datetime import UTC
 from itertools import permutations
 from random import choice, randint, sample
+from typing import cast
 
 from whoosh import fields, matching, qparser, query
 from whoosh.filedb.filestore import RamStorage
 from whoosh.query import And, Term
 from whoosh.scoring import WeightScorer
+from whoosh.searching import Hit
 from whoosh.util import make_binary_tree
 
 
@@ -495,11 +497,17 @@ def test_dismax():
         rq = s.search(qqp, limit=1)
         rd = s.search(qdp, limit=1)
 
-        assert rq[0].score < rd[0].score
+        rq0 = cast("Hit", rq[0])
+        rd0 = cast("Hit", rd[0])
+        rq_score = rq0.score
+        rd_score = rd0.score
+        assert rq_score is not None
+        assert rd_score is not None
+        assert rq_score < rd_score
 
 
 def test_exclusion():
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     schema = fields.Schema(id=fields.ID(stored=True), date=fields.DATETIME)
     ix = RamStorage().create_index(schema)
@@ -580,7 +588,7 @@ def test_every_matcher():
 
         def score(self):
             # Iterate through the sub-matchers
-            for child in self.children:
+            for child in cast("list[matching.Matcher]", self.children):
                 # If the matcher is on the current document, do something
                 # with its score
                 if child.is_active() and child.id() == self.id():
@@ -682,7 +690,7 @@ def _assert_no_hang(matcher_cls):
         raise AssertionError(
             f"{matcher_cls.__name__}.skip_to_quality hung (regression of #446/#124)"
         )
-    ok, skipped, dt, tb = queue.get(timeout=5)
+    ok, _skipped, _dt, tb = queue.get(timeout=5)
     assert ok, f"{matcher_cls.__name__} worker failed:\n{tb}"
 
 

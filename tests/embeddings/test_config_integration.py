@@ -117,7 +117,7 @@ def test_embedding_engine_onnx_with_model_and_sha256(tmp_path: Path) -> None:
 
     with (
         patch("whoosh_modern.embeddings.model_manager.EmbeddingModelManager") as mock_mgr_cls,
-        patch("whoosh_modern.embeddings.onnx_provider.ONNXEmbeddingProvider") as mock_onnx,
+        patch("whoosh_modern.embeddings.onnx_provider.ONNXEmbeddingProvider") as _mock_onnx,
     ):
         mock_mgr = mock_mgr_cls.return_value
         mock_mgr.download.return_value = model_dir

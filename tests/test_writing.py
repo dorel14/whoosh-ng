@@ -35,7 +35,9 @@ def test_no_stored():
             w.add_document(id=str(i), text=" ".join(random.sample(domain, 5)))
         w.commit()
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert sorted([int(id) for id in r.lexicon("id")]) == list(range(20))
 
 
@@ -70,7 +72,9 @@ def test_asyncwriter():
                 w.join()
 
         # Check whether all documents made it into the index.
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert sorted([int(id) for id in r.lexicon("id")]) == list(range(20))
 
 
@@ -105,7 +109,9 @@ def test_asyncwriter_no_stored():
                 w.join()
 
         # Check whether all documents made it into the index.
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert sorted([int(id) for id in r.lexicon("id")]) == list(range(20))
 
 
@@ -133,7 +139,7 @@ def test_buffered():
             "india",
         ]
 
-        w = writing.BufferedWriter(ix, period=None, limit=10, commitargs={"merge": False})
+        w = writing.BufferedWriter(ix, period=None, limit=10, commitargs={"merge": False})  # type: ignore[arg-type]
         for i in range(20):
             w.add_document(id=str(i), text=" ".join(random.sample(domain, 5)))
         time.sleep(0.1)
@@ -145,7 +151,7 @@ def test_buffered():
 def test_buffered_search():
     schema = fields.Schema(id=fields.STORED, text=fields.TEXT)
     with TempIndex(schema, "bufferedsearch") as ix:
-        w = writing.BufferedWriter(ix, period=None, limit=5)
+        w = writing.BufferedWriter(ix, period=None, limit=5)  # type: ignore[arg-type]
         w.add_document(id=1, text="alfa bravo charlie")
         w.add_document(id=2, text="bravo tango delta")
         w.add_document(id=3, text="tango delta echo")
@@ -170,7 +176,7 @@ def test_buffered_search():
 def test_buffered_update():
     schema = fields.Schema(id=fields.ID(stored=True, unique=True), payload=fields.STORED)
     with TempIndex(schema, "bufferedupdate") as ix:
-        w = writing.BufferedWriter(ix, period=None, limit=5)
+        w = writing.BufferedWriter(ix, period=None, limit=5)  # type: ignore[arg-type]
         for i in range(10):
             for char in "abc":
                 fs = {"id": char, "payload": str(i) + char}
@@ -220,14 +226,16 @@ def test_buffered_threads():
             thread.join()
         w.close()
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert r.doc_count() == 4
             names = sorted([d["name"] for d in r.all_stored_fields()])
             assert names == domain
 
 
 def test_fractional_weights():
-    ana = analysis.RegexTokenizer(r"\S+") | analysis.DelimitedAttributeFilter()
+    ana = analysis.RegexTokenizer(r"\S+") | analysis.DelimitedAttributeFilter()  # type: ignore[arg-type]
 
     # With Positions format
     schema = fields.Schema(f=fields.TEXT(analyzer=ana))
@@ -267,7 +275,9 @@ def test_cancel_delete():
             w.add_document(id=char)
         w.commit()
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert not r.has_deletions()
 
         w = ix.writer()
@@ -275,7 +285,9 @@ def test_cancel_delete():
         w.delete_document(3)
         w.cancel()
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert not r.has_deletions()
             assert not r.is_deleted(2)
             assert not r.is_deleted(3)
@@ -287,7 +299,9 @@ def test_cancel_delete():
             w.add_document(id=char)
             w.commit(merge=False)
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert not r.has_deletions()
 
         w = ix.writer()
@@ -295,7 +309,9 @@ def test_cancel_delete():
         w.delete_document(3)
         w.cancel()
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert not r.has_deletions()
             assert not r.is_deleted(2)
             assert not r.is_deleted(3)
@@ -371,7 +387,9 @@ def test_add_reader():
             w.add_document(i="5", a="india juliet kilo lima", b="umber violet weird xray")
             w.optimize = True
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert r.doc_count() == 4
 
             sfs = sorted(r.all_stored_fields(), key=lambda d: d["i"])
@@ -416,7 +434,9 @@ def test_add_reader_spelling():
             w.add_document(a="undoing indicating", b="undoing indicating")
             w.optimize = True
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             sws = list(r.lexicon("spell_b"))
             assert sws == [
                 b"eyeing",
@@ -451,7 +471,7 @@ def test_clear():
     # Clear
     with ix.writer() as w:
         w.add_document(a="foo bar baz")
-        w.mergetype = writing.CLEAR
+        w.mergetype = writing.CLEAR  # type: ignore[attr-defined]
 
     with ix.searcher() as s:
         assert s.doc_count_all() == 1
@@ -503,14 +523,18 @@ def test_delete_by_term_has_del():
             w.add_document(key="foxtrot")
             w.merge = False
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert not r.has_deletions()
 
         with ix.writer() as w:
             w.delete_by_term("key", "bravo")
             w.optimize = True
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert not r.has_deletions()
 
 
@@ -630,7 +654,9 @@ def test_asyncwriter_lockerror_recovery():
 
         # The buffered documents are eventually committed without crashing.
         assert w.wait(timeout=10)
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert sorted(r.lexicon("id")) == [b"1", b"2"]
 
 
@@ -645,7 +671,9 @@ async def test_async_writer_await_api():
         await w.commit(timeout=30)
         assert w._committed
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert sorted(r.lexicon("id")) == [b"1", b"2"]
 
         # A second commit must be refused.
@@ -674,7 +702,9 @@ async def test_async_writer_locked_then_commit_recovers():
 
         await task
         assert w._committed
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert b"1" in list(r.lexicon("id"))
 
 
@@ -686,7 +716,7 @@ def test_bufferedwriter_concurrent_search():
     # BufferedWriter must not crash or return inconsistent results.
     schema = fields.Schema(id=fields.ID(stored=True), content=fields.TEXT)
     with TempIndex(schema, "bufferedconcurrent") as ix:
-        w = writing.BufferedWriter(ix, period=None, limit=100)
+        w = writing.BufferedWriter(ix, period=None, limit=100)  # type: ignore[arg-type]
 
         errors = []
         stop = threading.Event()
@@ -783,8 +813,8 @@ def test_writer_temp_storage_isolated():
             # The two writers must not share a temporary storage directory.
             assert w1._tempstorage.folder != w2._tempstorage.folder
             # Each temp storage is a distinct subdirectory of the index dir.
-            assert os.path.dirname(w1._tempstorage.folder) == ix.storage.folder
-            assert os.path.dirname(w2._tempstorage.folder) == ix.storage.folder
+            assert os.path.dirname(w1._tempstorage.folder) == ix.storage.folder  # type: ignore[attr-defined]
+            assert os.path.dirname(w2._tempstorage.folder) == ix.storage.folder  # type: ignore[attr-defined]
         finally:
             w1.cancel()
             w2.cancel()

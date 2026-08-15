@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from whoosh import columns, fields, query
+from whoosh import columns, fields
 from whoosh.codec.whoosh3 import W3Codec
 from whoosh.filedb import compound
 from whoosh.filedb.filestore import RamStorage
@@ -213,7 +213,9 @@ def test_multivalue():
         w.add_document(s=["alfa", "foxtrot", "charlie"], n=[100, 200, 300])
         w.add_document(s=["juliet", "bravo", "india"], n=[10, 20, 30])
 
-    with ix.reader() as r:
+    reader = ix.reader()
+    assert reader is not None
+    with reader as r:
         scr = r.column_reader("s")
         assert list(scr) == ["alfa", "juliet"]
 
@@ -230,7 +232,9 @@ def test_column_field():
             w.add_document(a="bravo charlie", b=b"delta echo")
             w.add_document(a="charlie delta", b=b"echo foxtrot")
 
-        with ix.reader() as r:
+        reader = ix.reader()
+    assert reader is not None
+    with reader as r:
             assert r.has_column("a")
             assert r.has_column("b")
 
@@ -321,13 +325,15 @@ def test_varbytes_offsets():
 
     # Without offsets:
     col = columns.VarBytesColumn(allow_offsets=False)
-    schema = fields.Schema(name=fields.ID(sortable=col))
+    schema = fields.Schema(name=fields.ID(sortable=col))  # type: ignore[reportArgumentType]
     with TempIndex(schema) as ix:
         with ix.writer() as w:
             for i in range(5000):
                 w.add_document(name=values[i % vlen])
 
-        with ix.reader() as r:
+        reader = ix.reader()
+    assert reader is not None
+    with reader as r:
             cr = r.column_reader("name")
             assert isinstance(cr, columns.TranslatingColumnReader)
             assert not cr.raw_column().had_stored_offsets
@@ -336,13 +342,15 @@ def test_varbytes_offsets():
 
     # With offsets
     col = columns.VarBytesColumn(allow_offsets=True, write_offsets_cutoff=4096)
-    schema = fields.Schema(name=fields.ID(sortable=col))
+    schema = fields.Schema(name=fields.ID(sortable=col))  # type: ignore[reportArgumentType]
     with TempIndex(schema) as ix:
         with ix.writer() as w:
             for i in range(5000):
                 w.add_document(name=values[i % vlen])
 
-        with ix.reader() as r:
+        reader = ix.reader()
+    assert reader is not None
+    with reader as r:
             cr = r.column_reader("name")
             assert isinstance(cr, columns.TranslatingColumnReader)
             assert cr.raw_column().had_stored_offsets

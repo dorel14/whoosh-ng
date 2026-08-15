@@ -171,7 +171,7 @@ def format_commit_list(commits: list[dict], locale: str = "en") -> str:
     categories: dict[str, list[str]] = {}
     for commit in commits:
         msg = commit.get("commit", {}).get("message", "")
-        sha = commit.get("sha", "")[:7]
+        _sha = commit.get("sha", "")[:7]
         cat_key, summary = categorize_commit(msg, locale)
         if not summary:
             continue
@@ -213,7 +213,7 @@ def format_release_notes(release: dict, all_releases: list[dict], token: str | N
     else:
         date_str = "unreleased"
 
-    version = re.sub(r"^v", "", tag)
+    _version = re.sub(r"^v", "", tag)
 
     # Find previous tag for commit comparison
     try:

@@ -1,16 +1,13 @@
 """Tests for SearchView."""
 
-import os
 import sqlite3
 import tempfile
-from datetime import datetime
 
 import pytest
 
 from whoosh.fields import ID, TEXT, Schema
-from whoosh.index import exists_in, open_dir
+from whoosh.index import exists_in
 from whoosh_modern.data_sources.sql import SQLSource
-from whoosh_modern.exceptions import ValidationError
 from whoosh_modern.middleware import LoggingMiddleware, RetryMiddleware
 from whoosh_modern.views import SearchView
 

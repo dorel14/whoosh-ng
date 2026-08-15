@@ -20,18 +20,12 @@ from __future__ import annotations
 import argparse
 import os
 import shutil
-import sys
 import time
 from typing import Any
 
 from benchmark import WhooshLikeSpec
 from whoosh import fields, index
-from whoosh.writing import SegmentWriter
-from whoosh_modern.profiling.commit_profiler_v2 import (
-    CommitProfilerV2,
-    _TimedSegmentWriter,
-    profile_commit,
-)
+from whoosh_modern.profiling import CommitProfilerV2, profile_commit
 
 
 class SegmentCommitBenchmark(WhooshLikeSpec):
@@ -62,7 +56,7 @@ class SegmentCommitBenchmark(WhooshLikeSpec):
                 def discover_schema(self):
                     with open(self._path, newline="", encoding="utf-8") as f:
                         reader = csv.DictReader(f)
-                        row = next(reader, {})
+                        _row = next(reader, {})
                     return fields.Schema(
                         customer_id=fields.ID(stored=True, unique=True),
                         first_name=fields.TEXT(stored=True),

@@ -22,6 +22,7 @@ def test_stemming_middleware_stems_configured_fields() -> None:
     ctx = MiddlewareContext("index")
     ctx.document = {"title": "running jumping", "body": "untouched"}
     result = mw.before_index(ctx)
+    assert result.document is not None
     assert result.document["title"] == "run jum"
     assert result.document["body"] == "untouched"
 
@@ -31,6 +32,7 @@ def test_stemming_middleware_stems_all_string_fields_when_no_fields() -> None:
     ctx = MiddlewareContext("index")
     ctx.document = {"a": "running", "b": 42}
     result = mw.before_index(ctx)
+    assert result.document is not None
     assert result.document["a"] == "run"
     assert result.document["b"] == 42
 
@@ -79,6 +81,7 @@ def test_analyzer_middleware_in_chain() -> None:
     ctx.document = {"title": "running car", "body": "car"}
     ctx = chain.run_before("before_index", ctx)
     ctx = chain.run_before("before_search", ctx)
+    assert ctx.document is not None
     assert ctx.document["title"] == "run car auto"
     assert ctx.document["body"] == "car auto"
     assert ctx.query == "car auto run"

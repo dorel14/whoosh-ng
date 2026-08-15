@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-from collections.abc import AsyncIterator
-
 import pytest
 
 from whoosh_modern.data_sources.rest import RESTSource

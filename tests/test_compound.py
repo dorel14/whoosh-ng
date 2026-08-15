@@ -39,7 +39,7 @@ def _test_simple_compound(st):
 
 
 def test_simple_compound_mmap():
-    with TempStorage("compound") as st:
+    with TempStorage("compound") as st:  # type: ignore[arg-type]
         assert st.supports_mmap
         _test_simple_compound(st)
 
