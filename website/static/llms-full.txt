@@ -9116,6 +9116,53 @@ otherwise the number of segments will tend to increase forever!
 
 Release notes for Whoosh-NG, auto-generated from GitHub releases and commit messages.
 
+## v5.3.1 (2026-08-13)
+**Tag**: `v5.3.1`
+
+## v5.3.1 (2026-08-13)
+
+_This release is published under the MIT License._
+
+### Bug Fixes
+
+- **linguistics**: Rendre l'import langdetect robuste pour pyright ([`54ab70e`](https://github.com/dorel14/whoosh-ng/commit/54ab70e9247c3ecfdebef592f1107dc794921194))
+
+- **tooling**: Corriger le type:ignore de langdetect pour mypy/pyright ([`e37be1c`](https://github.com/dorel14/whoosh-ng/commit/e37be1ce62ff958011983f8ed3efded56428fda8))
+
+### Documentation
+
+- Update changelog and API docs [skip ci] ([`d884547`](https://github.com/dorel14/whoosh-ng/commit/d884547c17bcaea800e7e2277bcdfc25753ad446))
+
+---
+
+**Detailed Changes**: [v5.3.0...v5.3.1](https://github.com/dorel14/whoosh-ng/compare/v5.3.0...v5.3.1)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- apply pre-commit fixes
+- v5.3.1 [skip ci]
+
+### Other
+
+- .
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #455 from dorel14/dev
+
+### Bug Fixes
+
+- corriger le type:ignore de langdetect pour mypy/pyright
+- rendre l'import langdetect robuste pour pyright
+
+### Documentation
+
+- update changelog and API docs [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.3.1)
+
 ## v5.3.0 (2026-08-13)
 **Tag**: `v5.3.0`
 
@@ -29490,6 +29537,53 @@ otherwise the number of segments will tend to increase forever!
 # Historique des modifications
 
 Notes de version pour Whoosh-NG, generees automatiquement a partir des releases GitHub et des messages de commits.
+
+## v5.3.1 (2026-08-13)
+**Tag**: `v5.3.1`
+
+## v5.3.1 (2026-08-13)
+
+_This release is published under the MIT License._
+
+### Bug Fixes
+
+- **linguistics**: Rendre l'import langdetect robuste pour pyright ([`54ab70e`](https://github.com/dorel14/whoosh-ng/commit/54ab70e9247c3ecfdebef592f1107dc794921194))
+
+- **tooling**: Corriger le type:ignore de langdetect pour mypy/pyright ([`e37be1c`](https://github.com/dorel14/whoosh-ng/commit/e37be1ce62ff958011983f8ed3efded56428fda8))
+
+### Documentation
+
+- Update changelog and API docs [skip ci] ([`d884547`](https://github.com/dorel14/whoosh-ng/commit/d884547c17bcaea800e7e2277bcdfc25753ad446))
+
+---
+
+**Detailed Changes**: [v5.3.0...v5.3.1](https://github.com/dorel14/whoosh-ng/compare/v5.3.0...v5.3.1)
+
+### Commits
+
+### Chores
+
+- merge master into dev [skip ci]
+- apply pre-commit fixes
+- v5.3.1 [skip ci]
+
+### Other
+
+- .
+- Merge branch 'dev' of https://github.com/dorel14/whoosh-ng into dev
+- Merge pull request #455 from dorel14/dev
+
+### Bug Fixes
+
+- corriger le type:ignore de langdetect pour mypy/pyright
+- rendre l'import langdetect robuste pour pyright
+
+### Documentation
+
+- update changelog and API docs [skip ci]
+
+
+[View on GitHub](https://github.com/dorel14/whoosh-ng/releases/tag/v5.3.1)
 
 ## v5.3.0 (2026-08-13)
 **Tag**: `v5.3.0`
