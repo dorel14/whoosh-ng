@@ -245,23 +245,6 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## Using storage with SearchApplication
-
-```python
-from whoosh_modern import SearchApplication, SQLSource
-from whoosh_modern.storage import HybridStorage, S3Storage
-
-remote = S3Storage(bucket="my-index-bucket", prefix="segments")
-storage = HybridStorage(local_cache="./cache", remote=remote)
-
-app = SearchApplication(
-    source=SQLSource(query="SELECT * FROM products", connection=engine),
-    storage=storage,
-)
-app.build()
-results = app.index.search("laptop")
-```
-
 ## Performance Benchmarks
 
 Benchmarks were run against a local MinIO instance using a 28.89 MB Whoosh
@@ -413,7 +396,7 @@ with MiddlewareWriter(ix.writer(), chain) as writer:
 | `SyncStorageProvider` / `AsyncStorageProvider` | **Contract** defining `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
 | `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implementations** of the contract |
 | `StorageMiddleware` | **Integration layer** that calls the provider at specific lifecycle hooks (`before_index`, `on_commit`) |
-| `SearchApplication` | **Entry point** that delegates to `SearchView.build()`; when the storage is a `FileStorageProvider` (exposed as `FileStorage`) it uses its public `root` to create the Whoosh index directory, otherwise it falls back to a temporary directory |
+| `SearchApplication` | **Entry point** that delegates to `SearchView.build()`; resolves the index path from `FileStorageProvider.root` or a temporary directory. See [SearchApplication](/modern/search-application). |
 
 The provider itself does **not** intercept Whoosh's internal segment reads. Those reads go through Whoosh's built-in `FileStorage` (`whoosh.filedb.filestore`) which reads from the filesystem path given to `create_in()`. The Whoosh-NG storage provider abstraction is designed for:
 - Custom segment routing (S3, SQLite, hybrid cache)

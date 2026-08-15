@@ -22,6 +22,7 @@ Toute la configuration est exprimée via des modèles Pydantic typés :
 - `SearchConfig` / `FuzzyConfig` / `RankingConfig` / `AIConfig`
 - `DataSourceConfigModel` — connexion et synchronisation de la source de données
 - `StorageConfigModel` — sélection du backend de stockage
+- `EmbeddingConfig` — configuration du fournisseur d'embeddings, du modèle et de la vectorisation multi-champs
 
 ### Chargeurs (loaders)
 
@@ -180,6 +181,11 @@ data_source:
 storage:
   type: file
   path: ./index
+embedding:
+  provider: fastembed
+  model: BAAI/bge-small-en-v1.5
+  source_field: description
+  target_field: description_vector
 ```
 
 ### Configuration par couches (base + instance + runtime)
@@ -297,6 +303,7 @@ results = app.search("python")
 | `whoosh_modern.config.models` | Modèles Pydantic de validation |
 | `whoosh_modern.config.loader` | Chargeurs de fichiers YAML / JSON |
 | `whoosh_modern.config.engine` | `ConfigEngine` avec fusion hiérarchique |
+| `whoosh_modern.config.engines.embedding` | `EmbeddingEngine` — construit un `EmbeddingProvider` à partir du bloc de config `embedding` |
 
 ## Voir aussi
 

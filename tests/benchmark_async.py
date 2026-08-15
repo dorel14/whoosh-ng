@@ -6,7 +6,7 @@ import pytest
 
 pytest.importorskip("pytest_benchmark")
 
-from whoosh.utils.async_utils import run_sync
+from whoosh.util.async_utils import run_sync
 
 
 def _blocking_compute(x: int) -> int:

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from whoosh.middleware.chain import MiddlewareChain  # type: ignore[import]
     from whoosh.query import Query  # type: ignore[import]
 
-from whoosh.utils.async_utils import is_async_callable, run_async_from_sync  # type: ignore[import]
+from whoosh.util.async_utils import is_async_callable, run_async_from_sync  # type: ignore[import]
 
 logger = logging.getLogger(__name__)
 

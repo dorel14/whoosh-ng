@@ -230,23 +230,6 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## Utilisation du stockage avec SearchApplication
-
-```python
-from whoosh_modern import SearchApplication, SQLSource
-from whoosh_modern.storage import HybridStorage, S3Storage
-
-remote = S3Storage(bucket="my-index-bucket", prefix="segments")
-storage = HybridStorage(local_cache="./cache", remote=remote)
-
-app = SearchApplication(
-    source=SQLSource(query="SELECT * FROM products", connection=engine),
-    storage=storage,
-)
-app.build()
-results = app.index.search("laptop")
-```
-
 ## Benchmarks de performance
 
 Les benchmarks ont été exécutés contre une instance MinIO locale en
@@ -369,7 +352,7 @@ modifier le writer.
 | `SyncStorageProvider` / `AsyncStorageProvider` | **Contrat** définissant `write()`, `read()`, `delete()`, `exists()`, `list_keys()` |
 | `FileStorageProvider`, `S3StorageProvider`, `HybridStorage` | **Implémentations** du contrat |
 | `StorageMiddleware` | **Couche d'intégration** qui appelle le provider aux hooks de cycle de vie (`before_index`, `on_commit`) |
-| `SearchApplication` | **Point d'entrée** qui extrait `_root` du provider pour créer le répertoire d'index Whoosh |
+| `SearchApplication` | **Point d'entrée** qui extrait `_root` du provider pour créer le répertoire d'index Whoosh. Voir [SearchApplication](/modern/search-application). |
 
 Le provider ne **n'intercepte pas** les lectures internes de segments de Whoosh. Ces lectures passent par le `FileStorage` intégré de Whoosh (`whoosh.filedb.filestore`) qui lit depuis le chemin du système de fichiers donné à `create_in()`. L'abstraction provider de Whoosh-NG est conçue pour :
 - Le routage personnalisé de segments (S3, SQLite, cache hybride)

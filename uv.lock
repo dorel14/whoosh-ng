@@ -1167,6 +1167,15 @@ wheels = [
 ]
 
 [[package]]
+name = "langdetect"
+version = "1.0.9"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0e/72/a3add0e4eec4eb9e2569554f7c70f4a3c27712f40e3284d483e88094cc0e/langdetect-1.0.9.tar.gz", hash = "sha256:cbc1fef89f8d062739774bd51eda3da3274006b3661d199c2655f6b3f6d605a0", size = 981474, upload-time = "2021-05-07T07:54:13.562Z" }
+
+[[package]]
 name = "librt"
 version = "0.11.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3962,7 +3971,7 @@ wheels = [
 
 [[package]]
 name = "whoosh-ng"
-version = "5.2.0"
+version = "5.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "cached-property" },
@@ -3992,6 +4001,14 @@ dev = [
     { name = "twine" },
 ]
 embeddings = [
+    { name = "fastembed" },
+]
+embeddings-onnx = [
+    { name = "huggingface-hub" },
+    { name = "onnxruntime" },
+    { name = "tokenizers" },
+]
+embeddings-sentence-transformers = [
     { name = "sentence-transformers" },
 ]
 faiss = [
@@ -4008,6 +4025,9 @@ fuzzy = [
 ]
 hnsw = [
     { name = "hnswlib" },
+]
+linguistic = [
+    { name = "langdetect" },
 ]
 lmdb = [
     { name = "lmdb" },
@@ -4054,14 +4074,18 @@ requires-dist = [
     { name = "cached-property", specifier = ">=2.0.1" },
     { name = "faiss-cpu", marker = "extra == 'faiss'" },
     { name = "fastapi", marker = "extra == 'api'" },
+    { name = "fastembed", marker = "extra == 'embeddings'" },
     { name = "fastembed", marker = "extra == 'fastembed'" },
     { name = "hnswlib", marker = "extra == 'hnsw'" },
+    { name = "huggingface-hub", marker = "extra == 'embeddings-onnx'" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=8.0.1" },
+    { name = "langdetect", marker = "extra == 'linguistic'" },
     { name = "lmdb", marker = "extra == 'lmdb'" },
     { name = "metaphone", marker = "extra == 'phonetic'" },
     { name = "msgspec", marker = "extra == 'models'", specifier = ">=0.19" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.15" },
     { name = "numpy", marker = "extra == 'vector'", specifier = ">=2" },
+    { name = "onnxruntime", marker = "extra == 'embeddings-onnx'" },
     { name = "orjson", marker = "extra == 'api'" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.6.0" },
@@ -4082,14 +4106,15 @@ requires-dist = [
     { name = "rapidfuzz", marker = "extra == 'fuzzy'" },
     { name = "re2", marker = "extra == 'profiling'" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11" },
-    { name = "sentence-transformers", marker = "extra == 'embeddings'" },
+    { name = "sentence-transformers", marker = "extra == 'embeddings-sentence-transformers'" },
     { name = "sqlalchemy", marker = "extra == 'models'", specifier = ">=2" },
     { name = "sqlmodel", marker = "extra == 'models'", specifier = ">=0.0.16" },
+    { name = "tokenizers", marker = "extra == 'embeddings-onnx'" },
     { name = "twine", marker = "extra == 'dev'", specifier = ">=6" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'api'" },
     { name = "watchdog", marker = "extra == 'watch'" },
 ]
-provides-extras = ["models", "vector", "hnsw", "faiss", "embeddings", "fastembed", "async", "sqlite", "postgres", "s3", "watch", "fuzzy", "phonetic", "lmdb", "yaml", "api", "metrics", "dev", "benchmark", "profiling", "fast-stemming"]
+provides-extras = ["models", "vector", "hnsw", "faiss", "embeddings", "embeddings-sentence-transformers", "embeddings-onnx", "fastembed", "async", "sqlite", "postgres", "s3", "watch", "fuzzy", "phonetic", "linguistic", "lmdb", "yaml", "api", "metrics", "dev", "benchmark", "profiling", "fast-stemming"]
 
 [[package]]
 name = "win32-setctime"

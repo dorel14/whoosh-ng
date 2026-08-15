@@ -6,30 +6,42 @@ Version: 3.2.0
 
 from __future__ import annotations
 
-from whoosh_modern.profiling.analyzer_cache import AnalyzerCache, FieldAnalyzerCache
-from whoosh_modern.profiling.analyzer_comparator import AnalyzerComparator
-from whoosh_modern.profiling.analyzer_profiler import AnalyzerStepProfiler
 from whoosh_modern.profiling.auto_cache_advisor import AutoCacheAdvisor
 from whoosh_modern.profiling.batch_memory_profiler import BatchMemoryProfiler
 from whoosh_modern.profiling.cache_analyzer import BatchSizeOptimizer, CacheAnalyzer
-from whoosh_modern.profiling.commit_profiler_v2 import CommitProfilerV2, profile_commit
+from whoosh_modern.profiling.commit import (
+    CommitProfilerV2,
+    PipelineReconciler,
+    PipelineReconcilerV2,
+    profile_commit,
+)
 from whoosh_modern.profiling.core import IndexProfiler
-from whoosh_modern.profiling.field_index_profiler import FieldIndexProfiler
-from whoosh_modern.profiling.field_profiler import FieldProfiler
-from whoosh_modern.profiling.field_transformation_profiler import FieldTransformationProfiler
-from whoosh_modern.profiling.index_quality_analyzer import IndexQualityAnalyzer
-from whoosh_modern.profiling.indexing_pipeline_profiler import IndexingPipelineProfiler
+from whoosh_modern.profiling.field import (
+    AnalyzerCache,
+    AnalyzerComparator,
+    AnalyzerStepProfiler,
+    FieldAnalyzerCache,
+    FieldConversionProfiler,
+    FieldIndexProfiler,
+    FieldProfiler,
+    FieldTransformationProfiler,
+)
+from whoosh_modern.profiling.index import (
+    IndexQualityAnalyzer,
+    PerDocWriterProfiler,
+    PostingPoolProfiler,
+    SegmentProfiler,
+)
 from whoosh_modern.profiling.memory import MemoryProfiler
 from whoosh_modern.profiling.metrics import MetricsCollector
 from whoosh_modern.profiling.ngram_profiler import NgramProfiler, NgramProfilerReport
-from whoosh_modern.profiling.perdocwriter_profiler import PerDocWriterProfiler
-from whoosh_modern.profiling.pipeline_reconciler_v2 import PipelineReconcilerV2
-from whoosh_modern.profiling.posting_pool_profiler import PostingPoolProfiler
-from whoosh_modern.profiling.segment_profiler import SegmentProfiler
+from whoosh_modern.profiling.pipeline import (
+    IndexingPathProfiler,
+    IndexingPipelineProfiler,
+    UnifiedPipelineProfiler,
+)
 from whoosh_modern.profiling.stemmer_benchmark import StemmerBenchmark
 from whoosh_modern.profiling.stemmer_profiler import StemmerProfiler, StemmerProfilerReport
-from whoosh_modern.profiling.synthetic_datasets import SyntheticDatasetGenerator
-from whoosh_modern.profiling.unified_pipeline_profiler import UnifiedPipelineProfiler
 
 __all__ = [
     "AnalyzerCache",
@@ -41,25 +53,26 @@ __all__ = [
     "CacheAnalyzer",
     "CommitProfilerV2",
     "FieldAnalyzerCache",
+    "FieldConversionProfiler",
     "FieldIndexProfiler",
     "FieldProfiler",
     "FieldTransformationProfiler",
     "IndexProfiler",
     "IndexQualityAnalyzer",
+    "IndexingPathProfiler",
     "IndexingPipelineProfiler",
     "MemoryProfiler",
     "MetricsCollector",
     "NgramProfiler",
     "NgramProfilerReport",
     "PerDocWriterProfiler",
+    "PipelineReconciler",
     "PipelineReconcilerV2",
     "PostingPoolProfiler",
     "SegmentProfiler",
     "StemmerBenchmark",
     "StemmerProfiler",
     "StemmerProfilerReport",
-    "SyntheticDatasetGenerator",
     "UnifiedPipelineProfiler",
-    "AnalyzerCache",
     "profile_commit",
 ]

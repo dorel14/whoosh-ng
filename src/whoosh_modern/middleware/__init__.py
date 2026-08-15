@@ -21,6 +21,7 @@ from whoosh_modern.middleware.analyzer import (
     StemmingMiddleware,
     SynonymMiddleware,
 )
+from whoosh_modern.middleware.embedding import EmbeddingMiddleware
 from whoosh_modern.middleware.resilience import (
     CacheMiddleware,
     LoggingMiddleware,
@@ -60,4 +61,6 @@ __all__ = [
     "AnalyzerMiddleware",
     "StemmingMiddleware",
     "SynonymMiddleware",
+    # embedding middleware
+    "EmbeddingMiddleware",
 ]

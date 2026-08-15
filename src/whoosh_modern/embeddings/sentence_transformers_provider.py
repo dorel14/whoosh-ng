@@ -2,7 +2,7 @@
 
 Requires the optional ``sentence-transformers`` package::
 
-    pip install whoosh-ng[embeddings]
+    pip install whoosh-ng[embeddings-sentence-transformers]
 
 Author: dorel14
 Version: 1.0.0

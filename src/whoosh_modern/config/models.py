@@ -172,6 +172,47 @@ class StorageConfigModel(BaseModel):
     prefix: str = ""
 
 
+class EmbeddingConfig(BaseModel):
+    """Embedding provider configuration.
+
+    Attributes:
+        provider: Embedding provider type (``"onnx"``, ``"sentence-transformers"``,
+            ``"fastembed"``).
+        model: Model identifier or name (e.g. ``"bge-small"``, ``"e5-small"``).
+        model_path: Path to the ONNX model file.
+        tokenizer_dir: Directory containing the tokenizer files.
+        pooling: Pooling strategy (``"mean"``, ``"cls"``, ``"max"``).
+        normalize: Whether to L2-normalize the output vectors.
+        quantization: Optional quantization variant (``"int8"``, ``"fp16"``,
+            ``"fp32"``).
+        batch_size: Number of texts to embed per batch.
+        cache: Whether to cache embeddings locally.
+         source_field: Default source field to embed when
+            ``embedding_fields`` is not provided.
+        target_field: Default target field when ``embedding_fields`` is not
+            provided.
+        embedding_fields: Sequence of ``{"source_field": ..., "target_field": ...}``
+            mappings for multi-field embedding. When provided, the
+            ``source_field`` and ``target_field`` defaults are ignored.
+        expected_sha256: Optional SHA256 checksum for model integrity
+            verification when downloading via ``EmbeddingModelManager``.
+    """
+
+    provider: str | None = None
+    model: str | None = None
+    model_path: str | None = None
+    tokenizer_dir: str | None = None
+    pooling: str = "mean"
+    normalize: bool = True
+    quantization: str | None = None
+    batch_size: int = 32
+    cache: bool = True
+    source_field: str = "content"
+    target_field: str = "embedding"
+    embedding_fields: list[dict[str, str]] | None = None
+    expected_sha256: str | None = None
+
+
 class WhooshNGConfig(BaseModel):
     """Top-level Whoosh-NG application configuration.
 
@@ -194,13 +235,14 @@ class WhooshNGConfig(BaseModel):
     data_source: DataSourceConfigModel | None = None
     storage: StorageConfigModel = Field(default_factory=StorageConfigModel)
     vector: dict[str, Any] = Field(default_factory=dict)
-    embedding: dict[str, Any] = Field(default_factory=dict)
+    embedding: EmbeddingConfig = Field(default_factory=EmbeddingConfig)
     language_detection: dict[str, Any] = Field(default_factory=dict)
 
 
 __all__ = [
     "AIConfig",
     "DataSourceConfigModel",
+    "EmbeddingConfig",
     "FieldConfig",
     "FuzzyConfig",
     "RankingConfig",

@@ -158,5 +158,6 @@ requise au démarrage.
 
 ## Voir Aussi
 
+- [Embeddings](/modern/embeddings) — Provider d'embeddings ONNX Runtime compatible CPU
 - [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
 - [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
