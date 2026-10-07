@@ -280,3 +280,13 @@ def test_onnx_provider_repr(tmp_path: Path) -> None:
     r = repr(provider)
     assert "ONNXEmbeddingProvider" in r
     assert "fake_model.onnx" in r
+
+
+def test_onnx_provider_repr_shows_quantization(tmp_path: Path) -> None:
+    """Test the string representation shows quantization, not pooling."""
+    provider, _, _ = _make_provider(tmp_path, dimension=4)
+    r = repr(provider)
+    assert "ONNXEmbeddingProvider" in r
+    assert "fake_model.onnx" in r
+    assert "quantization=" in r
+    assert "pooling=" not in r

@@ -84,7 +84,7 @@ compression = CompressionMiddleware()
 
 ### EmbeddingMiddleware
 
-Enriches documents with dense vector embeddings before indexing:
+Enriches documents with dense vector embeddings before indexing.
 
 ```python
 from whoosh_modern.middleware import EmbeddingMiddleware
@@ -95,6 +95,8 @@ embedding = EmbeddingMiddleware(
     embedding_provider=provider,
     source_field="body",
     target_field="body_vector",
+    batch_size=32,          # accumulate docs, then embed_batch() for +33% throughput
+    strict_errors=False,    # log and continue on embedding failures
 )
 ```
 
@@ -103,6 +105,7 @@ Use `embedding_fields` for multi-field vectorization:
 ```python
 embedding = EmbeddingMiddleware(
     embedding_provider=provider,
+    batch_size=32,
     embedding_fields=[
         {"source_field": "title", "target_field": "title_vector"},
         {"source_field": "body", "target_field": "body_vector"},

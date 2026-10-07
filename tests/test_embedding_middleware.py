@@ -29,6 +29,7 @@ def test_embedding_middleware_enriches_document() -> None:
         embedding_provider=provider,
         source_field="content",
         target_field="embedding",
+        batch_size=1,
     )
     context = MiddlewareContext("index")
     context.document = {"content": "hello world"}
@@ -45,6 +46,7 @@ def test_embedding_middleware_skips_non_string() -> None:
         embedding_provider=provider,
         source_field="content",
         target_field="embedding",
+        batch_size=1,
     )
     context = MiddlewareContext("index")
     context.document = {"content": 123}
@@ -62,6 +64,7 @@ def test_embedding_middleware_handles_error() -> None:
         embedding_provider=provider,
         source_field="content",
         target_field="embedding",
+        batch_size=1,
     )
     context = MiddlewareContext("index")
     context.document = {"content": "hello"}
@@ -75,6 +78,7 @@ def test_embedding_middleware_multi_field() -> None:
     provider.embed.side_effect = lambda text: [float(len(text))]
     middleware = EmbeddingMiddleware(
         embedding_provider=provider,
+        batch_size=1,
         embedding_fields=[
             {"source_field": "title", "target_field": "title_vector"},
             {"source_field": "body", "target_field": "body_vector"},
@@ -94,6 +98,7 @@ def test_embedding_middleware_multi_field_skips_missing() -> None:
     provider = MagicMock()
     middleware = EmbeddingMiddleware(
         embedding_provider=provider,
+        batch_size=1,
         embedding_fields=[
             {"source_field": "title", "target_field": "title_vector"},
             {"source_field": "body", "target_field": "body_vector"},

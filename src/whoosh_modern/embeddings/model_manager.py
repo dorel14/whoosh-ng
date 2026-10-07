@@ -384,10 +384,10 @@ class EmbeddingModelManager:
         if subfolder:
             subfolder = f"{subfolder}/"
         return [
-            f"{base}/{subfolder}model{suffix}.onnx",
-            f"{base}/tokenizer.json",
-            f"{base}/tokenizer_config.json",
-            f"{base}/config.json",
+            f"{base}/{subfolder}model{suffix}.onnx?download=true",
+            f"{base}/tokenizer.json?download=true",
+            f"{base}/tokenizer_config.json?download=true",
+            f"{base}/config.json?download=true",
         ]
 
     def _get_onnx_candidates(self, model_info: ModelInfo) -> list[str]:

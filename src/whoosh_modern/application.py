@@ -57,6 +57,7 @@ class SearchApplication:
         embedding_provider: Any | None = None,
         embedding_fields: list[dict[str, str]] | None = None,
         config: Any | None = None,
+        searcher: Any | None = None,
     ) -> None:
         """Initialize the SearchApplication.
 
@@ -81,6 +82,11 @@ class SearchApplication:
                 instance used to resolve embedding defaults (``source_field``,
                 ``target_field``, ``embedding_fields``) when they are not
                 explicitly provided as constructor arguments.
+            searcher: Optional searcher configuration. Can be a
+                :class:`whoosh_modern.config.models.SearcherConfig` instance,
+                or a ``dict`` that will be converted to ``SearcherConfig``.
+                When provided, ``search()`` uses the configured weighting
+                model instead of the default.
         """
         self._source = source
         self._storage = storage
@@ -93,6 +99,24 @@ class SearchApplication:
         self._embedding_provider = embedding_provider
         self._embedding_fields = embedding_fields
         self._config = config
+        self._searcher = self._resolve_searcher_config(searcher)
+
+    def _resolve_searcher_config(self, searcher: Any | None) -> Any | None:
+        """Resolve the searcher configuration.
+
+        Args:
+            searcher: Raw searcher config from constructor or config object.
+
+        Returns:
+            A ``SearcherConfig`` instance, or ``None``.
+        """
+        if searcher is None and self._config is not None:
+            return self._config.search.searcher
+        if isinstance(searcher, dict):
+            from whoosh_modern.config.models import SearcherConfig
+
+            return SearcherConfig(**searcher)
+        return searcher
 
     @property
     def index(self) -> Index:
@@ -188,6 +212,7 @@ class SearchApplication:
                     source_field=source_field,
                     target_field=target_field,
                     embedding_fields=embedding_fields,
+                    # Use default batch_size (32) for batch embedding optimization
                 ),
             ]
         self._index = view.build(index_path)
@@ -238,7 +263,13 @@ class SearchApplication:
             default_field = self._schema.names()[0] if self._schema else "content"
             parser = QueryParser(default_field, self._schema)
             query = parser.parse(query)
-        with self._index.searcher() as searcher:
+
+        weighting = getattr(self._searcher, "weighting", None) if self._searcher else None
+        if weighting is not None:
+            searcher_obj = self._index.searcher(weighting=weighting)
+        else:
+            searcher_obj = self._index.searcher()
+        with searcher_obj as searcher:
             return searcher.search(query, **kwargs)
 
 

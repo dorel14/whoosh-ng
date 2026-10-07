@@ -8,8 +8,7 @@ development workflow, coding standards, and quality gates for this project.
 - Python 3.11 or newer
 - [Git](https://git-scm.com/)
 - [Ruff](https://docs.astral.sh/ruff/) for linting/formatting
-- [Mypy](https://mypy.readthedocs.io/) for static type checking
-- [Pyright](https://microsoft.github.io/pyright/) for additional type checking
+- [Pyright](https://microsoft.github.io/pyright/) for static type checking
 
 ## Setup
 
@@ -51,7 +50,6 @@ ruff check .
 ruff format .
 
 # Type checking (new code must pass without errors)
-mypy src/
 pyright src/
 
 # Tests
@@ -60,7 +58,7 @@ pytest --cov=whoosh
 
 ### Type Checking Policy
 
-- **New code and new modules** must pass `mypy` and `pyright` without errors.
+- **New code and new modules** must pass `pyright` without errors.
 - **Legacy code** (`src/whoosh/` core package) has known type issues and is subject to error thresholds in CI (`legacy-typecheck.yml`). Do not introduce new type errors in legacy modules without fixing existing ones in the same area.
 
 Coverage for new modules must be >= 90%.

@@ -98,6 +98,6 @@ with ix.searcher() as s:
 - **Dépôt GitHub**: [whoosh-ng](https://github.com/dorel14/whoosh-ng)
 - **Paquet PyPI**: [whoosh-ng](https://pypi.org/project/whoosh-ng/)
 - **Signalements de bugs**: [GitHub Issues](https://github.com/dorel14/whoosh-ng/issues)
-- **Documentation pour LLM**:
-  - [`llms.txt`](/llms.txt) — Index de toutes les pages de documentation
-  - [`llms-full.txt`](/llms-full.txt) — Documentation API complète
+  - **Documentation pour LLM**:
+    - [`llms.txt`](https://dorel14.github.io/whoosh-ng/llms.txt) — Index de toutes les pages de documentation
+    - [`llms-full.txt`](https://dorel14.github.io/whoosh-ng/llms-full.txt) — Documentation API complète

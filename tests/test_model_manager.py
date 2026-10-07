@@ -266,8 +266,8 @@ def test_build_default_urls() -> None:
     info = registry.resolve("test-model")
     assert info is not None
     urls = manager._build_default_urls(info)
-    assert urls[0] == "https://huggingface.co/org/test-model/resolve/main/model.onnx"
-    assert urls[1] == "https://huggingface.co/org/test-model/resolve/main/tokenizer.json"
+    assert urls[0] == "https://huggingface.co/org/test-model/resolve/main/model.onnx?download=true"
+    assert urls[1] == "https://huggingface.co/org/test-model/resolve/main/tokenizer.json?download=true"
 
 
 def test_build_default_urls_quantized() -> None:
@@ -285,7 +285,7 @@ def test_build_default_urls_quantized() -> None:
     info = registry.resolve("model-int8")
     assert info is not None
     urls = manager._build_default_urls(info)
-    assert urls[0] == ("https://huggingface.co/org/model/resolve/main/model-int8.onnx")
+    assert urls[0] == ("https://huggingface.co/org/model/resolve/main/model-int8.onnx?download=true")
 
 
 # --- New methods: exists, info, remove, update ---

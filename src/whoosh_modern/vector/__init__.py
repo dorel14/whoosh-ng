@@ -8,7 +8,6 @@ Author: dorel14
 Version: 2.1.0
 """
 
-# mypy: ignore-errors
 from __future__ import annotations
 
 from whoosh.vector.base import VectorField, VectorHit, VectorProvider

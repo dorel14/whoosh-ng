@@ -104,6 +104,18 @@ class AIConfig(BaseModel):
     enabled: bool = False
 
 
+class SearcherConfig(BaseModel):
+    """Searcher configuration.
+
+    Attributes:
+        weighting: Optional weighting model name or class identifier
+            (e.g. ``"BM25F"``, ``"BM25"``, ``"TF_IDF"``, ``"PL2"``,
+            ``"DFree"``, ``"Frequency"``).
+    """
+
+    weighting: str | None = None
+
+
 class SearchConfig(BaseModel):
     """Search behaviour configuration.
 
@@ -111,11 +123,13 @@ class SearchConfig(BaseModel):
         fuzzy: Fuzzy search settings.
         ranking: Ranking/boost settings.
         ai: AI feature flags.
+        searcher: Searcher configuration.
     """
 
     fuzzy: FuzzyConfig = Field(default_factory=FuzzyConfig)
     ranking: RankingConfig = Field(default_factory=RankingConfig)
     ai: AIConfig = Field(default_factory=AIConfig)
+    searcher: SearcherConfig = Field(default_factory=SearcherConfig)
 
 
 class DataSourceConfigModel(BaseModel):
@@ -177,7 +191,7 @@ class EmbeddingConfig(BaseModel):
 
     Attributes:
         provider: Embedding provider type (``"onnx"``, ``"sentence-transformers"``,
-            ``"fastembed"``).
+            ``"fastembed"``, ``"libembedding"``).
         model: Model identifier or name (e.g. ``"bge-small"``, ``"e5-small"``).
         model_path: Path to the ONNX model file.
         tokenizer_dir: Directory containing the tokenizer files.
@@ -198,7 +212,7 @@ class EmbeddingConfig(BaseModel):
             verification when downloading via ``EmbeddingModelManager``.
     """
 
-    provider: str | None = None
+    provider: str | None = "libembedding"
     model: str | None = None
     model_path: str | None = None
     tokenizer_dir: str | None = None
@@ -246,6 +260,7 @@ __all__ = [
     "FieldConfig",
     "FuzzyConfig",
     "RankingConfig",
+    "SearcherConfig",
     "SearchConfig",
     "StorageConfigModel",
     "WhooshNGConfig",

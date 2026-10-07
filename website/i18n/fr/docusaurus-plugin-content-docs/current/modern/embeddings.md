@@ -7,17 +7,20 @@ sidebar_position: 70
 
 Whoosh-NG peut embarquer des documents dans des vecteurs denses et les utiliser
 pour la recherche sémantique. Cette page couvre la stack embeddings complète :
-**FastEmbedProvider** (backend CPU par défaut), **ONNXEmbeddingProvider**
-(backend CPU avancé), **EmbeddingModelRegistry**, **EmbeddingModelManager**,
-le CLI `whoosh-ng-models` et `EmbeddingEngine` pour l'intégration
-`ConfigEngine`.
+**LibEmbeddingProvider** (backend CPU par défaut), **FastEmbedProvider**,
+**ONNXEmbeddingProvider** (backend CPU avancé), **EmbeddingModelRegistry**,
+**EmbeddingModelManager**, le CLI `whoosh-ng-models` et `EmbeddingEngine` pour
+l'intégration `ConfigEngine`.
 
 > **Module :** `whoosh_modern.embeddings`
-> **Version :** 3.1.0
+> **Version :** 4.0.0
 
 ## Installation
 
 ```bash
+# Backend CPU par défaut (libembedding-ng)
+pip install whoosh-ng[libembedding]
+
 # Backend CPU par défaut (FastEmbed)
 pip install whoosh-ng[embeddings]
 
@@ -34,9 +37,9 @@ pip install whoosh-ng[embeddings,vector]
 ## Démarrage rapide
 
 ```python
-from whoosh_modern.embeddings import FastEmbedProvider
+from whoosh_modern.embeddings import LibEmbeddingProvider
 
-provider = FastEmbedProvider()
+provider = LibEmbeddingProvider()
 vector = provider.embed("hello world")
 print(len(vector))  # 384
 
@@ -46,9 +49,9 @@ print(len(batch))   # 2
 
 ## Providers
 
-### FastEmbedProvider (défaut)
+### FastEmbedProvider
 
-`FastEmbedProvider` est le backend CPU par défaut. Il encapsule
+`FastEmbedProvider` est un backend CPU. Il encapsule
 `fastembed.TextEmbedding`, qui télécharge et cache les modèles
 automatiquement.
 
@@ -59,6 +62,41 @@ provider = FastEmbedProvider()
 # Ou avec un modèle personnalisé :
 provider = FastEmbedProvider(model_name="BAAI/bge-base-en-v1.5")
 ```
+
+- Zéro dépendance PyTorch.
+- CPU-only.
+- Téléchargement automatique et cache des modèles.
+- Conforme au protocole `EmbeddingProvider`.
+
+### LibEmbeddingProvider (défaut)
+
+`LibEmbeddingProvider` est le nouveau backend CPU par défaut. Il encapsule
+`libembedding.TextEmbedding`, qui télécharge et cache les modèles automatiquement.
+Il est CPU-only, nécessite zéro PyTorch, et est plus rapide que FastEmbed.
+
+```python
+from whoosh_modern.embeddings import LibEmbeddingProvider
+
+provider = LibEmbeddingProvider()
+# Ou avec un preset :
+provider = LibEmbeddingProvider(model_name="fast")
+# Ou avec une quantification explicite :
+provider = LibEmbeddingProvider(model_name="balanced", quantization="auto")
+```
+
+Prises en charge des presets :
+- `"fast"` → modèle le plus rapide auto-sélectionné (dimension 384 préférée, taille minimale, score de vitesse CPU le plus élevé)
+- `"balanced"` → vitesse/qualité équilibrée (défaut)
+- `"quality"` → modèle de plus haute qualité
+
+Ou utiliser un identifiant de modèle direct (ex: `"BAAI/bge-small-en-v1.5"`).
+
+Arguments du constructeur :
+- `model_name`: preset ou identifiant HF (défaut: `"balanced"`)
+- `pooling`: `"mean"` ou `"cls"` (défaut: `"mean"`)
+- `batch_size`: taille de lot d'inférence optionnelle
+- `cache_size`: taille de cache LRU optionnelle (0 = désactivé)
+- `quantization`: mode de quantification optionnel (`"none"`, `"static"`, `"dynamic"`, `"fp16"`, `"auto"`)
 
 - Zéro dépendance PyTorch.
 - CPU-only.
@@ -155,6 +193,115 @@ les deux registres :
 > **ne sont pas interchangeables** — FastEmbed gère son propre téléchargement,
 > tandis que le registre ONNX mappe vers `onnx-community/bge-small-en-v1.5-ONNX`
 > via `EmbeddingModelManager`.
+
+## ProviderPool (embedding parallèle)
+
+`ProviderPool` distribue les appels `embed_batch()` across plusieurs instances
+de provider pour maximiser le throughput CPU et éviter la contention GIL.
+
+```python
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+vectors = pool.embed_batch(["texte 1", "texte 2", "texte 3", "texte 4"])
+print(len(vectors))  # 4
+```
+
+Amélioration attendue : throughput parallèle vs provider unique (à mesurer sur votre matériel).
+
+## Réglage du runtime ONNX
+
+`ONNXEmbeddingProvider` expose les options de session ONNX Runtime pour le réglage CPU/GPU :
+
+```python
+from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider
+
+provider = ONNXEmbeddingProvider(
+    model_path="models/bge-small-en-v1.5.onnx",
+    tokenizer_dir="models/tokenizer",
+    use_cuda=True,                    # auto-détecte CUDA, fallback CPU
+    intra_op_num_threads=2,           # parallélisme intra-op
+    inter_op_num_threads=2,           # parallélisme inter-op
+    graph_optimization_level="all",   # active toutes les optimisations
+)
+```
+
+## EmbeddingBatchWriter v4.0
+
+`EmbeddingBatchWriter` supporte maintenant le provider pooling, la gestion
+d'erreurs stricte, le cache LRU thread-safe et les métriques de performance :
+
+```python
+from whoosh_modern.indexing import EmbeddingBatchWriter
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+writer = EmbeddingBatchWriter(
+    index,
+    embedding_provider=pool,
+    text_field="body",
+    vector_field="body_vector",
+    batch_size=500,
+    embedding_batch_size=32,
+    cache_size=8192,
+    strict_errors=True,
+)
+
+for batch in source.stream_batches(batch_size=500):
+    writer.add_batch(batch)
+
+writer.close()
+
+stats = writer.get_stats()
+print(f"Taux de hit cache: {stats['cache']['hit_rate_percent']}%")
+print(f"Throughput: {stats['docs_per_second']} docs/sec")
+```
+
+## EmbeddingMiddleware v4.0
+
+`EmbeddingMiddleware` accumule maintenant les documents et appelle
+`embed_batch()` pour +33% de throughput. Utilisez `batch_size=1` pour le mode
+par document (comportement legacy).
+
+```python
+from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+
+middleware = EmbeddingMiddleware(
+    embedding_provider=provider,
+    source_field="content",
+    target_field="embedding",
+    batch_size=32,          # accumule 32 docs, puis embed_batch()
+    strict=True,            # raise on embedding failures
+)
+```
+
+## Préchargement de modèles
+
+Préchargez les modèles de manière asynchrone au démarrage pour éviter la latence
+de première requête :
+
+```python
+import asyncio
+from whoosh_modern.embeddings.model_preload import preload_embedding_model_async
+
+async def startup():
+    await preload_embedding_model_async(
+        model_name="BAAI/bge-small-en-v1.5",
+        provider_type="fastembed",
+    )
+
+asyncio.run(startup())
+```
 
 ## Model manager et registry
 
@@ -311,7 +458,7 @@ Il est recommandé d'utiliser soit `model` pour les modèles gérés par le mana
 soit `model_path` / `tokenizer_dir` pour des chemins locaux personnalisés, afin
 d'éviter toute ambiguïité.
 
-## Gestion des erreurs d'embedding
+## Gestion des erreurs d'embedding {#error-handling}
 
 > **Décision de conception :** Les erreurs du fournisseur sont **ignorées**
 > (journalisées en tant qu'avertissements) pour éviter d'interrompre le pipeline

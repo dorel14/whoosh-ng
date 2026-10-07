@@ -89,6 +89,7 @@ class TestSearchApplicationEmbedding:
                     embedding_provider=provider,
                     source_field="content",
                     target_field="embedding",
+                    batch_size=1,
                 ),
             ],
         )
@@ -117,6 +118,7 @@ class TestSearchApplicationEmbedding:
                     embedding_provider=provider,
                     source_field="content",
                     target_field="embedding",
+                    batch_size=1,
                 ),
             ],
         )
@@ -145,6 +147,7 @@ class TestSearchApplicationEmbedding:
             middleware=[
                 EmbeddingMiddleware(
                     embedding_provider=provider,
+                    batch_size=1,
                     embedding_fields=[
                         {"source_field": "title", "target_field": "title_vector"},
                         {"source_field": "content", "target_field": "body_vector"},

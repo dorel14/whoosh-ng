@@ -45,6 +45,23 @@ class EmbeddingEngine:
             )
             return None
         provider_type = embedding_config.provider.lower()
+        if provider_type == "libembedding":
+            try:
+                from whoosh_modern.embeddings.libembedding_provider import (
+                    LibEmbeddingProvider,
+                )
+
+                return LibEmbeddingProvider(
+                    model_name=embedding_config.model or "balanced",
+                    pooling=embedding_config.pooling or "mean",
+                    batch_size=embedding_config.batch_size,
+                    cache_size=256 if embedding_config.cache else None,
+                )
+            except ImportError as exc:
+                raise ImportError(
+                    "LibEmbeddingProvider requires libembedding-ng. "
+                    "Install with: pip install whoosh-ng[libembedding]"
+                ) from exc
         if provider_type == "fastembed":
             try:
                 from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider

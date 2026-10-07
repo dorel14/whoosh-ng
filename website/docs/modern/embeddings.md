@@ -6,17 +6,20 @@ sidebar_position: 70
 # Embeddings
 
 Whoosh-NG can embed documents into dense vectors and use them for semantic
-search. This page covers the full embeddings stack: **FastEmbedProvider**
-(default CPU backend), **ONNXEmbeddingProvider** (advanced CPU backend),
-**EmbeddingModelRegistry**, **EmbeddingModelManager**, the
+search. This page covers the full embeddings stack: **LibEmbeddingProvider**
+(default CPU backend), **FastEmbedProvider**, **ONNXEmbeddingProvider** (advanced
+CPU backend), **EmbeddingModelRegistry**, **EmbeddingModelManager**, the
 `whoosh-ng-models` CLI, and `EmbeddingEngine` for `ConfigEngine` integration.
 
 > **Module:** `whoosh_modern.embeddings`
-> **Version:** 3.1.0
+> **Version:** 4.0.0
 
 ## Install
 
 ```bash
+# Default CPU backend (libembedding-ng)
+pip install whoosh-ng[libembedding]
+
 # Default CPU backend (FastEmbed)
 pip install whoosh-ng[embeddings]
 
@@ -33,9 +36,9 @@ pip install whoosh-ng[embeddings,vector]
 ## Quickstart
 
 ```python
-from whoosh_modern.embeddings import FastEmbedProvider
+from whoosh_modern.embeddings import LibEmbeddingProvider
 
-provider = FastEmbedProvider()
+provider = LibEmbeddingProvider()
 vector = provider.embed("hello world")
 print(len(vector))  # 384
 
@@ -57,6 +60,61 @@ provider = FastEmbedProvider()
 # Or with a custom model:
 provider = FastEmbedProvider(model_name="BAAI/bge-base-en-v1.5")
 ```
+
+- Zero PyTorch dependency.
+- CPU-only.
+- Automatic model download and caching.
+- Conforms to `EmbeddingProvider`.
+
+### FastEmbed automatic model selection
+
+Use `model_name="fast"` to automatically select the fastest available model
+based on CPU throughput benchmarks:
+
+```python
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+print(provider)  # FastEmbedProvider(model_name='BAAI/bge-small-en-v1.5', dimension=384, threads=None)
+```
+
+Selection priority:
+1. 384-dim models preferred (smaller vectors, faster inference)
+2. Smaller model size
+3. Higher speed score
+
+Available presets: `bge-small`, `bge-base`, `minilm`, `minilm-multilingual`,
+`e5-small`, `e5-base`, `multilingual`, `nomic`.
+
+### LibEmbeddingProvider (default)
+
+`LibEmbeddingProvider` is the new default CPU-friendly backend. It wraps
+`libembedding.TextEmbedding`, which downloads and caches models automatically.
+It is CPU-only, requires zero PyTorch, and is faster than FastEmbed.
+
+```python
+from whoosh_modern.embeddings import LibEmbeddingProvider
+
+provider = LibEmbeddingProvider()
+# Or with a preset:
+provider = LibEmbeddingProvider(model_name="fast")
+# Or with explicit quantization:
+provider = LibEmbeddingProvider(model_name="balanced", quantization="auto")
+```
+
+Supported presets:
+- `"fast"` → auto-selected fastest model (dimension 384 preferred, minimal size, highest CPU speed score)
+- `"balanced"` → balanced speed/quality (default)
+- `"quality"` → highest quality model
+
+Or use a direct model identifier (e.g. `"BAAI/bge-small-en-v1.5"`).
+
+Constructor arguments:
+- `model_name`: preset or HF model identifier (default: `"balanced"`)
+- `pooling`: `"mean"` or `"cls"` (default: `"mean"`)
+- `batch_size`: optional inference batch size
+- `cache_size`: optional LRU cache size (0 = disabled)
+- `quantization`: optional quantization mode (`"none"`, `"static"`, `"dynamic"`, `"fp16"`, `"auto"`)
 
 - Zero PyTorch dependency.
 - CPU-only.
@@ -138,13 +196,13 @@ When `enable_prefix=True`, `embed()` prepends `"passage: "` and
 The two providers interpret model identifiers differently. Understanding
 this distinction avoids confusion with names that exist in both registries:
 
-| Aspect | FastEmbedProvider | ONNXEmbeddingProvider |
-|--------|-------------------|-----------------------|
-| Identifier type | HuggingFace model name (e.g. `BAAI/bge-small-en-v1.5`) | Registered model name (e.g. `bge-small-en-v1.5`) **or** a local file path |
-| Download mechanism | `fastembed` downloads automatically on first use | `EmbeddingModelManager.download()` downloads from the Hub |
-| Cache location | FastEmbed's own cache (`~/.cache/fastembed`) | `~/.whoosh-ng/models/` |
-| Registry | None (FastEmbed manages its own model list) | `EmbeddingModelRegistry` (`get_default_registry()`) |
-| Example | `FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")` | `ONNXEmbeddingProvider(model_path=str(model_dir / "model.onnx"))` |
+| Aspect | LibEmbeddingProvider | FastEmbedProvider | ONNXEmbeddingProvider |
+|--------|----------------------|-------------------|-----------------------|
+| Identifier type | preset or HF model name (e.g. `BAAI/bge-small-en-v1.5`) | HuggingFace model name | Registered model name **or** local file path |
+| Download mechanism | `libembedding` downloads automatically on first use | `fastembed` downloads automatically | `EmbeddingModelManager.download()` downloads from the Hub |
+| Cache location | libembedding cache (`~/.cache/libembedding`) | FastEmbed cache (`~/.cache/fastembed`) | `~/.whoosh-ng/models/` |
+| Registry | presets via `TextEmbedding.from_mode()` | None (FastEmbed manages its own list) | `EmbeddingModelRegistry` |
+| Example | `LibEmbeddingProvider(model_name="fast")` | `FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")` | `ONNXEmbeddingProvider(model_path=str(model_dir / "model.onnx"))` |
 
 > **Ambiguity note:** The name `bge-small-en-v1.5` exists both as a
 > FastEmbed model (a HuggingFace repo identifier without namespace) and as
@@ -152,6 +210,113 @@ this distinction avoids confusion with names that exist in both registries:
 > interchangeable** — FastEmbed manages its own download, while the ONNX
 > registry maps to `onnx-community/bge-small-en-v1.5-ONNX` via
 > `EmbeddingModelManager`.
+
+## ProviderPool (parallel embedding)
+
+`ProviderPool` distributes `embed_batch()` calls across multiple provider
+instances to maximize CPU throughput and avoid GIL contention.
+
+```python
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+vectors = pool.embed_batch(["text 1", "text 2", "text 3", "text 4"])
+print(len(vectors))  # 4
+```
+
+Expected improvement: parallel throughput vs single provider (benchmark on your hardware).
+
+## ONNX runtime tuning
+
+`ONNXEmbeddingProvider` exposes ONNX Runtime session options for CPU/GPU tuning:
+
+```python
+from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider
+
+provider = ONNXEmbeddingProvider(
+    model_path="models/bge-small-en-v1.5.onnx",
+    tokenizer_dir="models/tokenizer",
+    use_cuda=True,                    # auto-detect CUDA, fallback CPU
+    intra_op_num_threads=2,           # intra-op parallelism
+    inter_op_num_threads=2,           # inter-op parallelism
+    graph_optimization_level="all",   # enable all graph optimizations
+)
+```
+
+## EmbeddingBatchWriter v4.0
+
+`EmbeddingBatchWriter` now supports provider pooling, strict error handling,
+thread-safe LRU caching, and performance metrics:
+
+```python
+from whoosh_modern.indexing import EmbeddingBatchWriter
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+writer = EmbeddingBatchWriter(
+    index,
+    embedding_provider=pool,
+    text_field="body",
+    vector_field="body_vector",
+    batch_size=500,
+    embedding_batch_size=32,
+    cache_size=8192,
+    strict_errors=True,
+)
+
+for batch in source.stream_batches(batch_size=500):
+    writer.add_batch(batch)
+
+writer.close()
+
+stats = writer.get_stats()
+print(f"Cache hit rate: {stats['cache']['hit_rate_percent']}%")
+print(f"Throughput: {stats['docs_per_second']} docs/sec")
+```
+
+## EmbeddingMiddleware v4.0
+
+`EmbeddingMiddleware` now accumulates documents and calls `embed_batch()` for
++33% throughput. Set `batch_size=1` for per-document mode (legacy behavior).
+
+```python
+from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+
+middleware = EmbeddingMiddleware(
+    embedding_provider=provider,
+    source_field="content",
+    target_field="embedding",
+    batch_size=32,          # accumulate 32 docs, then embed_batch()
+    strict=True,            # raise on embedding failures
+)
+```
+
+## Model preloading
+
+Preload models asynchronously at startup to avoid first-request latency:
+
+```python
+import asyncio
+from whoosh_modern.embeddings.model_preload import preload_embedding_model_async
+
+async def startup():
+    await preload_embedding_model_async(
+        model_name="BAAI/bge-small-en-v1.5",
+        provider_type="fastembed",
+    )
+
+asyncio.run(startup())
+```
 
 ## Model manager and registry
 
@@ -234,6 +399,16 @@ faster downloads.
 ```yaml
 # whoosh-ng.yml
 embedding:
+  provider: libembedding
+  model: fast
+  pooling: mean
+  batch_size: 32
+  cache: true
+```
+
+```yaml
+# whoosh-ng.yml with FastEmbed
+embedding:
   provider: fastembed
   model: BAAI/bge-small-en-v1.5
 ```
@@ -271,8 +446,8 @@ embedding:
 # When embedding_fields is used, omit source_field/target_field at the
 # root level — they are ignored when embedding_fields is present.
 embedding:
-  provider: fastembed
-  model: BAAI/bge-small-en-v1.5
+  provider: libembedding
+  model: balanced
   embedding_fields:
     - source_field: title
       target_field: title_vector
@@ -280,7 +455,7 @@ embedding:
       target_field: body_vector
 ```
 
-Supported providers: `fastembed`, `onnx`, `sentence-transformers`.
+Supported providers: `libembedding`, `fastembed`, `onnx`, `sentence-transformers`.
 
 > **Multi-field precedence:** When `embedding_fields` is provided, the
 > root-level `source_field` / `target_field` defaults are **ignored** — each
@@ -360,8 +535,9 @@ class MyProvider:
 
 ## Examples
 
+- [Embeddings with LibEmbedding](/examples/embeddings_libembedding) — Runnable LibEmbedding example
 - [Embeddings with FastEmbed](/examples/embeddings-fastembed) — Runnable FastEmbed example
-- [Embeddings with ONNX](/examples/embeddings-onnx) — Runnable ONNX example
+- [Embeddings with ONNX](/examples/embeddings_onnx) — Runnable ONNX example
 
 ## See Also
 

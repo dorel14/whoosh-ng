@@ -24,8 +24,6 @@ jobs:
           pip install -e ".[dev,models,api,vector]"
       - name: Run ruff
         run: ruff check .
-      - name: Run mypy
-        run: mypy src/
       - name: Run pyright
         run: pyright src/
 

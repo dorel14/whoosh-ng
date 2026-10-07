@@ -1,0 +1,92 @@
+[
+  {
+    "text": "Patel-Deleon company",
+    "relevant_ids": [],
+    "semantic_variant": "Patel Deleon business",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "Gina Rocha customer",
+    "relevant_ids": [],
+    "semantic_variant": "Gina Rocha client",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "British Indian Ocean Territory Chagos",
+    "relevant_ids": [],
+    "semantic_variant": "Chagos Archipelago territory",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "faulkner-kramer email",
+    "relevant_ids": [],
+    "semantic_variant": "faulkner kramer contact",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "2021 subscription",
+    "relevant_ids": [],
+    "semantic_variant": "subscription year 2021",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "morgan domain",
+    "relevant_ids": [],
+    "semantic_variant": "morgan company website",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "Shah and Sons company",
+    "relevant_ids": [],
+    "semantic_variant": "Shah Sons business",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "Costa Rica customer",
+    "relevant_ids": [],
+    "semantic_variant": "Costa Rica client",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "Michelle Blevins",
+    "relevant_ids": [],
+    "semantic_variant": "Blevins customer record",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "pineda-rogers website",
+    "relevant_ids": [],
+    "semantic_variant": "pineda rogers domain",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "Ecuador customer",
+    "relevant_ids": [],
+    "semantic_variant": "Ecuador client record",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "West Jared city",
+    "relevant_ids": [],
+    "semantic_variant": "West Jared location",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "Moyer-Wang company",
+    "relevant_ids": [],
+    "semantic_variant": "Moyer Wang business",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "nicholas00 faulkner",
+    "relevant_ids": [],
+    "semantic_variant": "nicholas faulkner contact",
+    "auto_ground_truth": true
+  },
+  {
+    "text": "2020-11-29 subscription",
+    "relevant_ids": [],
+    "semantic_variant": "november 2020 subscription",
+    "auto_ground_truth": true
+  }
+]

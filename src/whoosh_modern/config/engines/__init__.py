@@ -14,6 +14,7 @@ component:
 - :class:`VectorEngine` — ``VectorProvider`` from vector config
 - :class:`EmbeddingEngine` — ``EmbeddingProvider`` from embedding config
 - :class:`LanguageEngine` — ``LanguageDetector`` from language detection config
+- :class:`SearcherEngine` — ``SearcherConfig`` from search config
 
 Author: dorel14
 Version: 3.0.0
@@ -30,6 +31,7 @@ from whoosh_modern.config.engines.language import LanguageEngine
 from whoosh_modern.config.engines.plugin import PluginEngine
 from whoosh_modern.config.engines.schema import SchemaEngine
 from whoosh_modern.config.engines.search_model import SearchModelEngine
+from whoosh_modern.config.engines.searcher import SearcherEngine
 from whoosh_modern.config.engines.storage import StorageEngine
 from whoosh_modern.config.engines.vector import VectorEngine
 
@@ -41,6 +43,7 @@ __all__ = [
     "FacetEngine",
     "LanguageEngine",
     "PluginEngine",
+    "SearcherEngine",
     "SchemaEngine",
     "SearchModelEngine",
     "StorageEngine",
