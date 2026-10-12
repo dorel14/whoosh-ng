@@ -4,12 +4,15 @@ Author: dorel14
 Version: 3.0.0
 """
 
+import asyncio
 import logging
-from collections.abc import Iterator, Mapping
+from collections.abc import AsyncIterator, Iterator, Mapping
 from typing import Any
 
-from whoosh.fields import Schema
+from whoosh.fields import TEXT, Schema
+from whoosh_modern.data_sources.sql import _validate_identifier
 from whoosh_modern.exceptions import DataSourceError
+from whoosh_modern.schema_discovery import SchemaDiscovery
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +25,10 @@ class SQLAlchemySource:
     Supports any SQLAlchemy dialect (PostgreSQL, MySQL, SQLite, Oracle, etc.)
     with proper type mapping and connection pooling via SQLAlchemy's pool.
 
-    Uses the SQLAlchemy inspector and column types to infer the Whoosh
-    schema directly, so ``SchemaDiscovery`` is not needed here.
+    Uses SQLAlchemy result-set metadata and sampled values to infer the
+    Whoosh schema via :meth:`SchemaDiscovery.infer_schema`, which is
+    robust for JOINs and subqueries. The inspector-based type map
+    (``_build_type_map``) is retained as a fallback.
 
     Example:
         from sqlalchemy import create_engine
@@ -87,9 +92,14 @@ class SQLAlchemySource:
     def discover_schema(self) -> Schema:
         """Discover schema from query result metadata using SQLAlchemy.
 
-        Executes the configured query with ``LIMIT 0``-equivalent
-        introspection and uses the SQLAlchemy inspector to map column
-        types to Whoosh field types.
+        Samples ``sample_size`` rows from the query result and uses
+        :meth:`SchemaDiscovery.infer_schema` to build a Whoosh ``Schema``
+        from column names, SQL type metadata, and value-based inference.
+        This approach is robust for JOINs and subqueries where the
+        SQLAlchemy inspector (which parses the ``FROM`` clause) fails.
+
+        Falls back to the inspector-based ``_build_type_map`` only when
+        the result-set approach raises an exception.
 
         Returns:
             A Whoosh :class:`~whoosh.fields.Schema` derived from the
@@ -98,8 +108,6 @@ class SQLAlchemySource:
         Raises:
             DataSourceError: If ``query`` or ``engine`` is missing.
         """
-        from sqlalchemy import inspect, text
-
         if self._schema is not None:
             return self._schema
 
@@ -109,27 +117,64 @@ class SQLAlchemySource:
                 source="sqlalchemy",
             )
 
-        with self._engine.connect() as conn:
-            stmt = text(self.query)
-            result = conn.execution_options(stream_results=True).execute(stmt)
-            columns = list(result.keys())
-
-        if not columns:
-            from whoosh.fields import Schema
-
-            return Schema()
-
-        # Use SQLAlchemy inspector for type mapping when possible
+        columns: list[str] = []
         try:
-            inspector = inspect(self._engine)
-            dialect = self._engine.dialect
-            type_map = self._build_type_map(inspector, dialect, columns)
+            from sqlalchemy import text
+
+            with self._engine.connect() as conn:
+                stmt = text(self.query)
+                result = conn.execution_options(stream_results=True).execute(stmt)
+                columns = list(result.keys())
+
+                if not columns:
+                    return Schema()
+
+                sql_types: list[str | None] = []
+                try:
+                    cursor_desc = result.cursor.description  # type: ignore[union-attr]
+                except Exception:
+                    cursor_desc = None
+
+                if cursor_desc:
+                    for col_name in columns:
+                        col_type = next(
+                            (desc[1] for desc in cursor_desc if desc[0] == col_name),
+                            None,
+                        )
+                        sql_types.append(col_type if isinstance(col_type, str) else None)
+                else:
+                    sql_types = [None] * len(columns)
+
+                sample_rows: list[dict[str, Any]] = []
+                try:
+                    raw_rows = result.fetchmany(self.sample_size)
+                    sample_rows = [dict(zip(columns, row, strict=True)) for row in raw_rows]
+                except Exception:
+                    pass
+
+                self._schema = SchemaDiscovery.infer_schema(
+                    keys=columns,
+                    sample_rows=sample_rows if sample_rows else None,
+                    sql_types=sql_types,
+                )
+                return self._schema
         except Exception:
-            type_map = {col: "TEXT" for col in columns}
+            pass
 
-        from whoosh.fields import Schema
+        if columns:
+            try:
+                from sqlalchemy import inspect
 
-        self._schema = Schema(**type_map)
+                inspector = inspect(self._engine)
+                dialect = self._engine.dialect
+                type_map = self._build_type_map(inspector, dialect, columns)
+                self._schema = Schema(**type_map)
+                return self._schema
+            except Exception:
+                self._schema = Schema(**{col: TEXT(stored=True) for col in columns})
+                return self._schema
+
+        self._schema = Schema()
         return self._schema
 
     def _build_type_map(self, inspector: Any, dialect: Any, columns: list[str]) -> dict[str, Any]:
@@ -152,9 +197,9 @@ class SQLAlchemySource:
                 if col_type is not None:
                     type_map[col_name] = self._map_sqlalchemy_type(col_type, dialect)
                 else:
-                    type_map[col_name] = "TEXT"
+                    type_map[col_name] = TEXT(stored=True)
             except Exception:
-                type_map[col_name] = "TEXT"
+                type_map[col_name] = TEXT(stored=True)
         return type_map
 
     def _get_table_name(self) -> str:
@@ -237,6 +282,42 @@ class SQLAlchemySource:
                 doc: dict[str, Any] = dict(zip(columns, row, strict=True))
                 yield doc
 
+    def stream_batches(self, batch_size: int = 1000) -> Iterator[list[dict[str, Any]]]:
+        """Yield documents from the SQLAlchemy query result in batches.
+
+        Uses SQLAlchemy's native ``result.fetchmany(batch_size)`` for
+        efficient batch reading from the database, mirroring the pattern
+        from :class:`~whoosh_modern.data_sources.sql.SQLSource`.
+
+        Args:
+            batch_size: Maximum number of rows per batch.
+
+        Yields:
+            Lists of document dictionaries, each list containing at
+            most ``batch_size`` items.
+
+        Raises:
+            DataSourceError: If ``query`` or ``engine`` is missing.
+        """
+        from sqlalchemy import text
+
+        if self._engine is None or not self.query:
+            raise DataSourceError(
+                "SQLAlchemySource requires a 'query' and 'engine' to stream batches",
+                source="sqlalchemy",
+            )
+
+        with self._engine.connect() as conn:
+            stmt = text(self.query)
+            result = conn.execution_options(stream_results=True).execute(stmt)
+            columns = list(result.keys())
+
+            while True:
+                rows = result.fetchmany(batch_size)
+                if not rows:
+                    break
+                yield [dict(zip(columns, row, strict=True)) for row in rows]
+
     def iter_changes(self, since: Any) -> Iterator[Document]:
         """Yield documents changed since a timestamp using SQLAlchemy.
 
@@ -265,6 +346,8 @@ class SQLAlchemySource:
                 "SQLAlchemySource requires a 'query' and 'engine' to iterate changes",
                 source="sqlalchemy",
             )
+
+        _validate_identifier(self.incremental_field)
 
         query = (
             f"{self.query} AND {self.incremental_field} > :since"
@@ -320,4 +403,72 @@ class SQLAlchemySource:
             "incremental_field": self.incremental_field,
             "id_field": self.id_field,
             "dialect": getattr(self._engine.dialect, "name", "unknown"),
+            "sample_size": self.sample_size,
         }
+
+    async def adiscover_schema(self) -> Schema:
+        """Async equivalent of :meth:`discover_schema` via ``asyncio.to_thread``.
+
+        Returns:
+            A Whoosh :class:`~whoosh.fields.Schema` derived from the
+            query's result columns.
+        """
+        return await asyncio.to_thread(self.discover_schema)
+
+    async def aiter_documents(self) -> AsyncIterator[Document]:
+        """Async document streaming via ``asyncio.to_thread``.
+
+        Yields:
+            Document dictionaries, one per row in the result set.
+        """
+
+        def _collect() -> list[dict[str, Any]]:
+            from sqlalchemy import text
+
+            if self._engine is None or not self.query:
+                raise DataSourceError(
+                    "SQLAlchemySource requires a 'query' and 'engine' to iterate documents",
+                    source="sqlalchemy",
+                )
+            with self._engine.connect() as conn:
+                stmt = text(self.query)
+                result = conn.execution_options(stream_results=True).execute(stmt)
+                columns = list(result.keys())
+                return [dict(zip(columns, row, strict=True)) for row in result]
+
+        for doc in await asyncio.to_thread(_collect):
+            yield doc
+
+    async def astream_batches(self, batch_size: int = 1000) -> AsyncIterator[list[dict[str, Any]]]:
+        """Async batch streaming via ``asyncio.to_thread``.
+
+        Args:
+            batch_size: Maximum number of rows per batch.
+
+        Yields:
+            Lists of document dictionaries, each list containing at
+            most ``batch_size`` items.
+        """
+
+        def _collect() -> list[list[dict[str, Any]]]:
+            from sqlalchemy import text
+
+            if self._engine is None or not self.query:
+                raise DataSourceError(
+                    "SQLAlchemySource requires a 'query' and 'engine' to stream batches",
+                    source="sqlalchemy",
+                )
+            with self._engine.connect() as conn:
+                stmt = text(self.query)
+                result = conn.execution_options(stream_results=True).execute(stmt)
+                columns = list(result.keys())
+                batches: list[list[dict[str, Any]]] = []
+                while True:
+                    rows = result.fetchmany(batch_size)
+                    if not rows:
+                        break
+                    batches.append([dict(zip(columns, row, strict=True)) for row in rows])
+                return batches
+
+        for batch in await asyncio.to_thread(_collect):
+            yield batch
