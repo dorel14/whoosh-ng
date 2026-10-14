@@ -38,14 +38,6 @@ class BatchIndexWriter:
     - Uses multisegment=True to defer merging
     - Supports batch commits to reduce I/O pressure
 
-    Note:
-        The ``batch_size`` parameter is stored as metadata for API
-        compatibility and introspection. It is NOT used to automatically
-        split documents passed to :meth:`add_batch`. Each call to
-        :meth:`add_batch` processes the entire list provided; the caller
-        is responsible for splitting documents into appropriate batch sizes
-        (e.g., via ``source.stream_batches(batch_size=...)``).
-
     Example::
 
         writer = BatchIndexWriter(index, batch_size=5000)
@@ -69,11 +61,7 @@ class BatchIndexWriter:
 
         Args:
             index: The Whoosh index to write documents into.
-            batch_size: Number of documents processed per batch. 
-                Note: Stored for compatibility/metadata only; this writer
-                does not auto-split batches. The caller is responsible
-                for providing appropriately sized batches to ``add_batch()``.
-                Defaults to 5000.
+            batch_size: Number of documents processed per batch. Defaults to 5000.
             limitmb: Memory limit in MB for the writer's buffer. Defaults to 512.
             commit_every: If set, commit every N batches. If ``None``, no
                 intermediate commits occur until ``close``. Defaults to None.
@@ -140,9 +128,7 @@ class BatchIndexWriter:
         schema, then adds them to the index.
 
         Args:
-            docs: List of document dicts to index. This is treated as
-                a single batch; the writer does not split it based on
-                ``batch_size``.
+            docs: List of document dicts to index.
 
         Returns:
             The number of documents successfully added.
