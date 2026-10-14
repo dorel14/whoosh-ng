@@ -125,7 +125,10 @@ class BatchIndexWriter:
         """Add a batch of documents.
 
         Filters each document to only include fields present in the
-        schema, then adds them to the index.
+        schema, then adds them to the index. If the number of documents
+        exceeds ``batch_size``, the batch is automatically split into
+        multiple sub-batches; each sub-batch is written and counted
+        separately.
 
         Args:
             docs: List of document dicts to index.
@@ -147,24 +150,28 @@ class BatchIndexWriter:
 
         schema_fields = self._get_schema_fields()
         count = 0
-        for doc in docs:
-            if any(k not in schema_fields for k in doc):
-                filtered = {k: v for k, v in doc.items() if k in schema_fields}
-                writer.add_document(**filtered)
-            else:
-                writer.add_document(**doc)
-            count += 1
+        batch_size = max(1, self._batch_size)
 
-        self._doc_count += count
-        self._batch_count += 1
+        for i in range(0, len(docs), batch_size):
+            subbatch = docs[i : i + batch_size]
+            for doc in subbatch:
+                if any(k not in schema_fields for k in doc):
+                    filtered = {k: v for k, v in doc.items() if k in schema_fields}
+                    writer.add_document(**filtered)
+                else:
+                    writer.add_document(**doc)
+            count += len(subbatch)
 
-        if self._commit_every is not None and self._batch_count % self._commit_every == 0:
-            if self._writer is not None and self._commit_profiler is not None:
-                self._commit_profiler.profile(self._writer)
-            elif self._writer is not None:
-                self._writer.commit(merge=False, callback=self._callback)
-            self._writer = None
-            self._schema_fields = None
+            self._doc_count += len(subbatch)
+            self._batch_count += 1
+
+            if self._commit_every is not None and self._batch_count % self._commit_every == 0:
+                if self._writer is not None and self._commit_profiler is not None:
+                    self._commit_profiler.profile(self._writer)
+                elif self._writer is not None:
+                    self._writer.commit(merge=False, callback=self._callback)
+                self._writer = None
+                self._schema_fields = None
 
         return count
 
