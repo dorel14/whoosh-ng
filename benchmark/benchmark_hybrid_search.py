@@ -186,8 +186,7 @@ def _compare_providers(
         import tempfile
 
         tmp_path = (
-            Path(tempfile.gettempdir())
-            / f"benchmark_compare_{provider_type}_{int(time.time())}"
+            Path(tempfile.gettempdir()) / f"benchmark_compare_{provider_type}_{int(time.time())}"
         )
         if tmp_path.exists():
             import shutil
@@ -292,36 +291,103 @@ def print_provider_comparison(
 # ---------------------------------------------------------------------------
 TOPICS: dict[str, list[str]] = {
     "search": [
-        "search", "engine", "query", "retrieval", "ranking", "index",
-        "document", "relevance", "result", "inverted index", "full text",
+        "search",
+        "engine",
+        "query",
+        "retrieval",
+        "ranking",
+        "index",
+        "document",
+        "relevance",
+        "result",
+        "inverted index",
+        "full text",
     ],
     "vector": [
-        "vector", "embedding", "dimension", "cosine", "similarity",
-        "nearest neighbor", "hnsw", "faiss", "numpy", "matrix",
+        "vector",
+        "embedding",
+        "dimension",
+        "cosine",
+        "similarity",
+        "nearest neighbor",
+        "hnsw",
+        "faiss",
+        "numpy",
+        "matrix",
     ],
     "ml": [
-        "machine", "learning", "model", "training", "neural", "network",
-        "classification", "regression", "prediction", "accuracy",
+        "machine",
+        "learning",
+        "model",
+        "training",
+        "neural",
+        "network",
+        "classification",
+        "regression",
+        "prediction",
+        "accuracy",
     ],
     "data": [
-        "data", "processing", "pipeline", "etl", "dataset", "schema",
-        "database", "storage", "column", "analytics", "streaming",
+        "data",
+        "processing",
+        "pipeline",
+        "etl",
+        "dataset",
+        "schema",
+        "database",
+        "storage",
+        "column",
+        "analytics",
+        "streaming",
     ],
     "semantic": [
-        "semantic", "meaning", "language", "nlp", "token", "embedding",
-        "context", "transformer", "attention", "similarity",
+        "semantic",
+        "meaning",
+        "language",
+        "nlp",
+        "token",
+        "embedding",
+        "context",
+        "transformer",
+        "attention",
+        "similarity",
     ],
     "python": [
-        "python", "framework", "library", "asyncio", "pydantic",
-        "fastapi", "package", "module", "import", "type hint",
+        "python",
+        "framework",
+        "library",
+        "asyncio",
+        "pydantic",
+        "fastapi",
+        "package",
+        "module",
+        "import",
+        "type hint",
     ],
     "optimization": [
-        "optimization", "index", "cache", "performance", "benchmark",
-        "latency", "throughput", "memory", "profiling", "tuning",
+        "optimization",
+        "index",
+        "cache",
+        "performance",
+        "benchmark",
+        "latency",
+        "throughput",
+        "memory",
+        "profiling",
+        "tuning",
     ],
     "distributed": [
-        "cloud", "distributed", "scalable", "service", "api", "rest",
-        "endpoint", "cluster", "node", "shard", "replication",
+        "cloud",
+        "distributed",
+        "scalable",
+        "service",
+        "api",
+        "rest",
+        "endpoint",
+        "cluster",
+        "node",
+        "shard",
+        "replication",
     ],
 }
 
@@ -364,24 +430,28 @@ def _build_documents(
             rng.shuffle(text_words)
             text = " ".join(text_words)
             doc_id = f"doc-{doc_index:05d}"
-            documents.append({
-                "id": doc_id,
-                "title": f"Document {doc_index}",
-                "content": text,
-                "_topic": topic_name,
-            })
+            documents.append(
+                {
+                    "id": doc_id,
+                    "title": f"Document {doc_index}",
+                    "content": text,
+                    "_topic": topic_name,
+                }
+            )
             doc_index += 1
 
     while len(documents) < n_docs:
         length = rng.randint(TOPIC_WORDS_MIN, TOPIC_WORDS_MAX)
         text = " ".join(rng.choice(all_words) for _ in range(length))
         doc_id = f"doc-{doc_index:05d}"
-        documents.append({
-            "id": doc_id,
-            "title": f"Document {doc_index}",
-            "content": text,
-            "_topic": "noise",
-        })
+        documents.append(
+            {
+                "id": doc_id,
+                "title": f"Document {doc_index}",
+                "content": text,
+                "_topic": "noise",
+            }
+        )
         doc_index += 1
 
     rng.shuffle(documents)
@@ -462,12 +532,14 @@ def _build_documents_stock(
         content = " ".join(text_parts) if text_parts else nom
 
         doc_id = f"stock-{idx:06d}"
-        documents.append({
-            "id": doc_id,
-            "title": nom or denomination or siren,
-            "content": content,
-            "siren": siren,
-        })
+        documents.append(
+            {
+                "id": doc_id,
+                "title": nom or denomination or siren,
+                "content": content,
+                "siren": siren,
+            }
+        )
 
     name_candidates = [
         (i, row["nomUniteLegale"])
@@ -642,16 +714,18 @@ def _build_documents_gouv_local(
         content = " ".join(text_parts)
 
         doc_id = f"gouv-{idx:06d}"
-        documents.append({
-            "id": doc_id,
-            "title": nom,
-            "content": content,
-            "nom": nom,
-            "categorie": categorie,
-            "type_organisme": type_org,
-            "code_insee": code_insee,
-            "pivot_type": pivot_type,
-        })
+        documents.append(
+            {
+                "id": doc_id,
+                "title": nom,
+                "content": content,
+                "nom": nom,
+                "categorie": categorie,
+                "type_organisme": type_org,
+                "code_insee": code_insee,
+                "pivot_type": pivot_type,
+            }
+        )
 
         # Build lookup indexes
         by_name.setdefault(nom.lower(), []).append(idx)
@@ -706,10 +780,8 @@ def _build_documents_gouv_local(
 
     # Level 3: Semantic queries (paraphrases, different wording)
     def _semantic_template_1(nom: str) -> str:
-        return (
-            "services publics "
-            + nom.replace("mairie", "municipal")
-            .replace("police municipale", "police locale")
+        return "services publics " + nom.replace("mairie", "municipal").replace(
+            "police municipale", "police locale"
         )
 
     def _semantic_template_2(nom: str) -> str:
@@ -831,12 +903,16 @@ def _build_index(
         ix = create_in(str(idx_dir), schema)
         with BatchIndexWriter(ix, batch_size=5000, limitmb=512, multisegment=True) as writer:
             for doc, embedding in zip(documents, embeddings, strict=False):
-                writer.add_batch([{
-                    "id": doc["id"],
-                    "title": doc["title"],
-                    "content": doc["content"],
-                    "vector": embedding,
-                }])
+                writer.add_batch(
+                    [
+                        {
+                            "id": doc["id"],
+                            "title": doc["title"],
+                            "content": doc["content"],
+                            "vector": embedding,
+                        }
+                    ]
+                )
         return ix, schema
 
     if index_mode == "parallel":
@@ -845,12 +921,14 @@ def _build_index(
         batches: list[list[dict[str, Any]]] = []
         batch: list[dict[str, Any]] = []
         for doc, embedding in zip(documents, embeddings, strict=False):
-            batch.append({
-                "id": doc["id"],
-                "title": doc["title"],
-                "content": doc["content"],
-                "vector": embedding,
-            })
+            batch.append(
+                {
+                    "id": doc["id"],
+                    "title": doc["title"],
+                    "content": doc["content"],
+                    "vector": embedding,
+                }
+            )
             if len(batch) >= 5000:
                 batches.append(batch)
                 batch = []
@@ -1133,9 +1211,7 @@ def run_benchmark(
     try:
         with ix.searcher() as searcher:
             vector_searcher = VectorSearcher(searcher.reader(), "vector")
-            hybrid_searcher = HybridSearcher(
-                searcher, id_field="id", vector_column="vector"
-            )
+            hybrid_searcher = HybridSearcher(searcher, id_field="id", vector_column="vector")
             parser = QueryParser(schema.names()[0], schema)
 
             for query_text, query_vector in zip(queries, query_embeddings, strict=False):
@@ -1149,9 +1225,7 @@ def run_benchmark(
 
                 # --- Vector (native column) ---
                 t0 = time.perf_counter()
-                vec_hits = _vector_search_native(
-                    vector_searcher, searcher, query_vector, k=k
-                )
+                vec_hits = _vector_search_native(vector_searcher, searcher, query_vector, k=k)
                 vec_ms = (time.perf_counter() - t0) * 1000
                 vec_ids = [doc_id for doc_id, _ in vec_hits]
 
@@ -1216,6 +1290,7 @@ def _tune_hybrid(
     tmp_path = Path("benchmark") / "indexes" / "hybrid_tune"
     if tmp_path.exists():
         import shutil
+
         shutil.rmtree(tmp_path)
     tmp_path.mkdir(parents=True, exist_ok=True)
 
@@ -1226,9 +1301,7 @@ def _tune_hybrid(
     try:
         with ix.searcher() as searcher:
             vector_searcher = VectorSearcher(searcher.reader(), "vector")
-            hybrid_searcher = HybridSearcher(
-                searcher, id_field="id", vector_column="vector"
-            )
+            hybrid_searcher = HybridSearcher(searcher, id_field="id", vector_column="vector")
             parser = QueryParser(schema.names()[0], schema)
 
             for query_text, query_vector in zip(queries, query_embeddings, strict=False):
@@ -1237,9 +1310,7 @@ def _tune_hybrid(
                 bm25_hits = _bm25_search(searcher, parser, query_text, limit=bm25_k)
                 bm25_ids = [doc_id for doc_id, _ in bm25_hits]
 
-                vec_hits = _vector_search_native(
-                    vector_searcher, searcher, query_vector, k=k
-                )
+                vec_hits = _vector_search_native(vector_searcher, searcher, query_vector, k=k)
                 vec_ids = [doc_id for doc_id, _ in vec_hits]
 
                 print(f"  Query {query_text!r}")
@@ -1282,6 +1353,7 @@ def _tune_hybrid(
     finally:
         ix.close()
         import shutil
+
         if tmp_path.exists():
             shutil.rmtree(tmp_path, ignore_errors=True)
 
@@ -1443,8 +1515,7 @@ def _print_embedding_tuning(results: list[EmbeddingTuningResult]) -> None:
     print("  Embedding tuning")
     print(f"{'=' * 100}")
     header = (
-        f"{'batch':>6} {'threads':>8} {'parallel':>8} "
-        f"{'docs/s':>10} {'ms/doc':>10} {'total_s':>10}"
+        f"{'batch':>6} {'threads':>8} {'parallel':>8} {'docs/s':>10} {'ms/doc':>10} {'total_s':>10}"
     )
     print(header)
     print("-" * 100)
@@ -1525,10 +1596,7 @@ def _print_comparative_table(all_results: dict[int, list[ScaleResult]], scales: 
     print(f"\n{'=' * 90}")
     print("  Comparative table: search latency p50 (ms)")
     print(f"{'=' * 90}")
-    header = (
-        f"{'mode':<20} "
-        + " ".join(f"{n:>10}" for n in scales)
-    )
+    header = f"{'mode':<20} " + " ".join(f"{n:>10}" for n in scales)
     print(header)
     print("-" * len(header))
     for mode in ("bm25", "vector", "hybrid_weighted", "hybrid_rrf"):
@@ -1615,9 +1683,7 @@ def main(argv: list[str] | None = None) -> int:
         "--output",
         type=str,
         default="",
-        help=(
-            "Save results to a file (csv or json, inferred from extension)"
-        ),
+        help=("Save results to a file (csv or json, inferred from extension)"),
     )
     parser.add_argument(
         "--corpus",
@@ -1728,6 +1794,7 @@ def main(argv: list[str] | None = None) -> int:
         tmp_path = Path("benchmark") / "indexes" / f"hybrid_{n_docs}"
         if tmp_path.exists():
             import shutil
+
             shutil.rmtree(tmp_path)
         tmp_path.mkdir(parents=True, exist_ok=True)
 
@@ -1752,8 +1819,13 @@ def main(argv: list[str] | None = None) -> int:
         t0_total = time.perf_counter()
         try:
             results, phase_times = run_benchmark(
-                tmp_path, documents, query_texts, ground_truth,
-                provider, k=k, bm25_k=bm25_k,
+                tmp_path,
+                documents,
+                query_texts,
+                ground_truth,
+                provider,
+                k=k,
+                bm25_k=bm25_k,
                 show_score_dist=args.score_dist,
                 index_mode=index_mode,
             )
@@ -1778,6 +1850,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
         finally:
             import shutil
+
             if tmp_path.exists():
                 shutil.rmtree(tmp_path, ignore_errors=True)
 
@@ -1796,9 +1869,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             documents, ground_truth = _build_documents(n_docs)
         query_texts = list(ground_truth.keys())
-        tuning_results = _tune_hybrid(
-            documents, query_texts, ground_truth, provider, k=k
-        )
+        tuning_results = _tune_hybrid(documents, query_texts, ground_truth, provider, k=k)
         _print_hybrid_tuning(tuning_results)
 
     _print_comparative_table(all_results, scales)
@@ -1832,8 +1903,7 @@ def _save_results(
     if path.suffix.lower() == ".json":
         data = {
             "scales": {
-                str(n): [_scale_result_to_dict(sr) for sr in srs]
-                for n, srs in all_results.items()
+                str(n): [_scale_result_to_dict(sr) for sr in srs] for n, srs in all_results.items()
             },
             "phase_times": phase_times,
         }

@@ -121,8 +121,7 @@ class VectorColumn(Column):
                 data = arr.tobytes()
             if len(data) != self._itemsize:
                 raise ValueError(
-                    f"Packed vector size {len(data)} does not match "
-                    f"expected {self._itemsize}"
+                    f"Packed vector size {len(data)} does not match expected {self._itemsize}"
                 )
             if docnum > self._count:
                 self.fill(docnum)

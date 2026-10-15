@@ -1,4 +1,4 @@
-﻿"""NumPy-based vector provider for exact cosine similarity search.
+"""NumPy-based vector provider for exact cosine similarity search.
 
 Stores vectors in memory and computes exact cosine similarity via a single
 matrix--vector product at query time. This is the **reference exact
@@ -98,7 +98,7 @@ class NumpyProvider(VectorProvider):
             vectors: Iterable of (doc_id, vector_values) pairs.
         """
         for doc_id, values in vectors:
-            if isinstance(values, (bytes, bytearray)):
+            if isinstance(values, bytes | bytearray):
                 arr = np.frombuffer(values, dtype=np.float32)
             else:
                 arr = np.asarray(values, dtype=np.float32)
@@ -134,7 +134,7 @@ class NumpyProvider(VectorProvider):
         if matrix is None or norms is None or len(self._doc_ids) == 0:
             return []
 
-        if isinstance(query_vector, (bytes, bytearray)):
+        if isinstance(query_vector, bytes | bytearray):
             query = np.frombuffer(query_vector, dtype=np.float32)
         else:
             query = np.asarray(query_vector, dtype=np.float32)
@@ -183,29 +183,26 @@ class NumpyProvider(VectorProvider):
             results.append(VectorHit(doc_id=self._doc_ids[idx], score=score))
         return results
 
-def remove(self, doc_ids: Iterable[str]) -> None:
-        """Remove vectors from the provider.
 
-        Args:
-            doc_ids: Iterable of document IDs to remove.
-        """
-        removed = 0
-        for doc_id in doc_ids:
-            if doc_id in self._doc_index:
-                removed += 1
-        if removed == 0:
-            return
-        keep = [d for d in self._doc_ids if d not in set(doc_ids)]
-        keep_set = set(keep)
-        self._doc_ids = keep
-        self._vectors = [
-            v for d, v in zip(self._doc_ids, self._vectors, strict=True) if d in keep_set
-        ]
-        self._norms = [
-            n for d, n in zip(self._doc_ids, self._norms, strict=True) if d in keep_set
-        ]
-        self._doc_index = {d: i for i, d in enumerate(self._doc_ids)}
-        self._matrix = None
-        self._norms_arr = None
-        self._consolidation_needed = True
-        logger.debug("Removed %d vectors from provider", removed)
+def remove(self, doc_ids: Iterable[str]) -> None:
+    """Remove vectors from the provider.
+
+    Args:
+        doc_ids: Iterable of document IDs to remove.
+    """
+    removed = 0
+    for doc_id in doc_ids:
+        if doc_id in self._doc_index:
+            removed += 1
+    if removed == 0:
+        return
+    keep = [d for d in self._doc_ids if d not in set(doc_ids)]
+    keep_set = set(keep)
+    self._doc_ids = keep
+    self._vectors = [v for d, v in zip(self._doc_ids, self._vectors, strict=True) if d in keep_set]
+    self._norms = [n for d, n in zip(self._doc_ids, self._norms, strict=True) if d in keep_set]
+    self._doc_index = {d: i for i, d in enumerate(self._doc_ids)}
+    self._matrix = None
+    self._norms_arr = None
+    self._consolidation_needed = True
+    logger.debug("Removed %d vectors from provider", removed)

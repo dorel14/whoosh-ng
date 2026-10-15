@@ -130,9 +130,7 @@ class TestEmbeddingBatchWriter:
         """Create mock provider."""
         provider = MagicMock()
         provider.dimension = 384
-        provider.embed_batch = MagicMock(
-            return_value=[[0.1] * 384 for _ in range(100)]
-        )
+        provider.embed_batch = MagicMock(return_value=[[0.1] * 384 for _ in range(100)])
         return provider
 
     def test_dimension_validation_success(self, mock_index, mock_provider):
@@ -215,10 +213,7 @@ class TestNumpyProviderIncrementalAdd:
         provider = NumpyProvider(dimension=384)
 
         # Add vectors
-        vectors = [
-            (f"doc_{i}", [0.1] * 384)
-            for i in range(100)
-        ]
+        vectors = [(f"doc_{i}", [0.1] * 384) for i in range(100)]
         provider.add(vectors)
 
         # Matrix should not be consolidated yet
@@ -240,9 +235,7 @@ class TestEmbeddingMiddlewareBatch:
         from whoosh_modern.middleware.embedding import EmbeddingMiddleware
 
         provider = MagicMock()
-        provider.embed_batch = MagicMock(
-            return_value=[[0.1] * 384 for _ in range(32)]
-        )
+        provider.embed_batch = MagicMock(return_value=[[0.1] * 384 for _ in range(32)])
 
         middleware = EmbeddingMiddleware(
             embedding_provider=provider,

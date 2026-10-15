@@ -1773,7 +1773,8 @@ def test_find_decimals():
     from decimal import Decimal
 
     schema = fields.Schema(
-        name=fields.KEYWORD(stored=True), num=fields.NUMERIC(Decimal, decimal_places=5)  # type: ignore[arg-type]
+        name=fields.KEYWORD(stored=True),
+        num=fields.NUMERIC(Decimal, decimal_places=5),  # type: ignore[arg-type]
     )
     ix = RamStorage().create_index(schema)
 

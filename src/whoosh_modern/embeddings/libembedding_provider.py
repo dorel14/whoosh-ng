@@ -117,9 +117,7 @@ class LibEmbeddingProvider:
         try:
             return TextEmbedding.from_mode(mode=mode).model_name
         except Exception as exc:
-            raise RuntimeError(
-                f"Failed to resolve libembedding preset {mode!r}: {exc}"
-            ) from exc
+            raise RuntimeError(f"Failed to resolve libembedding preset {mode!r}: {exc}") from exc
 
     @staticmethod
     def _load_model(model_name: str, **kwargs: Any) -> Any:
@@ -199,7 +197,4 @@ class LibEmbeddingProvider:
         return [[float(x) for x in vec.tolist()] for vec in result]
 
     def __repr__(self) -> str:
-        return (
-            f"LibEmbeddingProvider(model_name={self._model_name!r}, "
-            f"dimension={self._dimension})"
-        )
+        return f"LibEmbeddingProvider(model_name={self._model_name!r}, dimension={self._dimension})"

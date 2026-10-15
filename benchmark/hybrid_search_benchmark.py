@@ -176,8 +176,9 @@ class HybridSearchBenchmark(WhooshLikeSpec):
             self._provider = ProviderPool(
                 # threads=1 per provider avoids CPU oversubscription:
                 # pool_size instances x ORT threads would exceed logical cores.
-                provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5",
-                                                            threads=1),
+                provider_factory=lambda: FastEmbedProvider(
+                    model_name="BAAI/bge-small-en-v1.5", threads=1
+                ),
                 pool_size=self._pool_size,
             )
             print(f"[OK] ProviderPool ready (dimension={self._provider.dimension})")
@@ -525,10 +526,7 @@ class HybridSearchBenchmark(WhooshLikeSpec):
                 # Collect vectors from batch for NumpyProvider (same vectors as embedded)
                 for doc in batch:
                     doc_id = str(
-                        doc.get("Customer_Id")
-                        or doc.get("doc_id")
-                        or doc.get("customer_id")
-                        or ""
+                        doc.get("Customer_Id") or doc.get("doc_id") or doc.get("customer_id") or ""
                     )
                     vector = doc.get("body_vector", [0.0] * embedding_provider.dimension)
                     if vector:
@@ -537,8 +535,10 @@ class HybridSearchBenchmark(WhooshLikeSpec):
                 if batch_num % 5 == 0:
                     elapsed = time.perf_counter() - t0_total
                     rate = doc_count / elapsed if elapsed > 0 else 0
-                    print(f"  [{batch_num}] {doc_count} docs ({rate:.0f} docs/sec) \
-                        - time: {elapsed:.2f}s")
+                    print(
+                        f"  [{batch_num}] {doc_count} docs ({rate:.0f} docs/sec) \
+                        - time: {elapsed:.2f}s"
+                    )
 
             #  Close writer and collect stats
             writer.close()
@@ -559,10 +559,7 @@ class HybridSearchBenchmark(WhooshLikeSpec):
             for doc in self.documents():
                 text = doc.get("body", "") or doc.get("headline", "")
                 doc_id = str(
-                    doc.get("Customer_Id")
-                    or doc.get("doc_id")
-                    or doc.get("customer_id")
-                    or ""
+                    doc.get("Customer_Id") or doc.get("doc_id") or doc.get("customer_id") or ""
                 )
 
                 #  Embed single text (or use zero vector if empty)
@@ -841,17 +838,23 @@ class HybridSearchBenchmark(WhooshLikeSpec):
             print("EMBEDDING PERFORMANCE METRICS")
             print("=" * 70)
             print(f"Documents indexed:        {self._embedding_stats.get('docs_added', 0):>12}")
-            print(f"Embeddings computed:      \
-                {self._embedding_stats.get('embeddings_computed', 0):>12}")
+            print(
+                f"Embeddings computed:      \
+                {self._embedding_stats.get('embeddings_computed', 0):>12}"
+            )
             cache_stats = self._embedding_stats.get("cache", {})
             print(f"Cache hits:               {cache_stats.get('hits', 0):>12}")
             print(f"Cache misses:             {cache_stats.get('misses', 0):>12}")
             print(f"Cache hit rate:           {cache_stats.get('hit_rate_percent', 0):>12.1f}%")
             print(f"Disk cache entries:  {self._embedding_stats.get('disk_cache_size', 0):>12}")
-            print(f"Indexing throughput:     \
-                {self._embedding_stats.get('docs_per_second', 0):>12.0f} docs/sec")
-            print(f"Total time:              \
-                {self._embedding_stats.get('elapsed_seconds', 0):>12.1f}s")
+            print(
+                f"Indexing throughput:     \
+                {self._embedding_stats.get('docs_per_second', 0):>12.0f} docs/sec"
+            )
+            print(
+                f"Total time:              \
+                {self._embedding_stats.get('elapsed_seconds', 0):>12.1f}s"
+            )
             print(f"Errors:                   {self._embedding_stats.get('errors', 0):>12}")
             if self._pool_size > 1 and not self._no_pool:
                 print(f"Provider pool size:       {self._pool_size:>12}")
@@ -927,8 +930,10 @@ class HybridSearchBenchmark(WhooshLikeSpec):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Hybrid search real-world benchmark \
-                                    (ProviderPool)")
+    parser = argparse.ArgumentParser(
+        description="Hybrid search real-world benchmark \
+                                    (ProviderPool)"
+    )
     parser.add_argument("--dataset", choices=["reuters", "customers"], default="reuters")
     parser.add_argument("--upto", type=int, default=0, help="Max docs to index (0=all)")
     parser.add_argument("--limit", type=int, default=10, help="Max search results")
@@ -975,8 +980,8 @@ def main() -> int:
         type=int,
         default=None,
         help="Enable FastEmbed native parallel inference. 0=auto-detect CPU cores, "
-            "N>=1=exact worker count. Combines with threads=1 per worker "
-            "(preferred over ProviderPool for throughput).",
+        "N>=1=exact worker count. Combines with threads=1 per worker "
+        "(preferred over ProviderPool for throughput).",
     )
     parser.add_argument(
         "--no-preload",
@@ -1024,5 +1029,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
-

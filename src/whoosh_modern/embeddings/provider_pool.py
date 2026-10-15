@@ -139,10 +139,7 @@ class ProviderPool:
         # For larger batches: split into chunks and process in parallel
         # Pre-assign providers to chunks: chunk i -> provider i % pool_size
         chunk_size = max(1, len(texts) // self._pool_size)
-        chunks = [
-            texts[i : i + chunk_size]
-            for i in range(0, len(texts), chunk_size)
-        ]
+        chunks = [texts[i : i + chunk_size] for i in range(0, len(texts), chunk_size)]
 
         results_dict: dict[int, list[Sequence[float]]] = {}
         exceptions: list[tuple[int, Exception]] = []
@@ -160,10 +157,7 @@ class ProviderPool:
 
         # Use ThreadPoolExecutor for true parallel execution
         with ThreadPoolExecutor(max_workers=min(self._pool_size, len(chunks))) as executor:
-            futures = {
-                executor.submit(embed_chunk, i, chunk): i
-                for i, chunk in enumerate(chunks)
-            }
+            futures = {executor.submit(embed_chunk, i, chunk): i for i, chunk in enumerate(chunks)}
 
             for future in as_completed(futures):
                 try:

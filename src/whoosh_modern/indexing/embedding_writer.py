@@ -203,7 +203,7 @@ class EmbeddingBatchWriter(BatchIndexWriter):
     def __init__(
         self,
         index: Index,
-        embedding_provider: Any |ProviderPool | None = None,
+        embedding_provider: Any | ProviderPool | None = None,
         text_field: str = "body",
         vector_field: str = "body_vector",
         batch_size: int = 500,
@@ -397,8 +397,7 @@ class EmbeddingBatchWriter(BatchIndexWriter):
                 arr = np.asarray(vector, dtype=np.float32)
                 if len(arr) != self._dimension:
                     raise RuntimeError(
-                        f"Vector dimension mismatch: got {len(arr)}, "
-                        f"expected {self._dimension}"
+                        f"Vector dimension mismatch: got {len(arr)}, expected {self._dimension}"
                     )
                 # Store list of floats in result (vector field expects this)
                 result[text] = vector
@@ -416,10 +415,7 @@ class EmbeddingBatchWriter(BatchIndexWriter):
                 raise
             logger.warning("Embedding failed, using zero vectors: %s", exc)
             self._stats["errors"] += 1
-            return {
-                text: [0.0] * self._dimension
-                for text in to_embed
-            }
+            return {text: [0.0] * self._dimension for text in to_embed}
 
     def add_batch(self, docs: list[dict[str, Any]]) -> int:
         """Add a batch of documents with auto-generated embeddings.
@@ -464,9 +460,7 @@ class EmbeddingBatchWriter(BatchIndexWriter):
         """
         cache_stats = self._cache.stats()
         elapsed = time.time() - self._stats["start_time"]
-        docs_per_sec = (
-            self._stats["docs_added"] / elapsed if elapsed > 0 else 0
-        )
+        docs_per_sec = self._stats["docs_added"] / elapsed if elapsed > 0 else 0
 
         return {
             **self._stats,
@@ -492,9 +486,7 @@ class EmbeddingBatchWriter(BatchIndexWriter):
                     self._cache_path,
                 )
             except Exception as exc:  # pragma: no cover - defensive
-                logger.warning(
-                    "Failed to save embedding cache %s: %s", self._cache_path, exc
-                )
+                logger.warning("Failed to save embedding cache %s: %s", self._cache_path, exc)
         stats = self.get_stats()
         logger.info(
             "EmbeddingBatchWriter closed: docs_added=%d, "

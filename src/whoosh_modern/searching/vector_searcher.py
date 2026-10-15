@@ -55,13 +55,9 @@ class VectorSearcher:
     def _build_matrix(self) -> None:
         """Build the in-memory matrix from the column reader."""
         try:
-            creader = self._reader.column_reader(
-                self._fieldname, self._column, translate=False
-            )
+            creader = self._reader.column_reader(self._fieldname, self._column, translate=False)
         except NotImplementedError:
-            self._matrix = np.array([], dtype=np.float32).reshape(
-                0, self._column.dimension
-            )
+            self._matrix = np.array([], dtype=np.float32).reshape(0, self._column.dimension)
             self._row_to_docnum = []
             return
         n_docs = self._reader.doc_count_all()
@@ -84,9 +80,7 @@ class VectorSearcher:
             self._matrix = np.array(vectors, dtype=np.float32)
             self._row_to_docnum = row_to_docnum
         else:
-            self._matrix = np.array([], dtype=np.float32).reshape(
-                0, self._column.dimension
-            )
+            self._matrix = np.array([], dtype=np.float32).reshape(0, self._column.dimension)
             self._row_to_docnum = []
 
     def search(
@@ -110,7 +104,7 @@ class VectorSearcher:
         if self._matrix is None or len(self._matrix) == 0:
             return []
 
-        if isinstance(query_vector, (bytes, bytearray)):
+        if isinstance(query_vector, bytes | bytearray):
             query = np.frombuffer(query_vector, dtype=np.float32)
         else:
             query = np.asarray(query_vector, dtype=np.float32)

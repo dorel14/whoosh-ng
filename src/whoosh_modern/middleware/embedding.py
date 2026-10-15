@@ -227,4 +227,3 @@ class EmbeddingMiddleware(Middleware):
             self._accumulated_texts.clear()
             if enriched:
                 self._enriched_queue.extend(enriched)
-

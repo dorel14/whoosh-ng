@@ -16,8 +16,7 @@ from whoosh_modern.fields import VECTOR
 from whoosh_modern.indexing import EmbeddingBatchWriter
 
 TEXTS = [
-    f"This is sample document number {i} about machine learning and search."
-    for i in range(200)
+    f"This is sample document number {i} about machine learning and search." for i in range(200)
 ]
 
 FASTEMBED_CONFIGS = [
@@ -82,20 +81,18 @@ def run_configs(configs: list[dict], provider_type: str) -> None:
             t0 = time.perf_counter()
             for i in range(0, len(TEXTS), 50):
                 batch = [
-                    {"id": str(j), "body": TEXTS[j]}
-                    for j in range(i, min(i + 50, len(TEXTS)))
+                    {"id": str(j), "body": TEXTS[j]} for j in range(i, min(i + 50, len(TEXTS)))
                 ]
                 writer.add_batch(batch)
             writer.close()
             elapsed = time.perf_counter() - t0
 
-            print(
-                f"{cfg['label']:<35} | {elapsed:.2f}s | {len(TEXTS)/elapsed:.1f} docs/s"
-            )
+            print(f"{cfg['label']:<35} | {elapsed:.2f}s | {len(TEXTS) / elapsed:.1f} docs/s")
 
 
 def main() -> int:
     import argparse
+
     parser = argparse.ArgumentParser(description="EmbeddingBatchWriter E2E benchmark")
     parser.add_argument(
         "--provider",

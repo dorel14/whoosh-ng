@@ -128,7 +128,7 @@ class HnswlibProvider(VectorProvider):
         arrs: list[np.ndarray] = []
 
         for doc_id, values in vectors:
-            if isinstance(values, (bytes, bytearray)):
+            if isinstance(values, bytes | bytearray):
                 arr = np.frombuffer(values, dtype=np.float32)
             else:
                 arr = np.asarray(values, dtype=np.float32)
@@ -181,7 +181,7 @@ class HnswlibProvider(VectorProvider):
             return []
 
         index = self._ensure_index()
-        if isinstance(query_vector, (bytes, bytearray)):
+        if isinstance(query_vector, bytes | bytearray):
             query = np.frombuffer(query_vector, dtype=np.float32)
         else:
             query = np.asarray(query_vector, dtype=np.float32)

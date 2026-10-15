@@ -196,9 +196,7 @@ class FastEmbedProvider:
         self._parallel = parallel
         self._batch_size = batch_size
         self._lazy_load = lazy_load
-        self._model = self._load_model(
-            resolved, threads=threads, lazy_load=lazy_load
-        )
+        self._model = self._load_model(resolved, threads=threads, lazy_load=lazy_load)
         if hasattr(self._model, "dim"):
             self._dimension = int(self._model.dim)
         else:

@@ -197,7 +197,9 @@ def test_fieldname_chars():
     q: Any = qp.parse("abc123:456 def")
     assert str(q) == "(abc123:456 AND content:def)"
 
-    q: Any = qp.parse("\u0646\u0633\u0628\u0629:\u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a")
+    q: Any = qp.parse(
+        "\u0646\u0633\u0628\u0629:\u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a"
+    )
     assert q.__class__ == query.Term
     assert q.fieldname == "nisbah"
     assert q.text == "\u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a"

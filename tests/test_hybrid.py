@@ -49,15 +49,21 @@ def _build_native_searcher(tmp_path: Any) -> Searcher:
     ix = create_in(str(idx_dir), schema)
     writer = ix.writer()
     writer.add_document(
-        id="doc1", title="python search", content="python is great",
+        id="doc1",
+        title="python search",
+        content="python is great",
         embedding=[1.0, 0.0, 0.0, 0.0],
     )
     writer.add_document(
-        id="doc2", title="java search", content="java is verbose",
+        id="doc2",
+        title="java search",
+        content="java is verbose",
         embedding=[0.0, 1.0, 0.0, 0.0],
     )
     writer.add_document(
-        id="doc3", title="python java", content="both languages",
+        id="doc3",
+        title="python java",
+        content="both languages",
         embedding=[0.707, 0.707, 0.0, 0.0],
     )
     writer.commit()

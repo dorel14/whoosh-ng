@@ -1,4 +1,4 @@
-﻿"""Dense vector field type with native column storage and binary encoding.
+"""Dense vector field type with native column storage and binary encoding.
 
 Provides the VECTOR field type for storing embedding vectors efficiently
 as packed binary blobs (float32 or float16) in a native Whoosh column,
@@ -59,6 +59,7 @@ class VECTOR(STORED):
 
         if dimension is not None:
             from whoosh_modern.columns import VectorColumn
+
             self.column_type = VectorColumn(
                 dimension=dimension,
                 dtype=dtype,
@@ -86,8 +87,7 @@ class VECTOR(STORED):
             raise ValueError(f"Vector must be 1-dimensional, got {arr.ndim}d")
         if self.dimension is not None and arr.shape[0] != self.dimension:
             raise ValueError(
-                f"Vector dimension {arr.shape[0]} does not match "
-                f"field dimension {self.dimension}"
+                f"Vector dimension {arr.shape[0]} does not match field dimension {self.dimension}"
             )
         if not np.all(np.isfinite(arr)):
             raise ValueError("Vector contains NaN or Inf values")
@@ -129,4 +129,3 @@ class VECTOR(STORED):
             NumPy array of the configured dtype.
         """
         return self.from_bytes(value)
-

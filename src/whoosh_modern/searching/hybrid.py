@@ -103,9 +103,7 @@ class HybridSearcher:
 
         if vector_column is not None:
             if vector_column not in searcher.schema:
-                raise ValueError(
-                    f"Vector column {vector_column!r} not found in schema"
-                )
+                raise ValueError(f"Vector column {vector_column!r} not found in schema")
             self._vector_searcher = VectorSearcher(searcher.reader(), vector_column)
 
     def _build_id_mapping(self) -> None:
@@ -205,9 +203,7 @@ class HybridSearcher:
         for rank, hit in enumerate(vector_hits):
             vector_map[hit.doc_id] = (hit.score, rank)
 
-        return self._fuse_by_doc_id(
-            bm25_map, vector_map, limit, alpha, method, rrf_k
-        )
+        return self._fuse_by_doc_id(bm25_map, vector_map, limit, alpha, method, rrf_k)
 
     def _search_native(
         self,
@@ -239,9 +235,7 @@ class HybridSearcher:
         for rank, (docnum, score) in enumerate(vector_hits):
             vector_scores[docnum] = (score, rank)
 
-        return self._fuse_by_docnum(
-            bm25_scores, vector_scores, limit, alpha, method, rrf_k
-        )
+        return self._fuse_by_docnum(bm25_scores, vector_scores, limit, alpha, method, rrf_k)
 
     def _fuse_by_doc_id(
         self,

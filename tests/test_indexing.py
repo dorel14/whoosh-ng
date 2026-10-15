@@ -776,7 +776,8 @@ def test_index_decimals():
         w.add_document(name="hello", num=Decimal("3.2"))
 
     schema = fields.Schema(
-        name=fields.KEYWORD(stored=True), num=fields.NUMERIC(Decimal, decimal_places=5)  # type: ignore[arg-type]
+        name=fields.KEYWORD(stored=True),
+        num=fields.NUMERIC(Decimal, decimal_places=5),  # type: ignore[arg-type]
     )
     ix = RamStorage().create_index(schema)
     with ix.writer() as w:

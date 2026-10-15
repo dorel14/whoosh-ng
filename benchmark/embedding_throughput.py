@@ -121,9 +121,7 @@ def main() -> int:
         default=500,
         help="Number of texts for batch benchmark",
     )
-    parser.add_argument(
-        "--batch-size", type=int, default=32, help="Batch size for embed_batch"
-    )
+    parser.add_argument("--batch-size", type=int, default=32, help="Batch size for embed_batch")
     args = parser.parse_args()
 
     results = []

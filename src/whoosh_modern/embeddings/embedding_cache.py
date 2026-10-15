@@ -1,4 +1,4 @@
-﻿"""Persistent on-disk cache for text embeddings (NumPy ``.npz`` format).
+"""Persistent on-disk cache for text embeddings (NumPy ``.npz`` format).
 
 This lets an indexing run reuse embeddings computed in a previous run:
 texts that are already present in the cache skip model inference entirely,
@@ -43,9 +43,7 @@ class EmbeddingCache:
         except (OSError, ValueError) as exc:
             import logging
 
-            logging.getLogger(__name__).warning(
-                "EmbeddingCache.load failed for %s: %s", path, exc
-            )
+            logging.getLogger(__name__).warning("EmbeddingCache.load failed for %s: %s", path, exc)
             return {}
 
         texts = data["texts"]
