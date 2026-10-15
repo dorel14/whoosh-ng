@@ -42,7 +42,7 @@ class TestLanguageRegistry:
         registry = get_default_registry()
         profile = registry.resolve(None)
         assert profile is not None
-        assert profile.language == "fr"
+        assert profile.language == "en"
 
 
 class TestStemmerRegistry:
