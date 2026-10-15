@@ -184,7 +184,28 @@ class NumpyProvider(VectorProvider):
         return results
 
 
-def remove(self, doc_ids: Iterable[str]) -> None:
+    def remove(self, doc_ids: Iterable[str]) -> None:
+        """Remove vectors from the provider.
+
+        Args:
+            doc_ids: Iterable of document IDs to remove.
+        """
+        removed = 0
+        for doc_id in doc_ids:
+            if doc_id in self._doc_index:
+                removed += 1
+        if removed == 0:
+            return
+        keep = [d for d in self._doc_ids if d not in set(doc_ids)]
+        keep_set = set(keep)
+        self._doc_ids = keep
+        self._vectors = [v for d, v in zip(self._doc_ids, self._vectors, strict=True) if d in keep_set]
+        self._norms = [n for d, n in zip(self._doc_ids, self._norms, strict=True) if d in keep_set]
+        self._doc_index = {d: i for i, d in enumerate(self._doc_ids)}
+        self._matrix = None
+        self._norms_arr = None
+        self._consolidation_needed = True
+        logger.debug("Removed %d vectors from provider", removed)
     """Remove vectors from the provider.
 
     Args:
