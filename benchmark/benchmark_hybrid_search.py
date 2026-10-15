@@ -185,7 +185,10 @@ def _compare_providers(
 
         import tempfile
 
-        tmp_path = Path(tempfile.gettempdir()) / f"benchmark_compare_{provider_type}_{int(time.time())}"
+        tmp_path = (
+            Path(tempfile.gettempdir())
+            / f"benchmark_compare_{provider_type}_{int(time.time())}"
+        )
         if tmp_path.exists():
             import shutil
 
@@ -209,7 +212,10 @@ def _compare_providers(
         snap_after = _current_snapshot()
 
         scale_results = _aggregate_scale(query_metrics, scale=scale)
-        main_mode = next((sr for sr in scale_results if sr.mode == "hybrid_rrf"), scale_results[0] if scale_results else None)
+        main_mode = next(
+            (sr for sr in scale_results if sr.mode == "hybrid_rrf"),
+            scale_results[0] if scale_results else None,
+        )
 
         results[provider_type] = ProviderComparisonResult(
             provider_type=provider_type,
@@ -246,9 +252,17 @@ def print_provider_comparison(
 
     rows = [
         ("Total run (s)", f"{lib_result.total_s:.2f}", f"{fast_result.total_s:.2f}"),
-        ("Document embedding (s)", f"{lib_result.embed_docs_s:.2f}", f"{fast_result.embed_docs_s:.2f}"),
+        (
+            "Document embedding (s)",
+            f"{lib_result.embed_docs_s:.2f}",
+            f"{fast_result.embed_docs_s:.2f}",
+        ),
         ("Indexing + commit (s)", f"{lib_result.index_s:.2f}", f"{fast_result.index_s:.2f}"),
-        ("Query embedding (s)", f"{lib_result.embed_queries_s:.2f}", f"{fast_result.embed_queries_s:.2f}"),
+        (
+            "Query embedding (s)",
+            f"{lib_result.embed_queries_s:.2f}",
+            f"{fast_result.embed_queries_s:.2f}",
+        ),
         ("Search total (s)", f"{lib_result.search_s:.2f}", f"{fast_result.search_s:.2f}"),
         ("CPU %", f"{lib_result.cpu_percent:.1f}", f"{fast_result.cpu_percent:.1f}"),
         ("RAM delta (MB)", f"{lib_result.ram_mb:.1f}", f"{fast_result.ram_mb:.1f}"),

@@ -15,14 +15,32 @@ from whoosh_modern.embeddings.libembedding_provider import LibEmbeddingProvider
 from whoosh_modern.fields import VECTOR
 from whoosh_modern.indexing import EmbeddingBatchWriter
 
-TEXTS = [f"This is sample document number {i} about machine learning and search." for i in range(200)]
+TEXTS = [
+    f"This is sample document number {i} about machine learning and search."
+    for i in range(200)
+]
 
 FASTEMBED_CONFIGS = [
     {"model": "BAAI/bge-small-en-v1.5", "batch_size": 32, "workers": 0, "label": "bge-small bs=32"},
     {"model": "BAAI/bge-small-en-v1.5", "batch_size": 64, "workers": 0, "label": "bge-small bs=64"},
-    {"model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "batch_size": 32, "workers": 0, "label": "multilingual bs=32"},
-    {"model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "batch_size": 64, "workers": 0, "label": "multilingual bs=64"},
-    {"model": "BAAI/bge-small-en-v1.5", "batch_size": 32, "workers": 2, "label": "bge-small bs=32 workers=2"},
+    {
+        "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "batch_size": 32,
+        "workers": 0,
+        "label": "multilingual bs=32",
+    },
+    {
+        "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "batch_size": 64,
+        "workers": 0,
+        "label": "multilingual bs=64",
+    },
+    {
+        "model": "BAAI/bge-small-en-v1.5",
+        "batch_size": 32,
+        "workers": 2,
+        "label": "bge-small bs=32 workers=2",
+    },
 ]
 
 LIBEMBEDDING_CONFIGS = [
@@ -63,7 +81,10 @@ def run_configs(configs: list[dict], provider_type: str) -> None:
 
             t0 = time.perf_counter()
             for i in range(0, len(TEXTS), 50):
-                batch = [{"id": str(j), "body": TEXTS[j]} for j in range(i, min(i + 50, len(TEXTS)))]
+                batch = [
+                    {"id": str(j), "body": TEXTS[j]}
+                    for j in range(i, min(i + 50, len(TEXTS)))
+                ]
                 writer.add_batch(batch)
             writer.close()
             elapsed = time.perf_counter() - t0
