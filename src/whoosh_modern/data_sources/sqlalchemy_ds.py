@@ -145,13 +145,6 @@ class SQLAlchemySource:
                 else:
                     sql_types = [None] * len(columns)
 
-                sample_rows: list[dict[str, Any]] = []
-                try:
-                    raw_rows = result.fetchmany(self.sample_size)
-                    sample_rows = [dict(zip(columns, row, strict=True)) for row in raw_rows]
-                except Exception:
-                    pass
-
                 self._schema = SchemaDiscovery.from_result_set(
                     list(zip(columns, sql_types, strict=True))
                 )
