@@ -35,9 +35,9 @@ from typing import Any
 
 from whoosh.fields import Schema
 from whoosh.index import create_in, open_dir
-from whoosh_modern.indexing._utils import (  # pyright: ignore[reportPrivateUsage]
-    _build_segment_worker,
-    _rmtree_retry,
+from whoosh_modern.indexing._utils import (
+    _build_segment_worker,  # pyright: ignore[reportPrivateUsage]
+    _rmtree_retry,  # pyright: ignore[reportPrivateUsage]
 )
 from whoosh_modern.indexing.batch_writer import BatchIndexWriter
 from whoosh_modern.indexing.compiler import BatchAnalyzer, CompiledDataSource
