@@ -8,7 +8,7 @@ from whoosh.util.testing import TempStorage
 
 def test_readwrite():
     schema = fields.Schema(id=fields.ID(stored=True), content=fields.TEXT)
-    with TempStorage("threading") as st:
+    with TempStorage("threading") as st:  # type: ignore[arg-type]
         domain = (
             "alfa",
             "bravo",

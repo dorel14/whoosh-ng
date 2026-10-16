@@ -30,8 +30,6 @@ def test_nested_parent():
             w.add_document(part="case", price=50)
 
     with ix.searcher() as s:
-        price = s.schema["price"]
-
         pq = query.Term("type", "product")
         cq = query.Term("price", 50)
         q = query.NestedParent(pq, cq)
@@ -291,18 +289,18 @@ def test_parent_score_fn():
             print(list(q.docs(s)))
             r = s.search(q)
             assert r.scored_length() == 2
-            assert r[0]["name"] == "p2"
-            assert r[0].score == 4
-            assert r[1]["name"] == "p1"
-            assert r[1].score == 3
+            assert r[0]["name"] == "p2"  # type: ignore[call-arg]
+            assert r[0].score == 4  # type: ignore[attr-defined]
+            assert r[1]["name"] == "p1"  # type: ignore[call-arg]
+            assert r[1].score == 3  # type: ignore[attr-defined]
 
             q = query.NestedParent(parents, children, score_fn=min)
             r = s.search(q)
             assert r.scored_length() == 2
-            assert r[0]["name"] == "p1"
-            assert r[0].score == 2
-            assert r[1]["name"] == "p2"
-            assert r[1].score == 1
+            assert r[0]["name"] == "p1"  # type: ignore[call-arg]
+            assert r[0].score == 2  # type: ignore[attr-defined]
+            assert r[1]["name"] == "p2"  # type: ignore[call-arg]
+            assert r[1].score == 1  # type: ignore[attr-defined]
 
 
 def test_nested_children():

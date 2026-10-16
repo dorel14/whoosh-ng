@@ -3,11 +3,8 @@
 import os
 import sqlite3
 import tempfile
-from tempfile import NamedTemporaryFile
 
-import pytest
-
-from whoosh.fields import ID, KEYWORD, NUMERIC, STORED, TEXT, Schema
+from whoosh.fields import ID, NUMERIC, TEXT, Schema
 from whoosh_modern.data_sources.sql import SQLSource
 from whoosh_modern.validation import ValidationFramework, ValidationResult
 

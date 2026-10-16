@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import numpy as np
 import pytest
 
 from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider

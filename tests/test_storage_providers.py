@@ -13,6 +13,7 @@ from whoosh_modern.storage import (
     AsyncHybridStorage,
     CoreStorageAdapter,
     FileStorage,
+    FileStorageProvider,
     HybridStorage,
     S3Storage,
 )
@@ -284,7 +285,7 @@ def test_snapshot_storage_read_does_not_escape_local_path(
 # ---------------------------------------------------------------------------
 
 
-def test_hybrid_read_cache_miss_then_hit(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_read_cache_miss_then_hit(tmp_path, remote_storage: FileStorageProvider) -> None:
     remote_storage.write("hot.dat", b"remote-data")
     cache = str(tmp_path / "cache")
     storage = HybridStorage(local_cache=cache, remote=remote_storage)
@@ -293,7 +294,7 @@ def test_hybrid_read_cache_miss_then_hit(tmp_path, remote_storage: FileStorage) 
     assert storage.read("hot.dat") == b"remote-data"
 
 
-def test_hybrid_write_through(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_write_through(tmp_path, remote_storage: FileStorageProvider) -> None:
     cache = str(tmp_path / "cache")
     storage = HybridStorage(local_cache=cache, remote=remote_storage)
     storage.write("new.dat", b"value")
@@ -301,7 +302,7 @@ def test_hybrid_write_through(tmp_path, remote_storage: FileStorage) -> None:
     assert os.path.exists(os.path.join(cache, "new.dat"))
 
 
-def test_hybrid_delete_propagates(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_delete_propagates(tmp_path, remote_storage: FileStorageProvider) -> None:
     remote_storage.write("del.dat", b"x")
     cache = str(tmp_path / "cache")
     storage = HybridStorage(local_cache=cache, remote=remote_storage)
@@ -311,7 +312,7 @@ def test_hybrid_delete_propagates(tmp_path, remote_storage: FileStorage) -> None
     assert not os.path.exists(os.path.join(cache, "del.dat"))
 
 
-def test_hybrid_exists_cache_hit(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_exists_cache_hit(tmp_path, remote_storage: FileStorageProvider) -> None:
     remote_storage.write("exists.dat", b"x")
     cache = str(tmp_path / "cache")
     storage = HybridStorage(local_cache=cache, remote=remote_storage)
@@ -319,13 +320,13 @@ def test_hybrid_exists_cache_hit(tmp_path, remote_storage: FileStorage) -> None:
     assert storage.exists("exists.dat") is True
 
 
-def test_hybrid_exists_miss(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_exists_miss(tmp_path, remote_storage: FileStorageProvider) -> None:
     cache = str(tmp_path / "cache")
     storage = HybridStorage(local_cache=cache, remote=remote_storage)
     assert storage.exists("nope.dat") is False
 
 
-def test_hybrid_list_keys_from_remote(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_list_keys_from_remote(tmp_path, remote_storage: FileStorageProvider) -> None:
     remote_storage.write("a.dat", b"1")
     remote_storage.write("b.dat", b"2")
     cache = str(tmp_path / "cache")
@@ -335,7 +336,7 @@ def test_hybrid_list_keys_from_remote(tmp_path, remote_storage: FileStorage) -> 
     assert "b.dat" in keys
 
 
-def test_hybrid_list_keys_include_cache(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_list_keys_include_cache(tmp_path, remote_storage: FileStorageProvider) -> None:
     cache = str(tmp_path / "cache")
     storage = HybridStorage(local_cache=cache, remote=remote_storage)
     with open(os.path.join(cache, "cached.dat"), "wb") as fh:
@@ -346,7 +347,7 @@ def test_hybrid_list_keys_include_cache(tmp_path, remote_storage: FileStorage) -
     assert "remote.dat" in keys
 
 
-def test_hybrid_invalidate(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_invalidate(tmp_path, remote_storage: FileStorageProvider) -> None:
     remote_storage.write("inv.dat", b"v")
     cache = str(tmp_path / "cache")
     storage = HybridStorage(local_cache=cache, remote=remote_storage)
@@ -355,7 +356,7 @@ def test_hybrid_invalidate(tmp_path, remote_storage: FileStorage) -> None:
     assert not os.path.exists(os.path.join(cache, "inv.dat"))
 
 
-def test_hybrid_prefetch(tmp_path, remote_storage: FileStorage) -> None:
+def test_hybrid_prefetch(tmp_path, remote_storage: FileStorageProvider) -> None:
     remote_storage.write("p1.dat", b"1")
     remote_storage.write("p2.dat", b"2")
     cache = str(tmp_path / "cache")
@@ -395,7 +396,7 @@ def test_hybrid_write_does_not_pollute_cache_on_remote_failure(tmp_path) -> None
 
 
 @pytest.mark.asyncio
-async def test_async_hybrid_round_trip(tmp_path, remote_storage: FileStorage) -> None:
+async def test_async_hybrid_round_trip(tmp_path, remote_storage: FileStorageProvider) -> None:
     remote_storage.write("async.dat", b"async-data")
     cache = str(tmp_path / "cache")
     storage = AsyncHybridStorage(local_cache=cache, remote=remote_storage)
@@ -403,7 +404,7 @@ async def test_async_hybrid_round_trip(tmp_path, remote_storage: FileStorage) ->
 
 
 @pytest.mark.asyncio
-async def test_async_hybrid_awrite(tmp_path, remote_storage: FileStorage) -> None:
+async def test_async_hybrid_awrite(tmp_path, remote_storage: FileStorageProvider) -> None:
     cache = str(tmp_path / "cache")
     storage = AsyncHybridStorage(local_cache=cache, remote=remote_storage)
     await storage.awrite("async_write.dat", b"av")

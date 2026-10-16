@@ -28,6 +28,8 @@ class ModelInfo:
         description: Human-readable description of the model.
         subfolder: Optional subfolder within the repo where model files
             are stored (e.g. ``"onnx"``).
+        size_mb: Approximate model size in megabytes, or ``None`` if unknown.
+        license: Model license identifier, or ``None`` if unknown.
     """
 
     name: str
@@ -38,6 +40,8 @@ class ModelInfo:
     quantization: str | None = None
     description: str = ""
     subfolder: str | None = None
+    size_mb: float | None = None
+    license: str | None = None
 
 
 class EmbeddingModelRegistry:

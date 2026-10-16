@@ -1,12 +1,12 @@
 import struct
 
-from whoosh import fields, formats
+from whoosh import fields
 from whoosh.filedb.filepostings import FilePostingReader, FilePostingWriter
 from whoosh.util.testing import TempStorage
 
 
 def test_huge_postfile():
-    with TempStorage("hugeindex") as st:
+    with TempStorage("hugeindex") as st:  # type: ignore[argument-type]
         pf = st.create_file("test.pst")
 
         gb5 = 5 * 1024 * 1024 * 1024

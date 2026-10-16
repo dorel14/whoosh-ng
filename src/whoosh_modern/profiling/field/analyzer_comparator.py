@@ -100,11 +100,11 @@ class AnalyzerComparator:
         total_time = time.perf_counter() - t0
 
         result.total_time = total_time
-        result.token_count = profiler._token_count
-        result.text_count = profiler._text_count
+        result.token_count = profiler._token_count  # pyright: ignore[reportPrivateUsage]
+        result.text_count = profiler._text_count  # pyright: ignore[reportPrivateUsage]
         result.steps = profiler.to_dict().get("steps", {})
 
-        profiler._reset()
+        profiler._reset()  # pyright: ignore[reportPrivateUsage]
         return result
 
     def report(self) -> str:

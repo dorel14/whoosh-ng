@@ -186,7 +186,7 @@ def test_auto_indexer_error_raise():
     auto = AutoIndexer(ix, on_error="raise")
 
     class Bad:
-        x: int = 0
+        x: int = 0  # type: ignore[redefinition, assignment]
 
         @property  # type: ignore[no-redef]
         def x(self):
@@ -260,14 +260,14 @@ def test_msgspec_integration():
 
 @pytest.mark.skipif(not HAS_SQLALCHEMY, reason="sqlalchemy not installed")
 def test_sqlalchemy_integration():
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine("sqlite:///:memory:")  # type: ignore[possibly-unbound]
 
-    class Base(DeclarativeBase):
+    class Base(DeclarativeBase):  # type: ignore[possibly-unbound]
         __allow_unmapped__ = True
 
     class Book(Base):
         __tablename__ = "books"
-        id: Mapped[int] = mapped_column(primary_key=True)
+        id: Mapped[int] = mapped_column(primary_key=True)  # type: ignore[possibly-unbound]
         title: Mapped[str]
 
     Base.metadata.create_all(engine)

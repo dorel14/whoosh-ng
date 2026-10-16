@@ -1,7 +1,5 @@
 """Tests for SQLAlchemySource (optional backend)."""
 
-import sqlite3
-
 import pytest
 
 pytest.importorskip("sqlalchemy")

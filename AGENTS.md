@@ -127,7 +127,7 @@ whoosh-ng/
 - Python 3.11 or newer (3.12 recommended)
 - [Git](https://git-scm.com/)
 - [Ruff](https://docs.astral.sh/ruff/) for linting/formatting
-- [Mypy](https://mypy.readthedocs.io/) and [Pyright](https://microsoft.github.io/pyright/) for type checking
+- [Pyright](https://microsoft.github.io/pyright/) for type checking
 - Windows  => Powershell
 - .venv at project root
 
@@ -159,8 +159,7 @@ pre-commit install
 ```bash
 ruff check .          # lint
 ruff format .         # format
-mypy src/             # type checking
-pyright src/          # additional type checking
+pyright src/          # type checking
 pytest                # run tests
 ```
 
@@ -203,7 +202,7 @@ The `Version` should be incremented when the module's public API changes or when
 
 - Python 3.11+ type annotations on **all** public functions, methods, and module-level variables.
 - Use `from __future__ import annotations` at the top of every module (before any other imports except `__future__` and comments/docstrings).
-- **New code** must pass both `mypy --strict` and `pyright` without errors.
+- **New code** must pass `pyright` without errors.
 - **Legacy code** (`src/whoosh/` core package) has known type issues and is excluded from strict checks in CI (`legacy-typecheck.yml`). Do not introduce new type errors in legacy modules; if you must, fix existing ones in the same area.
 
 ### 4.3 Docstrings (Functions & Classes)
@@ -237,7 +236,7 @@ def search(query: str, limit: int = 10) -> SearchResults:
 - Comments should explain **why**, not **what**.
 - Use section comments to break up large functions.
 - For non-obvious algorithms, add inline comments.
-- Comment `# type: ignore[...]` is used in legacy modules to suppress mypy errors — do not remove without replacing with proper typing.
+- Comment `# type: ignore[...]` is used in legacy modules to suppress pyright errors — do not remove without replacing with proper typing.
 
 ### 4.5 Import Ordering
 
@@ -295,8 +294,7 @@ pytest tests/ --benchmark-only
 Every contribution must pass:
 ```bash
 ruff check .          # 0 errors
-mypy src/             # 0 errors (new code); legacy has thresholds
-pyright src/          # 0 errors (new code)
+pyright src/          # 0 errors (new code); legacy has thresholds
 pytest                # 100% green
 ```
 
@@ -416,7 +414,7 @@ Located in `.github/workflows/`:
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
-| `ci.yml` | PR to `dev`, push to `dev` | Lint (ruff/mypy/pyright), test matrix (3.11/3.12/3.13), build |
+| `ci.yml` | PR to `dev`, push to `dev` | Lint (ruff/pyright), test matrix (3.11/3.12/3.13), build |
 | `legacy-typecheck.yml` | PR to `dev` | Permissive type checking for legacy `src/whoosh/` modules |
 | `semantic-release.yml` | Push to `master` | Auto-version bump, changelog, PyPI release |
 | `pages.yml` | Push to `master` | Build and deploy Docusaurus site to GitHub Pages |
@@ -447,8 +445,7 @@ pre-commit run --all-files                  # run all pre-commit checks
 ruff check .                              # lint all files
 ruff check --fix .                        # lint + auto-fix
 ruff format .                             # format code
-mypy src/                                 # type checking (strict on new code)
-pyright src/                              # additional type checking
+pyright src/                              # type checking
 ```
 
 ### Testing
@@ -527,7 +524,7 @@ If you're an AI agent assigned to a task, follow this workflow:
 3. **Locate** relevant source files using `grep` or `codebase_search`.
 4. **Write code** following the conventions in §4 (module docstrings, type annotations, Google-style docstrings).
 5. **Write tests** — new modules require >= 90% coverage.
-6. **Run quality gates**: `ruff check`, `mypy`, `pyright`, `pytest`.
+6. **Run quality gates**: `ruff check`, `pyright`, `pytest`.
 7. **Update documentation** in `website/docs/` if the change affects public API or behavior.
 8. **Update** `CHANGELOG.md` with a concise entry.
 9. **Use conventional commits** for the git commit message.
@@ -538,9 +535,9 @@ If you're an AI agent assigned to a task, follow this workflow:
 
 | File | Purpose |
 |---|---|
-| `pyproject.toml` | All project config: dependencies, ruff, mypy, pyright, pytest, semantic_release |
+| `pyproject.toml` | All project config: dependencies, ruff, pyright, pytest, semantic_release |
 | `pyrightconfig.json` | Pyright configuration (includes/excludes for legacy modules) |
-| `.pre-commit-config.yaml` | Pre-commit hooks: ruff, mypy, pyright, sync-version |
+| `.pre-commit-config.yaml` | Pre-commit hooks: ruff, pyright, sync-version |
 | `CONTRIBUTING.md` | Contributor workflow guide |
 | `CHANGELOG.md` | English changelog |
 | `CHANGELOG.fr.md` | French changelog (auto-translated) |

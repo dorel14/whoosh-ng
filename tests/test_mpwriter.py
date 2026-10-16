@@ -12,7 +12,11 @@ from whoosh.util.testing import TempIndex
 def check_multi():
     try:
         import multiprocessing
-        import multiprocessing.synchronize  # @UnusedImport
+
+        _ = multiprocessing
+        import multiprocessing.synchronize
+
+        _ = multiprocessing.synchronize
     except ImportError:
         pytest.skip()
     else:
@@ -248,7 +252,7 @@ def test_multisegment():
     with TempIndex(schema) as ix:
         with ix.writer(procs=3, multisegment=True, batchsize=10) as w:
             assert w.__class__ == MpWriter
-            assert w.multisegment
+            assert w.multisegment  # type: ignore[attr-defined]
 
             for ls in permutations(words, 3):
                 w.add_document(a=" ".join(ls))

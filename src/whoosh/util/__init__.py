@@ -9,7 +9,6 @@ Version: 1.0.0
 """
 
 # type: ignore
-# mypy: ignore-errors
 # pyright: ignore
 # Copyright 2007 Matt Chaput. All rights reserved.
 #

@@ -12,7 +12,7 @@ from whoosh.util.testing import TempStorage
 
 
 def _roundtrip(content, format_, astype, ana=None):
-    with TempStorage("roundtrip") as st:
+    with TempStorage("roundtrip") as st:  # type: ignore[arg-type]
         codec = default_codec()
         seg = codec.new_segment(st, "")
         ana = ana or analysis.StandardAnalyzer()
@@ -89,7 +89,7 @@ def test_character_postings():
 
 def test_posboost_postings():
     pbs = PositionBoosts()
-    ana = analysis.RegexTokenizer(r"\S+") | analysis.DelimitedAttributeFilter()
+    ana = analysis.RegexTokenizer(r"\S+") | analysis.DelimitedAttributeFilter()  # type: ignore[arg-type]
     content = "alfa^2 bravo^0.1 charlie^2 bravo^0.5 alfa alfa"
     assert _roundtrip(content, pbs, "position_boosts", ana) == [
         ("alfa", [(0, 2), (4, 1), (5, 1)]),
@@ -110,7 +110,7 @@ def test_posboost_postings():
 
 def test_charboost_postings():
     cbs = CharacterBoosts()
-    ana = analysis.RegexTokenizer(r"\S+") | analysis.DelimitedAttributeFilter()
+    ana = analysis.RegexTokenizer(r"\S+") | analysis.DelimitedAttributeFilter()  # type: ignore[arg-type]
     content = "alfa^2 bravo^0.1 charlie^2 bravo^0.5 alfa alfa"
     assert _roundtrip(content, cbs, "character_boosts", ana) == [
         ("alfa", [(0, 0, 4, 2), (4, 37, 41, 1), (5, 42, 46, 1)]),

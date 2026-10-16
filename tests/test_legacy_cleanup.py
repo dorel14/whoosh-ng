@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from whoosh.support.levenshtein import damerau_levenshtein, distance, levenshtein, relative
-from whoosh.util.loading import RenamingUnpickler, find_object
+from whoosh.util.loading import find_object
 from whoosh.util.text import byte, first_diff, prefix_encode, rcompile
 from whoosh.util.varints import (
     decode_signed_varint,
@@ -106,13 +106,3 @@ class TestLegacyCleanupTypecheck:
         assert result.returncode == 0, (
             f"pyright errors on {path}:\n{result.stdout}\n{result.stderr}"
         )
-
-    @pytest.mark.parametrize("path", CLEANED_FILES)
-    def test_mypy_clean(self, path: Path):
-        result = subprocess.run(
-            ["uv", "run", "mypy", str(path)],
-            capture_output=True,
-            text=True,
-            cwd=Path(__file__).resolve().parent.parent,
-        )
-        assert result.returncode == 0, f"mypy errors on {path}:\n{result.stdout}\n{result.stderr}"

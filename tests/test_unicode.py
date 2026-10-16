@@ -1,5 +1,3 @@
-import pytest
-
 from whoosh import fields, query
 from whoosh.filedb.filestore import RamStorage
 

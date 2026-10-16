@@ -16955,17 +16955,20 @@ results = app.search("python")
 # Embeddings
 
 Whoosh-NG can embed documents into dense vectors and use them for semantic
-search. This page covers the full embeddings stack: **FastEmbedProvider**
-(default CPU backend), **ONNXEmbeddingProvider** (advanced CPU backend),
-**EmbeddingModelRegistry**, **EmbeddingModelManager**, the
+search. This page covers the full embeddings stack: **LibEmbeddingProvider**
+(default CPU backend), **FastEmbedProvider**, **ONNXEmbeddingProvider** (advanced
+CPU backend), **EmbeddingModelRegistry**, **EmbeddingModelManager**, the
 `whoosh-ng-models` CLI, and `EmbeddingEngine` for `ConfigEngine` integration.
 
 > **Module:** `whoosh_modern.embeddings`
-> **Version:** 3.1.0
+> **Version:** 4.0.0
 
 ## Install
 
 ```bash
+# Default CPU backend (libembedding-ng)
+pip install whoosh-ng[libembedding]
+
 # Default CPU backend (FastEmbed)
 pip install whoosh-ng[embeddings]
 
@@ -16982,9 +16985,9 @@ pip install whoosh-ng[embeddings,vector]
 ## Quickstart
 
 ```python
-from whoosh_modern.embeddings import FastEmbedProvider
+from whoosh_modern.embeddings import LibEmbeddingProvider
 
-provider = FastEmbedProvider()
+provider = LibEmbeddingProvider()
 vector = provider.embed("hello world")
 print(len(vector))  # 384
 
@@ -17006,6 +17009,61 @@ provider = FastEmbedProvider()
 # Or with a custom model:
 provider = FastEmbedProvider(model_name="BAAI/bge-base-en-v1.5")
 ```
+
+- Zero PyTorch dependency.
+- CPU-only.
+- Automatic model download and caching.
+- Conforms to `EmbeddingProvider`.
+
+### FastEmbed automatic model selection
+
+Use `model_name="fast"` to automatically select the fastest available model
+based on CPU throughput benchmarks:
+
+```python
+from whoosh_modern.embeddings import FastEmbedProvider
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+print(provider)  # FastEmbedProvider(model_name='BAAI/bge-small-en-v1.5', dimension=384, threads=None)
+```
+
+Selection priority:
+1. 384-dim models preferred (smaller vectors, faster inference)
+2. Smaller model size
+3. Higher speed score
+
+Available presets: `bge-small`, `bge-base`, `minilm`, `minilm-multilingual`,
+`e5-small`, `e5-base`, `multilingual`, `nomic`.
+
+### LibEmbeddingProvider (default)
+
+`LibEmbeddingProvider` is the new default CPU-friendly backend. It wraps
+`libembedding.TextEmbedding`, which downloads and caches models automatically.
+It is CPU-only, requires zero PyTorch, and is faster than FastEmbed.
+
+```python
+from whoosh_modern.embeddings import LibEmbeddingProvider
+
+provider = LibEmbeddingProvider()
+# Or with a preset:
+provider = LibEmbeddingProvider(model_name="fast")
+# Or with explicit quantization:
+provider = LibEmbeddingProvider(model_name="balanced", quantization="auto")
+```
+
+Supported presets:
+- `"fast"` → auto-selected fastest model (dimension 384 preferred, minimal size, highest CPU speed score)
+- `"balanced"` → balanced speed/quality (default)
+- `"quality"` → highest quality model
+
+Or use a direct model identifier (e.g. `"BAAI/bge-small-en-v1.5"`).
+
+Constructor arguments:
+- `model_name`: preset or HF model identifier (default: `"balanced"`)
+- `pooling`: `"mean"` or `"cls"` (default: `"mean"`)
+- `batch_size`: optional inference batch size
+- `cache_size`: optional LRU cache size (0 = disabled)
+- `quantization`: optional quantization mode (`"none"`, `"static"`, `"dynamic"`, `"fp16"`, `"auto"`)
 
 - Zero PyTorch dependency.
 - CPU-only.
@@ -17087,13 +17145,13 @@ When `enable_prefix=True`, `embed()` prepends `"passage: "` and
 The two providers interpret model identifiers differently. Understanding
 this distinction avoids confusion with names that exist in both registries:
 
-| Aspect | FastEmbedProvider | ONNXEmbeddingProvider |
-|--------|-------------------|-----------------------|
-| Identifier type | HuggingFace model name (e.g. `BAAI/bge-small-en-v1.5`) | Registered model name (e.g. `bge-small-en-v1.5`) **or** a local file path |
-| Download mechanism | `fastembed` downloads automatically on first use | `EmbeddingModelManager.download()` downloads from the Hub |
-| Cache location | FastEmbed's own cache (`~/.cache/fastembed`) | `~/.whoosh-ng/models/` |
-| Registry | None (FastEmbed manages its own model list) | `EmbeddingModelRegistry` (`get_default_registry()`) |
-| Example | `FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")` | `ONNXEmbeddingProvider(model_path=str(model_dir / "model.onnx"))` |
+| Aspect | LibEmbeddingProvider | FastEmbedProvider | ONNXEmbeddingProvider |
+|--------|----------------------|-------------------|-----------------------|
+| Identifier type | preset or HF model name (e.g. `BAAI/bge-small-en-v1.5`) | HuggingFace model name | Registered model name **or** local file path |
+| Download mechanism | `libembedding` downloads automatically on first use | `fastembed` downloads automatically | `EmbeddingModelManager.download()` downloads from the Hub |
+| Cache location | libembedding cache (`~/.cache/libembedding`) | FastEmbed cache (`~/.cache/fastembed`) | `~/.whoosh-ng/models/` |
+| Registry | presets via `TextEmbedding.from_mode()` | None (FastEmbed manages its own list) | `EmbeddingModelRegistry` |
+| Example | `LibEmbeddingProvider(model_name="fast")` | `FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")` | `ONNXEmbeddingProvider(model_path=str(model_dir / "model.onnx"))` |
 
 > **Ambiguity note:** The name `bge-small-en-v1.5` exists both as a
 > FastEmbed model (a HuggingFace repo identifier without namespace) and as
@@ -17101,6 +17159,113 @@ this distinction avoids confusion with names that exist in both registries:
 > interchangeable** — FastEmbed manages its own download, while the ONNX
 > registry maps to `onnx-community/bge-small-en-v1.5-ONNX` via
 > `EmbeddingModelManager`.
+
+## ProviderPool (parallel embedding)
+
+`ProviderPool` distributes `embed_batch()` calls across multiple provider
+instances to maximize CPU throughput and avoid GIL contention.
+
+```python
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+vectors = pool.embed_batch(["text 1", "text 2", "text 3", "text 4"])
+print(len(vectors))  # 4
+```
+
+Expected improvement: parallel throughput vs single provider (benchmark on your hardware).
+
+## ONNX runtime tuning
+
+`ONNXEmbeddingProvider` exposes ONNX Runtime session options for CPU/GPU tuning:
+
+```python
+from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider
+
+provider = ONNXEmbeddingProvider(
+    model_path="models/bge-small-en-v1.5.onnx",
+    tokenizer_dir="models/tokenizer",
+    use_cuda=True,                    # auto-detect CUDA, fallback CPU
+    intra_op_num_threads=2,           # intra-op parallelism
+    inter_op_num_threads=2,           # inter-op parallelism
+    graph_optimization_level="all",   # enable all graph optimizations
+)
+```
+
+## EmbeddingBatchWriter v4.0
+
+`EmbeddingBatchWriter` now supports provider pooling, strict error handling,
+thread-safe LRU caching, and performance metrics:
+
+```python
+from whoosh_modern.indexing import EmbeddingBatchWriter
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+writer = EmbeddingBatchWriter(
+    index,
+    embedding_provider=pool,
+    text_field="body",
+    vector_field="body_vector",
+    batch_size=500,
+    embedding_batch_size=32,
+    cache_size=8192,
+    strict_errors=True,
+)
+
+for batch in source.stream_batches(batch_size=500):
+    writer.add_batch(batch)
+
+writer.close()
+
+stats = writer.get_stats()
+print(f"Cache hit rate: {stats['cache']['hit_rate_percent']}%")
+print(f"Throughput: {stats['docs_per_second']} docs/sec")
+```
+
+## EmbeddingMiddleware v4.0
+
+`EmbeddingMiddleware` now accumulates documents and calls `embed_batch()` for
++33% throughput. Set `batch_size=1` for per-document mode (legacy behavior).
+
+```python
+from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+
+middleware = EmbeddingMiddleware(
+    embedding_provider=provider,
+    source_field="content",
+    target_field="embedding",
+    batch_size=32,          # accumulate 32 docs, then embed_batch()
+    strict=True,            # raise on embedding failures
+)
+```
+
+## Model preloading
+
+Preload models asynchronously at startup to avoid first-request latency:
+
+```python
+import asyncio
+from whoosh_modern.embeddings.model_preload import preload_embedding_model_async
+
+async def startup():
+    await preload_embedding_model_async(
+        model_name="BAAI/bge-small-en-v1.5",
+        provider_type="fastembed",
+    )
+
+asyncio.run(startup())
+```
 
 ## Model manager and registry
 
@@ -17183,6 +17348,16 @@ faster downloads.
 ```yaml
 # whoosh-ng.yml
 embedding:
+  provider: libembedding
+  model: fast
+  pooling: mean
+  batch_size: 32
+  cache: true
+```
+
+```yaml
+# whoosh-ng.yml with FastEmbed
+embedding:
   provider: fastembed
   model: BAAI/bge-small-en-v1.5
 ```
@@ -17220,8 +17395,8 @@ embedding:
 # When embedding_fields is used, omit source_field/target_field at the
 # root level — they are ignored when embedding_fields is present.
 embedding:
-  provider: fastembed
-  model: BAAI/bge-small-en-v1.5
+  provider: libembedding
+  model: balanced
   embedding_fields:
     - source_field: title
       target_field: title_vector
@@ -17229,7 +17404,7 @@ embedding:
       target_field: body_vector
 ```
 
-Supported providers: `fastembed`, `onnx`, `sentence-transformers`.
+Supported providers: `libembedding`, `fastembed`, `onnx`, `sentence-transformers`.
 
 > **Multi-field precedence:** When `embedding_fields` is provided, the
 > root-level `source_field` / `target_field` defaults are **ignored** — each
@@ -17309,8 +17484,9 @@ class MyProvider:
 
 ## Examples
 
+- [Embeddings with LibEmbedding](/examples/embeddings_libembedding) — Runnable LibEmbedding example
 - [Embeddings with FastEmbed](/examples/embeddings-fastembed) — Runnable FastEmbed example
-- [Embeddings with ONNX](/examples/embeddings-onnx) — Runnable ONNX example
+- [Embeddings with ONNX](/examples/embeddings_onnx) — Runnable ONNX example
 
 ## See Also
 
@@ -18464,7 +18640,7 @@ compression = CompressionMiddleware()
 
 ### EmbeddingMiddleware
 
-Enriches documents with dense vector embeddings before indexing:
+Enriches documents with dense vector embeddings before indexing.
 
 ```python
 from whoosh_modern.middleware import EmbeddingMiddleware
@@ -18475,6 +18651,8 @@ embedding = EmbeddingMiddleware(
     embedding_provider=provider,
     source_field="body",
     target_field="body_vector",
+    batch_size=32,          # accumulate docs, then embed_batch() for +33% throughput
+    strict_errors=False,    # log and continue on embedding failures
 )
 ```
 
@@ -18483,6 +18661,7 @@ Use `embedding_fields` for multi-field vectorization:
 ```python
 embedding = EmbeddingMiddleware(
     embedding_provider=provider,
+    batch_size=32,
     embedding_fields=[
         {"source_field": "title", "target_field": "title_vector"},
         {"source_field": "body", "target_field": "body_vector"},
@@ -20292,6 +20471,7 @@ SearchApplication(
     dictionary_stem_overrides: dict[str, str] | None = None,
     embedding_provider: Any | None = None,
     embedding_fields: list[dict[str, str]] | None = None,
+    searcher: SearcherConfig | dict[str, Any] | None = None,
 )
 ```
 
@@ -20306,6 +20486,7 @@ SearchApplication(
 | `dictionary_stem_overrides` | `dict[str, str] \| None` | Mapping of word → stemmed form to override the default Snowball stemmer. |
 | `embedding_provider` | `Any \| None` | Embedding provider used to enrich documents with dense vectors before indexing. |
 | `embedding_fields` | `list[dict[str, str]] \| None` | Sequence of `{"source_field": "...", "target_field": "..."}` mappings for multi-field embedding. When provided, the `source_field` / `target_field` defaults from the embedding configuration are ignored. |
+| `searcher` | `SearcherConfig \| dict[str, Any] \| None` | Optional searcher configuration. Accepts a `SearcherConfig` instance, a dict that will be converted to `SearcherConfig`, or `None` to fall back to the config object passed to the constructor. When set, `search()` opens the index with the configured weighting model. |
 
 ## Properties
 
@@ -20368,11 +20549,48 @@ def search(self, query: Any, **kwargs: Any) -> Any
 Search the index.
 
 - If `query` is a string, it is parsed using `QueryParser` with the first schema field as the default field.
-- Opens a searcher and delegates to `searcher.search()`.
+- When a `searcher` configuration was provided at construction time or via `config`, the index is opened with the configured `weighting` model. Otherwise the default Whoosh searcher is used.
+- Delegates to `searcher.search()`.
 
 Returns search results from the Whoosh searcher.
 
 Raises `RuntimeError` if `build()` has not been called yet.
+
+### With Searcher Config
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.config.models import WhooshNGConfig, SearchConfig, SearcherConfig
+from whoosh_modern.storage import FileStorage
+
+config = WhooshNGConfig(
+    search=SearchConfig(
+        searcher=SearcherConfig(weighting="BM25F"),
+    ),
+)
+
+app = SearchApplication(
+    source=source,
+    storage=FileStorage("indexdir"),
+    config=config,
+)
+app.build()
+
+# search() uses BM25F weighting automatically
+results = app.search("python search")
+```
+
+You can also pass the searcher configuration directly:
+
+```python
+app = SearchApplication(
+    source=source,
+    storage=FileStorage("indexdir"),
+    searcher={"weighting": "BM25F"},
+)
+```
+
+Available weighting models: `BM25F`, `BM25`, `TF_IDF`, `PL2`, `DFree`, `Frequency`.
 
 ## Usage Examples
 
@@ -20483,6 +20701,62 @@ app.build()
 When `storage` is a `FileStorageProvider` (exposed as `FileStorage`), `SearchApplication` uses its public `root` as the index directory. For all other providers (S3, Hybrid, Snapshot), it falls back to a temporary directory because Whoosh core requires a filesystem path for `create_in()`.
 
 The actual segment routing, commit checkpointing, and cache synchronization are handled by `StorageMiddleware` at the middleware layer, not by the storage provider itself.
+
+## Hybrid Search (BM25 + Vector)
+
+`SearchApplication` supports hybrid search through `HybridSearcher`, which fuses BM25 keyword results with vector similarity results.
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.embeddings import FastEmbedProvider
+from whoosh_modern.vector.numpy_provider import NumpyProvider
+from whoosh_modern.searching.hybrid import HybridSearcher
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+vector_provider = NumpyProvider()
+
+app = SearchApplication(
+    source=source,
+    embedding_provider=provider,
+    storage=FileStorage("indexdir"),
+)
+app.build("indexdir")
+
+with app.index.searcher() as searcher:
+    hs = HybridSearcher(searcher, vector_provider, id_field="id")
+    query_vector = provider.embed("Python programming")
+    results = hs.search(
+        "Python programming",
+        query_vector=query_vector,
+        method="weighted",   # or "rrf" for Reciprocal Rank Fusion
+        alpha=0.5,           # 0.0 = BM25 only, 1.0 = vector only
+    )
+    for r in results:
+        print(r.doc_id, r.score, r.bm25_score, r.vector_score)
+```
+
+## Parallel Embedding with ProviderPool
+
+For high-throughput indexing, use `ProviderPool` to parallelize embedding across multiple provider instances:
+
+```python
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+app = SearchApplication(
+    source=source,
+    embedding_provider=pool,
+    storage=FileStorage("indexdir"),
+)
+app.build("indexdir")
+```
+
+Expected improvement: parallel throughput vs single provider (benchmark on your hardware).
 
 ## See Also
 
@@ -21718,9 +21992,9 @@ middleware = SynonymExpansionMiddleware(app.synonym_manager)
 # Vector Search
 
 Module: `whoosh_modern.vector`
-Version: 2.1.0
+Version: 4.0.0
 
-Whoosh-NG supports semantic search through vector embeddings. This guide covers setting up and using vector fields.
+Whoosh-NG supports semantic search through vector embeddings. This guide covers the vector providers and how to use them with the current API.
 
 ## Concept
 
@@ -21728,43 +22002,65 @@ Vector search lets you find documents based on semantic similarity rather than e
 
 ```
 Query embedding  ----\
-                      >--- Cosine Similarity ---> Ranked results
+                       >--- Cosine Similarity ---> Ranked results
 Document embedding ---/
-```
-
-## Setup
-
-### Define Schema
-
-```python
-from whoosh.fields import Schema, TEXT, VectorField
-
-schema = Schema(
-    title=TEXT(stored=True),
-    content=TEXT,
-    embedding=VectorField(dimensions=384)  # e.g., all-MiniLM-L6-v2
-)
 ```
 
 ## Providers
 
-Whoosh-NG includes multiple vector backends:
+Whoosh-NG includes two vector backends:
 
 | Provider | Description | Use Case |
 |----------|-------------|----------|
-| `NumpyProvider` | Pure NumPy, cosine similarity | Small to medium indexes |
-| `HNSWProvider` | Hierarchical navigable small world | Large indexes, fast ANN |
-| `FaissProvider` | Facebook AI Similarity Search | Very large indexes |
-| `QdrantProvider` | Qdrant vector DB | Distributed |
+| `NumpyProvider` | Pure NumPy, vectorized cosine similarity | Small to medium indexes (up to ~100k docs) |
+| `HnswlibProvider` | HNSW approximate nearest neighbor | Large indexes, fast ANN |
 
 ### NumpyProvider (Default)
 
+`NumpyProvider` stores vectors in memory and computes cosine similarity using vectorized NumPy operations. It is the default choice for indexes up to ~100k documents.
+
 ```python
-from whoosh.vector import NumpyProvider
+from whoosh_modern.vector.numpy_provider import NumpyProvider
 
 provider = NumpyProvider()
-provider.add_vector(doc_id, embedding)
-results = provider.search(query_embedding, limit=10)
+provider.add([("doc1", [0.1, 0.2, ...]), ("doc2", [0.4, 0.5, ...])])
+hits = provider.search(query_embedding, k=10)
+for hit in hits:
+    print(hit.doc_id, hit.score)
+```
+
+**Optimizations v4.0:**
+- Vectorized cosine similarity via `matrix @ query`
+- Lazy matrix consolidation (built only at search time)
+- `np.argpartition` for O(N) top-k selection
+- float32 storage for -50% memory usage
+
+### HnswlibProvider
+
+`HnswlibProvider` uses HNSW for approximate nearest neighbor search. Suitable for large indexes where exact search is too slow.
+
+```python
+from whoosh_modern.vector.hnswlib_provider import HnswlibProvider
+
+provider = HnswlibProvider(dimension=384, space="cosine")
+provider.add([("doc1", [0.1, 0.2, ...]), ("doc2", [0.4, 0.5, ...])])
+hits = provider.search(query_embedding, k=10)
+```
+
+## Vector Field
+
+Use `VECTOR` from `whoosh_modern.fields` to declare a dense vector field:
+
+```python
+from whoosh.fields import Schema, TEXT, ID
+from whoosh_modern.fields import VECTOR
+
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    content=TEXT,
+    embedding=VECTOR(dimension=384),
+)
 ```
 
 ## Indexing with Vectors
@@ -21772,274 +22068,71 @@ results = provider.search(query_embedding, limit=10)
 ### Generate Embeddings
 
 ```python
-from sentence_transformers import SentenceTransformer
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
-
-embeddings = model.encode([
-    "First document content",
-    "Second document content"
-])
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+texts = ["First document content", "Second document content"]
+embeddings = provider.embed_batch(texts)
 ```
 
 ### Write Documents
 
 ```python
 with ix.writer() as writer:
-    writer.add_document(
-        title="Doc 1",
-        content="Python is great",
-        embedding=embeddings[0].tolist()
-    )
+    for doc_id, text, embedding in zip(doc_ids, texts, embeddings):
+        writer.add_document(
+            id=doc_id,
+            content=text,
+            embedding=embedding,
+        )
     writer.commit()
 ```
 
-## Searching with Vectors
-
-### Hybrid Search (Keyword + Vector)
-
-```python
-from whoosh.searching import Searcher
-from whoosh.vector import VectorProvider
-
-with ix.searcher() as searcher:
-    # Semantic search component
-    query_embedding = model.encode(["Python tutorial"])[0]
-    vector_results = searcher.vector_search(
-        "embedding", query_embedding, limit=20
-    )
-
-    # Keyword search component
-    keyword_query = QueryParser("content", schema).parse("Python")
-    keyword_results = searcher.search(keyword_query, limit=20)
-
-    # Combine (e.g., RRF fusion)
-    final_results = fuse_results(vector_results, keyword_results)
-```
+## Searching
 
 ### Pure Vector Search
 
 ```python
-with ix.searcher() as searcher:
-    query_embedding = model.encode(["search query"])[0]
-    results = searcher.vector_search(
-        "embedding",
-        query_embedding,
-        limit=10,
-        metric="cosine"  # or "euclidean", "dot"
-    )
-```
+from whoosh_modern.vector.numpy_provider import NumpyProvider
 
-## VectorField Options
-
-```python
-embedding_field = VectorField(
-    dimensions=384,      # Required: embedding dimension
-    metric="cosine",     # Similarity metric: cosine, euclidean, dot
-    provider="hnsw"      # Provider name from registry
-)
-```
-
-## Indexing Stream
-
-```python
-from whoosh.vector.indexing import VectorIndexer
-
-indexer = VectorIndexer(ix)
-indexer.add_document(
-    title="Doc",
-    content="Content",
-    embedding=embedding.tolist()
-)
-indexer.commit()
-```
-
-## Similarity Metrics
-
-| Metric | Description | Range |
-|--------|-------------|-------|
-| `cosine` | Cosine similarity | [0, 1] (higher is more similar) |
-| `euclidean` | Euclidean distance | [0, inf) (lower is more similar) |
-| `dot` | Dot product | [-inf, inf] (higher is more similar) |
-
-## Best Practices
-
-1. **Normalize embeddings**: Use cosine similarity with normalized vectors
-2. **Choose provider wisely**: Numpy for &lt;100k vectors, HNSW/Faiss for larger
-3. **Hybrid search**: Combine vector and keyword search for best results
-4. **Cache embeddings**: Pre-compute and store to avoid recomputation
-5. **Batch indexing**: Index vectors in batches for efficiency
-
-## Vector Provider Integration in the Pipeline
-
-The vector search system integrates through Whoosh's plugin registry and segment
-format. The provider is stored in the index segment and resolved at search time.
-
-### Architecture
-
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  Registration (startup)                                            │
-│                                                                     │
-│  VectorPlugin.register(PluginManager)                              │
-│    └── VectorRegistry.register("numpy", NumpyProvider(), owner)     │
-│                                                                     │
-│  The provider is now available for any VECTOR field                │
-│  that specifies provider="numpy"                                   │
-└─────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────┐
-│  Indexation                                                         │
-│                                                                     │
-│  VECTOR(dimensions=384, provider="numpy")                          │
-│       │                                                             │
-│       ▼                                                             │
-│  PerDocWriter.add_vector_items(fieldname, field, items)            │
-│       │                                                             │
-│       ▼                                                             │
-│  Segment file contains:                                            │
-│    - vector bytes (raw)                                            │
-│    - provider name ("numpy")                                        │
-│    - metric ("cosine")                                              │
-│       │                                                             │
-│       ▼                                                             │
-│  writer.commit() → segments written to disk                        │
-└─────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────┐
-│  Search                                                          │
-│                                                                     │
-│  searcher.vector_search("embedding", query_vec, k=10)              │
-│       │                                                             │
-│       ▼                                                             │
-│  Whoosh core reads segment                                         │
-│    └── retrieves provider name ("numpy")                            │
-│       │                                                             │
-│       ▼                                                             │
-│  VectorRegistry.get("numpy")                                        │
-│       │                                                             │
-│       ▼                                                             │
-│  NumpyProvider.search(query_vec, k, filter_ids)                    │
-│       │                                                             │
-│       ▼                                                             │
-│  VectorHit[] sorted by cosine similarity                           │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### Full indexing flow
-
-```python
-from whoosh import index, fields
-from whoosh_modern.vector.plugin import VectorPlugin
-from whoosh.plugins.manager import PluginManager
-from whoosh_modern.storage import FileStorage
-import numpy as np
-
-# 1. Register vector plugin (startup)
-manager = PluginManager()
-VectorPlugin().register(manager)
-
-# 2. Define schema with VECTOR field
-schema = fields.Schema(
-    title=fields.TEXT(stored=True),
-    embedding=fields.VECTOR(dimensions=384, provider="numpy", stored=True),
-)
-
-# 3. Create index (storage determines where segments live)
-ix = index.create_in("indexdir", schema)
-
-# 4. Index documents with vectors
-np.random.seed(42)
-embeddings = {
-    "doc1": np.random.rand(384).astype(np.float32).tolist(),
-    "doc2": np.random.rand(384).astype(np.float32).tolist(),
-}
-
-with ix.writer() as writer:
-    for doc_id, vec in embeddings.items():
-        writer.add_document(
-            title=f"Document {doc_id}",
-            embedding=vec,
-        )
-    writer.commit()
-    # Whoosh core serializes vectors to segment files
-    # Provider name "numpy" is stored in the segment
-```
-
-### Full search flow
-
-```python
-from whoosh.qparser import QueryParser
-import numpy as np
-
-with ix.searcher() as searcher:
-    # 1. Keyword search
-    qp = QueryParser("title", schema)
-    keyword_results = searcher.search(qp.parse("Document"))
-
-    # 2. Vector search
-    query_vec = np.random.rand(384).astype(np.float32).tolist()
-    vector_results = searcher.vector_search(
-        "embedding",
-        query_vec,
-        limit=10,
-    )
-
-    # 3. Hybrid: combine both
-    # Example: Reciprocal Rank Fusion (RRF)
-    def rrf(results_list, k=60):
-        scores = {}
-        for results in results_list:
-            for rank, hit in enumerate(results):
-                doc_id = hit.doc_id if hasattr(hit, "doc_id") else hit["doc_id"]
-                scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank + 1)
-        return sorted(scores.items(), key=lambda x: x[1], reverse=True)
-
-    combined = rrf([keyword_results, vector_results])
-```
-
-### Standalone usage (no schema)
-
-```python
-from whoosh_modern.vector import NumpyProvider
-
-# Create provider directly
 provider = NumpyProvider()
-
-# Add vectors
-provider.add([
-    ("doc1", [0.1, 0.2, 0.3]),
-    ("doc2", [0.4, 0.5, 0.6]),
-])
-
-# Search
-query_vec = [0.1, 0.2, 0.3]
-hits = provider.search(query_vec, k=5)
-
-for hit in hits:
-    print(f"doc_id={hit.doc_id}, score={hit.score:.4f}")
+# Populate provider with indexed vectors...
+query_embedding = provider.embed("search query")
+hits = provider.search(query_embedding, k=10)
 ```
 
-### Provider resolution chain
+### Hybrid Search (BM25 + Vector)
 
-When `searcher.vector_search()` is called, Whoosh core:
+```python
+from whoosh_modern.searching.hybrid import HybridSearcher
 
-1. Reads the `VECTOR` field configuration from the schema
-2. Opens the segment file containing the vector data
-3. Extracts the provider name stored in the segment (e.g., `"numpy"`)
-4. Looks up the provider in `VectorRegistry`
-5. Calls `provider.search(query_vector, k, filter_ids)`
-6. Returns `list[VectorHit]`
+with ix.searcher() as searcher:
+    hs = HybridSearcher(searcher, vector_provider, id_field="id")
+    results = hs.search(
+        "Python programming",
+        query_vector=query_embedding,
+        method="weighted",
+        alpha=0.5,
+    )
+    for r in results:
+        print(r.doc_id, r.score, r.bm25_score, r.vector_score)
+```
 
-If the provider is not registered, the search fails with a registry miss. This
-is why `VectorPlugin().register(manager)` (or manual registration) is required
-at startup.
+## Performance
+
+For optimal vector search performance:
+
+- **NumpyProvider**: use for indexes up to ~100k vectors. Vectorized matrix multiplication ensures O(N) search time.
+- **HnswlibProvider**: use for larger indexes. HNSW provides O(log N) approximate search.
+- **Batch embeddings**: use `embed_batch()` instead of per-document `embed()` for +33% throughput.
+- **ProviderPool**: use multiple provider instances for parallel embedding on multi-core CPUs.
 
 ## See Also
 
-- [Embeddings](/modern/embeddings) — ONNX Runtime CPU-friendly embedding provider
-- [Provider Integration Guide](provider-integration.md) — Complete pipeline guide for all providers
-- [Middleware Guide](middleware-pipeline.md) — Pipeline hooks and provider adapters
+- [Embeddings](/modern/embeddings) — Embedding providers and configuration
+- [Hybrid Search](/modern/search-application) — BM25 + vector fusion
+- [Storage Providers](/modern/storage-providers) — Persisting vector indexes
+- [Configuration Engine](/modern/configuration-engine) — Typed configuration surface
 
 
 ## DOCUMENT (FR): Analysis
@@ -37806,17 +37899,20 @@ results = app.search("python")
 
 Whoosh-NG peut embarquer des documents dans des vecteurs denses et les utiliser
 pour la recherche sémantique. Cette page couvre la stack embeddings complète :
-**FastEmbedProvider** (backend CPU par défaut), **ONNXEmbeddingProvider**
-(backend CPU avancé), **EmbeddingModelRegistry**, **EmbeddingModelManager**,
-le CLI `whoosh-ng-models` et `EmbeddingEngine` pour l'intégration
-`ConfigEngine`.
+**LibEmbeddingProvider** (backend CPU par défaut), **FastEmbedProvider**,
+**ONNXEmbeddingProvider** (backend CPU avancé), **EmbeddingModelRegistry**,
+**EmbeddingModelManager**, le CLI `whoosh-ng-models` et `EmbeddingEngine` pour
+l'intégration `ConfigEngine`.
 
 > **Module :** `whoosh_modern.embeddings`
-> **Version :** 3.1.0
+> **Version :** 4.0.0
 
 ## Installation
 
 ```bash
+# Backend CPU par défaut (libembedding-ng)
+pip install whoosh-ng[libembedding]
+
 # Backend CPU par défaut (FastEmbed)
 pip install whoosh-ng[embeddings]
 
@@ -37833,9 +37929,9 @@ pip install whoosh-ng[embeddings,vector]
 ## Démarrage rapide
 
 ```python
-from whoosh_modern.embeddings import FastEmbedProvider
+from whoosh_modern.embeddings import LibEmbeddingProvider
 
-provider = FastEmbedProvider()
+provider = LibEmbeddingProvider()
 vector = provider.embed("hello world")
 print(len(vector))  # 384
 
@@ -37845,9 +37941,9 @@ print(len(batch))   # 2
 
 ## Providers
 
-### FastEmbedProvider (défaut)
+### FastEmbedProvider
 
-`FastEmbedProvider` est le backend CPU par défaut. Il encapsule
+`FastEmbedProvider` est un backend CPU. Il encapsule
 `fastembed.TextEmbedding`, qui télécharge et cache les modèles
 automatiquement.
 
@@ -37858,6 +37954,41 @@ provider = FastEmbedProvider()
 # Ou avec un modèle personnalisé :
 provider = FastEmbedProvider(model_name="BAAI/bge-base-en-v1.5")
 ```
+
+- Zéro dépendance PyTorch.
+- CPU-only.
+- Téléchargement automatique et cache des modèles.
+- Conforme au protocole `EmbeddingProvider`.
+
+### LibEmbeddingProvider (défaut)
+
+`LibEmbeddingProvider` est le nouveau backend CPU par défaut. Il encapsule
+`libembedding.TextEmbedding`, qui télécharge et cache les modèles automatiquement.
+Il est CPU-only, nécessite zéro PyTorch, et est plus rapide que FastEmbed.
+
+```python
+from whoosh_modern.embeddings import LibEmbeddingProvider
+
+provider = LibEmbeddingProvider()
+# Ou avec un preset :
+provider = LibEmbeddingProvider(model_name="fast")
+# Ou avec une quantification explicite :
+provider = LibEmbeddingProvider(model_name="balanced", quantization="auto")
+```
+
+Prises en charge des presets :
+- `"fast"` → modèle le plus rapide auto-sélectionné (dimension 384 préférée, taille minimale, score de vitesse CPU le plus élevé)
+- `"balanced"` → vitesse/qualité équilibrée (défaut)
+- `"quality"` → modèle de plus haute qualité
+
+Ou utiliser un identifiant de modèle direct (ex: `"BAAI/bge-small-en-v1.5"`).
+
+Arguments du constructeur :
+- `model_name`: preset ou identifiant HF (défaut: `"balanced"`)
+- `pooling`: `"mean"` ou `"cls"` (défaut: `"mean"`)
+- `batch_size`: taille de lot d'inférence optionnelle
+- `cache_size`: taille de cache LRU optionnelle (0 = désactivé)
+- `quantization`: mode de quantification optionnel (`"none"`, `"static"`, `"dynamic"`, `"fp16"`, `"auto"`)
 
 - Zéro dépendance PyTorch.
 - CPU-only.
@@ -37954,6 +38085,115 @@ les deux registres :
 > **ne sont pas interchangeables** — FastEmbed gère son propre téléchargement,
 > tandis que le registre ONNX mappe vers `onnx-community/bge-small-en-v1.5-ONNX`
 > via `EmbeddingModelManager`.
+
+## ProviderPool (embedding parallèle)
+
+`ProviderPool` distribue les appels `embed_batch()` across plusieurs instances
+de provider pour maximiser le throughput CPU et éviter la contention GIL.
+
+```python
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+vectors = pool.embed_batch(["texte 1", "texte 2", "texte 3", "texte 4"])
+print(len(vectors))  # 4
+```
+
+Amélioration attendue : throughput parallèle vs provider unique (à mesurer sur votre matériel).
+
+## Réglage du runtime ONNX
+
+`ONNXEmbeddingProvider` expose les options de session ONNX Runtime pour le réglage CPU/GPU :
+
+```python
+from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider
+
+provider = ONNXEmbeddingProvider(
+    model_path="models/bge-small-en-v1.5.onnx",
+    tokenizer_dir="models/tokenizer",
+    use_cuda=True,                    # auto-détecte CUDA, fallback CPU
+    intra_op_num_threads=2,           # parallélisme intra-op
+    inter_op_num_threads=2,           # parallélisme inter-op
+    graph_optimization_level="all",   # active toutes les optimisations
+)
+```
+
+## EmbeddingBatchWriter v4.0
+
+`EmbeddingBatchWriter` supporte maintenant le provider pooling, la gestion
+d'erreurs stricte, le cache LRU thread-safe et les métriques de performance :
+
+```python
+from whoosh_modern.indexing import EmbeddingBatchWriter
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+writer = EmbeddingBatchWriter(
+    index,
+    embedding_provider=pool,
+    text_field="body",
+    vector_field="body_vector",
+    batch_size=500,
+    embedding_batch_size=32,
+    cache_size=8192,
+    strict_errors=True,
+)
+
+for batch in source.stream_batches(batch_size=500):
+    writer.add_batch(batch)
+
+writer.close()
+
+stats = writer.get_stats()
+print(f"Taux de hit cache: {stats['cache']['hit_rate_percent']}%")
+print(f"Throughput: {stats['docs_per_second']} docs/sec")
+```
+
+## EmbeddingMiddleware v4.0
+
+`EmbeddingMiddleware` accumule maintenant les documents et appelle
+`embed_batch()` pour +33% de throughput. Utilisez `batch_size=1` pour le mode
+par document (comportement legacy).
+
+```python
+from whoosh_modern.middleware.embedding import EmbeddingMiddleware
+
+middleware = EmbeddingMiddleware(
+    embedding_provider=provider,
+    source_field="content",
+    target_field="embedding",
+    batch_size=32,          # accumule 32 docs, puis embed_batch()
+    strict=True,            # raise on embedding failures
+)
+```
+
+## Préchargement de modèles
+
+Préchargez les modèles de manière asynchrone au démarrage pour éviter la latence
+de première requête :
+
+```python
+import asyncio
+from whoosh_modern.embeddings.model_preload import preload_embedding_model_async
+
+async def startup():
+    await preload_embedding_model_async(
+        model_name="BAAI/bge-small-en-v1.5",
+        provider_type="fastembed",
+    )
+
+asyncio.run(startup())
+```
 
 ## Model manager et registry
 
@@ -38110,7 +38350,7 @@ Il est recommandé d'utiliser soit `model` pour les modèles gérés par le mana
 soit `model_path` / `tokenizer_dir` pour des chemins locaux personnalisés, afin
 d'éviter toute ambiguïité.
 
-## Gestion des erreurs d'embedding
+## Gestion des erreurs d'embedding {#error-handling}
 
 > **Décision de conception :** Les erreurs du fournisseur sont **ignorées**
 > (journalisées en tant qu'avertissements) pour éviter d'interrompre le pipeline
@@ -40859,6 +41099,7 @@ SearchApplication(
     dictionary_stem_overrides: dict[str, str] | None = None,
     embedding_provider: Any | None = None,
     embedding_fields: list[dict[str, str]] | None = None,
+    searcher: SearcherConfig | dict[str, Any] | None = None,
 )
 ```
 
@@ -40873,6 +41114,7 @@ SearchApplication(
 | `dictionary_stem_overrides` | `dict[str, str] \| None` | Mapping mot → forme stemmée pour remplacer le stemmer Snowball par défaut. |
 | `embedding_provider` | `Any \| None` | Fournisseur d'embeddings utilisé pour enrichir les documents avec des vecteurs denses avant l'indexation. |
 | `embedding_fields` | `list[dict[str, str]] \| None` | Séquence de mappings `{"source_field": "...", "target_field": "..."}` pour l'embedding multi-champs. Lorsque fourni, les valeurs par défaut `source_field` / `target_field` de la configuration d'embedding sont ignorées. |
+| `searcher` | `SearcherConfig \| dict[str, Any] \| None` | Configuration optionnelle du searcher. Accepte une instance `SearcherConfig`, un dict qui sera converti en `SearcherConfig`, ou `None` pour revenir à la config passée au constructeur. Lorsque défini, `search()` ouvre l'index avec le modèle de pondération configuré. |
 
 ## Propriétés
 
@@ -40935,11 +41177,48 @@ def search(self, query: Any, **kwargs: Any) -> Any
 Recherche dans l'index.
 
 - Si `query` est une chaîne, elle est analysée en utilisant `QueryParser` avec le premier champ du schéma comme champ par défaut.
-- Ouvre un searcher et délègue à `searcher.search()`.
+- Lorsqu'une configuration `searcher` a été fournie lors de la construction ou via `config`, l'index est ouvert avec le modèle de pondération configuré. Sinon, le searcher Whoosh par défaut est utilisé.
+- Délègue à `searcher.search()`.
 
 Retourne les résultats de recherche du searcher Whoosh.
 
 Lève `RuntimeError` si `build()` n'a pas été appelé.
+
+### Avec configuration du searcher
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.config.models import WhooshNGConfig, SearchConfig, SearcherConfig
+from whoosh_modern.storage import FileStorage
+
+config = WhooshNGConfig(
+    search=SearchConfig(
+        searcher=SearcherConfig(weighting="BM25F"),
+    ),
+)
+
+app = SearchApplication(
+    source=source,
+    storage=FileStorage("indexdir"),
+    config=config,
+)
+app.build()
+
+# search() utilise automatiquement la pondération BM25F
+results = app.search("python search")
+```
+
+Vous pouvez également passer la configuration directement :
+
+```python
+app = SearchApplication(
+    source=source,
+    storage=FileStorage("indexdir"),
+    searcher={"weighting": "BM25F"},
+)
+```
+
+Modèles de pondération disponibles : `BM25F`, `BM25`, `TF_IDF`, `PL2`, `DFree`, `Frequency`.
 
 ## Exemples d'utilisation
 
@@ -41050,6 +41329,62 @@ app.build()
 Lorsque `storage` est un `FileStorageProvider` (exposé sous le nom `FileStorage`), `SearchApplication` utilise son attribut public `root` comme répertoire d'index. Pour tous les autres providers (S3, Hybride, Snapshot), il se rabat sur un répertoire temporaire car Whoosh core nécessite un chemin filesystem pour `create_in()`.
 
 Le routage réel des segments, le pointage de commit et la synchronisation du cache sont gérés par `StorageMiddleware` au niveau middleware, et non par le provider de stockage lui-même.
+
+## Recherche hybride (BM25 + Vector)
+
+`SearchApplication` supporte la recherche hybride via `HybridSearcher`, qui fusionne les résultats BM25 par mots-clés avec les résultats de similarité vectorielle.
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.embeddings import FastEmbedProvider
+from whoosh_modern.vector.numpy_provider import NumpyProvider
+from whoosh_modern.searching.hybrid import HybridSearcher
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+vector_provider = NumpyProvider()
+
+app = SearchApplication(
+    source=source,
+    embedding_provider=provider,
+    storage=FileStorage("indexdir"),
+)
+app.build("indexdir")
+
+with app.index.searcher() as searcher:
+    hs = HybridSearcher(searcher, vector_provider, id_field="id")
+    query_vector = provider.embed("programmation Python")
+    results = hs.search(
+        "programmation Python",
+        query_vector=query_vector,
+        method="weighted",   # ou "rrf" pour Reciprocal Rank Fusion
+        alpha=0.5,           # 0.0 = BM25 uniquement, 1.0 = vector uniquement
+    )
+    for r in results:
+        print(r.doc_id, r.score, r.bm25_score, r.vector_score)
+```
+
+## Embedding parallèle avec ProviderPool
+
+Pour un indexation à haut débit, utilisez `ProviderPool` pour paralléliser l'embedding across plusieurs instances de provider :
+
+```python
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+app = SearchApplication(
+    source=source,
+    embedding_provider=pool,
+    storage=FileStorage("indexdir"),
+)
+app.build("indexdir")
+```
+
+Amélioration attendue : throughput parallèle vs provider unique (à mesurer sur votre matériel).
 
 ## Voir aussi
 
@@ -42260,11 +42595,14 @@ middleware = SynonymExpansionMiddleware(app.synonym_manager)
 
 # Recherche vectorielle
 
-Whoosh-NG supporte la recherche sémantique via des embeddings vectoriels. Ce guide couvre la configuration et l'utilisation des champs vectoriels.
+Module: `whoosh_modern.vector`
+Version: 4.0.0
+
+Whoosh-NG supporte la recherche sémantique via des embeddings vectoriels. Ce guide couvre les providers vectoriels et leur utilisation avec l'API actuelle.
 
 ## Concept
 
-La recherche vectorielle permet de trouver des documents par similarité sémantique plutôt que par correspondance exacte de mots-clés.
+La recherche vectorielle permet de trouver des documents par similarité sémantique plutôt que par correspondance exacte de mots-clés. Vous embarquez des documents et des requêtes dans un espace à haute dimension, puis trouvez les voisins les plus proches.
 
 ```
 Embedding requête  ----\
@@ -42272,150 +42610,133 @@ Embedding requête  ----\
 Embedding document ---/
 ```
 
-## Configuration
-
-```python
-from whoosh.fields import Schema, TEXT, VectorField
-
-schema = Schema(
-    title=TEXT(stored=True),
-    content=TEXT,
-    embedding=VectorField(dimensions=384)  # ex: all-MiniLM-L6-v2
-)
-```
-
 ## Providers
+
+Whoosh-NG inclut deux backends vectoriels :
 
 | Provider | Description | Cas d'usage |
 |----------|-------------|-------------|
-| `NumpyProvider` | NumPy pur, similarité cosinus | Petits/moyens indexes |
-| `HNSWProvider` | Hierarchical Navigable Small World | Gros indexes, ANN rapide |
-| `FaissProvider` | Facebook AI Similarity Search | Très gros indexes |
-| `QdrantProvider` | Qdrant vector DB | Distribué |
+| `NumpyProvider` | NumPy pur, similarité cosinus vectorisée | Petits/moyens indexes (jusqu'à ~100k docs) |
+| `HnswlibProvider` | HNSW approximate nearest neighbor | Gros indexes, recherche ANN rapide |
+
+### NumpyProvider (par défaut)
+
+`NumpyProvider` stocke les vecteurs en mémoire et calcule la similarité cosinus en utilisant des opérations NumPy vectorisées. C'est le choix par défaut pour les indexes jusqu'à ~100k documents.
+
+```python
+from whoosh_modern.vector.numpy_provider import NumpyProvider
+
+provider = NumpyProvider()
+provider.add([("doc1", [0.1, 0.2, ...]), ("doc2", [0.4, 0.5, ...])])
+hits = provider.search(query_embedding, k=10)
+for hit in hits:
+    print(hit.doc_id, hit.score)
+```
+
+**Optimisations v4.0 :**
+- Similarité cosinus vectorisée via `matrix @ query`
+- Consolidation paresseuse de la matrice (construite seulement au moment de la recherche)
+- `np.argpartition` pour la sélection top-k en O(N)
+- Stockage float32 pour -50% de mémoire
+
+### HnswlibProvider
+
+`HnswlibProvider` utilise HNSW pour la recherche de voisins approximatifs. Adapté aux gros indexes où la recherche exacte est trop lente.
+
+```python
+from whoosh_modern.vector.hnswlib_provider import HnswlibProvider
+
+provider = HnswlibProvider(dimension=384, space="cosine")
+provider.add([("doc1", [0.1, 0.2, ...]), ("doc2", [0.4, 0.5, ...])])
+hits = provider.search(query_embedding, k=10)
+```
+
+## Champ vectoriel
+
+Utilisez `VECTOR` depuis `whoosh_modern.fields` pour déclarer un champ vecteur dense :
+
+```python
+from whoosh.fields import Schema, TEXT, ID
+from whoosh_modern.fields import VECTOR
+
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    content=TEXT,
+    embedding=VECTOR(dimension=384),
+)
+```
 
 ## Indexation avec vecteurs
 
+### Générer des embeddings
+
 ```python
-from sentence_transformers import SentenceTransformer
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
-embeddings = model.encode([
-    "Premier document",
-    "Deuxième document"
-])
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+texts = ["Premier document", "Deuxième document"]
+embeddings = provider.embed_batch(texts)
+```
 
+### Écrire des documents
+
+```python
 with ix.writer() as writer:
-    writer.add_document(
-        title="Doc 1",
-        content="Python est génial",
-        embedding=embeddings[0].tolist()
-    )
+    for doc_id, text, embedding in zip(doc_ids, texts, embeddings):
+        writer.add_document(
+            id=doc_id,
+            content=text,
+            embedding=embedding,
+        )
     writer.commit()
 ```
 
-## Recherche hybride (mots-clés + vecteur)
+## Recherche
+
+### Recherche vectorielle pure
 
 ```python
+from whoosh_modern.vector.numpy_provider import NumpyProvider
+
+provider = NumpyProvider()
+# Peupler le provider avec les vecteurs indexés...
+query_embedding = provider.embed("requête de recherche")
+hits = provider.search(query_embedding, k=10)
+```
+
+### Recherche hybride (BM25 + Vector)
+
+```python
+from whoosh_modern.searching.hybrid import HybridSearcher
+
 with ix.searcher() as searcher:
-    # Composante sémantique
-    query_embedding = model.encode(["Tutoriel Python"])[0]
-    vector_results = searcher.vector_search(
-        "embedding", query_embedding, limit=20
+    hs = HybridSearcher(searcher, vector_provider, id_field="id")
+    results = hs.search(
+        "programmation Python",
+        query_vector=query_embedding,
+        method="weighted",
+        alpha=0.5,
     )
-
-    # Composante mots-clés
-    keyword_query = QueryParser("content", schema).parse("Python")
-    keyword_results = searcher.search(keyword_query, limit=20)
-
-    # Combiner (ex: fusion RRF)
-    final_results = fuse_results(vector_results, keyword_results)
+    for r in results:
+        print(r.doc_id, r.score, r.bm25_score, r.vector_score)
 ```
 
-## Bonnes pratiques
+## Performance
 
-1. **Normalisez les embeddings**: Utilisez la similarité cosinus avec des vecteurs normalisés
-2. **Choisissez le provider wisely**: Numpy pour &lt;100k vecteurs, HNSW/Faiss pour plus
-3. **Recherche hybride**: Combinez vecteur et mots-clés pour de meilleurs résultats
-4. **Cachez les embeddings**: Pré-calculez et stockez pour éviter de recalculer
-5. **Indexation par lots**: Indexez les vecteurs en lots pour l'efficacité
+Pour des performances de recherche vectorielle optimales :
 
-## Intégration des Fournisseurs de Vecteurs dans le Pipeline
+- **NumpyProvider** : utilisez-le pour des indexes jusqu'à ~100k vecteurs. La multiplication matricielle vectorisée garantit un temps de recherche en O(N).
+- **HnswlibProvider** : utilisez-le pour les plus gros indexes. HNSW fournit une recherche approximative en O(log N).
+- **Embeddings par batch** : utilisez `embed_batch()` au lieu de `embed()` par document pour +33% de throughput.
+- **ProviderPool** : utilisez plusieurs instances de provider pour un embedding parallèle sur CPU multi-coeurs.
 
-Le système de recherche vectorielle s'intègre via le registre de plugins de Whoosh
-et le format de segment. Le provider est stocké dans le segment d'index et résolu
-au moment de la recherche.
+## Voir aussi
 
-### Architecture
-
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  Enregistrement (démarrage)                                         │
-│                                                                     │
-│  VectorPlugin.register(PluginManager)                              │
-│    └── VectorRegistry.register("numpy", NumpyProvider(), owner)     │
-│                                                                     │
-│  Le provider est maintenant disponible pour tout champ VECTOR      │
-│  qui spécifie provider="numpy"                                     │
-└─────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────┐
-│  Indexation                                                          │
-│                                                                     │
-│  VECTOR(dimensions=384, provider="numpy")                          │
-│       │                                                             │
-│       ▼                                                             │
-│  PerDocWriter.add_vector_items(fieldname, field, items)            │
-│       │                                                             │
-│       ▼                                                             │
-│  Le fichier segment contient :                                     │
-│    - octets vectoriels (bruts)                                     │
-│    - nom du provider ("numpy")                                     │
-│    - métrique ("cosine")                                           │
-│       │                                                             │
-│       ▼                                                             │
-│  writer.commit() → segments écrits sur le disque                  │
-└─────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────┐
-│  Recherche                                                         │
-│                                                                     │
-│  searcher.vector_search("embedding", query_vec, k=10)              │
-│       │                                                             │
-│       ▼                                                             │
-│  Whoosh core lit le segment                                        │
-│    └── récupère le nom du provider ("numpy")                        │
-│       │                                                             │
-│       ▼                                                             │
-│  VectorRegistry.get("numpy")                                        │
-│       │                                                             │
-│       ▼                                                             │
-│  NumpyProvider.search(query_vec, k, filter_ids)                    │
-│       │                                                             │
-│       ▼                                                             │
-│  VectorHit[] trié par similarité cosinus                           │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### Chaîne de résolution du provider
-
-Quand `searcher.vector_search()` est appelé, Whoosh core :
-
-1. Lit la configuration du champ `VECTOR` depuis le schéma
-2. Ouvre le fichier segment contenant les données vectorielles
-3. Extrait le nom du provider stocké dans le segment (ex: `"numpy"`)
-4. Recherche le provider dans `VectorRegistry`
-5. Appelle `provider.search(query_vector, k, filter_ids)`
-6. Retourne `list[VectorHit]`
-
-Si le provider n'est pas enregistré, la recherche échoue avec un manquant de registre.
-C'est pourquoi `VectorPlugin().register(manager)` (ou l'enregistrement manuel) est
-requise au démarrage.
-
-## Voir Aussi
-
-- [Embeddings](/modern/embeddings) — Provider d'embeddings ONNX Runtime compatible CPU
-- [Intégration des Providers](provider-integration.md) — Guide complet du pipeline pour tous les providers
-- [Guide Middleware](middleware-pipeline.md) — Pipeline hooks et adaptateurs de providers
+- [Embeddings](/modern/embeddings) — Providers d'embeddings et configuration
+- [Recherche hybride](/modern/search-application) — Fusion BM25 + vectorielle
+- [Stockage](/modern/storage-providers) — Persistance des indexes vectoriels
+- [Moteur de configuration](/modern/configuration-engine) — Interface de configuration typée
 
 
 # Code Examples

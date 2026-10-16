@@ -22,5 +22,5 @@ def test_fastapi_websocket_autocomplete():
 
     app = create_app(None)  # type: ignore[arg-type]
 
-    routes = [route.path for route in app.routes]
+    routes = [route.path for route in app.routes]  # type: ignore[attr-defined]
     assert "/api/v1/autocomplete/ws" in routes

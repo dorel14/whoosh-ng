@@ -26,11 +26,11 @@ class AsyncOrderMiddleware(Middleware):
         self.log = log
         self.tag = tag
 
-    async def before_search(self, context: MiddlewareContext) -> MiddlewareContext:
+    async def before_search(self, context: MiddlewareContext) -> MiddlewareContext:  # type: ignore[override]
         self.log.append(f"async-before-{self.tag}")
         return context
 
-    async def after_search(self, context: MiddlewareContext) -> MiddlewareContext:
+    async def after_search(self, context: MiddlewareContext) -> MiddlewareContext:  # type: ignore[override]
         self.log.append(f"async-after-{self.tag}")
         return context
 

@@ -394,7 +394,7 @@ def test_requires():
 
 
 def test_highlight_daterange():
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     schema = fields.Schema(
         id=fields.ID(unique=True, stored=True),
@@ -422,14 +422,15 @@ def test_highlight_daterange():
     s = ix.searcher()
     r = s.search(Term("content", "train"), terms=True)
     assert len(r) == 1
-    assert r[0]["id"] == "2"
+    assert r[0]["id"] == "2"  # type: ignore[call-arg]
     assert (
-        r[0].highlights("content") == 'for a life changing <b class="match term0">train</b> journey'
+        r[0].highlights("content")  # type: ignore[attr-defined]
+        == 'for a life changing <b class="match term0">train</b> journey'
     )
 
     r = s.search(DateRange("released", datetime(2007, 1, 1, tzinfo=UTC), None))
     assert len(r) == 1
-    assert r[0].highlights("content") == ""
+    assert r[0].highlights("content") == ""  # type: ignore[attr-defined]
 
 
 def test_patterns():
@@ -457,7 +458,9 @@ def test_patterns():
         for word in domain:
             w.add_document(word=word)
 
-    with ix.reader() as r:
+    r = ix.reader()
+    assert r is not None
+    with r as r:
         assert list(r.field_terms("word")) == domain
 
         assert list(r.expand_prefix("word", "al")) == [b"alembic", b"all"]
@@ -606,13 +609,15 @@ def test_sequence():
         w.add_document(id=3, text="delta echo charlie")
         w.add_document(id=4, text="echo delta")
 
-    with ix.searcher() as s:
+    s = ix.searcher()
+    assert s is not None
+    with s as s:
         seq = query.Sequence([query.Term("text", "echo"), query.Term("text", "alfa")])
         q = query.And([query.Term("text", "bravo"), seq])
 
         r = s.search(q, limit=4)
         assert len(r) == 1
-        assert r[0]["id"] == 1
+        assert r[0]["id"] == 1  # type: ignore[call-arg]
 
 
 def test_andmaybe():
@@ -828,7 +833,7 @@ def test_valid_fieldname_start_end_boost_constantscore_negative():
 def test_invalid_boost():
     from whoosh.query.ranges import NumericRange
 
-    nr = NumericRange("number", 10, 5925, boost="invalid")
+    nr = NumericRange("number", 10, 5925, boost="invalid")  # type: ignore[arg-type]
     assert nr.boost == "invalid"
 
 

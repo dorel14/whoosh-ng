@@ -127,7 +127,7 @@ class _FieldStepContext:
         self._field_name = field_name
 
     def __enter__(self) -> _FieldStepContext:
-        self._profiler._start_field(self._field_name)
+        self._profiler._start_field(self._field_name)  # pyright: ignore[reportPrivateUsage]
         return self
 
     def __exit__(
@@ -136,4 +136,4 @@ class _FieldStepContext:
         exc_val: BaseException | None,
         exc_tb: Any,
     ) -> None:
-        self._profiler._stop_field()
+        self._profiler._stop_field()  # pyright: ignore[reportPrivateUsage]

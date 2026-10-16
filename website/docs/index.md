@@ -122,9 +122,9 @@ Whoosh-NG combines classic Whoosh's pure-Python full-text search with modern fea
 - **Project Repository**: [GitHub - whoosh-ng](https://github.com/dorel14/whoosh-ng)
 - **PyPI Package**: [whoosh-ng](https://pypi.org/project/whoosh-ng/)
 - **Issue Tracker**: [GitHub Issues](https://github.com/dorel14/whoosh-ng/issues)
-- **LLM-Friendly Docs**:
-  - [`llms.txt`](/llms.txt) — Index of all documentation pages
-  - [`llms-full.txt`](/llms-full.txt) — Complete API documentation concatenated
+  - **LLM-Friendly Docs**:
+    - [`llms.txt`](https://dorel14.github.io/whoosh-ng/llms.txt) — Index of all documentation pages
+    - [`llms-full.txt`](https://dorel14.github.io/whoosh-ng/llms-full.txt) — Complete API documentation concatenated
 
 ## Contributing
 

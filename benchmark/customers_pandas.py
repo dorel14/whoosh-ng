@@ -8,7 +8,6 @@ import re
 import pandas as pd
 
 from benchmark import WhooshLikeSpec
-from whoosh import fields
 from whoosh_modern.data_sources.pandas_ds import PandasSource
 
 

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from whoosh.qparser.dateparse import English, adatetime, relative_days, relativedelta, timespan
 
@@ -219,9 +219,9 @@ def test_reldate(p=english.plusdate):
 def test_bundle_subs(p=english.bundle):
     test_time(p)
     test_dmy(p)
-    test_plustime(p)
-    test_dayname(p)
-    test_reldate(p)
+    test_plustime(p)  # type: ignore[reportArgumentType]
+    test_dayname(p)  # type: ignore[reportArgumentType]
+    test_reldate(p)  # type: ignore[reportArgumentType]
 
 
 def test_bundle(p=english.bundle):
@@ -327,7 +327,7 @@ def test_all():
     p = english.all
     test_bundle_subs(p)
     test_bundle(p)
-    test_ranges(p)
+    test_ranges(p)  # type: ignore[reportArgumentType]
 
 
 def test_final_dates(p=english):

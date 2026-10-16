@@ -21,7 +21,7 @@ class TestRegexTokenizerUnicode:
     @pytest.fixture
     def custom_tokenizer(self):
         """Custom RegexTokenizer with explicit pattern."""
-        return RegexTokenizer(expression=r"\w+(\.?\w+)*")
+        return RegexTokenizer(expression=r"\w+(\.?\w+)*")  # type: ignore[arg-type]
 
     def test_basic_ascii(self, tokenizer):
         """Test basic ASCII tokenization."""
@@ -36,7 +36,7 @@ class TestRegexTokenizerUnicode:
 
     def test_custom_pattern_does_not_use_global(self):
         """Test that custom pattern creates its own compiled regex."""
-        tokenizer = RegexTokenizer(expression=r"\w+")
+        tokenizer = RegexTokenizer(expression=r"\w+")  # type: ignore[arg-type]
         assert tokenizer._uses_global is False
 
     def test_unicode_ascii(self, tokenizer):
@@ -130,7 +130,7 @@ class TestRegexTokenizerUnicode:
 
     def test_gaps_mode_unicode(self):
         """Test gaps mode with Unicode."""
-        tokenizer = RegexTokenizer(expression=r"\s+", gaps=True)
+        tokenizer = RegexTokenizer(expression=r"\s+", gaps=True)  # type: ignore[arg-type]
         tokens = [t.copy() for t in tokenizer("hello world café")]
         assert [t.text for t in tokens] == ["hello", "world", "café"]
 
@@ -146,7 +146,7 @@ class TestRegexTokenizerUnicode:
         from whoosh.analysis.tokenizers import RegexTokenizer
 
         stoplist = ["le", "la", "les"]
-        tokenizer = RegexTokenizer() | StopFilter(stoplist=stoplist)
+        tokenizer = RegexTokenizer() | StopFilter(stoplist=stoplist)  # type: ignore[arg-type]
         tokens = [t.copy() for t in tokenizer("le café la résumé")]
         assert "le" not in [t.text for t in tokens]
         assert "la" not in [t.text for t in tokens]

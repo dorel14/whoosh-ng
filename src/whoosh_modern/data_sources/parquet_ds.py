@@ -127,7 +127,7 @@ class ParquetSource:
             pass
 
         try:
-            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports]
+            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports, reportMissingTypeStubs]
 
             if sample:
                 return pq.read_table(self.path).slice(0, self.sample_size).to_pandas()
@@ -151,7 +151,7 @@ class ParquetSource:
             Document dictionaries streamed from the Parquet file.
         """
         try:
-            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports]
+            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports, reportMissingTypeStubs]
         except ImportError:
             df = self._read_parquet()
             for _, row in df.iterrows():
@@ -179,7 +179,7 @@ class ParquetSource:
             return self._compiled_mapper
 
         try:
-            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports]
+            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports, reportMissingTypeStubs]
 
             pf = pq.ParquetFile(self.path)
             batch = next(pf.iter_batches(batch_size=1))
@@ -224,7 +224,7 @@ class ParquetSource:
         from whoosh_modern.models.base import TypeMapper
 
         try:
-            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports]
+            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports, reportMissingTypeStubs]
 
             schema = pq.read_schema(self.path)
             columns: dict[str, Any] = {
@@ -289,7 +289,7 @@ class ParquetSource:
             )
 
         try:
-            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports]
+            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports, reportMissingTypeStubs]
 
             pf = pq.ParquetFile(self.path)
             for pb in pf.iter_batches(batch_size=batch_size):
@@ -340,7 +340,7 @@ class ParquetSource:
             )
 
         try:
-            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports]
+            import pyarrow.parquet as pq  # pyright: ignore[reportMissingImports, reportMissingTypeStubs]
 
             pf = pq.ParquetFile(self.path)
             return int(pf.metadata.num_rows)

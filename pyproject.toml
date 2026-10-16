@@ -54,6 +54,7 @@ faiss = [
 ]
 embeddings = [
   "fastembed",
+  "libembedding-ng>=1.5",
 ]
 embeddings-sentence-transformers = [
   "sentence-transformers",
@@ -65,6 +66,9 @@ embeddings-onnx = [
 ]
 fastembed = [
   "fastembed",
+]
+libembedding = [
+  "libembedding-ng>=1.5",
 ]
 async = []
 sqlite = []
@@ -103,7 +107,6 @@ metrics = [
 ]
 dev = [
   "ruff>=0.11",
-  "mypy>=1.15",
   "pyright>=1.1",
   "pytest>=9",
   "pytest-cov>=6",
@@ -362,191 +365,6 @@ known-first-party = ["whoosh", "whoosh_modern", "whoosh_fastapi", "whoosh_admin"
 indent-style = "space"
 line-ending = "lf"
 quote-style = "double"
-
-[tool.mypy]
-python_version = "3.12"
-mypy_path = "src"
-show_column_numbers = true
-show_error_context = true
-pretty = true
-error_summary = true
-follow_imports = "normal"
-warn_unused_configs = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-strict_optional = true
-no_implicit_optional = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-warn_return_any = true
-disable_error_code = ["attr-defined"]
-cache_dir = ".mypy_cache"
-exclude = [
-    "tests/",
-    "benchmark/",
-]
-
-[tool.pyright]
-reportMissingImports = "warning"
-reportArgumentType = "warning"
-reportAttributeAccessIssue = "warning"
-reportAssignmentType = "warning"
-
-[[tool.mypy.overrides]]
-module = [
-  "whoosh.support.pyparsing",
-  "whoosh.lang.wordnet",
-]
-disable_error_code = ["assignment", "attr-defined", "no-redef", "union-attr"]
-
-[[tool.mypy.overrides]]
-module = "requests"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "hnswlib"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "boto3"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "rapidfuzz"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "langdetect"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = [
-  "pydantic",
-  "msgspec",
-  "sqlalchemy",
-  "sqlalchemy.orm",
-  "sqlmodel",
-  "fastapi",
-  "fastapi.responses",
-  "numpy",
-  "pandas",
-  "polars",
-  "pyarrow",
-  "pyarrow.parquet",
-  "tortoise",
-  "Stemmer",
-  "lmdb",
-  "sentence_transformers",
-  "tokenizers",
-  "onnxruntime",
-  "huggingface_hub",
-  "fastembed",
-  "yaml",
-]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = [
-  "whoosh.codec.whoosh2",
-  "whoosh.codec.whoosh3",
-  "whoosh.lang.dmetaphone",
-  "whoosh.lang.lovins",
-  "whoosh.automata.fst",
-  "whoosh.query.ranges",
-  "whoosh.query.spans",
-  "whoosh.filedb.filereading",
-  "whoosh.filedb.filepostings",
-  "whoosh.filedb.filewriting",
-  "whoosh.filedb.fileindex",
-  "whoosh.codec.memory",
-  "whoosh.writing.segment_writer",
-  "whoosh.matching.mcore",
-  "whoosh.util.numlists",
-  "whoosh.util.times",
-  "whoosh.query.terms",
-  "whoosh.qparser.syntax",
-  "whoosh.fields.numeric",
-  "whoosh.util.filelock",
-  "whoosh.searching.searcher",
-  "whoosh.support.bitvector",
-  "whoosh.sorting.facet",
-  "whoosh.backends.sqlite",
-  "whoosh.filedb.gae",
-  "whoosh.providers.hnsw",
-  "whoosh.support.base85",
-  "whoosh.support.charset",
-  "whoosh.multiproc",
-  "whoosh.formats",
-  "whoosh.columns",
-  "whoosh.qparser.plugins.bool_plugins",
-  "whoosh.reading.index_reader",
-  "whoosh.registry",
-  "whoosh.filedb.pools",
-  "whoosh.matching.binary",
-  "whoosh.util.cache",
-  "whoosh.analysis.intraword",
-  "whoosh.analysis.morph",
-  "whoosh.automata.fsa",
-  "whoosh.backends.file",
-  "whoosh.backends.lmdb",
-  "whoosh.classify",
-  "whoosh.collectors.base",
-  "whoosh.collectors.filter",
-  "whoosh.externalsort",
-  "whoosh.fields.base",
-  "whoosh.fields.schema",
-  "whoosh.fields.text",
-  "whoosh.fields.wrappers",
-  "whoosh.filedb.compound",
-  "whoosh.filedb.filestore",
-  "whoosh.filedb.filetables",
-  "whoosh.filedb.misc",
-  "whoosh.filedb.structfile",
-  "whoosh.highlight.formatters",
-  "whoosh.highlight.fragmenters",
-  "whoosh.highlight.highlighters",
-  "whoosh.idsets",
-  "whoosh.index",
-  "whoosh.lang.phonetic",
-  "whoosh.lang.porter2",
-  "whoosh.lang.wordnet",
-  "whoosh.legacy",
-  "whoosh.matching.wrappers",
-  "whoosh.middleware.chain",
-  "whoosh.middleware.wrappers",
-  "whoosh.plugins.manager",
-  "whoosh.qparser.dateparse",
-  "whoosh.query.autocomplete",
-  "whoosh.query.compound",
-  "whoosh.query.nested",
-  "whoosh.query.positional",
-  "whoosh.query.qcolumns",
-  "whoosh.reading.segment_reader",
-  "whoosh.reading.term",
-  "whoosh.scoring",
-  "whoosh.spelling",
-  "whoosh.support.bench",
-  "whoosh.support.unicode",
-  "whoosh.util.testing",
-  "whoosh.util.versions",
-  "whoosh.utils.async_utils",
-  "whoosh.writing.async_writer",
-  "whoosh.writing.buffered_writer",
-  "whoosh.writing.writer",
-  "whoosh_modern.vector.numpy_provider",
-  "whoosh_admin",
-  "whoosh_fastapi",
-  "whoosh_modern.data_sources",
-  "whoosh_modern.facets",
-  "whoosh_modern.validation",
-  "whoosh_modern.models",
-  "whoosh_modern.profiling.memory",
-  "whoosh_modern.profiling.benchmarks.regex_tokenizer",
-  "whoosh_modern.analysis.stemmer_providers",
-  "whoosh_modern.profiling.benchmark",
-  "whoosh.analysis.tokenizers",
-]
-ignore_errors = true
 
 [tool.pytest.ini_options]
 addopts = [

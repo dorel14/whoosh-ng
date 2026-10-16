@@ -49,9 +49,9 @@ def run_p4_1_2(schema: Schema, datasets: dict[str, list[str]]) -> dict[str, Any]
             total_tokens += len(items)
 
         # Aggregate results
-        for step, t in profiler._timings.items():
+        for step, t in profiler._timings.items():  # pyright: ignore[reportPrivateUsage]
             step_timings[step] += t
-        for step, c in profiler._counts.items():
+        for step, c in profiler._counts.items():  # pyright: ignore[reportPrivateUsage]
             step_counts[step] += c
 
         total_time = step_timings.get("total", 0.0)
@@ -119,7 +119,7 @@ def run_p4_3(schema: Schema, datasets: dict[str, list[str]]) -> dict[str, Any]:
         analyzer_results: dict[str, dict[str, Any]] = {}
 
         for dataset_name, texts in datasets.items():
-            profiler._reset()
+            profiler._reset()  # pyright: ignore[reportPrivateUsage]
             for text in texts:
                 profiler.profile_text(text)
             result = profiler.to_dict()

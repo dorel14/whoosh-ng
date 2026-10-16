@@ -26,7 +26,7 @@ def _create_test_source() -> SQLSource:
     import sqlite3
     import tempfile
 
-    fd, path = tempfile.mkstemp(suffix=".db")
+    _fd, path = tempfile.mkstemp(suffix=".db")
     conn = sqlite3.connect(path)
     cursor = conn.cursor()
     cursor.execute(
@@ -113,7 +113,7 @@ class BenchmarkValidationFramework:
         import sqlite3
         import tempfile
 
-        fd, path = tempfile.mkstemp(suffix=".db")
+        _fd, path = tempfile.mkstemp(suffix=".db")
         conn = sqlite3.connect(path)
         cursor = conn.cursor()
         cursor.execute(
@@ -164,7 +164,7 @@ class BenchmarkValidationEdgeCases:
         import sqlite3
         import tempfile
 
-        fd, path = tempfile.mkstemp(suffix=".db")
+        _fd, path = tempfile.mkstemp(suffix=".db")
         conn = sqlite3.connect(path)
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE empty (id INTEGER PRIMARY KEY)")

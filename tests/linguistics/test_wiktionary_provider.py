@@ -6,8 +6,6 @@ import json
 import os
 import tempfile
 
-import pytest
-
 from whoosh_modern.linguistics.synonyms.wiktionary_provider import (
     WiktionarySynonymProvider,
 )

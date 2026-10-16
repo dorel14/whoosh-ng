@@ -2,7 +2,7 @@
 
 import pytest
 
-from whoosh.fields import BOOLEAN, DATETIME, ID, KEYWORD, NUMERIC, TEXT, Schema
+from whoosh.fields import BOOLEAN, ID, KEYWORD, NUMERIC, TEXT, Schema
 from whoosh_modern.exceptions import SchemaDiscoveryError
 from whoosh_modern.schema_discovery import SchemaDiscovery
 
@@ -132,10 +132,10 @@ class TestSchemaDiscoveryFromSample:
 class TestSchemaDiscoveryDetectIdField:
     def test_detects_id_field(self):
         schema = Schema(id=ID(stored=True), title=TEXT())
-        result = SchemaDiscovery.detect_id_field(schema)
+        result = SchemaDiscovery.detect_id_field(schema)  # type: ignore[arg-type]
         assert result == "id"
 
     def test_no_id_field_returns_none(self):
         schema = Schema(title=TEXT(), count=NUMERIC())
-        result = SchemaDiscovery.detect_id_field(schema)
+        result = SchemaDiscovery.detect_id_field(schema)  # type: ignore[arg-type]
         assert result is None

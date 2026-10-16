@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from whoosh_modern.embeddings.libembedding_provider import LibEmbeddingProvider
 from whoosh_modern.embeddings.protocol import EmbeddingProvider
 from whoosh_modern.embeddings.registry import EmbeddingModelRegistry, get_default_registry
 from whoosh_modern.embeddings.sentence_transformers_provider import (
@@ -26,11 +27,16 @@ else:
         from whoosh_modern.embeddings.model_manager import EmbeddingModelManager
     except ImportError:
         EmbeddingModelManager = None
+    try:
+        from whoosh_modern.embeddings.libembedding_provider import LibEmbeddingProvider
+    except ImportError:
+        LibEmbeddingProvider = None
 
 __all__ = [
     "EmbeddingProvider",
     "SentenceTransformersProvider",
     "ONNXEmbeddingProvider",
+    "LibEmbeddingProvider",
     "EmbeddingModelRegistry",
     "EmbeddingModelManager",
     "get_default_registry",

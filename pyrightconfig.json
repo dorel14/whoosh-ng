@@ -144,5 +144,10 @@
   "reportAttributeAccessIssue": "warning",
   "reportAssignmentType": "warning",
   "reportUnusedImport": "error",
-  "reportUnusedVariable": "error"
+  "reportUnusedVariable": "error",
+  "reportMissingTypeStubs": true,
+  "reportPrivateUsage": true,
+  "reportPropertyTypeMismatch": true,
+  "reportGeneralTypeIssues": true,
+  "reportIncompatibleMethodOverride": true
 }

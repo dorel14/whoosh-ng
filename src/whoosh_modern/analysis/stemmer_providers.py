@@ -187,7 +187,7 @@ class PyStemmerProvider:
         Returns:
             The stemmed word.
         """
-        return cast(str, self._filter._stem(word))
+        return cast(str, self._filter._stem(word))  # pyright: ignore[reportPrivateUsage]
 
     @property
     def name(self) -> str:

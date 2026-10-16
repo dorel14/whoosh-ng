@@ -251,6 +251,7 @@ class TestSynonymExpansionMiddleware:
         ctx = MiddlewareContext(operation="index")
         ctx.document = {"title": "car"}
         ctx = middleware.before_index(ctx)
+        assert ctx.document is not None
         assert "automobile" in ctx.document["title"]
 
     def test_no_expansion_when_none(self):

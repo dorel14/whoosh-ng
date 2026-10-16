@@ -1,6 +1,4 @@
-import pytest
-
-from whoosh import fields, query
+from whoosh import fields
 from whoosh.filedb.filestore import RamStorage
 from whoosh.query.autocomplete import AutocompleteQuery, suggestions
 

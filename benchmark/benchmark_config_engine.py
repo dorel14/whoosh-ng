@@ -21,10 +21,8 @@ import pytest
 
 pytest.importorskip("pytest_benchmark")
 
-from whoosh_modern.config import ConfigEngine
 from whoosh_modern.config.engine import ConfigEngine as DirectConfigEngine
 from whoosh_modern.config.loader import load_yaml
-from whoosh_modern.config.models import WhooshNGConfig
 
 BENCHMARK_DIR = pytest.importorskip("pathlib").Path(__file__).parent
 YAML_PATH = BENCHMARK_DIR / "benchmark_data" / "whoosh-ng.yml"
@@ -116,6 +114,6 @@ class BenchmarkConfigEngine:
                 encoding="utf-8",
             )
             storage = FileStorage("./index")
-            app = SearchApplication(source=source, storage=storage)
+            _app = SearchApplication(source=source, storage=storage)
 
         benchmark(_manual_build)

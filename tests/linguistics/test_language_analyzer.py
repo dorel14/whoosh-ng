@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 
 from whoosh_modern.linguistics.analyzers import MultiLanguageAnalyzer
-from whoosh_modern.linguistics.stemmers import FrenchAnalyzer
 
 
 class TestMultiLanguageAnalyzer:

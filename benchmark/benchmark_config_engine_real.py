@@ -11,13 +11,10 @@ Run with::
 
 from __future__ import annotations
 
-import os
-
 import pytest
 
 pytest.importorskip("pytest_benchmark")
 
-from whoosh_modern.config import ConfigEngine
 from whoosh_modern.config.engine import ConfigEngine as DirectConfigEngine
 from whoosh_modern.config.loader import load_yaml
 
@@ -127,6 +124,6 @@ class BenchmarkConfigEngineReal:
                 id_field="Customer Id",
             )
             storage = FileStorage("./benchmark_indexes/customers_manual")
-            app = SearchApplication(source=source, storage=storage)
+            _app = SearchApplication(source=source, storage=storage)
 
         benchmark(_manual_build)

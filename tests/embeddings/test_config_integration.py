@@ -16,6 +16,46 @@ from whoosh_modern.config.engines.embedding import EmbeddingEngine
 from whoosh_modern.config.models import EmbeddingConfig, WhooshNGConfig
 
 
+def test_embedding_engine_libembedding() -> None:
+    """Test EmbeddingEngine builds a LibEmbeddingProvider from config."""
+    config = WhooshNGConfig(
+        embedding=EmbeddingConfig(
+            provider="libembedding",
+            model="fast",
+            pooling="mean",
+            batch_size=16,
+            cache=True,
+        )
+    )
+    with patch("whoosh_modern.embeddings.libembedding_provider.LibEmbeddingProvider") as mock:
+        mock.return_value = MagicMock()
+        result = EmbeddingEngine(config).build()
+        assert result is not None
+        mock.assert_called_once_with(
+            model_name="fast",
+            pooling="mean",
+            batch_size=16,
+            cache_size=256,
+        )
+
+
+def test_embedding_engine_libembedding_defaults() -> None:
+    """Test EmbeddingEngine builds a LibEmbeddingProvider with defaults when
+    only provider is specified.
+    """
+    config = WhooshNGConfig(embedding=EmbeddingConfig(provider="libembedding"))
+    with patch("whoosh_modern.embeddings.libembedding_provider.LibEmbeddingProvider") as mock:
+        mock.return_value = MagicMock()
+        result = EmbeddingEngine(config).build()
+        assert result is not None
+        mock.assert_called_once_with(
+            model_name="balanced",
+            pooling="mean",
+            batch_size=32,
+            cache_size=256,
+        )
+
+
 def test_embedding_engine_fastembed() -> None:
     """Test EmbeddingEngine builds a FastEmbedProvider from config."""
     config = WhooshNGConfig(
@@ -117,7 +157,7 @@ def test_embedding_engine_onnx_with_model_and_sha256(tmp_path: Path) -> None:
 
     with (
         patch("whoosh_modern.embeddings.model_manager.EmbeddingModelManager") as mock_mgr_cls,
-        patch("whoosh_modern.embeddings.onnx_provider.ONNXEmbeddingProvider") as mock_onnx,
+        patch("whoosh_modern.embeddings.onnx_provider.ONNXEmbeddingProvider") as _mock_onnx,
     ):
         mock_mgr = mock_mgr_cls.return_value
         mock_mgr.download.return_value = model_dir

@@ -1,7 +1,5 @@
 """Tests for PydanticSource."""
 
-from typing import Any
-
 import pytest
 
 pydantic = pytest.importorskip("pydantic")

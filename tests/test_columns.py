@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from whoosh import columns, fields, query
+from whoosh import columns, fields
 from whoosh.codec.whoosh3 import W3Codec
 from whoosh.filedb import compound
 from whoosh.filedb.filestore import RamStorage
@@ -213,7 +213,9 @@ def test_multivalue():
         w.add_document(s=["alfa", "foxtrot", "charlie"], n=[100, 200, 300])
         w.add_document(s=["juliet", "bravo", "india"], n=[10, 20, 30])
 
-    with ix.reader() as r:
+    reader = ix.reader()
+    assert reader is not None
+    with reader as r:
         scr = r.column_reader("s")
         assert list(scr) == ["alfa", "juliet"]
 
@@ -230,17 +232,19 @@ def test_column_field():
             w.add_document(a="bravo charlie", b=b"delta echo")
             w.add_document(a="charlie delta", b=b"echo foxtrot")
 
-        with ix.reader() as r:
-            assert r.has_column("a")
-            assert r.has_column("b")
+        reader = ix.reader()
+    assert reader is not None
+    with reader as r:
+        assert r.has_column("a")
+        assert r.has_column("b")
 
-            cra = r.column_reader("a")
-            assert cra[0] == "alfa bravo"
-            assert type(cra[0]) == str
+        cra = r.column_reader("a")
+        assert cra[0] == "alfa bravo"
+        assert type(cra[0]) == str
 
-            crb = r.column_reader("b")
-            assert crb[0] == cd
-            assert type(crb[0]) == bytes
+        crb = r.column_reader("b")
+        assert crb[0] == cd
+        assert type(crb[0]) == bytes
 
 
 def test_column_query():
@@ -321,33 +325,37 @@ def test_varbytes_offsets():
 
     # Without offsets:
     col = columns.VarBytesColumn(allow_offsets=False)
-    schema = fields.Schema(name=fields.ID(sortable=col))
+    schema = fields.Schema(name=fields.ID(sortable=col))  # type: ignore[reportArgumentType]
     with TempIndex(schema) as ix:
         with ix.writer() as w:
             for i in range(5000):
                 w.add_document(name=values[i % vlen])
 
-        with ix.reader() as r:
-            cr = r.column_reader("name")
-            assert isinstance(cr, columns.TranslatingColumnReader)
-            assert not cr.raw_column().had_stored_offsets
-            for i in (10, 100, 1000, 3000):
-                assert cr[i] == values[i % vlen]
+        reader = ix.reader()
+    assert reader is not None
+    with reader as r:
+        cr = r.column_reader("name")
+        assert isinstance(cr, columns.TranslatingColumnReader)
+        assert not cr.raw_column().had_stored_offsets
+        for i in (10, 100, 1000, 3000):
+            assert cr[i] == values[i % vlen]
 
     # With offsets
     col = columns.VarBytesColumn(allow_offsets=True, write_offsets_cutoff=4096)
-    schema = fields.Schema(name=fields.ID(sortable=col))
+    schema = fields.Schema(name=fields.ID(sortable=col))  # type: ignore[reportArgumentType]
     with TempIndex(schema) as ix:
         with ix.writer() as w:
             for i in range(5000):
                 w.add_document(name=values[i % vlen])
 
-        with ix.reader() as r:
-            cr = r.column_reader("name")
-            assert isinstance(cr, columns.TranslatingColumnReader)
-            assert cr.raw_column().had_stored_offsets
-            for i in (10, 100, 1000, 3000):
-                assert cr[i] == values[i % vlen]
+        reader = ix.reader()
+    assert reader is not None
+    with reader as r:
+        cr = r.column_reader("name")
+        assert isinstance(cr, columns.TranslatingColumnReader)
+        assert cr.raw_column().had_stored_offsets
+        for i in (10, 100, 1000, 3000):
+            assert cr[i] == values[i % vlen]
 
 
 # Initializes the 'fieldname' and 'condition' attributes with the values passed as parameters.

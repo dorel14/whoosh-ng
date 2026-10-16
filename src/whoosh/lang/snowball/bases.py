@@ -1,7 +1,7 @@
 # Base classes
 
 
-class _ScandinavianStemmer:
+class ScandinavianStemmer:
     """
     This subclass encapsulates a method for defining the string region R1.
     It is used by the Danish, Norwegian, and Swedish stemmer.
@@ -43,7 +43,7 @@ class _ScandinavianStemmer:
         return r1
 
 
-class _StandardStemmer:
+class StandardStemmer:
     """
     This subclass encapsulates two methods for defining the standard versions
     of the string regions R1, R2, and RV.

@@ -55,7 +55,7 @@ def _make_fake_onnx(tmp_path: Path, dimension: int = 4) -> Path:
         w_initializer = helper.make_tensor(
             "W",
             TensorProto.FLOAT,
-            [None, dimension],
+            [None, dimension],  # type: ignore[arg-type]
             [1.0] * (10 * dimension),
         )
         graph = helper.make_graph(
@@ -280,3 +280,13 @@ def test_onnx_provider_repr(tmp_path: Path) -> None:
     r = repr(provider)
     assert "ONNXEmbeddingProvider" in r
     assert "fake_model.onnx" in r
+
+
+def test_onnx_provider_repr_shows_quantization(tmp_path: Path) -> None:
+    """Test the string representation shows quantization, not pooling."""
+    provider, _, _ = _make_provider(tmp_path, dimension=4)
+    r = repr(provider)
+    assert "ONNXEmbeddingProvider" in r
+    assert "fake_model.onnx" in r
+    assert "quantization=" in r
+    assert "pooling=" not in r

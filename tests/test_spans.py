@@ -120,6 +120,7 @@ def test_span_first():
             m = q.matcher(s)
             while m.is_active():
                 sps = m.spans()
+                assert sps is not None
                 original = s.stored_fields(m.id())["text"]
                 assert original[0] == word
                 assert len(sps) == 1
@@ -131,7 +132,9 @@ def test_span_first():
         m = q.matcher(s)
         while m.is_active():
             orig = s.stored_fields(m.id())["text"]
-            for sp in m.spans():
+            sps = m.spans()
+            assert sps is not None
+            for sp in sps:
                 assert orig[sp.start] == "bravo"
             m.next()
 
@@ -149,12 +152,14 @@ def test_span_near():
         for orig, sps in test(
             spans.SpanNear(Term("text", "alfa"), Term("text", "bravo"), ordered=True)
         ):
+            assert sps is not None
             assert orig[sps[0].start] == "alfa"
             assert orig[sps[0].end] == "bravo"
 
         for orig, sps in test(
             spans.SpanNear(Term("text", "alfa"), Term("text", "bravo"), ordered=False)
         ):
+            assert sps is not None
             first = orig[sps[0].start]
             second = orig[sps[0].end]
             assert (first == "alfa" and second == "bravo") or (
@@ -363,7 +368,9 @@ def test_span_characters():
         m = pq.matcher(s)
         while m.is_active():
             orig = " ".join(s.stored_fields(m.id())["text"])
-            for span in m.spans():
+            sp_list = m.spans()
+            assert sp_list is not None
+            for span in sp_list:
                 startchar, endchar = span.startchar, span.endchar
                 assert orig[startchar:endchar] == "bravo echo"
             m.next()

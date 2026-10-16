@@ -1,6 +1,14 @@
 import type {Config} from '@docusaurus/types';
 import {themes as prismThemes} from 'prism-react-renderer';
 
+// Full base URL for static file links (llms.txt, llms-full.txt).
+// These files live in static/ and are locale-independent, so footer/markdown
+// links must use absolute external URLs to avoid Docusaurus locale-prefixing
+// (which would create broken links like /whoosh-ng/fr/llms.txt).
+// Using href (instead of to) also prevents the broken-link checker from
+// flagging them, since external URLs are not checked.
+const FULL_BASE_URL = 'https://dorel14.github.io/whoosh-ng/';
+
 const config: Config = {
   title: 'Whoosh-NG Documentation',
   tagline: 'Pure-Python full-text indexing and search library, modernized for 2025+',
@@ -86,8 +94,8 @@ const config: Config = {
         {
           title: 'LLM Context',
           items: [
-            { label: 'llms.txt', to: '/llms.txt' },
-            { label: 'llms-full.txt', to: '/llms-full.txt' },
+            { label: 'llms.txt', href: `${FULL_BASE_URL}llms.txt` },
+            { label: 'llms-full.txt', href: `${FULL_BASE_URL}llms-full.txt` },
           ],
         },
         {

@@ -46,12 +46,12 @@ with ix.searcher() as s:
         num = sf["num"]
         r = s.search(query.Term("num", num), limit=None)
         assert len(r) == 1
-        assert r[0]["num"] == num
+        assert r[0]["num"] == num  # type: ignore[call-overload, argument-type]
 
         frac = sf["frac"]
         r = s.search(query.Term("frac", frac), limit=None)
         assert len(r) == 1
-        assert r[0]["frac"] == frac
+        assert r[0]["frac"] == frac  # type: ignore[call-overload, argument-type]
 
         dt = sf["dt"]
         q = query.Term("dt", dt)
@@ -60,6 +60,6 @@ with ix.searcher() as s:
             for hit in r:
                 print(hit.fields())
         assert len(r) == 1, len(r)
-        assert r[0]["dt"] == dt
+        assert r[0]["dt"] == dt  # type: ignore[call-overload, argument-type]
 
 print("Done")

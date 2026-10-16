@@ -15,9 +15,11 @@ def test_vector_registry_exists():
 def test_hnsw_provider_optional():
     """Test that HNSWProvider is available when hnswlib is installed."""
     try:
-        import hnswlib  # noqa: F401
+        import hnswlib as _hnswlib
     except ImportError:
         pytest.skip("hnswlib not installed - HNSWProvider requires optional dependency")
+
+    assert _hnswlib is not None
 
     from whoosh.providers.hnsw import HNSWProvider
 

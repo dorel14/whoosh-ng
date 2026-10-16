@@ -7,7 +7,6 @@ Version: 3.0.0
 from __future__ import annotations
 
 import json
-import sys
 import textwrap
 from pathlib import Path
 from typing import Any
@@ -90,7 +89,7 @@ class TestLoadYaml:
         monkeypatch.setattr(builtins, "__import__", failing_import)
         monkeypatch.delitem(sys.modules, "yaml", raising=False)
         with pytest.raises(ImportError, match="PyYAML is required"):
-            load_yaml(yaml_config)
+            load_yaml(yaml_config)  # type: ignore[reportArgumentType]
 
 
 class TestLoadJson:

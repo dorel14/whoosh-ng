@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import math
-
 import pytest
 
 pytest.importorskip("numpy")
 
-from whoosh_modern.vector import VectorField, VectorHit
+from whoosh_modern.vector import VectorField
 from whoosh_modern.vector.numpy_provider import NumpyProvider
 
 

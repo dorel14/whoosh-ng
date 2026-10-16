@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from whoosh_modern.linguistics.dictionary_stem_override import DictionaryStemOverride
 
 

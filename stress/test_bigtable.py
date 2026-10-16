@@ -5,7 +5,7 @@ from whoosh.util.testing import TempStorage
 
 
 def test_bigtable():
-    with TempStorage("bigtable") as st:
+    with TempStorage("bigtable") as st:  # type: ignore[arg-type]
 
         def randstring(min, max):
             return "".join(chr(randint(1, 255)) for _ in range(randint(min, max)))

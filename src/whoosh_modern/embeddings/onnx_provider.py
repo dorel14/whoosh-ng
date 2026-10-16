@@ -70,6 +70,10 @@ class ONNXEmbeddingProvider:
         dimension: int | None = None,
         enable_prefix: bool = True,
         quantization: str = "fp32",
+        intra_op_num_threads: int = 1,
+        inter_op_num_threads: int = 1,
+        graph_optimization_level: str | None = None,
+        use_cuda: bool = False,
     ) -> None:
         """Initialize the ONNX embedding provider.
 
@@ -81,6 +85,15 @@ class ONNXEmbeddingProvider:
             dimension: Expected embedding dimension (optional).
             enable_prefix: Whether to apply E5-style task prefixes.
             quantization: Quantization level (``"fp32"``, ``"fp16"``, ``"int8"``).
+            intra_op_num_threads: Number of threads for intra-op parallelism
+                in ONNX Runtime. Defaults to 1 for deterministic latency.
+            inter_op_num_threads: Number of threads for inter-op parallelism
+                in ONNX Runtime. Defaults to 1.
+            graph_optimization_level: Optional graph optimization level
+                (``"all"``, ``"none"``). ``None`` keeps the provider default.
+            use_cuda: When ``True``, attempt to use CUDAExecutionProvider
+                for GPU inference. Falls back to CPU if CUDA is not
+                available or the installed ONNX Runtime lacks CUDA support.
         """
         if pooling not in ("mean", "cls", "max"):
             raise ValueError(
@@ -109,14 +122,33 @@ class ONNXEmbeddingProvider:
             ) from exc
 
         try:
-            import onnxruntime as ort
+            import onnxruntime as ort  # pyright: ignore[reportMissingTypeStubs]
 
             sess_options = ort.SessionOptions()
-            sess_options.intra_op_num_threads = 1
-            sess_options.inter_op_num_threads = 1
+            sess_options.intra_op_num_threads = max(1, int(intra_op_num_threads))
+            sess_options.inter_op_num_threads = max(1, int(inter_op_num_threads))
             if quantization == "fp16":
                 sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-            providers = ["CPUExecutionProvider"]
+            if graph_optimization_level == "all":
+                sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+            elif graph_optimization_level == "none":
+                sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
+
+            providers: list[str] = ["CPUExecutionProvider"]
+            if use_cuda:
+                try:
+                    available = ort.get_available_providers()
+                    if "CUDAExecutionProvider" in available:
+                        # Prepend CUDA so it's tried first
+                        providers.insert(0, "CUDAExecutionProvider")
+                        sess_options.graph_optimization_level = (
+                            ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+                        )
+                    else:
+                        logger.warning("CUDAExecutionProvider not available, falling back to CPU")
+                except Exception as exc:
+                    logger.warning("Failed to initialize CUDA provider: %s", exc)
+
             self._session: Any = ort.InferenceSession(
                 str(model_file),
                 sess_options=sess_options,
@@ -147,13 +179,20 @@ class ONNXEmbeddingProvider:
         self._enable_prefix = enable_prefix
         self._model_path = str(model_file)
         self._quantization = quantization
+        self._intra_op_num_threads = int(intra_op_num_threads)
+        self._inter_op_num_threads = int(inter_op_num_threads)
+        self._use_cuda = use_cuda
         self._dimension_inferred = False
 
         logger.debug(
-            "ONNXEmbeddingProvider initialized: model=%s, pooling=%s, normalize=%s",
+            "ONNXEmbeddingProvider initialized: model=%s, pooling=%s, "
+            "normalize=%s, providers=%s, threads=%d/%d",
             model_file.name,
             pooling,
             normalize,
+            providers,
+            self._intra_op_num_threads,
+            self._inter_op_num_threads,
         )
 
     def _infer_dimension(self) -> None:
@@ -301,8 +340,7 @@ class ONNXEmbeddingProvider:
         return (
             f"ONNXEmbeddingProvider("
             f"model_path={self._model_path!r}, "
-            f"pooling={self._pooling!r}, "
-            f"normalize={self._normalize}, "
-            f"quantization={self._quantization!r}"
+            f"quantization={self._quantization!r}, "
+            f"normalize={self._normalize}"
             f")"
         )

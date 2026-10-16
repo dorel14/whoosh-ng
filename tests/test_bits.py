@@ -157,15 +157,15 @@ def test_before_after(c=BitSet):
 
 
 def test_sortedintset():
-    test_bit_basics(SortedIntSet)
-    test_len(SortedIntSet)
-    test_union(SortedIntSet)
-    test_intersection(SortedIntSet)
-    test_difference(SortedIntSet)
-    test_copy(SortedIntSet)
-    test_clear(SortedIntSet)
-    test_isdisjoint(SortedIntSet)
-    test_before_after(SortedIntSet)
+    test_bit_basics(SortedIntSet)  # type: ignore[arg-type]
+    test_len(SortedIntSet)  # type: ignore[arg-type]
+    test_union(SortedIntSet)  # type: ignore[arg-type]
+    test_intersection(SortedIntSet)  # type: ignore[arg-type]
+    test_difference(SortedIntSet)  # type: ignore[arg-type]
+    test_copy(SortedIntSet)  # type: ignore[arg-type]
+    test_clear(SortedIntSet)  # type: ignore[arg-type]
+    test_isdisjoint(SortedIntSet)  # type: ignore[arg-type]
+    test_before_after(SortedIntSet)  # type: ignore[arg-type]
 
 
 def test_ondisk():

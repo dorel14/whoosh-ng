@@ -1,3 +1,5 @@
+from typing import Any
+
 from whoosh import analysis, fields, query
 from whoosh.qparser import default, plugins
 
@@ -49,7 +51,7 @@ def test_phrase():
     assert repr(p.process('"b c" d')) == "<AndGroup <None:PhraseNode 'b c'~1>, <None:'d'>>"
     assert repr(p.process('"b c"')) == "<AndGroup <None:PhraseNode 'b c'~1>>"
 
-    q = p.parse('alfa "bravo charlie"~2 delta')
+    q: Any = p.parse('alfa "bravo charlie"~2 delta')
     assert q[1].__class__ == query.Phrase
     assert q[1].words == ["bravo", "charlie"]
     assert q[1].slop == 2
@@ -138,20 +140,20 @@ def test_boost():
 def test_empty_querystring():
     s = fields.Schema(content=fields.TEXT, title=fields.TEXT, id=fields.ID)
     qp = default.QueryParser("content", s)
-    q = qp.parse("")
+    q: Any = qp.parse("")
     assert q == query.NullQuery
 
 
 def test_fields():
     s = fields.Schema(content=fields.TEXT, title=fields.TEXT, id=fields.ID)
     qp = default.QueryParser("content", s)
-    q = qp.parse("test")
+    q: Any = qp.parse("test")
     assert q.__class__ == query.Term
     assert q.fieldname == "content"
     assert q.text == "test"
 
     mq = default.MultifieldParser(("title", "content"), s)
-    q = mq.parse("test")
+    q: Any = mq.parse("test")
     assert q.__class__ == query.Or
     assert q[0].__class__ == query.Term
     assert q[1].__class__ == query.Term
@@ -160,7 +162,7 @@ def test_fields():
     assert q[0].text == "test"
     assert q[1].text == "test"
 
-    q = mq.parse("title:test")
+    q: Any = mq.parse("title:test")
     assert q.__class__ == query.Term
     assert q.fieldname == "title"
     assert q.text == "test"
@@ -174,7 +176,7 @@ def test_multifield():
     qs = "a (b c cat:d) OR (b c cat:e)"
     qp = default.MultifieldParser(["x", "y"], schema)
 
-    q = qp.parse(qs)
+    q: Any = qp.parse(qs)
     assert (
         str(q)
         == "((x:a OR y:a) AND (((x:b OR y:b) AND (x:c OR y:c) AND cat:d) OR ((x:b OR y:b) AND (x:c OR y:c) AND cat:e)))"
@@ -187,32 +189,34 @@ def test_fieldname_chars():
     fieldmap = {"nisbah": ["\u0646\u0633\u0628\u0629"], "abc123": ["xyz"]}
     qp.add_plugin(plugins.FieldAliasPlugin(fieldmap))
 
-    q = qp.parse("abc123:456")
+    q: Any = qp.parse("abc123:456")
     assert q.__class__ == query.Term
     assert q.fieldname == "abc123"
     assert q.text == "456"
 
-    q = qp.parse("abc123:456 def")
+    q: Any = qp.parse("abc123:456 def")
     assert str(q) == "(abc123:456 AND content:def)"
 
-    q = qp.parse("\u0646\u0633\u0628\u0629:\u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a")
+    q: Any = qp.parse(
+        "\u0646\u0633\u0628\u0629:\u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a"
+    )
     assert q.__class__ == query.Term
     assert q.fieldname == "nisbah"
     assert q.text == "\u0627\u0644\u0641\u0644\u0633\u0637\u064a\u0646\u064a"
 
-    q = qp.parse("abc123 (xyz:123 OR qrs)")
+    q: Any = qp.parse("abc123 (xyz:123 OR qrs)")
     assert str(q) == "(content:abc123 AND (abc123:123 OR content:qrs))"
 
 
 def test_colonspace():
     s = fields.Schema(content=fields.TEXT, url=fields.ID)
     qp = default.QueryParser("content", s)
-    q = qp.parse("url:test")
+    q: Any = qp.parse("url:test")
     assert q.__class__ == query.Term
     assert q.fieldname == "url"
     assert q.text == "test"
 
-    q = qp.parse("url: test")
+    q: Any = qp.parse("url: test")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Term
     assert q[1].__class__ == query.Term
@@ -221,14 +225,14 @@ def test_colonspace():
     assert q[0].text == "url"
     assert q[1].text == "test"
 
-    q = qp.parse("url:")
+    q: Any = qp.parse("url:")
     assert q.__class__ == query.Term
     assert q.fieldname == "content"
     assert q.text == "url"
 
     s = fields.Schema(foo=fields.KEYWORD)
     qp = default.QueryParser("foo", s)
-    q = qp.parse("blah:")
+    q: Any = qp.parse("blah:")
     assert q.__class__ == query.Term
     assert q.fieldname == "foo"
     assert q.text == "blah:"
@@ -236,16 +240,16 @@ def test_colonspace():
 
 def test_andor():
     qp = default.QueryParser("a", None)
-    q = qp.parse("a AND b OR c AND d OR e AND f")
+    q: Any = qp.parse("a AND b OR c AND d OR e AND f")
     assert str(q) == "((a:a AND a:b) OR (a:c AND a:d) OR (a:e AND a:f))"
 
-    q = qp.parse("aORb")
+    q: Any = qp.parse("aORb")
     assert q == query.Term("a", "aORb")
 
-    q = qp.parse("aOR b")
+    q: Any = qp.parse("aOR b")
     assert q == query.And([query.Term("a", "aOR"), query.Term("a", "b")])
 
-    q = qp.parse("a ORb")
+    q: Any = qp.parse("a ORb")
     assert q == query.And([query.Term("a", "a"), query.Term("a", "ORb")])
 
     assert qp.parse("OR") == query.Term("a", "OR")
@@ -253,41 +257,41 @@ def test_andor():
 
 def test_andnot():
     qp = default.QueryParser("content", None)
-    q = qp.parse("this ANDNOT that")
+    q: Any = qp.parse("this ANDNOT that")
     assert q.__class__ == query.AndNot
     assert q.a.__class__ == query.Term
     assert q.b.__class__ == query.Term
     assert q.a.text == "this"
     assert q.b.text == "that"
 
-    q = qp.parse("foo ANDNOT bar baz")
+    q: Any = qp.parse("foo ANDNOT bar baz")
     assert q.__class__ == query.And
     assert len(q) == 2
     assert q[0].__class__ == query.AndNot
     assert q[1].__class__ == query.Term
 
-    q = qp.parse("foo fie ANDNOT bar baz")
+    q: Any = qp.parse("foo fie ANDNOT bar baz")
     assert q.__class__ == query.And
     assert len(q) == 3
     assert q[0].__class__ == query.Term
     assert q[1].__class__ == query.AndNot
     assert q[2].__class__ == query.Term
 
-    q = qp.parse("a AND b ANDNOT c")
+    q: Any = qp.parse("a AND b ANDNOT c")
     assert q.__class__ == query.AndNot
     assert str(q) == "((content:a AND content:b) ANDNOT content:c)"
 
 
 def test_boost_query():
     qp = default.QueryParser("content", None)
-    q = qp.parse("this^3 fn:that^0.5 5.67 hi^5x")
+    q: Any = qp.parse("this^3 fn:that^0.5 5.67 hi^5x")
     assert q[0].boost == 3.0
     assert q[1].boost == 0.5
     assert q[1].fieldname == "fn"
     assert q[2].text == "5.67"
     assert q[3].text == "hi^5x"
 
-    q = qp.parse("alfa (bravo OR charlie)^2.5 ^3")
+    q: Any = qp.parse("alfa (bravo OR charlie)^2.5 ^3")
     assert len(q) == 3
     assert q[0].boost == 1.0
     assert q[1].boost == 2.5
@@ -296,7 +300,7 @@ def test_boost_query():
 
 def test_boosts():
     qp = default.QueryParser("t", None)
-    q = qp.parse("alfa ((bravo^2)^3)^4 charlie")
+    q: Any = qp.parse("alfa ((bravo^2)^3)^4 charlie")
     assert str(q) == "(t:alfa AND t:bravo^24.0 AND t:charlie)"
 
 
@@ -310,7 +314,7 @@ def test_wild():
 
     #
     qp = default.QueryParser("content", None)
-    q = qp.parse("hello *the?e* ?star*s? test")
+    q: Any = qp.parse("hello *the?e* ?star*s? test")
     assert len(q) == 4
     assert q[0].__class__ == query.Term
     assert q[0].text == "hello"
@@ -323,7 +327,7 @@ def test_wild():
 
     #
     qp = default.QueryParser("content", None)
-    q = qp.parse("*the?e*")
+    q: Any = qp.parse("*the?e*")
     assert q.__class__ == query.Wildcard
     assert q.text == "*the?e*"
 
@@ -331,7 +335,7 @@ def test_wild():
 def test_parse_fieldname_underscores():
     s = fields.Schema(my_name=fields.ID(stored=True), my_value=fields.TEXT)
     qp = default.QueryParser("my_value", schema=s)
-    q = qp.parse("my_name:Green")
+    q: Any = qp.parse("my_name:Green")
     assert q.__class__ == query.Term
     assert q.fieldname == "my_name"
     assert q.text == "Green"
@@ -339,18 +343,18 @@ def test_parse_fieldname_underscores():
 
 def test_endstar():
     qp = default.QueryParser("text", None)
-    q = qp.parse("word*")
+    q: Any = qp.parse("word*")
     assert q.__class__ == query.Prefix
     assert q.text == "word"
 
-    q = qp.parse("first* second")
+    q: Any = qp.parse("first* second")
     assert q[0].__class__ == query.Prefix
     assert q[0].text == "first"
 
 
 def test_singlequotes_query():
     qp = default.QueryParser("text", None)
-    q = qp.parse("hell's hot 'i stab at thee'")
+    q: Any = qp.parse("hell's hot 'i stab at thee'")
     assert q.__class__.__name__ == "And"
     assert len(q) == 3
     assert q[0].__class__ == query.Term
@@ -360,7 +364,7 @@ def test_singlequotes_query():
     assert q[1].text == "hot"
     assert q[2].text == "i stab at thee"
 
-    q = qp.parse("alfa zulu:'bravo charlie' delta")
+    q: Any = qp.parse("alfa zulu:'bravo charlie' delta")
     assert q.__class__.__name__ == "And"
     assert len(q) == 3
     assert q[0].__class__ == query.Term
@@ -370,12 +374,12 @@ def test_singlequotes_query():
     assert (q[1].fieldname, q[1].text) == ("zulu", "bravo charlie")
     assert (q[2].fieldname, q[2].text) == ("text", "delta")
 
-    q = qp.parse("The rest 'is silence")
+    q: Any = qp.parse("The rest 'is silence")
     assert q.__class__ == query.And
     assert len(q) == 4
     assert [t.text for t in q.subqueries] == ["The", "rest", "'is", "silence"]
 
-    q = qp.parse("I don't like W's stupid face")
+    q: Any = qp.parse("I don't like W's stupid face")
     assert q.__class__ == query.And
     assert len(q) == 6
     assert [t.text for t in q.subqueries] == [
@@ -387,7 +391,7 @@ def test_singlequotes_query():
         "face",
     ]
 
-    q = qp.parse("I forgot the drinkin' in '98")
+    q: Any = qp.parse("I forgot the drinkin' in '98")
     assert q.__class__ == query.And
     assert len(q) == 6
     assert [t.text for t in q.subqueries] == [
@@ -460,7 +464,7 @@ def test_singlequotes_query():
 
 def test_phrase_phrase():
     qp = default.QueryParser("content", None)
-    q = qp.parse('"alfa bravo" "charlie delta echo"^2.2 test:"foxtrot golf"')
+    q: Any = qp.parse('"alfa bravo" "charlie delta echo"^2.2 test:"foxtrot golf"')
     assert q[0].__class__ == query.Phrase
     assert q[0].words == ["alfa", "bravo"]
     assert q[1].__class__ == query.Phrase
@@ -473,16 +477,16 @@ def test_phrase_phrase():
 
 def test_weird_characters():
     qp = default.QueryParser("content", None)
-    q = qp.parse(".abcd@gmail.com")
+    q: Any = qp.parse(".abcd@gmail.com")
     assert q.__class__ == query.Term
     assert q.text == ".abcd@gmail.com"
-    q = qp.parse("r*")
+    q: Any = qp.parse("r*")
     assert q.__class__ == query.Prefix
     assert q.text == "r"
-    q = qp.parse(".")
+    q: Any = qp.parse(".")
     assert q.__class__ == query.Term
     assert q.text == "."
-    q = qp.parse("?")
+    q: Any = qp.parse("?")
     assert q.__class__ == query.Wildcard
     assert q.text == "?"
 
@@ -490,7 +494,7 @@ def test_weird_characters():
 def test_euro_chars():
     schema = fields.Schema(text=fields.TEXT)
     qp = default.QueryParser("text", schema)
-    q = qp.parse("stra\xdfe")
+    q: Any = qp.parse("stra\xdfe")
     assert q.__class__ == query.Term
     assert q.text == "stra\xdfe"
 
@@ -498,30 +502,30 @@ def test_euro_chars():
 def test_star():
     schema = fields.Schema(text=fields.TEXT(stored=True))
     qp = default.QueryParser("text", schema)
-    q = qp.parse("*")
+    q: Any = qp.parse("*")
     assert q.__class__ == query.Every
     assert q.fieldname == "text"
 
-    q = qp.parse("*h?ll*")
+    q: Any = qp.parse("*h?ll*")
     assert q.__class__ == query.Wildcard
     assert q.text == "*h?ll*"
 
-    q = qp.parse("h?pe")
+    q: Any = qp.parse("h?pe")
     assert q.__class__ == query.Wildcard
     assert q.text == "h?pe"
 
-    q = qp.parse("*? blah")
+    q: Any = qp.parse("*? blah")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Wildcard
     assert q[0].text == "*?"
     assert q[1].__class__ == query.Term
     assert q[1].text == "blah"
 
-    q = qp.parse("*ending")
+    q: Any = qp.parse("*ending")
     assert q.__class__ == query.Wildcard
     assert q.text == "*ending"
 
-    q = qp.parse("*q")
+    q: Any = qp.parse("*q")
     assert q.__class__ == query.Wildcard
     assert q.text == "*q"
 
@@ -530,13 +534,13 @@ def test_star_field():
     schema = fields.Schema(text=fields.TEXT)
     qp = default.QueryParser("text", schema)
 
-    q = qp.parse("*:*")
+    q: Any = qp.parse("*:*")
     assert q.__class__ == query.Every
     assert q.fieldname is None
 
     # This gets parsed to a term with text="*:test" which is then analyzed down
     # to just "test"
-    q = qp.parse("*:test")
+    q: Any = qp.parse("*:test")
     assert q.__class__ == query.Term
     assert q.fieldname == "text"
     assert q.text == "test"
@@ -546,49 +550,49 @@ def test_range_query():
     schema = fields.Schema(name=fields.ID(stored=True), text=fields.TEXT(stored=True))
     qp = default.QueryParser("text", schema)
 
-    q = qp.parse("[alfa to bravo}")
+    q: Any = qp.parse("[alfa to bravo}")
     assert q.__class__ == query.TermRange
     assert q.start == "alfa"
     assert q.end == "bravo"
     assert q.startexcl is False
     assert q.endexcl is True
 
-    q = qp.parse("['hello there' to 'what ever']")
+    q: Any = qp.parse("['hello there' to 'what ever']")
     assert q.__class__ == query.TermRange
     assert q.start == "hello there"
     assert q.end == "what ever"
     assert q.startexcl is False
     assert q.endexcl is False
 
-    q = qp.parse("name:{'to' to 'b'}")
+    q: Any = qp.parse("name:{'to' to 'b'}")
     assert q.__class__ == query.TermRange
     assert q.start == "to"
     assert q.end == "b"
     assert q.startexcl is True
     assert q.endexcl is True
 
-    q = qp.parse("name:{'a' to 'to']")
+    q: Any = qp.parse("name:{'a' to 'to']")
     assert q.__class__ == query.TermRange
     assert q.start == "a"
     assert q.end == "to"
     assert q.startexcl is True
     assert q.endexcl is False
 
-    q = qp.parse("name:[a to to]")
+    q: Any = qp.parse("name:[a to to]")
     assert q.__class__ == query.TermRange
     assert q.start == "a"
     assert q.end == "to"
 
-    q = qp.parse("name:[to to b]")
+    q: Any = qp.parse("name:[to to b]")
     assert q.__class__ == query.TermRange
     assert q.start == "to"
     assert q.end == "b"
 
-    q = qp.parse("[alfa to alfa]")
+    q: Any = qp.parse("[alfa to alfa]")
     assert q.__class__ == query.Term
     assert q.text == "alfa"
 
-    q = qp.parse("Ind* AND name:[d TO]")
+    q: Any = qp.parse("Ind* AND name:[d TO]")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Prefix
     assert q[1].__class__ == query.TermRange
@@ -596,7 +600,7 @@ def test_range_query():
     assert q[1].start == "d"
     assert q[1].fieldname == "name"
 
-    q = qp.parse("name:[d TO]")
+    q: Any = qp.parse("name:[d TO]")
     assert q.__class__ == query.TermRange
     assert q.start == "d"
     assert q.fieldname == "name"
@@ -609,20 +613,20 @@ def test_numeric_range():
     teststart = 40
     testend = 100
 
-    q = qp.parse(f"[{teststart} to *]")
+    q: Any = qp.parse(f"[{teststart} to *]")
     assert q == query.NullQuery
 
-    q = qp.parse(f"[{teststart} to]")
+    q: Any = qp.parse(f"[{teststart} to]")
     assert q.__class__ == query.NumericRange
     assert q.start == teststart
     assert q.end is None
 
-    q = qp.parse(f"[to {testend}]")
+    q: Any = qp.parse(f"[to {testend}]")
     assert q.__class__ == query.NumericRange
     assert q.start is None
     assert q.end == testend
 
-    q = qp.parse(f"[{teststart} to {testend}]")
+    q: Any = qp.parse(f"[{teststart} to {testend}]")
     assert q.__class__ == query.NumericRange
     assert q.start == teststart
     assert q.end == testend
@@ -643,7 +647,7 @@ def test_regressions():
         ]
     )
 
-    q = qp.parse('22" BX')
+    q: Any = qp.parse('22" BX')
     assert q, query.And([query.Term("f", '22"') == query.Term("f", "BX")])
 
 
@@ -652,14 +656,14 @@ def test_empty_ranges():
     qp = default.QueryParser("text", schema)
 
     for fname in ("name", "date"):
-        q = qp.parse(f"{fname}:[to]")
+        q: Any = qp.parse(f"{fname}:[to]")
         assert q.__class__ == query.Every
 
 
 def test_empty_numeric_range():
     schema = fields.Schema(id=fields.ID, num=fields.NUMERIC)
     qp = default.QueryParser("num", schema)
-    q = qp.parse("num:[to]")
+    q: Any = qp.parse("num:[to]")
     assert q.__class__ == query.NumericRange
     assert q.start is None
     assert q.end is None
@@ -669,19 +673,19 @@ def test_numrange_multi():
     schema = fields.Schema(text=fields.TEXT, start=fields.NUMERIC, end=fields.NUMERIC)
     qp = default.QueryParser("text", schema)
 
-    q = qp.parse("start:[2008 to]")
+    q: Any = qp.parse("start:[2008 to]")
     assert q.__class__ == query.NumericRange
     assert q.fieldname == "start"
     assert q.start == 2008
     assert q.end is None
 
-    q = qp.parse("start:[2011 to 2012]")
+    q: Any = qp.parse("start:[2011 to 2012]")
     assert q.__class__.__name__ == "NumericRange"
     assert q.fieldname == "start"
     assert q.start == 2011
     assert q.end == 2012
 
-    q = qp.parse("start:[2008 to] AND end:[2011 to 2012]")
+    q: Any = qp.parse("start:[2008 to] AND end:[2011 to 2012]")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.NumericRange
     assert q[1].__class__ == query.NumericRange
@@ -693,11 +697,11 @@ def test_numrange_multi():
 
 def test_nonexistant_fieldnames():
     # Need an analyzer that won't mangle a URL
-    a = analysis.SimpleAnalyzer("\\S+")
+    a = analysis.SimpleAnalyzer("\\S+")  # type: ignore[arg-type]
     schema = fields.Schema(id=fields.ID, text=fields.TEXT(analyzer=a))
 
     qp = default.QueryParser("text", schema)
-    q = qp.parse("id:/code http://localhost/")
+    q: Any = qp.parse("id:/code http://localhost/")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Term
     assert q[0].fieldname == "id"
@@ -710,7 +714,7 @@ def test_nonexistant_fieldnames():
 def test_stopped():
     schema = fields.Schema(text=fields.TEXT)
     qp = default.QueryParser("text", schema)
-    q = qp.parse("a b")
+    q: Any = qp.parse("a b")
     assert q == query.NullQuery
 
 
@@ -718,47 +722,47 @@ def test_analyzing_terms():
     ana = analysis.StemmingAnalyzer()
     schema = fields.Schema(text=fields.TEXT(analyzer=ana))
     qp = default.QueryParser("text", schema)
-    q = qp.parse("Indexed!")
+    q: Any = qp.parse("Indexed!")
     assert q.__class__ == query.Term
     assert q.text == "index"
 
 
 def test_simple_parsing():
     parser = default.SimpleParser("x", None)
-    q = parser.parse("alfa bravo charlie delta")
+    q: Any = parser.parse("alfa bravo charlie delta")
     assert str(q) == "(x:alfa OR x:bravo OR x:charlie OR x:delta)"
 
-    q = parser.parse("alfa +bravo charlie delta")
+    q: Any = parser.parse("alfa +bravo charlie delta")
     assert str(q) == "(x:bravo ANDMAYBE (x:alfa OR x:charlie OR x:delta))"
 
-    q = parser.parse("alfa +bravo -charlie delta")
+    q: Any = parser.parse("alfa +bravo -charlie delta")
     assert str(q) == "((x:bravo ANDMAYBE (x:alfa OR x:delta)) ANDNOT x:charlie)"
 
-    q = parser.parse("- alfa +bravo + delta")
+    q: Any = parser.parse("- alfa +bravo + delta")
     assert str(q) == "((x:bravo AND x:delta) ANDNOT x:alfa)"
 
 
 def test_dismax():
     parser = default.DisMaxParser({"body": 0.8, "title": 2.5}, None)
-    q = parser.parse("alfa bravo charlie")
+    q: Any = parser.parse("alfa bravo charlie")
     assert (
         str(q)
         == "(DisMax(body:alfa^0.8 title:alfa^2.5) OR DisMax(body:bravo^0.8 title:bravo^2.5) OR DisMax(body:charlie^0.8 title:charlie^2.5))"
     )
 
-    q = parser.parse("alfa +bravo charlie")
+    q: Any = parser.parse("alfa +bravo charlie")
     assert (
         str(q)
         == "(DisMax(body:bravo^0.8 title:bravo^2.5) ANDMAYBE (DisMax(body:alfa^0.8 title:alfa^2.5) OR DisMax(body:charlie^0.8 title:charlie^2.5)))"
     )
 
-    q = parser.parse("alfa -bravo charlie")
+    q: Any = parser.parse("alfa -bravo charlie")
     assert (
         str(q)
         == "((DisMax(body:alfa^0.8 title:alfa^2.5) OR DisMax(body:charlie^0.8 title:charlie^2.5)) ANDNOT DisMax(body:bravo^0.8 title:bravo^2.5))"
     )
 
-    q = parser.parse("alfa -bravo +charlie")
+    q: Any = parser.parse("alfa -bravo +charlie")
     assert (
         str(q)
         == "((DisMax(body:charlie^0.8 title:charlie^2.5) ANDMAYBE DisMax(body:alfa^0.8 title:alfa^2.5)) ANDNOT DisMax(body:bravo^0.8 title:bravo^2.5))"
@@ -774,7 +778,7 @@ def test_many_clauses():
 
 def test_roundtrip():
     parser = default.QueryParser("a", None)
-    q = parser.parse("a OR ((b AND c AND d AND e) OR f OR g) ANDNOT h")
+    q: Any = parser.parse("a OR ((b AND c AND d AND e) OR f OR g) ANDNOT h")
     assert str(q) == "((a:a OR (a:b AND a:c AND a:d AND a:e) OR a:f OR a:g) ANDNOT a:h)"
 
 
@@ -783,7 +787,7 @@ def test_ngrams():
     parser = default.QueryParser("grams", schema)
     parser.remove_plugin_class(plugins.WhitespacePlugin)
 
-    q = parser.parse("Hello There")
+    q: Any = parser.parse("Hello There")
     assert q.__class__ == query.And
     assert len(q) == 8
     assert [sq.text for sq in q] == [
@@ -802,7 +806,7 @@ def test_ngramwords():
     schema = fields.Schema(grams=fields.NGRAMWORDS(queryor=True))
     parser = default.QueryParser("grams", schema)
 
-    q = parser.parse("Hello Tom")
+    q: Any = parser.parse("Hello Tom")
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Or
     assert q[1].__class__ == query.Term
@@ -821,7 +825,7 @@ def test_multitoken_default():
     texts = list(schema["text"].process_text(qstring))
     assert texts == ["chaw", "bacon"]
 
-    q = parser.parse(qstring)
+    q: Any = parser.parse(qstring)
     assert q.__class__ == query.And
     assert len(q) == 2
     assert q[0].__class__ == query.Term
@@ -840,7 +844,7 @@ def test_multitoken_or():
     texts = list(schema["text"].process_text(qstring))
     assert texts == ["chaw", "bacon"]
 
-    q = parser.parse(qstring)
+    q: Any = parser.parse(qstring)
     assert q.__class__ == query.Or
     assert len(q) == 2
     assert q[0].__class__ == query.Term
@@ -859,30 +863,30 @@ def test_multitoken_phrase():
     texts = list(schema["text"].process_text(qstring))
     assert texts == ["chaw", "bacon"]
 
-    q = parser.parse(qstring)
+    q: Any = parser.parse(qstring)
     assert q.__class__ == query.Phrase
 
 
 def test_singlequote_multitoken():
     schema = fields.Schema(text=fields.TEXT(multitoken_query="or"))
     parser = default.QueryParser("text", schema)
-    q = parser.parse("foo bar")
+    q: Any = parser.parse("foo bar")
     assert str(q) == "(text:foo AND text:bar)"
 
-    q = parser.parse("'foo bar'")  # single quotes
+    q: Any = parser.parse("'foo bar'")  # single quotes
     assert str(q) == "(text:foo OR text:bar)"
 
 
 def test_operator_queries():
     qp = default.QueryParser("f", None)
 
-    q = qp.parse("a AND b OR c AND d")
+    q: Any = qp.parse("a AND b OR c AND d")
     assert str(q) == "((f:a AND f:b) OR (f:c AND f:d))"
 
-    q = qp.parse("a OR b OR c OR d")
+    q: Any = qp.parse("a OR b OR c OR d")
     assert str(q) == "(f:a OR f:b OR f:c OR f:d)"
 
-    q = qp.parse("a ANDMAYBE b ANDNOT c REQUIRE d")
+    q: Any = qp.parse("a ANDMAYBE b ANDNOT c REQUIRE d")
     assert str(q) == "((f:a ANDMAYBE (f:b ANDNOT f:c)) REQUIRE f:d)"
 
 
@@ -919,23 +923,23 @@ def test_operator_queries():
 
 def test_not_assoc():
     qp = default.QueryParser("text", None)
-    q = qp.parse("a AND NOT b OR c")
+    q: Any = qp.parse("a AND NOT b OR c")
     assert str(q) == "((text:a AND NOT text:b) OR text:c)"
 
     qp = default.QueryParser("text", None)
-    q = qp.parse("a NOT (b OR c)")
+    q: Any = qp.parse("a NOT (b OR c)")
     assert str(q) == "(text:a AND NOT (text:b OR text:c))"
 
 
 def test_fieldname_space():
     qp = default.QueryParser("a", None)
-    q = qp.parse("Man Ray: a retrospective")
+    q: Any = qp.parse("Man Ray: a retrospective")
     assert str(q) == "(a:Man AND a:Ray: AND a:a AND a:retrospective)"
 
 
 def test_fieldname_fieldname():
     qp = default.QueryParser("a", None)
-    q = qp.parse("a:b:")
+    q: Any = qp.parse("a:b:")
     assert q == query.Term("a", "b:")
 
 
@@ -943,16 +947,16 @@ def test_paren_fieldname():
     schema = fields.Schema(kind=fields.ID, content=fields.TEXT)
 
     qp = default.QueryParser("content", schema)
-    q = qp.parse("(kind:1d565 OR kind:7c584) AND (stuff)")
+    q: Any = qp.parse("(kind:1d565 OR kind:7c584) AND (stuff)")
     assert str(q) == "((kind:1d565 OR kind:7c584) AND content:stuff)"
 
-    q = qp.parse("kind:(1d565 OR 7c584) AND (stuff)")
+    q: Any = qp.parse("kind:(1d565 OR 7c584) AND (stuff)")
     assert str(q) == "((kind:1d565 OR kind:7c584) AND content:stuff)"
 
 
 def test_star_paren():
     qp = default.QueryParser("content", None)
-    q = qp.parse("(*john*) AND (title:blog)")
+    q: Any = qp.parse("(*john*) AND (title:blog)")
 
     assert q.__class__ == query.And
     assert q[0].__class__ == query.Wildcard
@@ -964,27 +968,27 @@ def test_star_paren():
 
 
 def test_dash():
-    ana = analysis.StandardAnalyzer("[^ \t\r\n()*?]+")
+    ana = analysis.StandardAnalyzer("[^ \t\r\n()*?]+")  # type: ignore[arg-type]
     schema = fields.Schema(
         title=fields.TEXT(analyzer=ana), text=fields.TEXT(analyzer=ana), time=fields.ID
     )
     qtext = "*Ben-Hayden*"
 
     qp = default.QueryParser("text", schema)
-    q = qp.parse(qtext)
+    q: Any = qp.parse(qtext)
     assert q.__class__ == query.Wildcard
     assert q.fieldname == "text"
     assert q.text == "*ben-hayden*"
 
     qp = default.MultifieldParser(["title", "text", "time"], schema)
-    q = qp.parse(qtext)
+    q: Any = qp.parse(qtext)
     assert str(q) == "(title:*ben-hayden* OR text:*ben-hayden* OR time:*Ben-Hayden*)"
 
 
 def test_bool_True():
     schema = fields.Schema(text=fields.TEXT, bool=fields.BOOLEAN)
     qp = default.QueryParser("text", schema)
-    q = qp.parse("bool:True")
+    q: Any = qp.parse("bool:True")
     assert q.__class__ == query.Term
     assert q.fieldname == "bool"
     assert q.text is True
@@ -998,13 +1002,13 @@ def test_not_order():
     )
     qp = default.QueryParser("count", schema)
 
-    q1 = qp.parse("(NOT (count:0) AND cats:1)")
+    q1: Any = qp.parse("(NOT (count:0) AND cats:1)")
     assert q1.__class__ == query.And
     assert q1[0].__class__ == query.Not
     assert q1[1].__class__ == query.Term
     assert str(q1) == "(NOT count:0 AND cats:1)"
 
-    q2 = qp.parse("(cats:1 AND NOT (count:0))")
+    q2: Any = qp.parse("(cats:1 AND NOT (count:0))")
     assert q2.__class__ == query.And
     assert q2[0].__class__ == query.Term
     assert q2[1].__class__ == query.Not
@@ -1014,14 +1018,14 @@ def test_not_order():
 def test_spacespace_and():
     qp = default.QueryParser("f", None)
     # one blank before/after AND
-    q = qp.parse("A AND B")
+    q: Any = qp.parse("A AND B")
     assert q.__class__ == query.And
     assert len(q) == 2
     assert q[0] == query.Term("f", "A")
     assert q[1] == query.Term("f", "B")
 
     # two blanks before AND
-    q = qp.parse("A  AND B")
+    q: Any = qp.parse("A  AND B")
     assert q.__class__ == query.And
     assert len(q) == 2
     assert q[0] == query.Term("f", "A")
@@ -1031,7 +1035,7 @@ def test_spacespace_and():
 def test_unicode_num():
     schema = fields.Schema(num=fields.NUMERIC)
     parser = default.QueryParser("num", schema=schema)
-    q = parser.parse("num:1")
+    q: Any = parser.parse("num:1")
 
     _ = str(q)
 
@@ -1039,7 +1043,7 @@ def test_unicode_num():
 def test_phrase_andmaybe():
     qp = default.QueryParser("f", None)
 
-    q = qp.parse('Dahmen ANDMAYBE "Besov Spaces"')
+    q: Any = qp.parse('Dahmen ANDMAYBE "Besov Spaces"')
     assert isinstance(q, query.AndMaybe)
     assert q[0] == query.Term("f", "Dahmen")
     assert q[1] == query.Phrase("f", ["Besov", "Spaces"])
@@ -1047,7 +1051,7 @@ def test_phrase_andmaybe():
 
 def test_phrase_boost():
     qp = default.QueryParser("f", None)
-    q = qp.parse('Dahmen ANDMAYBE "Besov Spaces"^9')
+    q: Any = qp.parse('Dahmen ANDMAYBE "Besov Spaces"^9')
     assert isinstance(q, query.AndMaybe)
     assert q[0] == query.Term("f", "Dahmen")
     assert q[1] == query.Phrase("f", ["Besov", "Spaces"], boost=9)
@@ -1065,7 +1069,7 @@ def test_quoted_prefix():
     expr = r"(^|(?<=[ (]))(?P<text>\w+|[*]):"
     qp.replace_plugin(plugins.FieldsPlugin(expr))
 
-    q = qp.parse("foo url:https://apple.com:8080/bar* baz")
+    q: Any = qp.parse("foo url:https://apple.com:8080/bar* baz")
     assert isinstance(q, query.And)
     assert q[0] == query.Term("f", "foo")
     assert q[1] == query.Prefix("url", "https://apple.com:8080/bar")
@@ -1079,7 +1083,7 @@ def test_multitoken_with_factory():
     schema = fields.Schema(title=fields.TEXT)
 
     og = OrGroup.factory(0.9)
-    qp = default.QueryParser("title", schema, group=og)
+    qp = default.QueryParser("title", schema, group=og)  # type: ignore[arg-type]
 
     querystring = "get my name/address"
     _ = qp.parse(querystring)

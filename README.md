@@ -112,7 +112,10 @@ pip install "whoosh-ng[dev]"
 - **Enhanced StemmingAnalyzer** (`whoosh_modern.analysis`): Accepts `stemmer="auto"|"internal"|"pystemmer"|provider` parameter
 - **Configuration Engine** (`whoosh_modern.config`): `ConfigEngine` with hierarchical YAML/JSON merging, Pydantic models (`WhooshNGConfig`, `FieldConfig`), and sub-engines (`SchemaEngine`, `AnalyzerEngine`, `DataSourceEngine`, `StorageEngine`, `SearchModelEngine`, `FacetEngine`, `PluginEngine`, `APIEngine`)
 - **Vector Search** (`whoosh_modern.vector`): `HnswlibProvider` for HNSW approximate nearest neighbor search alongside `NumpyProvider`
-- **Embedding Framework** (`whoosh_modern.embeddings`): `EmbeddingProvider` protocol and `SentenceTransformersProvider` for sentence-transformers embeddings
+- **Embedding Framework** (`whoosh_modern.embeddings`): `EmbeddingProvider` protocol, `FastEmbedProvider` with automatic model selection (`"fast"` preset), `ProviderPool` for parallel inference, `ONNXEmbeddingProvider` with CUDA support, and `model_preload` utilities
+- **EmbeddingBatchWriter v4.0** (`whoosh_modern.indexing`): High-performance batch writer with provider pooling, thread-safe LRU cache, strict error handling, dimension validation, in-place document mutation, and performance metrics via `get_stats()`
+- **EmbeddingMiddleware v4.0** (`whoosh_modern.middleware`): Batch accumulation mode with `embed_batch()` for +33% throughput, configurable `batch_size`, and strict error handling
+- **Vector Providers v4.0** (`whoosh_modern.vector`): `NumpyProvider` with vectorized matrix multiplication and lazy consolidation; `HnswlibProvider` with batch add and adaptive ef
 - **Modern N-Gram Framework** (`whoosh_modern.analysis`): `AutoCompleteAnalyzer`, `EdgeNgramAnalyzer`, `SEARCH_AS_YOU_TYPE` field type, `NgramProfiler` for performance profiling, and `AnalyzerPresets` (autocomplete, partial_match, fuzzy, code_search, documentation, ecommerce, blog, multilingual)
 - **Language Auto-Detection** (`whoosh_modern.linguistics.detection`): `StopwordDetector` and `LangDetectProvider` for automatic language detection with configurable supported languages
 - **Language Registry** (`whoosh_modern.linguistics.registry`): `LanguageRegistry`, `StemmerRegistry`, and `LanguageProfile` for centralized language/analyzer/stemmer resolution with `get_default_registry()`
@@ -123,6 +126,9 @@ pip install "whoosh-ng[dev]"
 - **Dictionary Stem Override** (`whoosh_modern.linguistics.dictionary_stem_override`): `DictionaryStemOverride` allows overriding Snowball stemming with business dictionaries (JSON/Wiktionary)
 - **Stemmer Profiler** (`whoosh_modern.profiling.stemmer_profiler`): `StemmerProfiler` and `StemmerProfilerReport` measure vocabulary reduction, estimated index size reduction, and average stemming time
 - **Multilingual SearchApplication** (`whoosh_modern.application`): `SearchApplication` now accepts `language_detector` and `dictionary_stem_overrides` parameters; `FieldConfig` supports `language="auto"` with detector resolution
+- **Hybrid Search** (`whoosh_modern.searching`): `HybridSearcher` fuses BM25 and vector results using weighted merge or Reciprocal Rank Fusion (RRF)
+- **EmbeddingBatchWriter** (`whoosh_modern.indexing`): Batch writer that generates embeddings during indexing via `VECTOR` fields, avoiding a second pass over documents
+- **Searcher Configuration** (`whoosh_modern.config`): `SearcherConfig` and `SearcherEngine` allow configuring the Whoosh searcher (e.g. `weighting`) through YAML/JSON config or `SearchApplication`
 
 ### Breaking Changes
 
@@ -142,7 +148,7 @@ pip install "whoosh-ng[dev]"
 - Documentation links now absolute (GitHub Pages): `https://dorel14.github.io/whoosh-ng/en/...`
 - **Python 3.11+ required** (dropped Python 3.9/3.10 support)
 - Packaging cleaned: consolidated extras in `pyproject.toml`
-- Type annotations modernized: `mypy src/whoosh` reports 0 errors, `py.typed` marker included
+- Type annotations modernized: `pyright src/whoosh` reports 0 errors, `py.typed` marker included
 
 ## Example: Simple Search
 
@@ -263,35 +269,190 @@ count = view.refresh()
 count = view.reindex()
 ```
 
-## Example: Vector Search
+## Example: SearchApplication with Searcher Config
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.config.models import WhooshNGConfig, SearchConfig, SearcherConfig
+from whoosh_modern.storage import FileStorage
+
+# Configure searcher weighting via config
+config = WhooshNGConfig(
+    search=SearchConfig(
+        searcher=SearcherConfig(weighting="BM25F"),
+    ),
+)
+
+app = SearchApplication(
+    source=...,
+    storage=FileStorage("indexdir"),
+    config=config,
+)
+app.build()
+
+# search() automatically uses BM25F weighting
+results = app.search("python search")
+```
+
+You can also pass the searcher config directly:
+
+```python
+app = SearchApplication(
+    source=...,
+    storage=FileStorage("indexdir"),
+    searcher={"weighting": "BM25F"},
+)
+```
+
+## Example: Vector Search with FastEmbed
 
 ```bash
-pip install "whoosh-ng[vector]" numpy
+pip install "whoosh-ng[vector]"
 ```
 
 ```python
 from whoosh import index
 from whoosh.fields import Schema, TEXT, ID, VECTOR
-from whoosh.vector import VectorField
-from whoosh_modern.vector.plugin import VectorPlugin
-from whoosh.plugins.manager import PluginManager
-import numpy as np
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+from whoosh_modern.vector.numpy_provider import NumpyProvider
 
-# Create index with vector field
+# Auto-select fastest available model (bge-small or arctic-embed-s)
+provider = FastEmbedProvider(model_name="fast")
+
 schema = Schema(
-    id=ID(stored=True),
+    id=ID(stored=True, unique=True),
     title=TEXT(stored=True),
-    embedding=VECTOR(dim=384),
+    body=TEXT(stored=True),
+    body_vector=VECTOR(dimension=provider.dimension),
 )
 
-# Register vector plugin
-VectorPlugin().register(PluginManager())
-
-# Index with embeddings
 ix = index.create_in("vector_db", schema)
+
 with ix.writer() as w:
-    w.add_document(
-        id="doc1",
-        title="Python tutorial",
-        embedding=np.random.rand(384).astype(np.float32).tobytes()
-    )
+    docs = [
+        {"id": "1", "title": "Python tutorial", "body": "Learn Python programming"},
+        {"id": "2", "title": "Java guide", "body": "Java development guide"},
+    ]
+    for doc in docs:
+        vector = provider.embed(doc["body"])
+        doc["body_vector"] = vector
+        w.add_document(**doc)
+
+# Search by vector similarity
+query_vector = provider.embed("Python programming")
+vector_provider = NumpyProvider()
+vector_provider.add([(doc["id"], provider.embed(doc["body"])) for doc in docs])
+hits = vector_provider.search(query_vector, k=10)
+for hit in hits:
+    print(hit.doc_id, hit.score)
+```
+
+## Example: Hybrid Search (BM25 + Vector)
+
+```python
+from whoosh import index
+from whoosh.fields import Schema, TEXT, ID, VECTOR
+from whoosh.qparser import QueryParser
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+from whoosh_modern.searching.hybrid import HybridSearcher
+from whoosh_modern.vector.numpy_provider import NumpyProvider
+
+schema = Schema(
+    id=ID(stored=True, unique=True),
+    title=TEXT(stored=True),
+    body=TEXT(stored=True),
+    body_vector=VECTOR(dimension=384),
+)
+
+ix = index.create_in("hybrid_db", schema)
+embedding_provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+vector_provider = NumpyProvider()
+
+with ix.writer() as w:
+    docs = [
+        {"id": "1", "title": "Python tutorial", "body": "Learn Python programming"},
+        {"id": "2", "title": "Java guide", "body": "Java development guide"},
+    ]
+    for doc in docs:
+        vector = embedding_provider.embed(doc["body"])
+        doc["body_vector"] = vector
+        w.add_document(**doc)
+        vector_provider.add([(doc["id"], vector)])
+
+with ix.searcher() as searcher:
+    hs = HybridSearcher(searcher, vector_provider, id_field="id")
+    results = hs.search("Python programming", query_vector=embedding_provider.embed("Python programming"))
+    for r in results:
+        print(r.doc_id, r.score, r.bm25_score, r.vector_score)
+```
+
+## Example: Batch Indexing with Embeddings
+
+```python
+from whoosh_modern.indexing import EmbeddingBatchWriter
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+# Auto-select fastest model + parallel workers
+provider = FastEmbedProvider(model_name="fast")
+
+writer = EmbeddingBatchWriter(
+    index,
+    embedding_provider=provider,
+    text_field="body",
+    vector_field="body_vector",
+    batch_size=500,
+    embedding_batch_size=32,   # texts per embed_batch() call
+    workers=2,                  # parallel embedding threads
+    encoding="bytes",            # compact storage via numpy.tobytes()
+)
+
+for batch in source.stream_batches(batch_size=500):
+    writer.add_batch(batch)
+
+writer.close()
+
+# View performance metrics
+stats = writer.get_stats()
+print(f"Cache hit rate: {stats['cache']['hit_rate_percent']}%")
+print(f"Throughput: {stats['docs_per_second']} docs/sec")
+```
+
+## Example: Parallel Embedding with ProviderPool
+
+```python
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+from whoosh_modern.indexing import EmbeddingBatchWriter
+
+# Create a pool of 4 provider instances for parallel embedding
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="fast"),
+    pool_size=4,
+)
+
+writer = EmbeddingBatchWriter(
+    index,
+    embedding_provider=pool,
+    text_field="body",
+    vector_field="body_vector",
+    batch_size=500,
+)
+
+for batch in source.stream_batches(batch_size=500):
+    writer.add_batch(batch)
+writer.close()
+```
+
+## Example: ONNX with CUDA
+
+```python
+from whoosh_modern.embeddings.onnx_provider import ONNXEmbeddingProvider
+
+provider = ONNXEmbeddingProvider(
+    model_path="models/bge-small-en-v1.5.onnx",
+    tokenizer_dir="models/tokenizer",
+    use_cuda=True,                    # auto-detect CUDA, fallback CPU
+    intra_op_num_threads=2,           # ONNX Runtime thread tuning
+    graph_optimization_level="all",   # enable all optimizations
+)
+```

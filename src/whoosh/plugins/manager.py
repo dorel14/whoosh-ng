@@ -76,7 +76,7 @@ class QueryRewritePlugin(Plugin):
 
 
 class PluginManager:
-    _default: ClassVar[PluginManager | None] = None
+    default: ClassVar[PluginManager | None] = None
 
     def __init__(self) -> None:
         self._plugins: dict[str, Plugin] = {}
@@ -91,13 +91,13 @@ class PluginManager:
 
     @classmethod
     def load_plugins(cls, group: str | None = None) -> None:
-        if cls._default is None:
-            cls._default = cls()
+        if cls.default is None:
+            cls.default = cls()
         if group is None:
             for standard in STANDARD_GROUPS:
-                cls._default._load(standard)
+                cls.default._load(standard)
         else:
-            cls._default._load(group)
+            cls.default._load(group)
 
     def _load(self, group: str) -> None:
         from importlib.metadata import entry_points

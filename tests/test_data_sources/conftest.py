@@ -1,17 +1,11 @@
 """Shared fixtures for data source tests."""
 
 import sqlite3
-from datetime import datetime, timezone
-from tempfile import NamedTemporaryFile
 
 import pytest
 
-from whoosh.fields import ID, KEYWORD, NUMERIC, TEXT, Schema
 from whoosh_modern.data_sources.rest import RESTSource
 from whoosh_modern.data_sources.sql import SQLSource
-from whoosh_modern.exceptions import DataSourceError, SchemaDiscoveryError
-from whoosh_modern.middleware import LoggingMiddleware, MiddlewarePipeline, RetryMiddleware
-from whoosh_modern.validation import ValidationFramework
 
 
 @pytest.fixture

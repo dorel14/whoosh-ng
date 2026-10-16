@@ -13,7 +13,7 @@ def create_test_db(num_rows: int = 1000) -> tuple[sqlite3.Connection, str]:
     Returns:
         Tuple of (connection, path) for the temporary database file.
     """
-    fd, path = tempfile.mkstemp(suffix=".db")
+    _fd, path = tempfile.mkstemp(suffix=".db")
     conn = sqlite3.connect(path)
     cursor = conn.cursor()
 

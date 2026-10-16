@@ -1,7 +1,7 @@
-from .bases import _ScandinavianStemmer
+from .bases import ScandinavianStemmer
 
 
-class SwedishStemmer(_ScandinavianStemmer):
+class SwedishStemmer(ScandinavianStemmer):
     """
     The Swedish Snowball stemmer.
 

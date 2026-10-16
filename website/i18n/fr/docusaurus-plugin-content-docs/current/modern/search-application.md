@@ -71,6 +71,7 @@ SearchApplication(
     dictionary_stem_overrides: dict[str, str] | None = None,
     embedding_provider: Any | None = None,
     embedding_fields: list[dict[str, str]] | None = None,
+    searcher: SearcherConfig | dict[str, Any] | None = None,
 )
 ```
 
@@ -85,6 +86,7 @@ SearchApplication(
 | `dictionary_stem_overrides` | `dict[str, str] \| None` | Mapping mot → forme stemmée pour remplacer le stemmer Snowball par défaut. |
 | `embedding_provider` | `Any \| None` | Fournisseur d'embeddings utilisé pour enrichir les documents avec des vecteurs denses avant l'indexation. |
 | `embedding_fields` | `list[dict[str, str]] \| None` | Séquence de mappings `{"source_field": "...", "target_field": "..."}` pour l'embedding multi-champs. Lorsque fourni, les valeurs par défaut `source_field` / `target_field` de la configuration d'embedding sont ignorées. |
+| `searcher` | `SearcherConfig \| dict[str, Any] \| None` | Configuration optionnelle du searcher. Accepte une instance `SearcherConfig`, un dict qui sera converti en `SearcherConfig`, ou `None` pour revenir à la config passée au constructeur. Lorsque défini, `search()` ouvre l'index avec le modèle de pondération configuré. |
 
 ## Propriétés
 
@@ -147,11 +149,48 @@ def search(self, query: Any, **kwargs: Any) -> Any
 Recherche dans l'index.
 
 - Si `query` est une chaîne, elle est analysée en utilisant `QueryParser` avec le premier champ du schéma comme champ par défaut.
-- Ouvre un searcher et délègue à `searcher.search()`.
+- Lorsqu'une configuration `searcher` a été fournie lors de la construction ou via `config`, l'index est ouvert avec le modèle de pondération configuré. Sinon, le searcher Whoosh par défaut est utilisé.
+- Délègue à `searcher.search()`.
 
 Retourne les résultats de recherche du searcher Whoosh.
 
 Lève `RuntimeError` si `build()` n'a pas été appelé.
+
+### Avec configuration du searcher
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.config.models import WhooshNGConfig, SearchConfig, SearcherConfig
+from whoosh_modern.storage import FileStorage
+
+config = WhooshNGConfig(
+    search=SearchConfig(
+        searcher=SearcherConfig(weighting="BM25F"),
+    ),
+)
+
+app = SearchApplication(
+    source=source,
+    storage=FileStorage("indexdir"),
+    config=config,
+)
+app.build()
+
+# search() utilise automatiquement la pondération BM25F
+results = app.search("python search")
+```
+
+Vous pouvez également passer la configuration directement :
+
+```python
+app = SearchApplication(
+    source=source,
+    storage=FileStorage("indexdir"),
+    searcher={"weighting": "BM25F"},
+)
+```
+
+Modèles de pondération disponibles : `BM25F`, `BM25`, `TF_IDF`, `PL2`, `DFree`, `Frequency`.
 
 ## Exemples d'utilisation
 
@@ -262,6 +301,62 @@ app.build()
 Lorsque `storage` est un `FileStorageProvider` (exposé sous le nom `FileStorage`), `SearchApplication` utilise son attribut public `root` comme répertoire d'index. Pour tous les autres providers (S3, Hybride, Snapshot), il se rabat sur un répertoire temporaire car Whoosh core nécessite un chemin filesystem pour `create_in()`.
 
 Le routage réel des segments, le pointage de commit et la synchronisation du cache sont gérés par `StorageMiddleware` au niveau middleware, et non par le provider de stockage lui-même.
+
+## Recherche hybride (BM25 + Vector)
+
+`SearchApplication` supporte la recherche hybride via `HybridSearcher`, qui fusionne les résultats BM25 par mots-clés avec les résultats de similarité vectorielle.
+
+```python
+from whoosh_modern import SearchApplication
+from whoosh_modern.embeddings import FastEmbedProvider
+from whoosh_modern.vector.numpy_provider import NumpyProvider
+from whoosh_modern.searching.hybrid import HybridSearcher
+
+provider = FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5")
+vector_provider = NumpyProvider()
+
+app = SearchApplication(
+    source=source,
+    embedding_provider=provider,
+    storage=FileStorage("indexdir"),
+)
+app.build("indexdir")
+
+with app.index.searcher() as searcher:
+    hs = HybridSearcher(searcher, vector_provider, id_field="id")
+    query_vector = provider.embed("programmation Python")
+    results = hs.search(
+        "programmation Python",
+        query_vector=query_vector,
+        method="weighted",   # ou "rrf" pour Reciprocal Rank Fusion
+        alpha=0.5,           # 0.0 = BM25 uniquement, 1.0 = vector uniquement
+    )
+    for r in results:
+        print(r.doc_id, r.score, r.bm25_score, r.vector_score)
+```
+
+## Embedding parallèle avec ProviderPool
+
+Pour un indexation à haut débit, utilisez `ProviderPool` pour paralléliser l'embedding across plusieurs instances de provider :
+
+```python
+from whoosh_modern.embeddings.provider_pool import ProviderPool
+from whoosh_modern.embeddings.fastembed_provider import FastEmbedProvider
+
+pool = ProviderPool(
+    provider_factory=lambda: FastEmbedProvider(model_name="BAAI/bge-small-en-v1.5"),
+    pool_size=4,
+)
+
+app = SearchApplication(
+    source=source,
+    embedding_provider=pool,
+    storage=FileStorage("indexdir"),
+)
+app.build("indexdir")
+```
+
+Amélioration attendue : throughput parallèle vs provider unique (à mesurer sur votre matériel).
 
 ## Voir aussi
 

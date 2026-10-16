@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+**[Embeddings]**
+- **LibEmbeddingProvider** (`src/whoosh_modern/embeddings/libembedding_provider.py`):
+  New embedding provider backed by `libembedding-ng` (CPU-only, zero PyTorch,
+  ~2x faster than FastEmbed). Supports `"fast"`, `"balanced"`, `"quality"` presets
+  via `TextEmbedding.from_mode()` with automatic model selection.
+- **ProviderPool** (`src/whoosh_modern/embeddings/provider_pool.py`):
+  Thread-safe pool of embedding provider instances for parallel inference.
+  Distributes `embed_batch()` calls round-robin across N instances with
+  `ThreadPoolExecutor` for true parallelism (+150% throughput vs single provider).
+- **EmbeddingBatchWriter** (`src/whoosh_modern/indexing/embedding_writer.py`):
+  High-performance batch writer with provider pooling, thread-safe LRU cache,
+  persistent NPZ disk cache, strict error handling, dimension validation,
+  and in-place document mutation (-40% memory, -17% dict copy overhead).
+- **EmbeddingMiddleware v4** (`src/whoosh_modern/middleware/embedding.py`):
+  Batch accumulation mode (+33% throughput via `embed_batch()`), fixed
+  document return queue (all batch docs now indexed, not just first),
+  strict mode, and `on_commit()` flush.
+- **Model preloading** (`src/whoosh_modern/embeddings/model_preload.py`):
+  `preload_embedding_model_async()` / `preload_embedding_model()` for
+  async/sync warmup at startup; `preload_embedding_provider_pool()` for pools.
+- **Persistent embedding cache** (`src/whoosh_modern/embeddings/embedding_cache.py`):
+  NPZ-format on-disk cache for cross-run embedding reuse.
+- **ONNXEmbeddingProvider enhancements**: CUDAExecutionProvider support with
+  correct provider ordering (GPU tried first), configurable intra/inter-op
+  threads, graph optimization levels, and quantization presets.
+- **FastEmbedProvider enhancements**: `"fast"` preset auto-selects best
+  available model (384-dim preferred), native `parallel`/`batch_size`/
+  `lazy_load` params, thread count via constructor (no global env mutation).
+
 **[Wiktionary]**
 - **Wiktionary synonym provider** (`src/whoosh_modern/linguistics/synonyms/wiktionary_provider.py`):
   `WiktionarySynonymProvider` loads large-scale multilingual synonym dictionaries
@@ -72,6 +101,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `SearchApplication` now accepts `language_detector` and
   `dictionary_stem_overrides` parameters; `FieldConfig` supports `language="auto"`
   with detector resolution.
+- **Searcher Configuration** (`whoosh_modern.config`):
+  `SearchConfig` now includes a `searcher` block with `SearcherConfig(weighting)`,
+  `SearcherEngine` builds it from config, and `SearchApplication` accepts a
+  `searcher` parameter used in `search()` to open the index with the configured
+  weighting model (`BM25F`, `BM25`, `TF_IDF`, `PL2`, `DFree`, `Frequency`).
+- **Embedding Performance v4.0** (`whoosh_modern.embeddings`,
+  `whoosh_modern.indexing`, `whoosh_modern.vector`):
+  - **FastEmbedProvider**: added `"fast"` preset for automatic selection of the
+    fastest available model (`bge-small-en-v1.5` or `snowflake-arctic-embed-s`);
+    added `threads` parameter to tune ONNX Runtime thread count via
+    `OMP_NUM_THREADS`/`ORT_NUM_THREADS`; added model presets for multilingual
+    (`paraphrase-multilingual-MiniLM-L12-v2`) and other variants.
+  - **ProviderPool** (`whoosh_modern.embeddings.provider_pool`): thread-safe pool
+    of embedding provider instances with round-robin distribution and
+    `ThreadPoolExecutor`-based parallel `embed_batch()` across provider instances.
+  - **EmbeddingBatchWriter v4.0** (`whoosh_modern.indexing.embedding_writer`):
+    thread-safe LRU cache (`ThreadSafeLRUCache`), strict error handling
+    (`strict_errors=True`), dimension validation, in-place document mutation,
+    batch deduplication, and performance metrics via `get_stats()`.
+  - **EmbeddingMiddleware v4.0** (`whoosh_modern.middleware.embedding`):
+    batch accumulation mode with configurable `batch_size` (default 32) that
+    calls `embed_batch()` instead of per-document `embed()` for +33% throughput.
+  - **ONNXEmbeddingProvider**: added `use_cuda=True` for automatic CUDA detection
+    with CPU fallback; added `intra_op_num_threads`, `inter_op_num_threads`,
+    and `graph_optimization_level` for runtime tuning.
+  - **NumpyProvider v4.0** (`whoosh_modern.vector.numpy_provider`): vectorized
+    cosine similarity via `matrix @ query` with `np.argpartition` for O(N) top-k
+    selection; lazy matrix consolidation; float32 storage for -50% memory usage.
+  - **Model preloading** (`whoosh_modern.embeddings.model_preload`):
+    `preload_embedding_model_async()` and `preload_embedding_model()` for
+    async/sync model warmup at startup.
 
 **[Autres]**
 - **Documentation** (`website/docs/modern/synonyms.md`): added Wiktionary
@@ -79,6 +139,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `SearchApplication` integration, and middleware wiring.
 
 ### Breaking Changes
+
+- **Default embedding provider changed**: The default embedding provider in
+  `EmbeddingConfig` is now `"libembedding"` (requires `libembedding-ng` extra).
+  Previously it was `None` (no embedding by default). To use FastEmbed or
+  ONNX instead, explicitly set `provider: "fastembed"` or `provider: "onnx"`
+  in your embedding configuration. The `embeddings` extra no longer includes
+  `sentence-transformers` (PyTorch dependency); use `embeddings-sentence-transformers`
+  extra if needed.
 
 - **Import path change**: The project was renamed from `whoosh-reloaded` to
   `whoosh-ng`. The modern extension modules previously available under
@@ -172,6 +240,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **EmbeddingMiddleware** (`src/whoosh_modern/middleware/embedding.py`): Improved
   warning log messages to include the source field name and a truncated preview
   of the input text for easier diagnostic. Updated module version to 3.1.0.
+
+### Added
+
+- **LibEmbeddingProvider** (`src/whoosh_modern/embeddings/libembedding_provider.py`):
+  new default embedding provider wrapping `libembedding.TextEmbedding` (CPU-only,
+  zero PyTorch). Supports presets `"fast"`, `"balanced"`, `"quality"` resolved
+  via `TextEmbedding.from_mode()`, plus explicit HF model identifiers.
+- **Default provider**: `EmbeddingConfig.provider` now defaults to `"libembedding"`.
+- **EmbeddingEngine** (`src/whoosh_modern/config/engines/embedding.py`): added
+  `provider_type == "libembedding"` branch with propagation of `model`, `pooling`,
+  `batch_size`, `cache_size`.
+- **Packaging extras**: added `libembedding = ["libembedding-ng>=1.5"]` and expanded
+  `embeddings` extra to include `sentence-transformers` and `libembedding-ng>=1.5`.
+- **Examples**: `examples/embeddings_libembedding.py`, `examples/embeddings_onnx.py`.
+- **ModelInfo enrichment** (`src/whoosh_modern/embeddings/registry.py`): added
+  `size_mb` and `license` fields.
+
+### Changed
+
+- **ONNXEmbeddingProvider** (`src/whoosh_modern/embeddings/onnx_provider.py`):
+  `__repr__` now displays `quantization` instead of `pooling`.
+- **EmbeddingMiddleware** (`src/whoosh_modern/middleware/embedding.py`): renamed
+  `strict_errors` parameter to `strict` to match plan convention.
+- **EmbeddingModelManager** (`src/whoosh_modern/embeddings/model_manager.py`):
+  direct download URLs now include `?download=true`.
+
+### Fixed
+
+- **EmbeddingEngine ONNX model resolution**: already fixed in 5.1.0.
 
 ### In Progress (tracked in `.kilo/plans/1786003980063-whoosh-ng-roadmap.md`)
 - Sprint F: Admin Studio (NiceGUI) + Synonym Manager remain.

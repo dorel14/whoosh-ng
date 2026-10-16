@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from whoosh.middleware.chain import MiddlewareChain
 from whoosh.middleware.context import MiddlewareContext
 from whoosh_modern.middleware import (

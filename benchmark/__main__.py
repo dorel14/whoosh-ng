@@ -12,11 +12,9 @@ import os
 import shutil
 import sys
 import time
-from collections.abc import Iterator, Sequence
-from pathlib import Path
-from typing import Any
+from collections.abc import Sequence
 
-from whoosh import index, qparser, query, scoring
+from whoosh import index, qparser, scoring
 from whoosh.support.bench import Spec
 
 
@@ -184,6 +182,8 @@ def _run_indexing(spec, options) -> tuple[int, float]:
     skip = int(options.skip)
     upto = int(options.upto) if options.upto else 0
 
+    profiler = None
+    commit_profiler = None
     if use_profiling:
         from whoosh_modern.profiling import CommitProfilerV2, IndexProfiler
 
@@ -196,6 +196,8 @@ def _run_indexing(spec, options) -> tuple[int, float]:
     count = 0
 
     if use_profiling:
+        assert profiler is not None
+        assert commit_profiler is not None
         if batch_size > 0:
             count = _run_batch_indexing_with_profiling(
                 ix, spec, options, profiler, commit_profiler, batch_size, skip, upto

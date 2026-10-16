@@ -9,9 +9,9 @@ import pytest
 
 pytest.importorskip("pytest_benchmark")
 
-from whoosh.fields import BOOLEAN, DATETIME, KEYWORD, NUMERIC, TEXT, Schema
+from whoosh.fields import Schema
 from whoosh_modern.data_sources.sql import SQLSource
-from whoosh_modern.facets import FacetManager, RangeFacet, TermsFacet
+from whoosh_modern.facets import FacetManager
 from whoosh_modern.schema_discovery import SchemaDiscovery
 
 BENCHMARK_DIR = Path(__file__).parent
@@ -63,7 +63,7 @@ class BenchmarkFacetManager:
         def _get():
             return self.facet_manager.get_facet_config("category")
 
-        config = benchmark(_get)
+        _config = benchmark(_get)
         # Returns None or config dict
 
     def benchmark_get_all_facet_configs(self, benchmark):

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import time
 from typing import Any
 
 import pytest
@@ -11,7 +10,6 @@ pytest.importorskip("pytest_benchmark")
 
 from whoosh_modern.middleware import (
     LoggingMiddleware,
-    Middleware,
     MiddlewarePipeline,
     RetryMiddleware,
 )

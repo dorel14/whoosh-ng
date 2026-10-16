@@ -4,7 +4,7 @@ from array import array
 import pytest
 
 from whoosh import analysis, fields, formats, query
-from whoosh.codec import default_codec, memory
+from whoosh.codec import default_codec
 from whoosh.codec.memory import MemoryCodec, MemSegment, MemTermsReader, MemWriter
 from whoosh.codec.plaintext import PlainTextCodec
 from whoosh.codec.whoosh3 import W3Codec
@@ -104,7 +104,7 @@ def test_random_termkeys():
 def test_stored_fields():
     codec = default_codec()
     fieldobj = fields.TEXT(stored=True)
-    with TempStorage("storedfields") as st:
+    with TempStorage("storedfields") as st:  # type: ignore[reportArgumentType]
         seg = codec.new_segment(st, "test")
 
         dw = codec.per_document_writer(st, seg)
@@ -252,7 +252,9 @@ def test_vector_values():
 
     dw = codec.per_document_writer(st, seg)
     dw.start_doc(0)
-    vals = ((t, w, v) for t, _, w, v in sorted(field.vector.word_values(content, field.analyzer)))
+    vector = field.vector
+    assert vector is not None
+    vals = ((t, w, v) for t, _, w, v in sorted(vector.word_values(content, field.analyzer)))
     dw.add_vector_items("f1", field, vals)
     dw.finish_doc()
     dw.close()
@@ -550,7 +552,9 @@ def test_plaintext_codec():
         w.add_document(a="delta echo foxtrot", b=True, c=-100, d="aching selling dipping")
         w.add_document(a="echo foxtrot india", b=None, c=-200, d="filling going hopping")
 
-    with ix.reader() as r:
+    reader = ix.reader()
+    assert reader is not None
+    with reader as r:
         assert r.has_column("a")
         c = r.column_reader("a")
         assert c[2] == u(cde)

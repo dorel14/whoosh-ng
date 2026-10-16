@@ -81,7 +81,7 @@ class TestParallelIndexBuilder:
                     parser = QueryParser("title", schema=schema)
                     results = searcher.search(parser.parse("Python"))
                     assert len(results) == 1
-                    assert results[0]["id"] == "2"
+                    assert results[0]["id"] == "2"  # type: ignore[call-overload]
 
                     results_all = searcher.search(parser.parse("title:*"))
                     assert len(results_all) >= 1
@@ -134,7 +134,7 @@ class TestParallelIndexBuilder:
                     for i in range(0, len(docs), batch_size):
                         yield docs[i : i + batch_size]
 
-            total = builder.build_from_source(_Source())
+            total = builder.build_from_source(_Source())  # type: ignore[arg-type]
             assert total == 6
 
             ix = open_dir(index_path)

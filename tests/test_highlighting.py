@@ -80,7 +80,7 @@ def test_sentence_fragment():
         + "This sentence is the second. Third sentence here."
     )
     terms = ("sentence",)
-    sa = analysis.StandardAnalyzer(stoplist=None)
+    sa = analysis.StandardAnalyzer(stoplist=None)  # type: ignore[arg-type]
     sf = highlight.SentenceFragmenter()
     uc = highlight.UppercaseFormatter()
     htext = highlight.highlight(text, terms, sa, sf, uc)
@@ -216,7 +216,7 @@ def test_unstored():
 
     hit = ix.searcher().search(query.Term("text", "bravo"))[0]
     with pytest.raises(KeyError):
-        hit.highlights("tags")
+        hit.highlights("tags")  # type: ignore[attr-defined]
 
 
 def test_multifilter():
@@ -235,7 +235,7 @@ def test_multifilter():
             assert ("text", "5000") in s.reader()
             hit = s.search(query.Term("text", "5000"))[0]
             assert (
-                hit.highlights("text") == 'Our BabbleTron<b class="match term0">5000</b> is great'
+                hit.highlights("text") == 'Our BabbleTron<b class="match term0">5000</b> is great'  # type: ignore[attr-defined]
             )
 
 
@@ -281,7 +281,7 @@ def test_highlight_wildcards():
         assert r.scored_length() == 1
         r.formatter = highlight.UppercaseFormatter()
         hit = r[0]
-        assert hit.highlights("text") == "alfa bravo CHARLIE delta COOKIE echo"
+        assert hit.highlights("text") == "alfa bravo CHARLIE delta COOKIE echo"  # type: ignore[attr-defined]
 
 
 def test_highlight_ngrams():
@@ -298,7 +298,7 @@ def test_highlight_ngrams():
 
         r.fragmenter = highlight.SentenceFragmenter()
         r.formatter = highlight.UppercaseFormatter()
-        snippet = r[0].highlights("text")
+        snippet = r[0].highlights("text")  # type: ignore[attr-defined]
         assert snippet == "MULTIPLICATIon and subtracTION are good"
 
 
@@ -326,15 +326,15 @@ def test_whole_noterms():
 
         r.fragmenter = highlight.WholeFragmenter()
         r.formatter = highlight.UppercaseFormatter()
-        hi = r[0].highlights("text")
+        hi = r[0].highlights("text")  # type: ignore[attr-defined]
         assert hi == "alfa bravo charlie DELTA echo foxtrot golf"
 
         r = s.search(query.Term("tag", "foo"))
         assert len(r) == 1
         r.fragmenter = highlight.WholeFragmenter()
         r.formatter = highlight.UppercaseFormatter()
-        hi = r[0].highlights("text")
+        hi = r[0].highlights("text")  # type: ignore[attr-defined]
         assert hi == ""
 
-        hi = r[0].highlights("text", minscore=0)
+        hi = r[0].highlights("text", minscore=0)  # type: ignore[attr-defined]
         assert hi == "alfa bravo charlie delta echo foxtrot golf"

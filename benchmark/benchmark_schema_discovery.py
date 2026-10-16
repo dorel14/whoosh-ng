@@ -117,5 +117,5 @@ class BenchmarkSchemaDiscovery:
             except Exception:
                 return None
 
-        result = benchmark(_discover)
+        _result = benchmark(_discover)
         # Should raise for duplicates

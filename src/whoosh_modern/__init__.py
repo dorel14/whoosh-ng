@@ -120,6 +120,7 @@ from whoosh_modern.profiling import (
     profile_commit,
 )
 from whoosh_modern.schema_discovery import SchemaDiscovery
+from whoosh_modern.searching import HybridSearcher
 from whoosh_modern.storage import (
     AsyncFileStorage,
     AsyncHybridStorage,
@@ -241,6 +242,7 @@ __all__ = [
     "SEARCH_AS_YOU_TYPE",
     # Vector / Embeddings
     "HnswlibProvider",
+    "HybridSearcher",
     "EmbeddingProvider",
     "SentenceTransformersProvider",
     # Analysis presets

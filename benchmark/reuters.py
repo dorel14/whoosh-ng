@@ -2,9 +2,7 @@ import gzip
 import os.path
 
 from benchmark import WhooshLikeSpec
-from benchmark.reporting import BenchmarkResult
 from whoosh import analysis, fields
-from whoosh.util import now
 
 
 class Reuters(WhooshLikeSpec):

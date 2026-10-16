@@ -81,7 +81,9 @@ def test_automaton():
         with ix.writer() as w:
             w.add_document(text=" ".join(_wordlist))
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             bterms = list(r.lexicon("text"))
             words = [bterm.decode("utf8") for bterm in bterms]
             assert words == _wordlist
@@ -101,7 +103,9 @@ def test_reader_corrector():
             w.add_document(text="leader libra oola paster")
             w.add_document(text="feeder lorry zoala baster")
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             sp = spelling.ReaderCorrector(r, "text", schema["text"])
             assert sp.suggest("koala", maxdist=1) == ["koala", "zoala"]
 
@@ -124,7 +128,9 @@ def test_unicode_spelling():
             for word in domain:
                 w.add_document(text=word)
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             rc = spelling.ReaderCorrector(r, "text", schema["text"])
             assert rc.suggest("\u65e5\u672e\u672c") == ["\u65e5\u672c"]
 

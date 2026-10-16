@@ -27,7 +27,9 @@ def test_vector_reading():
         )
         writer.commit()
 
-        with ix.reader() as r:
+        ctx = ix.reader()
+        assert ctx is not None
+        with ctx as r:
             assert list(r.vector_as("frequency", 0, "content")) == [
                 (u("black"), 1),
                 (u("hole"), 1),
@@ -131,6 +133,6 @@ def test_vpst_block_tag():
     ]
 
     with TempIndex(schema) as ix:
-        for i, string in enumerate(content):
+        for _i, string in enumerate(content):
             with ix.writer() as w:
                 w.add_document(text=string)

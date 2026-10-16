@@ -8,12 +8,14 @@ Version: 3.0.0
 
 from whoosh_modern.indexing.batch_writer import BatchIndexWriter
 from whoosh_modern.indexing.compiler import BatchAnalyzer, CompiledDataSource
+from whoosh_modern.indexing.embedding_writer import EmbeddingBatchWriter
 from whoosh_modern.indexing.modern_builder import ModernIndexBuilder
 from whoosh_modern.indexing.parallel_builder import ParallelIndexBuilder
 
 __all__ = [
     "BatchAnalyzer",
     "BatchIndexWriter",
+    "EmbeddingBatchWriter",
     "CompiledDataSource",
     "ModernIndexBuilder",
     "ParallelIndexBuilder",

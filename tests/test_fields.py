@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -159,7 +159,7 @@ def test_numeric():
     schema = fields.Schema(
         id=fields.ID(stored=True),
         integer=fields.NUMERIC(int),
-        floating=fields.NUMERIC(float),
+        floating=fields.NUMERIC(float),  # type: ignore[reportArgumentType]
     )
     ix = RamStorage().create_index(schema)
 
@@ -177,12 +177,12 @@ def test_numeric():
         q = qp.parse("5820")
         r = s.search(q)
         assert len(r) == 1
-        assert r[0]["id"] == "a"
+        assert r[0]["id"] == "a"  # type: ignore[reportCallIssue]
 
     with ix.searcher() as s:
         r = s.search(qp.parse("floating:4.5"))
         assert len(r) == 1
-        assert r[0]["id"] == "d"
+        assert r[0]["id"] == "d"  # type: ignore[reportCallIssue]
 
     q = qp.parse("integer:*")
     assert q.__class__ == query.Every
@@ -213,11 +213,11 @@ def test_decimal_numeric():
         q = qp.parse("123.56")
         r = s.search(q)
         assert len(r) == 1
-        assert r[0]["id"] == "a"
+        assert r[0]["id"] == "a"  # type: ignore[reportCallIssue]
 
         r = s.search(qp.parse("0.536255"))
         assert len(r) == 1
-        assert r[0]["id"] == "b"
+        assert r[0]["id"] == "b"  # type: ignore[reportCallIssue]
 
 
 def test_numeric_parsing():
@@ -229,18 +229,18 @@ def test_numeric_parsing():
 
     q = qp.parse("[to 400]")
     assert q.__class__ is query.NumericRange
-    assert q.start is None
-    assert q.end == 400
+    assert q.start is None  # type: ignore[reportAttributeAccessIssue]
+    assert q.end == 400  # type: ignore[reportAttributeAccessIssue]
 
     q = qp.parse("[10 to]")
     assert q.__class__ is query.NumericRange
-    assert q.start == 10
-    assert q.end is None
+    assert q.start == 10  # type: ignore[reportAttributeAccessIssue]
+    assert q.end is None  # type: ignore[reportAttributeAccessIssue]
 
     q = qp.parse("[10 to 400]")
     assert q.__class__ is query.NumericRange
-    assert q.start == 10
-    assert q.end == 400
+    assert q.start == 10  # type: ignore[reportAttributeAccessIssue]
+    assert q.end == 400  # type: ignore[reportAttributeAccessIssue]
 
 
 def test_numeric_ranges():
@@ -324,7 +324,7 @@ def test_decimal_ranges():
 
 def test_numeric_errors():
     f = fields.NUMERIC(int, bits=16, signed=True)
-    schema = fields.Schema(f=f)
+    _schema = fields.Schema(f=f)
 
     with pytest.raises(ValueError):
         list(f.index(-32769))
@@ -399,10 +399,10 @@ def test_datetime():
 
         r = s.search(qp.parse("date:20100523"))
         assert len(r) == 1
-        assert r[0]["id"] == "5-23"
-        assert r[0]["date"].__class__ is datetime
-        assert r[0]["date"].month == 5
-        assert r[0]["date"].day == 23
+        assert r[0]["id"] == "5-23"  # type: ignore[reportCallIssue]
+        assert r[0]["date"].__class__ is datetime  # type: ignore[reportCallIssue]
+        assert r[0]["date"].month == 5  # type: ignore[reportCallIssue]
+        assert r[0]["date"].day == 23  # type: ignore[reportCallIssue]
 
         r = s.search(qp.parse("date:'2010 02'"))
         assert len(r) == 27
@@ -411,8 +411,8 @@ def test_datetime():
         startdt = datetime(2010, 5, 1, 0, 0, 0, 0, tzinfo=UTC)
         enddt = datetime(2010, 8, 31, 23, 59, 59, 999999, tzinfo=UTC)
         assert q.__class__ is query.NumericRange
-        assert q.start == times.datetime_to_long(startdt)
-        assert q.end == times.datetime_to_long(enddt)
+        assert q.start == times.datetime_to_long(startdt)  # type: ignore[reportAttributeAccessIssue]
+        assert q.end == times.datetime_to_long(enddt)  # type: ignore[reportAttributeAccessIssue]
 
 
 def test_boolean():
@@ -440,7 +440,7 @@ def test_boolean():
 
         q = qp.parse("done:false")
         assert q.__class__ == query.Term
-        assert q.text is False
+        assert q.text is False  # type: ignore[reportAttributeAccessIssue]
         assert schema["done"].to_bytes(False) == b"f"
         r = s.search(q)
         assert sorted([d["id"] for d in r]) == ["b", "d"]
@@ -668,7 +668,9 @@ def test_pickle_schema():
 
         assert dumps(schema)
 
-        with ix.reader() as r:
+        reader = ix.reader()
+        assert reader is not None
+        with reader as r:
             assert dumps(r.schema)
 
 

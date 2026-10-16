@@ -21,11 +21,9 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-import io
 import os
 import random
 import shutil
-import statistics
 import tempfile
 import time
 from dataclasses import dataclass, field
@@ -36,7 +34,6 @@ import boto3
 import zstandard as zstd
 
 from whoosh import fields
-from whoosh.filedb.filestore import FileStorage
 from whoosh.index import create_in
 from whoosh.writing import IndexWriter
 from whoosh_modern.storage import HybridStorage, S3Storage

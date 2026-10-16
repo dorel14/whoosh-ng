@@ -1,18 +1,11 @@
 from __future__ import annotations
 
-import builtins
-import collections.abc
-import os
-import tempfile
-
 import pytest
 
 from whoosh.backends.abc import Backend
-from whoosh.backends.file import FileBackend
 from whoosh.backends.sqlite import SQLiteBackend
-from whoosh.fields import ID, KEYWORD, STORED, TEXT, Schema
+from whoosh.fields import ID, KEYWORD, TEXT, Schema
 from whoosh.index import EmptyIndexError
-from whoosh.registry import BackendRegistry
 
 
 @pytest.fixture
@@ -28,8 +21,8 @@ def tmp_sqlite_path(tmp_path):
 class ConcreteBackend(Backend):
     name = "concrete"
 
-    def create(self, schema): ...
-    def open(self, schema=None): ...
+    def create(self, schema): ...  # type: ignore[override]
+    def open(self, schema=None): ...  # type: ignore[override]
     def exists(self):
         return False
 
@@ -110,7 +103,7 @@ def test_sqlite_destroy(tmp_sqlite_path) -> None:
 def test_sqlite_context_manager(tmp_sqlite_path) -> None:
     backend = SQLiteBackend(tmp_sqlite_path)
     with backend:
-        ix = backend.create(Schema(title=TEXT(stored=True)))
+        _ix = backend.create(Schema(title=TEXT(stored=True)))
         w = backend.writer()
         w.add_document(title="ctx")
         w.commit()

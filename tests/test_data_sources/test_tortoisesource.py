@@ -14,7 +14,7 @@ class Article(Model):
     title = fields.CharField(max_length=255)
     body = fields.TextField()
 
-    class Meta:
+    class Meta:  # type: ignore[reportIncompatibleVariableOverride]
         table = "articles"
 
 

@@ -17,7 +17,6 @@ import pytest
 
 pytest.importorskip("pytest_benchmark")
 
-from whoosh.fields import BOOLEAN, NUMERIC, TEXT, Schema
 from whoosh_modern.data_sources.sql import SQLSource
 from whoosh_modern.facets import FacetManager
 from whoosh_modern.schema_discovery import SchemaDiscovery
@@ -69,7 +68,7 @@ class BenchmarkSearchViewPipeline:
 
     def test_pipeline_step_index(self, benchmark):
         """Benchmark step 3: index build from schema + documents."""
-        schema = self.source.discover_schema()
+        _schema = self.source.discover_schema()
         view = SearchView(name="reuters", source=self.source)
         idx_path = _index_path("pipeline_index")
         if os.path.exists(idx_path):

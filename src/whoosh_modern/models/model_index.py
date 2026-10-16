@@ -18,7 +18,7 @@ from typing import Any
 from whoosh.fields import ID, Schema
 
 from ._protocols import HasFields
-from .type_mapper import TypeMapper, _extract_search_options
+from .type_mapper import TypeMapper, _extract_search_options  # pyright: ignore[reportPrivateUsage]
 from .types import SearchField, SearchOptions
 
 
