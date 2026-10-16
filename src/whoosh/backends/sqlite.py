@@ -358,8 +358,7 @@ class SQLiteBackend(Backend):
     def open(self, schema: Schema | None = None) -> _SQLiteIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
         # For in-memory databases, skip file existence check
         if (
-            not (isinstance(self.path, str) and self.path == ":memory:")
-            and not self.path.exists()  # pyright: ignore[reportAttributeAccessIssue]
+            not (isinstance(self.path, str) and self.path == ":memory:") and not self.path.exists()  # pyright: ignore[reportAttributeAccessIssue]
         ):
             raise EmptyIndexError(f"No Whoosh (SQLite) index found at {self.path!r}")
         self._connect()
