@@ -445,8 +445,7 @@ pre-commit run --all-files                  # run all pre-commit checks
 ruff check .                              # lint all files
 ruff check --fix .                        # lint + auto-fix
 ruff format .                             # format code
-pyright src/                                 # type checking
-pyright src/                              # additional type checking
+pyright src/                              # type checking
 ```
 
 ### Testing

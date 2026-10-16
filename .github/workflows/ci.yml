@@ -25,6 +25,7 @@ jobs:
       - name: Run ruff
         run: ruff check .
       - name: Run pyright
+        # Mypy a été remplacé par Pyright comme vérificateur de types principal.
         run: pyright src/
 
   test:
