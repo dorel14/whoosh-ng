@@ -256,9 +256,7 @@ class SearchView:
         """
         return self._prepare_doc_ext(doc, schema)[0]
 
-    def _prepare_doc_ext(
-        self, doc: dict[str, Any], schema: Schema
-    ) -> tuple[dict[str, Any], bool]:
+    def _prepare_doc_ext(self, doc: dict[str, Any], schema: Schema) -> tuple[dict[str, Any], bool]:
         """Prepare a document and report whether middleware deferred it.
 
         Args:

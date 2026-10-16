@@ -198,9 +198,7 @@ class NumpyProvider(VectorProvider):
         remove_set = set(doc_ids)
         pairs = [
             (d, v, n)
-            for d, v, n in zip(
-                self._doc_ids, self._vectors, self._norms, strict=True
-            )
+            for d, v, n in zip(self._doc_ids, self._vectors, self._norms, strict=True)
             if d not in remove_set
         ]
         self._doc_ids = [p[0] for p in pairs]
