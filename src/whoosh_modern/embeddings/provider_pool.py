@@ -153,7 +153,7 @@ class ProviderPool:
                 return chunk_idx, vectors
             except Exception as exc:
                 logger.error("Chunk %d embedding failed: %s", chunk_idx, exc)
-                raise
+                return chunk_idx, []
 
         # Use ThreadPoolExecutor for true parallel execution
         with ThreadPoolExecutor(max_workers=min(self._pool_size, len(chunks))) as executor:
@@ -167,9 +167,6 @@ class ProviderPool:
                     idx = futures[future]
                     exceptions.append((idx, exc))
                     logger.error("Failed to embed chunk %d", idx)
-
-        if exceptions:
-            raise exceptions[0][1]  # Raise first exception
 
         # Assemble results in original order
         all_vectors: list[Sequence[float]] = []
