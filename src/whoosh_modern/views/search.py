@@ -126,7 +126,8 @@ class SearchView:
         # Populate index
         writer = self._index.writer()
         for doc in self.source.iter_documents():
-            writer.add_document(**self._prepare_doc(doc, schema))
+            self._write_doc(writer, doc, schema)
+        self._flush_middleware(writer)
         writer.commit()
 
         self._store_schema_metadata()
@@ -157,8 +158,9 @@ class SearchView:
         writer = self._index.writer()
         schema = self._schema if self._schema is not None else self.source.discover_schema()
         for doc in self.source.iter_changes(since):
-            writer.update_document(**self._prepare_doc(doc, schema))
+            self._write_doc(writer, doc, schema, update=True)
             count += 1
+        self._flush_middleware(writer, update=True)
         writer.commit()
 
         if count > 0:
@@ -185,8 +187,9 @@ class SearchView:
         count = 0
         writer = self._index.writer()
         for doc in self.source.iter_documents():
-            writer.add_document(**self._prepare_doc(doc, schema))
+            self._write_doc(writer, doc, schema)
             count += 1
+        self._flush_middleware(writer)
         writer.commit()
         return count
 
@@ -251,6 +254,22 @@ class SearchView:
         Returns:
             Prepared document dict ready for indexing.
         """
+        return self._prepare_doc_ext(doc, schema)[0]
+
+    def _prepare_doc_ext(
+        self, doc: dict[str, Any], schema: Schema
+    ) -> tuple[dict[str, Any], bool]:
+        """Prepare a document and report whether middleware deferred it.
+
+        Args:
+            doc: Source document as a dict.
+            schema: The Whoosh Schema to use for type checking.
+
+        Returns:
+            Tuple of the prepared document and a ``deferred`` flag. A deferred
+            document is held by a middleware (e.g. batch embedding) and will be
+            handed back through ``drain_ready()``.
+        """
         prepared: dict[str, Any] = {}
         for field_name, _field_type in schema.items():
             if field_name in doc:
@@ -259,6 +278,7 @@ class SearchView:
                     value = str(value)
                 prepared[field_name] = value
 
+        deferred = False
         if self.middleware:
             context = MiddlewareContext("index")
             context.document = prepared
@@ -266,8 +286,36 @@ class SearchView:
                 context = middleware.before_index(context)
             if context.document is not None:
                 prepared = context.document
+            deferred = bool(context.metadata.get("defer_index"))
 
-        return prepared
+        return prepared, deferred
+
+    def _write_doc(
+        self, writer: Any, doc: dict[str, Any], schema: Schema, update: bool = False
+    ) -> None:
+        """Run middleware on a document and write it (or defer it)."""
+        prepared, deferred = self._prepare_doc_ext(doc, schema)
+        write = writer.update_document if update else writer.add_document
+        if not deferred:
+            write(**prepared)
+        self._write_ready(writer, update)
+
+    def _write_ready(self, writer: Any, update: bool = False) -> None:
+        """Write documents that middleware released via ``drain_ready()``."""
+        write = writer.update_document if update else writer.add_document
+        for middleware in self.middleware:
+            drain = getattr(middleware, "drain_ready", None)
+            if drain is not None:
+                for ready in drain():
+                    write(**ready)
+
+    def _flush_middleware(self, writer: Any, update: bool = False) -> None:
+        """Flush buffered middleware documents; call before ``writer.commit()``."""
+        for middleware in self.middleware:
+            flush = getattr(middleware, "flush", None)
+            if flush is not None:
+                flush()
+        self._write_ready(writer, update)
 
     def _store_schema_metadata(self) -> None:
         """Store schema version and update timestamp in a sidecar JSON file.

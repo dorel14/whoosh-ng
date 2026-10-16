@@ -127,11 +127,11 @@ class EmbeddingMiddleware(Middleware):
 
         # Assign vectors to documents
         enriched = []
-        for (doc, field_configs), _, vector in zip(
-            self._accumulated_docs, self._accumulated_texts, vectors, strict=True
-        ):
+        offset = 0
+        for doc, field_configs in self._accumulated_docs:
             for _, target in field_configs:
-                doc[target] = vector
+                doc[target] = vectors[offset]
+                offset += 1
             enriched.append(doc)
 
         return enriched
@@ -149,11 +149,6 @@ class EmbeddingMiddleware(Middleware):
         Returns:
             The enriched middleware context.
         """
-        # If we have pre-enriched documents in the queue, return the next one
-        if self._enriched_queue:
-            context.document = self._enriched_queue.pop(0)
-            return context
-
         if self._embedding_provider is None:
             return context
 
@@ -198,32 +193,44 @@ class EmbeddingMiddleware(Middleware):
                 self._accumulated_docs.append((doc, field_configs))
                 self._accumulated_texts.extend(texts_for_doc)
 
+                # Writers must not index this doc yet: it is released via
+                # drain_ready() once its vector has been computed.
+                context.metadata["defer_index"] = True
+
                 if len(self._accumulated_docs) >= self._batch_size:
-                    enriched = self._process_accumulated_batch()
-                    self._accumulated_docs.clear()
-                    self._accumulated_texts.clear()
-                    # Queue all enriched docs and return the first one
-                    if enriched:
-                        self._enriched_queue.extend(enriched[1:])
-                        context.document = enriched[0]
-                        return context
+                    self.flush()
 
         context.document = doc
         return context
 
-    def on_commit(self, context: MiddlewareContext) -> None:
-        """Flush any remaining accumulated documents.
+    def flush(self) -> None:
+        """Embed any accumulated documents and queue them for indexing.
 
-        Called at commit time to ensure all accumulated documents
-        are processed before the writer commits.
+        Enriched documents become available through :meth:`drain_ready`.
         """
-        if self._accumulated_docs:
-            logger.debug(
-                "Flushing %d accumulated documents at commit time",
-                len(self._accumulated_docs),
-            )
-            enriched = self._process_accumulated_batch()
-            self._accumulated_docs.clear()
-            self._accumulated_texts.clear()
-            if enriched:
-                self._enriched_queue.extend(enriched)
+        if not self._accumulated_docs:
+            return
+        logger.debug("Flushing %d accumulated documents", len(self._accumulated_docs))
+        enriched = self._process_accumulated_batch()
+        self._accumulated_docs.clear()
+        self._accumulated_texts.clear()
+        self._enriched_queue.extend(enriched)
+
+    def drain_ready(self) -> list[dict[str, Any]]:
+        """Return and clear documents whose embeddings are ready to index.
+
+        Returns:
+            Enriched documents that the writer must now index.
+        """
+        ready = self._enriched_queue
+        self._enriched_queue = []
+        return ready
+
+    def on_commit(self, context: MiddlewareContext) -> None:
+        """Flush remaining accumulated documents (safety net at commit time).
+
+        Writers that honour ``defer_index`` call :meth:`flush` and
+        :meth:`drain_ready` *before* committing; this hook only embeds
+        leftovers so they are never silently dropped from the queue.
+        """
+        self.flush()

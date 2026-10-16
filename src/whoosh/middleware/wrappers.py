@@ -26,7 +26,9 @@ class MiddlewareWriter:
         ctx.document = dict(fields)
         ctx = self._chain.run_before("before_index", ctx)
         try:
-            self._writer.add_document(**ctx.document)
+            if not ctx.metadata.get("defer_index"):
+                self._writer.add_document(**ctx.document)
+            self._write_ready(self._writer.add_document)
             ctx = self._chain.run_after("after_index", ctx)
         except Exception as exc:
             self._chain.run_on_error(ctx, exc)
@@ -37,7 +39,9 @@ class MiddlewareWriter:
         ctx.document = dict(fields)
         ctx = self._chain.run_before("before_index", ctx)
         try:
-            self._writer.update_document(**ctx.document)
+            if not ctx.metadata.get("defer_index"):
+                self._writer.update_document(**ctx.document)
+            self._write_ready(self._writer.update_document)
             ctx = self._chain.run_after("after_index", ctx)
         except Exception as exc:
             self._chain.run_on_error(ctx, exc)
@@ -55,9 +59,24 @@ class MiddlewareWriter:
             self._chain.run_on_error(ctx, exc)
             raise
 
+    def _write_ready(self, write: Any) -> None:
+        for mw in self._chain._middlewares:
+            drain = getattr(mw, "drain_ready", None)
+            if drain is not None:
+                for doc in drain():
+                    write(**doc)
+
+    def _flush_pending(self) -> None:
+        for mw in self._chain._middlewares:
+            flush = getattr(mw, "flush", None)
+            if flush is not None:
+                flush()
+        self._write_ready(self._writer.add_document)
+
     def commit(self) -> None:
         ctx = MiddlewareContext("commit")
         try:
+            self._flush_pending()
             self._writer.commit()
             ctx = self._chain.run_after("on_commit", ctx)
         except Exception as exc:
