@@ -46,9 +46,8 @@ jobs:
           # Fetch PR Diff from GitHub
           headers = {
               "Authorization": f"token {github_token}",
-              "Accept": "application/vnd.github.v3.diff"
           }
-          diff_url = f"https://api.github.com/repos/{repo}/pulls/{pr_num}"
+          diff_url = f"https://github.com/{repo}/pull/{pr_num}.diff"
 
           try:
               diff_resp = requests.get(diff_url, headers=headers)
