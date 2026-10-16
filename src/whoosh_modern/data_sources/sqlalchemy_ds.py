@@ -152,10 +152,8 @@ class SQLAlchemySource:
                 except Exception:
                     pass
 
-                self._schema = SchemaDiscovery.infer_schema(
-                    keys=columns,
-                    sample_rows=sample_rows if sample_rows else None,
-                    sql_types=sql_types,
+                self._schema = SchemaDiscovery.from_result_set(
+                    list(zip(columns, sql_types, strict=True))
                 )
                 return self._schema
         except Exception:
