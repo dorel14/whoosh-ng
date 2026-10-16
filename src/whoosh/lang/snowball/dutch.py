@@ -1,7 +1,7 @@
-from .bases import _StandardStemmer
+from .bases import StandardStemmer
 
 
-class DutchStemmer(_StandardStemmer):
+class DutchStemmer(StandardStemmer):
     """
     The Dutch Snowball stemmer.
 

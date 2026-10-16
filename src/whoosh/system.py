@@ -31,6 +31,7 @@ from struct import Struct, calcsize
 IS_LITTLE = sys.byteorder == "little"
 
 _INT_SIZE = calcsize("!i")
+INT_SIZE = _INT_SIZE
 _SHORT_SIZE = calcsize("!H")
 _LONG_SIZE = calcsize("!Q")
 _FLOAT_SIZE = calcsize("!f")

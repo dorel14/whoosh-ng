@@ -149,6 +149,5 @@
   "reportPrivateUsage": true,
   "reportPropertyTypeMismatch": true,
   "reportGeneralTypeIssues": true,
-  "reportImplicitAny": true,
   "reportIncompatibleMethodOverride": true
 }

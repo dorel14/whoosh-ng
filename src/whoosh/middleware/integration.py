@@ -18,8 +18,8 @@ def apply_middleware_to_writer(writer, middleware: list | None = None) -> Middle
     """
     if middleware is None:
         chain = (
-            PluginManager._default.get_middleware_chain()
-            if hasattr(PluginManager, "_default") and PluginManager._default
+            PluginManager.default.get_middleware_chain()
+            if PluginManager.default
             else MiddlewareChain()
         )
     else:
@@ -36,8 +36,8 @@ def apply_middleware_to_searcher(searcher, middleware: list | None = None) -> Mi
     """
     if middleware is None:
         chain = (
-            PluginManager._default.get_middleware_chain()
-            if hasattr(PluginManager, "_default") and PluginManager._default
+            PluginManager.default.get_middleware_chain()
+            if PluginManager.default
             else MiddlewareChain()
         )
     else:

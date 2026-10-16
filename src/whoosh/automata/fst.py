@@ -45,7 +45,7 @@ from hashlib import sha1  # type: ignore
 from io import BytesIO
 
 from whoosh.filedb.structfile import StructFile
-from whoosh.system import _INT_SIZE, emptybytes, pack_byte, pack_int, pack_long, pack_uint
+from whoosh.system import INT_SIZE, emptybytes, pack_byte, pack_int, pack_long, pack_uint
 from whoosh.util.text import utf8decode, utf8encode
 from whoosh.util.varints import varint
 
@@ -188,7 +188,7 @@ class IntValues(Values):
 
     @staticmethod
     def skip(dbfile):  # pyright: ignore[reportIncompatibleMethodOverride]
-        dbfile.seek(_INT_SIZE, 1)
+        dbfile.seek(INT_SIZE, 1)
 
     @staticmethod
     def to_bytes(v):
@@ -1052,7 +1052,7 @@ class GraphWriter:
         here = dbfile.tell()
         dbfile.write_pickle(self.fieldroots)
         dbfile.flush()
-        dbfile.seek(4 + _INT_SIZE)  # Seek past magic and version number
+        dbfile.seek(4 + INT_SIZE)  # Seek past magic and version number
         dbfile.write_uint(here)
         dbfile.close()
 
@@ -1389,7 +1389,7 @@ class GraphReader(BaseGraphReader):
         if flags == 255:
             # This is a fake arc containing fixed size information; skip it
             # and read the next arc
-            dbfile.seek(_INT_SIZE * 2, 1)
+            dbfile.seek(INT_SIZE * 2, 1)
             flags = dbfile.read_byte()
         toarc.label = self._read_label(flags)
         return self._read_arc_data(flags, toarc)

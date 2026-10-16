@@ -75,7 +75,7 @@ class _SQLiteIndex:
         return True
 
     def last_modified(self) -> int:
-        path = self.backend._path
+        path = self.backend.path
         if isinstance(path, str) and path == ":memory:":
             return -1
         return path.stat().st_mtime_ns if path else -1  # pyright: ignore[reportAttributeAccessIssue]
@@ -117,10 +117,10 @@ class SQLiteReader:
         return self.backend.doc_count()
 
     def all_stored_fields(self) -> list[dict[str, Any]]:
-        return self.backend._all_stored_fields()
+        return self.backend.all_stored_fields()
 
     def stored_fields(self, docnum: int) -> dict[str, Any] | None:
-        return self.backend._stored_fields(docnum)
+        return self.backend.stored_fields(docnum)
 
     def close(self) -> None:
         pass
@@ -144,7 +144,7 @@ class SQLiteWriter:
         raise NotImplementedError("delete_by_query not yet supported for SQLiteBackend")
 
     def commit(self, optimize: bool = False) -> None:  # type: ignore[override]
-        self.backend._commit(self._docs, optimize=optimize)
+        self.backend.commit(self._docs, optimize=optimize)
         self._docs = []
 
     def cancel(self) -> None:
@@ -188,14 +188,14 @@ class SQLiteBackend(Backend):
     def __init__(self, path: str | Path) -> None:
         # Keep ":memory:" as string for special handling; convert other paths
         if isinstance(path, str) and path == ":memory:":
-            self._path: str | Path = path
+            self.path: str | Path = path
         else:
-            self._path = Path(path)
+            self.path = Path(path)
         self._conn: sqlite3.Connection | None = None
         self._schema: Schema | None = None
 
     def __repr__(self) -> str:
-        return f"SQLiteBackend({self._path!r})"
+        return f"SQLiteBackend({self.path!r})"
 
     # -- lifecycle -------------------------------------------------------
 
@@ -229,7 +229,7 @@ class SQLiteBackend(Backend):
 
     def _connect(self) -> None:
         self._check_fts5()
-        self._conn = sqlite3.connect(str(self._path), check_same_thread=False)
+        self._conn = sqlite3.connect(str(self.path), check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA synchronous=NORMAL")
@@ -343,10 +343,10 @@ class SQLiteBackend(Backend):
         if self._conn is not None:
             self._conn.close()
             self._conn = None
-        path_exists = self._path.exists() if not isinstance(self._path, str) else False
+        path_exists = self.path.exists() if not isinstance(self.path, str) else False
         if path_exists:
             try:
-                self._path.unlink()  # pyright: ignore[reportAttributeAccessIssue]
+                self.path.unlink()  # pyright: ignore[reportAttributeAccessIssue]
             except (PermissionError, OSError):
                 pass  # File may be locked on Windows
         self._ensure_schema_table()
@@ -358,30 +358,30 @@ class SQLiteBackend(Backend):
     def open(self, schema: Schema | None = None) -> _SQLiteIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
         # For in-memory databases, skip file existence check
         if (
-            not (isinstance(self._path, str) and self._path == ":memory:")
-            and not self._path.exists()  # pyright: ignore[reportAttributeAccessIssue]
+            not (isinstance(self.path, str) and self.path == ":memory:")
+            and not self.path.exists()  # pyright: ignore[reportAttributeAccessIssue]
         ):
-            raise EmptyIndexError(f"No Whoosh (SQLite) index found at {self._path!r}")
+            raise EmptyIndexError(f"No Whoosh (SQLite) index found at {self.path!r}")
         self._connect()
         # For :memory: databases, use the schema already in memory if available
-        if isinstance(self._path, str) and self._path == ":memory:" and self._schema is not None:
+        if isinstance(self.path, str) and self.path == ":memory:" and self._schema is not None:
             schema = schema or self._schema
         else:
             loaded = self._load_schema()
             if loaded is None:
-                raise EmptyIndexError(f"Index at {self._path!r} has no schema")
+                raise EmptyIndexError(f"Index at {self.path!r} has no schema")
             schema = schema or loaded
         self._ensure_doc_table(schema)
         self._schema = schema
         return _SQLiteIndex(self, schema)
 
     def exists(self) -> bool:
-        if isinstance(self._path, str) and self._path == ":memory:":
+        if isinstance(self.path, str) and self.path == ":memory:":
             return self._conn is not None
-        if not self._path.exists():  # pyright: ignore[reportAttributeAccessIssue]
+        if not self.path.exists():  # pyright: ignore[reportAttributeAccessIssue]
             return False
         try:
-            con = sqlite3.connect(str(self._path))
+            con = sqlite3.connect(str(self.path))
             cur = con.execute("SELECT COUNT(*) FROM _whoosh_schema")
             count = cur.fetchone()[0]
             con.close()
@@ -395,11 +395,11 @@ class SQLiteBackend(Backend):
             self._conn.close()
             self._conn = None
         # :memory: databases have no file to destroy
-        if isinstance(self._path, str) and self._path == ":memory:":
+        if isinstance(self.path, str) and self.path == ":memory:":
             return
-        if self._path.exists():  # pyright: ignore[reportAttributeAccessIssue]
+        if self.path.exists():  # pyright: ignore[reportAttributeAccessIssue]
             try:
-                self._path.unlink()  # pyright: ignore[reportAttributeAccessIssue]
+                self.path.unlink()  # pyright: ignore[reportAttributeAccessIssue]
             except (PermissionError, OSError):
                 pass  # File may be locked on Windows
 
@@ -421,12 +421,12 @@ class SQLiteBackend(Backend):
         except sqlite3.OperationalError:
             return 0
 
-    def _all_stored_fields(self) -> list[dict[str, Any]]:
+    def all_stored_fields(self) -> list[dict[str, Any]]:
         con = self._get_conn()
         cur = con.execute("SELECT * FROM documents")
         return [dict(row) for row in cur.fetchall()]
 
-    def _stored_fields(self, docnum: int) -> dict[str, Any] | None:
+    def stored_fields(self, docnum: int) -> dict[str, Any] | None:
         con = self._get_conn()
         cur = con.execute("SELECT * FROM documents WHERE _rowid = ?", (docnum,))
         row = cur.fetchone()
@@ -439,7 +439,7 @@ class SQLiteBackend(Backend):
 
     # -- commits ----------------------------------------------------------
 
-    def _commit(
+    def commit(
         self,
         docs: list[dict[str, Any]],
         optimize: bool = False,
