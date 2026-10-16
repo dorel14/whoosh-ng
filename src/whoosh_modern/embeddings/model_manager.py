@@ -318,9 +318,9 @@ class EmbeddingModelManager:
                 )
             onnx_candidates = self._get_onnx_candidates(model_info)
             other_files = [
-                "tokenizer.json",
-                "tokenizer_config.json",
-                "config.json",
+                "tokenizer.json?download=true",
+                "tokenizer_config.json?download=true",
+                "config.json?download=true",
             ]
             onnx_dest = model_dir / "model.onnx"
             if not self._download_onnx_with_hf(model_info, onnx_candidates, onnx_dest):
@@ -384,10 +384,10 @@ class EmbeddingModelManager:
         if subfolder:
             subfolder = f"{subfolder}/"
         return [
-            f"{base}/{subfolder}model{suffix}.onnx",
-            f"{base}/tokenizer.json",
-            f"{base}/tokenizer_config.json",
-            f"{base}/config.json",
+            f"{base}/{subfolder}model{suffix}.onnx?download=true",
+            f"{base}/tokenizer.json?download=true",
+            f"{base}/tokenizer_config.json?download=true",
+            f"{base}/config.json?download=true",
         ]
 
     def _get_onnx_candidates(self, model_info: ModelInfo) -> list[str]:
@@ -401,7 +401,7 @@ class EmbeddingModelManager:
         """
         suffix = f"-{model_info.quantization}" if model_info.quantization else ""
         base_names = [
-            f"model{suffix}.onnx",
+            f"model{suffix}.onnx?download=true",
             f"model{suffix}_fp16.onnx",
             f"model{suffix}_quantized.onnx",
         ]

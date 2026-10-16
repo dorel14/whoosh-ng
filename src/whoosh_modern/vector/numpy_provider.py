@@ -195,13 +195,17 @@ class NumpyProvider(VectorProvider):
                 removed += 1
         if removed == 0:
             return
-        keep = [d for d in self._doc_ids if d not in set(doc_ids)]
-        keep_set = set(keep)
-        self._doc_ids = keep
-        self._vectors = [
-            v for d, v in zip(self._doc_ids, self._vectors, strict=True) if d in keep_set
+        remove_set = set(doc_ids)
+        pairs = [
+            (d, v, n)
+            for d, v, n in zip(
+                self._doc_ids, self._vectors, self._norms, strict=True
+            )
+            if d not in remove_set
         ]
-        self._norms = [n for d, n in zip(self._doc_ids, self._norms, strict=True) if d in keep_set]
+        self._doc_ids = [p[0] for p in pairs]
+        self._vectors = [p[1] for p in pairs]
+        self._norms = [p[2] for p in pairs]
         self._doc_index = {d: i for i, d in enumerate(self._doc_ids)}
         self._matrix = None
         self._norms_arr = None
