@@ -259,7 +259,7 @@ class FieldAnalyzerCache:
             value: Field value to invalidate.
         """
         cache_key = f"{field_name}:{value}"
-        self._cache._cache.pop(cache_key, None)
+        self._cache._cache.pop(cache_key, None)  # pyright: ignore[reportPrivateUsage]
 
     def clear(self) -> None:
         """Clear all cached entries for all fields."""

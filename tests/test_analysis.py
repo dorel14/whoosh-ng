@@ -331,7 +331,7 @@ def test_double_metaphone():
 
 
 def test_substitution():
-    mf = analysis.RegexTokenizer(r"\S+")  # type: ignore[reportArgumentType] | analysis.SubstitutionFilter("-", "")
+    mf = analysis.RegexTokenizer(r"\S+") | analysis.SubstitutionFilter("-", "")  # type: ignore[reportArgumentType]
     assert [t.text for t in mf("one-two th-re-ee four")] == [
         "onetwo",
         "threee",
@@ -343,7 +343,7 @@ def test_substitution():
 
 
 def test_delimited_attribute():
-    ana = analysis.RegexTokenizer(r"\S+")  # type: ignore[reportArgumentType] | analysis.DelimitedAttributeFilter()
+    ana = analysis.RegexTokenizer(r"\S+") | analysis.DelimitedAttributeFilter()  # type: ignore[reportArgumentType]
     results = [(t.text, t.boost) for t in ana("image render^2 file^0.5")]
     assert results == [("image", 1.0), ("render", 2.0), ("file", 0.5)]
 

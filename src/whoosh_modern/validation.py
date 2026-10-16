@@ -197,7 +197,7 @@ class ValidationFramework:
         normalized = ValidationFramework._normalize_value(value, field_type)
         try:
             if isinstance(field_type, BOOLEAN):
-                field_type._obj_to_bool(normalized)
+                field_type._obj_to_bool(normalized)  # pyright: ignore[reportPrivateUsage]
             else:
                 to_bytes = getattr(field_type, "to_bytes", None)
                 if to_bytes is None:

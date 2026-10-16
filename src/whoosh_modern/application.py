@@ -156,7 +156,7 @@ class SearchApplication:
         if self._synonym_manager is None:
             self._synonym_manager = SynonymManager()
             if self._wiktionary_indexer is not None:
-                self._synonym_manager.import_wiktionary_index(self._wiktionary_indexer._index_dir)
+                self._synonym_manager.import_wiktionary_index(self._wiktionary_indexer._index_dir)  # pyright: ignore[reportPrivateUsage]
         return self._synonym_manager
 
     def _detect_language(self, document: dict[str, Any]) -> str | None:
@@ -216,7 +216,7 @@ class SearchApplication:
                 ),
             ]
         self._index = view.build(index_path)
-        self._schema = view._schema
+        self._schema = view._schema  # pyright: ignore[reportPrivateUsage]
         self._view = view
 
         return self

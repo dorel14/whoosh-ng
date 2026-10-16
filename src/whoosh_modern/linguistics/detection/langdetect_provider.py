@@ -37,7 +37,7 @@ class LangDetectProvider(LanguageDetector):
             ImportError: If ``langdetect`` is not installed.
         """
         try:
-            import langdetect  # pyright: ignore[reportMissingImports]
+            import langdetect  # pyright: ignore[reportMissingImports, reportMissingTypeStubs]
 
             _ = langdetect  # mark as used for type checkers
         except ImportError as exc:
@@ -56,7 +56,7 @@ class LangDetectProvider(LanguageDetector):
         Returns:
             An ISO 639-1 language code (e.g. ``"fr"``).
         """
-        import langdetect  # pyright: ignore[reportMissingImports]
+        import langdetect  # pyright: ignore[reportMissingImports, reportMissingTypeStubs]
 
         langs = langdetect.detect_langs(text)
         if not langs:

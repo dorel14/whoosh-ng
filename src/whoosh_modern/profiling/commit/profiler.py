@@ -506,37 +506,37 @@ class _TimedSegmentWriter:
             self._orig_start_field = None
 
         def _timed_flush() -> None:
-            profiler._step("flush")
+            profiler._step("flush")  # pyright: ignore[reportPrivateUsage]
             writer.perdocwriter.close()
             profiler.stop_active()
 
             if codec_length_stats:
-                profiler._step("perdoc_reader")
+                profiler._step("perdoc_reader")  # pyright: ignore[reportPrivateUsage]
                 pdr = writer.per_document_reader()
                 profiler.stop_active()
             else:
                 pdr = None
 
-            profiler._step("write_postings")
+            profiler._step("write_postings")  # pyright: ignore[reportPrivateUsage]
             postings = writer.pool.iter_postings()
             writer.fieldwriter.add_postings(writer.schema, pdr, postings)
             profiler.stop_active()
 
-            profiler._step("write_terms")
+            profiler._step("write_terms")  # pyright: ignore[reportPrivateUsage]
             writer.fieldwriter.close()
             profiler.stop_active()
 
             if pdr is not None:
-                profiler._step("perdoc_reader_close")
+                profiler._step("perdoc_reader_close")  # pyright: ignore[reportPrivateUsage]
                 pdr.close()
                 profiler.stop_active()
 
-            profiler._step("pool_cleanup")
+            profiler._step("pool_cleanup")  # pyright: ignore[reportPrivateUsage]
             writer.pool.cleanup()
             profiler.stop_active()
 
         def _timed_assemble() -> None:
-            profiler._step("write_vectors")
+            profiler._step("write_vectors")  # pyright: ignore[reportPrivateUsage]
             orig_assemble()
             profiler.stop_active()
 

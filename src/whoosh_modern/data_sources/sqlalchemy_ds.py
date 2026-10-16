@@ -10,7 +10,9 @@ from collections.abc import AsyncIterator, Iterator, Mapping
 from typing import Any
 
 from whoosh.fields import TEXT, Schema
-from whoosh_modern.data_sources.sql import _validate_identifier
+from whoosh_modern.data_sources.sql import (
+    _validate_identifier,  # pyright: ignore[reportPrivateUsage]
+)
 from whoosh_modern.exceptions import DataSourceError
 from whoosh_modern.schema_discovery import SchemaDiscovery
 

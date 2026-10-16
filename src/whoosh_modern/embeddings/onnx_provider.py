@@ -122,7 +122,7 @@ class ONNXEmbeddingProvider:
             ) from exc
 
         try:
-            import onnxruntime as ort
+            import onnxruntime as ort  # pyright: ignore[reportMissingTypeStubs]
 
             sess_options = ort.SessionOptions()
             sess_options.intra_op_num_threads = max(1, int(intra_op_num_threads))
