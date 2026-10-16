@@ -30,7 +30,7 @@ jobs:
           cache-suffix: lint
           python-version: "3.12"
       - name: Install deps
-        run: uv sync --frozen --extra dev --extra vector
+        run: uv sync --frozen --extra dev --extra vector --extra embeddings
       - name: Run pre-commit and auto-fix
         run: |
           set +e
